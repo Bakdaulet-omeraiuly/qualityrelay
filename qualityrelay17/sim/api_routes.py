@@ -345,3 +345,97 @@ async def live_stream(request: Request, after: int = 0):
             yield ': keep-alive\n\n'
             await asyncio.sleep(0.5)
     return StreamingResponse(gen(), media_type='text/event-stream')
+
+
+# ---- PR #8 visual-inspection tools, wired into the camera panel ----------------------------------
+REFS = ROOT / 'data' / 'reference'   # git-ignored, per-lane GOOD reference photos (registered)
+
+
+class InspectRequest(BaseModel):
+    lane: str = Field('slot', pattern='^(slot|tab)$')
+    action: str = Field('quality', pattern='^(quality|set_reference|compare|roboflow)$')
+    image_b64: str = Field(..., min_length=32, max_length=12_000_000)
+    roboflow_json: str | None = Field(None, max_length=2_000_000)
+    model_id: str = Field('roboflow-unspecified', max_length=160)
+    threshold: int = Field(40, ge=1, le=255)
+    edge_band_px: int = Field(2, ge=0, le=8)
+
+
+def _decode(b64: str):
+    import base64, cv2, numpy as np
+    raw = b64.split(',', 1)[1] if b64.startswith('data:') else b64
+    try:
+        data = base64.b64decode(raw, validate=True)
+    except Exception:  # noqa: BLE001
+        raise HTTPException(422, 'image_b64 is not valid base64')
+    img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
+    if img is None:
+        raise HTTPException(422, 'not a decodable image')
+    return data, img
+
+
+def _jpeg_b64(img, max_w=900):
+    import base64, cv2
+    if img.shape[1] > max_w:
+        img = cv2.resize(img, (max_w, int(img.shape[0] * max_w / img.shape[1])), interpolation=cv2.INTER_AREA)
+    ok, buf = cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 85])
+    return 'data:image/jpeg;base64,' + base64.b64encode(buf.tobytes()).decode()
+
+
+@router.post('/vision/inspect')
+def vision_inspect(req: InspectRequest):
+    """Quality gate, registered reference comparison (heatmap + candidate boxes) and Roboflow-JSON box
+    rendering, using qualityrelay17.inspection_visuals (PR #8). Every result is an
+    UNVERIFIED_VISUAL_CANDIDATE that requires review; nothing here passes or rejects a part."""
+    import hashlib, json as _json, time, cv2, numpy as np
+    from ..inspection_visuals import image_quality, reference_difference, roboflow_predictions, overlay_heatmap, draw_candidate_boxes, candidate_regions
+    from ..vision_measure import rectify_by_marker
+    data, img = _decode(req.image_b64)
+    sha = hashlib.sha256(data).hexdigest()
+    out = dict(source_tier='PHYSICAL_CAPTURE', lane=req.lane, action=req.action, image_sha256=sha, quality=image_quality(img),
+               anomaly_model=dict(status='NOT_CONFIGURED', note='STFPM/Anomalib score maps are shown once a model is trained on real photos; '
+                                                               'offline: scripts/inspect_visual.py --mode anomaly-map'))
+    if req.action == 'quality':
+        return out
+    if req.action == 'roboflow':
+        if not req.roboflow_json:
+            raise HTTPException(422, 'paste the Roboflow prediction JSON')
+        try:
+            payload = _json.loads(req.roboflow_json)
+            rep, _, _ = roboflow_predictions(img, payload, specimen_id=f'{req.lane}-photo', image_event_id=f'img-{sha[:12]}', source_root=f'root-{sha[:12]}',
+                                             station_id='PHONE', source_tier='PHYSICAL_CAPTURE', model_id=req.model_id)
+        except (ValueError, TypeError) as e:
+            raise HTTPException(422, str(e)[:200])
+        out.update(report=rep, boxes=_jpeg_b64(draw_candidate_boxes(img, rep)))
+        return out
+    rect, info = rectify_by_marker(img)
+    out['registration'] = info
+    if rect is None:
+        raise HTTPException(422, 'ArUco marker not found: registration (and reference comparison) needs the printed marker sheet in the photo')
+    REFS.mkdir(parents=True, exist_ok=True)
+    ref_path, meta_path = REFS / f'{req.lane}.png', REFS / f'{req.lane}.json'
+    if req.action == 'set_reference':
+        cv2.imwrite(str(ref_path), rect)
+        meta_path.write_text(_json.dumps(dict(sha256=sha, saved=time.strftime('%Y-%m-%dT%H:%M:%S'), registration=info)))
+        out.update(reference_saved=True, preview=_jpeg_b64(rect))
+        return out
+    if not ref_path.exists():
+        raise HTTPException(409, f'no GOOD reference for the {req.lane} lane yet: save one first')
+    ref = cv2.imread(str(ref_path)); meta = _json.loads(meta_path.read_text()) if meta_path.exists() else {}
+    if meta.get('sha256') == sha:
+        raise HTTPException(422, 'this is the reference photo itself; take a new photo of the part to inspect')
+    blur = lambda im: cv2.GaussianBlur(im, (5, 5), 0)  # noqa: E731
+    rep, diff, mask = reference_difference(blur(ref), blur(rect), specimen_id=f'{req.lane}-photo', image_event_id=f'img-{sha[:12]}',
+                                           source_root=f'root-{sha[:12]}', reference_event_id=f'ref-{meta.get("sha256", "unknown")[:12]}',
+                                           reference_root=f'refroot-{meta.get("sha256", "unknown")[:12]}', station_id='PHONE',
+                                           source_tier='PHYSICAL_CAPTURE', aligned=True, threshold=req.threshold, min_area_px=40)
+    if req.edge_band_px:
+        g = cv2.GaussianBlur(cv2.cvtColor(ref, cv2.COLOR_BGR2GRAY), (5, 5), 0)
+        band = cv2.dilate(cv2.Canny(g, 40, 120), np.ones((2 * req.edge_band_px + 1,) * 2, np.uint8)) > 0
+        mask = mask.copy(); mask[band] = 0
+        rep['regions'] = candidate_regions(mask, min_area_px=40)
+        rep['warnings'] = sorted(set(rep['warnings'] + [f'EDGE_BAND_{req.edge_band_px}PX_SUPPRESSED_DEFECTS_ON_EDGES_CAN_BE_MISSED']))
+    rep['registration'] = 'ArUco homography to a shared metric frame (lighting differences are not corrected)'
+    out.update(report=rep, heatmap=_jpeg_b64(overlay_heatmap(rect, diff, mask=mask)), boxes=_jpeg_b64(draw_candidate_boxes(rect, rep)),
+               reference_saved_at=meta.get('saved'))
+    return out

@@ -123,7 +123,7 @@ def measure_part_width(img_bgr, marker_mm: float = 20.0, px_per_mm: float = 20.0
 
 # ---- synthetic validation ----------------------------------------------------------------------------
 
-def render_synthetic(kind: str, width_mm: float, rng, photo_px_per_mm=15.0, outer_mm=None):
+def render_synthetic(kind: str, width_mm: float, rng, photo_px_per_mm=15.0, outer_mm=None, defect_mm=None):
     """Top-down scene in mm drawn at 40 px/mm, then a random camera homography, blur and noise."""
     R = 40.0
     W, H = int(160 * R), int(110 * R)
@@ -136,6 +136,9 @@ def render_synthetic(kind: str, width_mm: float, rng, photo_px_per_mm=15.0, oute
         cv2.rectangle(img, (int(x0), int(y0)), (int(x0 + 60 * R), int(y0 + outer * R)), 45, -1)
         g0 = y0 + (outer - width_mm) / 2 * R
         cv2.rectangle(img, (int(x0 + 12 * R), int(g0)), (int(x0 + 60 * R) + 2, int(g0 + width_mm * R)), 205, -1)
+    if defect_mm is not None:  # a light scratch on the part, (x, y, w, h) in mm from the part's corner
+        dx, dy, dw, dh = defect_mm
+        cv2.rectangle(img, (int(x0 + dx * R), int(y0 + dy * R)), (int(x0 + (dx + dw) * R), int(y0 + (dy + dh) * R)), 190, -1)
     side = int(20 * R)
     mk = cv2.aruco.generateImageMarker(cv2.aruco.getPredefinedDictionary(DICT), MARKER_ID, side)
     mx, my = int(12 * R), int(30 * R)
@@ -170,3 +173,24 @@ def validate_synthetic(n=40, seed=0, photo_px_per_mm=15.0):
     return dict(origin='SIMULATED', n=n, photo_px_per_mm=photo_px_per_mm, failures=fails,
                 mae_mm=round(float(e.mean()), 4) if len(e) else None, p95_abs_err_mm=round(float(np.percentile(e, 95)), 4) if len(e) else None,
                 bias_mm=round(float(np.mean(errs)), 4) if errs else None, pass_bar='MAE <= 0.10 mm at >= 12 px/mm')
+
+
+def rectify_by_marker(img_bgr, marker_mm: float = 20.0, px_per_mm: float = 5.0, window_mm=(-20.0, -40.0, 130.0, 80.0)):
+    """Register a photo to a metric top-down frame anchored on the ArUco marker: pixel (0,0) is the
+    marker's top-left corner + window offset, at a fixed px/mm. Two photos of the same set-up taken
+    from different angles land on the same grid, which is what photo-to-photo comparison needs.
+    Returns (rectified_bgr, info) or (None, info) when no marker is found. Lighting differences
+    are NOT corrected."""
+    gray = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2GRAY) if img_bgr.ndim == 3 else img_bgr
+    corners, ids, _ = _detector().detectMarkers(gray)
+    if ids is None or MARKER_ID not in ids.flatten():
+        return None, dict(status='NO_MARKER')
+    c = corners[list(ids.flatten()).index(MARKER_ID)].reshape(4, 2).astype(np.float32)
+    x0, y0, w_mm, h_mm = window_mm
+    s = marker_mm * px_per_mm
+    dst = np.float32([[-x0 * px_per_mm, -y0 * px_per_mm], [-x0 * px_per_mm + s, -y0 * px_per_mm],
+                      [-x0 * px_per_mm + s, -y0 * px_per_mm + s], [-x0 * px_per_mm, -y0 * px_per_mm + s]])
+    Hm = cv2.getPerspectiveTransform(c, dst)
+    out = cv2.warpPerspective(img_bgr, Hm, (int(w_mm * px_per_mm), int(h_mm * px_per_mm)), flags=cv2.INTER_LINEAR,
+                              borderMode=cv2.BORDER_REPLICATE)
+    return out, dict(status='REGISTERED', px_per_mm=px_per_mm, window_mm=list(window_mm), method='ArUco homography')

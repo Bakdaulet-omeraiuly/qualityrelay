@@ -80,3 +80,25 @@ def test_suggest_ranks_near_boundary_first(tmp_path, monkeypatch):
     cv2.imwrite(str(tmp_path / 'inbox' / 'c_nomarker.png'), np.full((200, 200, 3), 200, np.uint8))
     s = c.get('/sim/vision/suggest').json()['suggestions']
     assert [x['file'] for x in s] == ['b_near.png', 'a_far.png', 'c_nomarker.png']
+
+
+def test_visual_inspection_registered_reference_finds_a_scratch(tmp_path, monkeypatch):
+    import base64, cv2, numpy as np
+    from qualityrelay17.sim import api_routes
+    from qualityrelay17.vision_measure import render_synthetic
+    monkeypatch.setattr(api_routes, 'REFS', tmp_path)
+    enc = lambda im: 'data:image/jpeg;base64,' + base64.b64encode(cv2.imencode('.jpg', im, [cv2.IMWRITE_JPEG_QUALITY, 95])[1].tobytes()).decode()  # noqa: E731
+    rng = np.random.default_rng(4)
+    ref = render_synthetic('tab', 20.0, rng, 20)
+    assert c.post('/sim/vision/inspect', json=dict(lane='tab', action='compare', image_b64=enc(ref))).status_code == 409
+    assert c.post('/sim/vision/inspect', json=dict(lane='tab', action='set_reference', image_b64=enc(ref))).json()['reference_saved']
+    live = render_synthetic('tab', 20.0, rng, 20, defect_mm=(30, 6, 4, 2))
+    r = c.post('/sim/vision/inspect', json=dict(lane='tab', action='compare', image_b64=enc(live))).json()
+    assert r['report']['evidence_status'] == 'UNVERIFIED_VISUAL_CANDIDATE' and r['report']['requires_safe_mesh_and_human_review']
+    assert any(x['x1'] <= 460 and x['x2'] >= 440 and x['y1'] <= 240 and x['y2'] >= 230 for x in r['report']['regions'])
+    assert r['heatmap'].startswith('data:image/jpeg') and r['anomaly_model']['status'] == 'NOT_CONFIGURED'
+    rf = '{"predictions":[{"x":100,"y":80,"width":30,"height":20,"confidence":0.7,"class":"crack"}]}'
+    r2 = c.post('/sim/vision/inspect', json=dict(lane='tab', action='roboflow', image_b64=enc(live), roboflow_json=rf)).json()
+    assert len(r2['report']['regions']) == 1 and r2['report']['regions'][0]['model_class_unverified'] == 'crack'
+    nomarker = enc(np.full((200, 300, 3), 180, np.uint8))
+    assert c.post('/sim/vision/inspect', json=dict(lane='tab', action='compare', image_b64=nomarker)).status_code == 422

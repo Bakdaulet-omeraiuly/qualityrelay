@@ -676,7 +676,14 @@ function cameraSection(k) {
     <video id="camVideo" class="camimg" playsinline muted hidden></video><img id="camPhoto" class="camimg" alt="captured photo" hidden>
     <div class="row2" style="margin-top:8px"><select id="camLabel" aria-label="Label"><option value="inbox">label later</option><option value="good">good part</option><option value="defect">defective part</option></select>
       <button class="primary" id="camSave" disabled>Save + NVIDIA check</button></div>
-    <div id="camResult" class="faint small" style="margin-top:8px">The photo is saved as PHYSICAL_CAPTURE training data (data/prints/…). The NVIDIA anomaly model scores it once it has been trained on real photos.</div></section>`;
+    <div id="camResult" class="faint small" style="margin-top:8px">The photo is saved as PHYSICAL_CAPTURE training data (data/prints/…). The NVIDIA anomaly model scores it once it has been trained on real photos.</div></section>
+    <section><h4>Visual inspection <span class="badge mute">candidates · review required</span></h4>
+      <p class="faint small">Uses the open-source inspection pack: image-quality gate, photo-vs-reference difference after ArUco registration, heatmap, candidate boxes, and Roboflow prediction boxes. Results are UNVERIFIED_VISUAL_CANDIDATE and never pass or reject a part.</p>
+      <div class="row2"><button class="ghost" id="visRef" disabled>★ Set as GOOD reference</button><button class="ghost" id="visCmp" disabled>⇄ Compare with reference</button></div>
+      <details style="margin-top:8px"><summary class="faint small">Model output (Roboflow prediction JSON)</summary>
+        <textarea id="visRf" rows="4" style="width:100%;margin-top:6px;background:var(--panel2);color:var(--text);border:1px solid var(--border2);border-radius:6px;font:11px var(--mono)" placeholder='{"predictions":[{"x":120,"y":80,"width":30,"height":20,"confidence":0.7,"class":"crack"}]}'></textarea>
+        <button class="ghost" id="visRfBtn" disabled style="width:100%">Draw model boxes</button></details>
+      <div id="visOut" class="small" style="margin-top:8px"></div></section>`;
 }
 function passportURL(id) {
   const r = lab.runs.at(-1); const q = new URLSearchParams({ scenario: r.scenario, seed: r.seed, pairs: r.n_pairs, policy: r.policy, pairing: r.pairing, part: id });
@@ -754,7 +761,29 @@ function bindCameraPanel(k, side) {
   cam.up.set(0, 0, -1); cam.position.set(...st.camPos); cam.lookAt(...st.camTarget);
   lab.camView = { view, cam, renderer: camRenderer };
   let photo = null;
-  const setPhoto = (dataUrl) => { photo = dataUrl; $('#camPhoto').src = dataUrl; $('#camPhoto').hidden = false; $('#camVideo').hidden = true; $('#camSave').disabled = false; };
+  const setPhoto = (dataUrl) => { photo = dataUrl; $('#camPhoto').src = dataUrl; $('#camPhoto').hidden = false; $('#camVideo').hidden = true; $('#camSave').disabled = false;
+    for (const id of ['#visRef', '#visCmp', '#visRfBtn']) $(id).disabled = false; inspect('quality'); };
+  const lane = k === 'phone_0' ? 'slot' : 'tab';
+  const inspect = async (action) => {
+    const out = $('#visOut'); out.innerHTML = '<span class="faint">Running…</span>';
+    try {
+      const r = await api('/sim/vision/inspect', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lane, action, image_b64: photo, roboflow_json: action === 'roboflow' ? $('#visRf').value : null }) });
+      const q = r.quality, rep = r.report;
+      let html = `<div class="kv"><span>image quality</span><span>${q.warnings.length ? `<span class="badge hold">${q.warnings.join(', ')}</span>` : '<span class="badge ok">usable</span>'}</span>
+        <span>sharpness (Laplacian var.)</span><span>${fmt(q.blur_laplacian_variance, 0)}</span>`;
+      if (r.registration) html += `<span>registration</span><span>${r.registration.status === 'REGISTERED' ? 'ArUco ✔' : r.registration.status}</span>`;
+      if (rep) html += `<span>candidate regions</span><span>${rep.regions.length}</span><span>decision</span><span><span class="badge hold">${rep.decision}</span></span>`;
+      html += '</div>';
+      if (r.reference_saved) html += `<div class="why">GOOD reference saved for the ${lane} lane (registered to the marker frame).</div><img class="camimg" src="${r.preview}" alt="reference">`;
+      if (r.heatmap) html += `<div class="row2" style="margin-top:6px"><figure style="margin:0"><img class="camimg" src="${r.heatmap}" alt="difference heatmap"><figcaption class="faint small">difference heatmap</figcaption></figure><figure style="margin:0"><img class="camimg" src="${r.boxes}" alt="candidate boxes"><figcaption class="faint small">candidate boxes</figcaption></figure></div>`;
+      else if (r.boxes) html += `<img class="camimg" src="${r.boxes}" alt="model boxes"><p class="faint small">Model boxes: untrusted predictions; check the model's licence and weights.</p>`;
+      if (rep) html += `<p class="faint small">${rep.claim_boundary} ${rep.warnings.join(' · ')}</p>`;
+      html += `<p class="faint small">Anomaly heatmap (STFPM / Anomalib): ${r.anomaly_model.status}.</p>`;
+      out.innerHTML = html;
+    } catch (err) { out.innerHTML = `<span class="faint">${err.message.includes('409') ? 'No GOOD reference for this lane yet: set one first.' : err.message.includes('422') ? 'Needs the printed ArUco marker in the photo (or valid Roboflow JSON).' : err.message}</span>`; }
+  };
+  $('#visRef').onclick = () => inspect('set_reference'); $('#visCmp').onclick = () => inspect('compare'); $('#visRfBtn').onclick = () => inspect('roboflow');
   $('#camFile').onchange = (e) => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = () => setPhoto(r.result); r.readAsDataURL(f); };
   $('#camDevice').onclick = async () => {
     if (camStream) {   // second click = capture a frame
