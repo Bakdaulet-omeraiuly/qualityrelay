@@ -2,3 +2,4 @@ three.js r160 examples/jsm files, flattened into one directory: '../shaders/' im
 Added 31 Oct: GTAOPass, GTAOShader, PoissonDenoiseShader, SimplexNoise, SMAAPass, SMAAShader, RGBELoader (three.js r160, MIT; '../shaders/' and '../math/' imports rewritten to './').
 hdri/empty_warehouse_01_1k.hdr: "Empty Warehouse 01" by Sergej Majboroda, Poly Haven, CC0 (https://polyhaven.com/a/empty_warehouse_01).
 three-gpu-pathtracer 0.0.23 and three-mesh-bvh 0.7.8 (MIT, Garrett Johnson): npm build/index.module.js, unmodified.
+camera-controls 3.1.2 (MIT, yomotsu): npm dist/camera-controls.module.js, unmodified. Replaces OrbitControls in the Studio.

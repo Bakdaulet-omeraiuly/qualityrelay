@@ -1,6 +1,7 @@
 // QualityRelay Studio (18.1). Everything shown is SIMULATED.
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/OrbitControls.js';
+import CameraControls from 'camera-controls';
+CameraControls.install({ THREE });  // yomotsu/camera-controls: smooth orbit / truck / dolly, the de-facto three.js camera rig
 import { STLLoader } from 'three/addons/STLLoader.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/CSS2DRenderer.js';
 import { RoomEnvironment } from 'three/addons/RoomEnvironment.js';
@@ -115,8 +116,11 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
   if (QUALITY === 'high') loadHDR().then((hdr) => { if (hdr) { hdr.mapping = THREE.EquirectangularReflectionMapping; hdrEquirect = hdr; scene.environment = pmrem.fromEquirectangular(hdr).texture; scene.environmentIntensity = 0.8; } });
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
   camera.position.set(...camPos);
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(...target); controls.enableDamping = true; controls.dampingFactor = 0.08;
+  const controls = new CameraControls(camera, renderer.domElement);
+  controls.setLookAt(...camPos, ...target, false);
+  Object.assign(controls, { smoothTime: 0.22, draggingSmoothTime: 0.1, dollyToCursor: true, dollySpeed: 0.8 });
+  const clock = new THREE.Clock(); let autoRotate = false;
+  controls.addEventListener('controlstart', () => (autoRotate = false));
   const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(10, 22, 12); key.castShadow = true;
   const sm = QUALITY === 'high' ? 4096 : 1024;
   key.shadow.mapSize.set(sm, sm); Object.assign(key.shadow.camera, { left: -24, right: 24, top: 16, bottom: -16, near: 4, far: 60 });
@@ -150,6 +154,8 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
   let tween = null, tracer = null;
   return {
     el, renderer, scene, camera, controls, labelRenderer,
+    set autoRotate(on) { autoRotate = on; },
+    target() { return controls.getTarget(new THREE.Vector3()); },
     get tracer() { return tracer; },
     // Photo mode: progressive path tracing of the same scene (three-gpu-pathtracer). Fog is dropped
     // (unsupported); the environment is the raw warehouse HDRI so light bounces come from a real room.
@@ -178,33 +184,18 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
       }
     },
     snapshot() { if (tracer) tracer.renderSample(); else if (composer) composer.render(); else renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); },
-    pan(dxPx, dyPx) {  // move over the floor by a screen distance (pixels), scaled with zoom
-      const dist = camera.position.distanceTo(controls.target), k = dist * 0.0016;
-      const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
-      const right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
-      const move = right.multiplyScalar(dxPx * k).add(fwd.multiplyScalar(-dyPx * k));
-      camera.position.add(move); controls.target.add(move); controls.update();
-    },
-    zoomBy(f) {  // f < 1: closer; animated, within the controls' distance limits
-      const d = camera.position.clone().sub(controls.target), len = THREE.MathUtils.clamp(d.length() * f, controls.minDistance, controls.maxDistance);
-      this.flyTo(controls.target.clone().add(d.setLength(len)).toArray(), controls.target.toArray(), 0.35);
-    },
+    move(right, forward) { const k = controls.distance * 0.08; controls.truck(right * k, 0, true); controls.forward(forward * k, true); },
+    zoomBy(f) { controls.dollyTo(THREE.MathUtils.clamp(controls.distance * f, controls.minDistance, controls.maxDistance), true); },
     focus(point, dist = 4.5) {  // keep the viewing direction, move in on a point
-      const d = camera.position.clone().sub(controls.target).setLength(dist);
+      const d = camera.position.clone().sub(this.target()).setLength(dist);
       if (d.y < dist * 0.45) d.y = dist * 0.45;
-      this.flyTo(point.clone().add(d).toArray(), point.toArray(), 0.7);
+      const p = point.clone().add(d); controls.setLookAt(p.x, p.y, p.z, point.x, point.y, point.z, true);
     },
-    flyTo(pos, tgt, dur = 1.3) {
-      tween = { t0: performance.now(), dur: dur * 1000, p0: camera.position.clone(), q0: controls.target.clone(),
-        p1: new THREE.Vector3(...pos), q1: new THREE.Vector3(...tgt) };
-    },
+    flyTo(pos, tgt) { controls.setLookAt(...pos, ...tgt, true); },
     render() {
-      if (tween) {
-        const u = Math.min(1, (performance.now() - tween.t0) / tween.dur), e = ease(u);
-        camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.q0, tween.q1, e);
-        if (u >= 1) tween = null;
-      }
-      controls.update();
+      const dt = clock.getDelta();
+      if (autoRotate) controls.azimuthAngle += dt * 0.25;
+      controls.update(dt);
       if (tracer) {
         camera.updateMatrixWorld();
         if (!camera.matrixWorld.equals(this._camM)) { this._camM.copy(camera.matrixWorld); tracer.updateCamera(); }  // restart only when the view really moved
@@ -247,21 +238,9 @@ class FactoryView {
   constructor(el, partGeo) {
     this.el = el; this.partGeo = partGeo;
     this.s = makeStage(el, { camPos: [-2, 30, 34], target: [-1.2, 0, -1.2] });
-    Object.assign(this.s.controls, { maxPolarAngle: Math.PI / 2.1, minDistance: 2.2, maxDistance: 60,
-      zoomToCursor: true, zoomSpeed: 1.15, rotateSpeed: 0.7, panSpeed: 1.0, screenSpacePanning: false,  // pan slides over the floor
-      // map-style: left-drag moves the hall, right-drag turns it; one finger moves, two fingers zoom/turn
-      mouseButtons: { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE },
-      touches: { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE } });
-    // Trackpad: two-finger scroll moves, pinch (ctrlKey wheel) zooms. A mouse wheel (whole steps, no
-    // sideways delta) keeps zooming to the cursor via OrbitControls.
-    this.el.addEventListener('wheel', (e) => {
-      const trackpadScroll = !e.ctrlKey && (e.deltaX !== 0 || (e.deltaMode === 0 && Math.abs(e.deltaY) < 40 && !Number.isInteger(e.deltaY * 2)));
-      if (!trackpadScroll) return;
-      e.preventDefault(); e.stopPropagation(); this.s.pan(e.deltaX, e.deltaY);
-    }, { capture: true, passive: false });
-    // never lose the line: the orbit centre stays inside the hall
-    this.s.controls.addEventListener('change', () => { const t = this.s.controls.target;
-      t.set(THREE.MathUtils.clamp(t.x, -20, 15), THREE.MathUtils.clamp(t.y, 0, 3), THREE.MathUtils.clamp(t.z, -11, 9)); });
+    // camera-controls defaults: left-drag turn, right-drag / two fingers move, wheel / pinch zoom (to the cursor)
+    Object.assign(this.s.controls, { maxPolarAngle: Math.PI / 2.1, minDistance: 2.2, maxDistance: 60 });
+    this.s.controls.setBoundary(new THREE.Box3(new THREE.Vector3(-20, 0, -11), new THREE.Vector3(15, 3, 9)));  // the orbit centre stays in the hall
     this.parts = []; this.stations = {}; this.labels = []; this.readouts = {}; this.selected = null; this.data = null;
     this.build();
   }
@@ -487,9 +466,9 @@ class FactoryView {
         if (!hit) break;
         const back = hit.xy[0] - QUEUE_GAP;
         // only queue backwards while staying on the same surface (belt / table); never drop a part onto the floor
-        if (pushes < 3 && Math.abs(heightAt(back, x.xy[1]) - heightAt(x.xy[0], x.xy[1])) < 0.01) { x.xy = [back, x.xy[1], 0]; pushes++; }
+        if (x.stack === 0 && pushes < 3 && Math.abs(heightAt(back, x.xy[1]) - heightAt(x.xy[0], x.xy[1])) < 0.01) { x.xy = [back, x.xy[1], 0, x.xy[3]]; pushes++; }  // keeps its carried height
         else if (x.xy[0] > bx && x.xy[0] < P.assembly[0] && Math.abs(x.xy[1]) < 0.7) { rack(x); racked = true; break; }  // the assembly queue backs up into the buffer rack
-        else { x.xy = [hit.xy[0], hit.xy[1], 0]; x.stack = hit.stack + 1; }
+        else { x.xy = [hit.xy[0], hit.xy[1], hit.xy[2], hit.xy[3]]; x.stack = hit.stack + 1; }  // ride on top, including the part's hop
       }
       if (!racked) { x.w = w; placed.push(x); }
     }
@@ -506,7 +485,7 @@ class FactoryView {
         x.m.rotation.y = slotOf.m.rotation.y;
         x.m.position.copy(ASSEMBLED_TAB_OFFSET).applyAxisAngle(Y_AXIS, slotOf.m.rotation.y).add(slotOf.m.position);
       } else {
-        x.m.position.set(xy[0], heightAt(xy[0], xy[1]) + layer + (x.stack || 0) * 0.1 + xy[2], xy[1]); x.m.rotation.y = x.inBin ? 0 : x.yaw;
+        x.m.position.set(xy[0], (xy[3] ?? heightAt(xy[0], xy[1])) + layer + (x.stack || 0) * 0.1 + xy[2], xy[1]); x.m.rotation.y = x.inBin ? 0 : x.yaw;
       }
       const mat = x.m.material; let col = x.p.kind === 'slot' ? C.slot : C.tab, em = BLACK, ei = 0;
       if (inReview) { col = C.review; em = C.review; ei = 0.35; }
@@ -602,18 +581,24 @@ function heightAt(x, z) {
 function pathFor(p, binIndex) {
   const kf = [], j = hash(p.id), jz = (j - 0.5) * 0.6;
   const pos = (k, dx = 0, dz = 0) => { const [x, z] = P[laneKey(k, p.line)] || P.buffer; return [x + dx, z + dz]; };
+  // waiting spot just before a station, pulled in until it is on the station's own surface (belt / table), never the floor
+  const onSurface = (k, dx, dz) => { const [sx, sz] = pos(k), h = heightAt(sx, sz); let f = 1;
+    while (f > 0.05 && Math.abs(heightAt(sx + dx * f, sz + dz * f) - h) > 0.01) f *= 0.8;
+    return [sx + dx * f, sz + dz * f]; };
   const pr = p.kind === 'slot' ? 'printer_slot' : 'printer_tab';
   const first = p.events.length ? p.events[0][1] : p.print_t + 60;
   const out = Math.max(p.print_t, first - 25);
-  kf.push([out, ...pos(pr, 1.7, jz * 0.8)]);
+  // printed part is handed from the printer straight onto the start of its lane belt (never the floor)
+  const laneZ = (P[laneKey('phone', p.line)] || P.phone_0)[1], beltStart = [-12.2, laneZ + jz * 0.25];
+  kf.push([out, ...beltStart]);
   let prevEnd = out + 2, prevKey = pr;
-  kf.push([prevEnd, ...pos(pr, 1.7, jz * 0.8)]);
+  kf.push([prevEnd, ...beltStart]);
   for (const [station, start, end] of p.events) {
-    const [px, pz] = pos(prevKey), [sx, sz] = pos(station);
+    const [px, pz] = prevKey === pr ? beltStart : pos(prevKey), [sx, sz] = pos(station);
     const travel = Math.min(Math.max(0.5, start - prevEnd), Math.hypot(sx - px, sz - pz) / BELT_SPEED);
     const arrive = Math.max(prevEnd, Math.min(start, prevEnd + travel));
-    kf.push([prevEnd, ...pos(prevKey, prevKey.startsWith('printer') ? 1.7 : 0, prevKey.startsWith('printer') ? jz * 0.8 : jz * 0.25)]);
-    if (start - arrive > 1) kf.push([arrive, ...pos(station, -1.15, jz)], [start - 0.5, ...pos(station, -0.95, jz)]);
+    kf.push([prevEnd, ...(prevKey === pr ? beltStart : pos(prevKey, 0, jz * 0.25))]);
+    if (start - arrive > 1) kf.push([arrive, ...onSurface(station, -1.15, jz)], [start - 0.5, ...onSurface(station, -0.95, jz)]);
     kf.push([start, ...pos(station, 0, jz * 0.25)], [end, ...pos(station, 0, jz * 0.25)]);
     prevEnd = end; prevKey = station;
   }
@@ -632,9 +617,12 @@ function at(kf, t) {
   for (let i = 1; i < kf.length; i++) if (t <= kf[i][0]) {
     const [t0, x0, z0] = kf[i - 1], [t1, x1, z1] = kf[i]; const u = t1 > t0 ? (t - t0) / (t1 - t0) : 1;
     const moving = Math.hypot(x1 - x0, z1 - z0) > 0.5;
-    return [x0 + (x1 - x0) * u, z0 + (z1 - z0) * u, moving ? Math.sin(Math.PI * u) * (kf[i][3] ?? 0.15) : 0];
+    // while moving between two surfaces the part is carried at a height blended between them, so it
+    // never dips to the floor over a gap (4th value: surface height)
+    const x = x0 + (x1 - x0) * u, z = z0 + (z1 - z0) * u;
+    return [x, z, moving ? Math.sin(Math.PI * u) * (kf[i][3] ?? 0.15) : 0, moving ? heightAt(x0, z0) + (heightAt(x1, z1) - heightAt(x0, z0)) * u : heightAt(x, z)];
   }
-  const l = kf[kf.length - 1]; return [l[1], l[2], 0];
+  const l = kf[kf.length - 1]; return [l[1], l[2], 0, heightAt(l[1], l[2])];
 }
 
 // ---------------------------------------------------------------- lab controller
@@ -667,13 +655,16 @@ async function initLab() {
   $('#storyNext').onclick = () => story(lab.story + 1); $('#storyPrev').onclick = () => story(lab.story - 1);
   $('#toggleInspector').onclick = () => $('#studio').classList.toggle('noinsp');
   lab.views.forEach((v, i) => { bindPicking(v, i); viewControls(v); });
-  // Compare mode: both cameras move together so the two lines stay comparable
-  let syncing = false;
-  lab.views.forEach((v, i) => v.s.controls.addEventListener('change', () => {
-    if (syncing || lab.mode !== 'compare') return; syncing = true;
-    const o = lab.views[1 - i].s; o.camera.position.copy(v.s.camera.position); o.controls.target.copy(v.s.controls.target); o.controls.update();
-    syncing = false;
-  }));
+  // Compare mode: the other camera follows the one being moved, so the two lines stay comparable
+  let leader = 0;
+  lab.views.forEach((v, i) => {
+    v.s.controls.addEventListener('controlstart', () => (leader = i));
+    v.s.controls.addEventListener('update', () => {
+      if (lab.mode !== 'compare' || leader !== i) return;
+      const o = lab.views[1 - i].s, p = v.s.camera.position, t = v.s.target();
+      o.controls.setLookAt(p.x, p.y, p.z, t.x, t.y, t.z, false);
+    });
+  });
   window.addEventListener('keydown', (e) => {
     if (['INPUT', 'SELECT'].includes(document.activeElement?.tagName) || $('#view-lab').hidden) return;
     if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
@@ -681,8 +672,8 @@ async function initLab() {
     else if (e.key === 't' || e.key === 'T') { $('#truth').checked = !$('#truth').checked; renderInspector(); }
     else if (e.key === 'i' || e.key === 'I') $('#studio').classList.toggle('noinsp');
     else if ('wasdWASD'.includes(e.key) && e.key.length === 1) {  // WASD: move over the floor
-      const k = { w: [0, -60], s: [0, 60], a: [-60, 0], d: [60, 0] }[e.key.toLowerCase()];
-      lab.views.forEach((v) => v.s.pan(...k));
+      const k = { w: [0, 1], s: [0, -1], a: [-1, 0], d: [1, 0] }[e.key.toLowerCase()];
+      lab.views.forEach((v) => v.s.move(...k));
     }
     else if (e.key === '+' || e.key === '=') lab.views.forEach((v) => v.s.zoomBy(0.7));
     else if (e.key === '-' || e.key === '_') lab.views.forEach((v) => v.s.zoomBy(1.4));
@@ -780,7 +771,7 @@ function viewControls(v) {
     if (a === 'in') v.s.zoomBy(0.7); else if (a === 'out') v.s.zoomBy(1.4); else if (a === 'reset') resetView(v);
     else if (a === 'focus' && lab.sel) focusOn(v, lab.sel); };
   const hint = document.createElement('div'); hint.className = 'viewhint';
-  hint.innerHTML = 'drag: move · right-drag: turn<br>trackpad: 2 fingers move, pinch zoom<br>mouse wheel: zoom to cursor<br>WASD: move · double-click: fly to';
+  hint.innerHTML = 'drag: turn · right-drag: move<br>scroll / pinch: zoom to cursor<br>WASD: move · double-click: fly to';
   v.s.el.append(box, hint);
   setTimeout(() => hint.classList.add('gone'), 9000);  // shown once at start, then out of the way
   box.onmouseenter = () => hint.classList.remove('gone'); box.onmouseleave = () => hint.classList.add('gone');
@@ -1115,7 +1106,7 @@ async function initParts() {
   $('#fitSlot').onchange = fit; $('#fitTab').onchange = fit;
   $('#modeSingle').onclick = () => { $('#modeSingle').classList.add('on'); $('#modeFit').classList.remove('on'); $('#fitPick').classList.add('hidden'); list.classList.remove('hidden'); $('#partList button.on')?.click(); };
   $('#modeFit').onclick = () => { $('#modeFit').classList.add('on'); $('#modeSingle').classList.remove('on'); $('#fitPick').classList.remove('hidden'); list.classList.add('hidden'); fit(); };
-  s.controls.autoRotate = true; s.controls.autoRotateSpeed = 0.8;
+  s.autoRotate = true;
   (function loop() { if (!$('#view-parts').hidden) s.render(); requestAnimationFrame(loop); })();
 }
 
