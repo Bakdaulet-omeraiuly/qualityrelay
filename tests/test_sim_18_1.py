@@ -89,8 +89,9 @@ def test_conservation_every_scenario(sid):
 def test_same_seed_same_result_and_common_random_numbers_across_configs():
     sc = small('F05')
     assert run(sc, 'rules', 'fifo', keep_log=False) == run(sc, 'rules', 'fifo', keep_log=False)
-    hashes = {run(sc, p, r)['truth_sha256'] for p in POLICIES for r in ('fifo', 'optimized')}
-    assert len(hashes) == 1
+    for sid in [s.sid for s in GRID] + [s.sid for s in MULTI]:
+        hashes = {run(small(sid), p, r)['truth_sha256'] for p in POLICIES for r in ('fifo', 'optimized')}
+        assert len(hashes) == 1, sid
 
 
 def test_partition_never_turns_into_a_clear_reading():
@@ -128,7 +129,7 @@ def test_hold_all_sends_every_part_to_review_and_costs_throughput():
 
 def test_drift_widens_tabs_over_time():
     f = Factory(replace(BY_ID['F02'], n_pairs=200, process_drift_mm_per_h=1.0, warp_p=0.0), 4, 'rules', model=MODEL); f.run()
-    tabs = sorted((p for p in f.parts if p['kind'] == 'tab'), key=lambda p: p['t_print_s'])
+    tabs = sorted((p for p in f.parts if p['kind'] == 'tab'), key=lambda p: p['part_id'])
     early = sum(p['printed_width_mm'] for p in tabs[:40]) / 40
     late = sum(p['printed_width_mm'] for p in tabs[-40:]) / 40
     assert late > early

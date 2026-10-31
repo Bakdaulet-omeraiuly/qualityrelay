@@ -70,7 +70,11 @@ def draw_part(sc: FactoryScenario, seed: int, kind: str, idx: int, site: SiteCon
     policy sees identical parts and identical sensor noise (common random numbers)."""
     rng = Random(f'part:{seed}:{kind}:{idx}')
     nominal = design['slot_opening_mm'] if kind == 'slot' else design['tab_width_mm']
-    drift = sc.process_drift_mm_per_h * t_print_s / 3600.0
+    # Drift is indexed by PRODUCTION SEQUENCE (planned print time of part idx), not by the actual
+    # print time: actual time depends on the policy (WIP blocking), and drift keyed to it would give
+    # each policy different parts. Tool wear by part count is the physical reading of this.
+    t_planned = idx * (site.print_setup_s / site.print_batch + site.print_per_part_s) * 2 / max(1, site.printers)
+    drift = sc.process_drift_mm_per_h * t_planned / 3600.0
     width = rng.gauss(nominal + site.printer_bias_mm + (-drift / 2 if kind == 'slot' else drift), site.width_sd_mm)
     warped = rng.random() < sc.warp_p
     if warped:
