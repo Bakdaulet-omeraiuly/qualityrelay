@@ -26,3 +26,16 @@ GRID = (
       duplicate_photo_p=0.5, shared_camera_noise=0.10, network_outage=0.20),
 )
 BY_ID = {s.sid: s for s in GRID}
+
+# EXPLORATORY -- added AFTER the registered run was looked at, because no registered scenario
+# combines duplicated photos with prices at which B7 actually inspects, so the provenance
+# ablation was never exercised. Results from these are labelled exploratory, never primary.
+EXPLORATORY = (
+    S('X01', 'duplicated photo 0.5 + cheap messages 0.05 (provenance test)', duplicate_photo_p=0.5,
+      costs=Costs(peer_request=0.05)),
+    S('X02', 'combined stress (as S14) + hold 5.0 + cheap messages 0.05',
+      duplicate_photo_p=0.5, shared_camera_noise=0.10, network_outage=0.20, costs=Costs(hold=5.0, peer_request=0.05)),
+    S('X03', 'duplicated photo 1.0 + cheap messages 0.05 (every Pi frame is a re-upload)', duplicate_photo_p=1.0,
+      costs=Costs(peer_request=0.05)),
+)
+BY_ID.update({s.sid: s for s in EXPLORATORY})

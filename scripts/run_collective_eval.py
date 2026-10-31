@@ -21,9 +21,9 @@ sys.path.insert(0, str(ROOT))
 
 from qualityrelay17.experiments.belief import calibrate_belief_model  # noqa: E402
 from qualityrelay17.experiments.collective_eval import run_scenario  # noqa: E402
-from qualityrelay17.experiments.scenarios import GRID  # noqa: E402
+from qualityrelay17.experiments.scenarios import GRID, EXPLORATORY  # noqa: E402
 
-TRACE_SCENARIOS = {'S01', 'S05', 'S06', 'S13'}
+TRACE_SCENARIOS = {'S01', 'S05', 'S06', 'S13', 'X01'}
 
 
 def _git(*args):
@@ -43,16 +43,19 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--seeds', type=int, default=30)
     ap.add_argument('--n', type=int, default=1000)
-    ap.add_argument('--out', default=str(ROOT / 'examples' / 'results' / 'collective_gate_a'))
+    ap.add_argument('--out', default=None)
+    ap.add_argument('--exploratory', action='store_true', help='run the post-hoc X.. scenarios instead of the registered grid')
     a = ap.parse_args()
+    grid = EXPLORATORY if a.exploratory else GRID
+    a.out = a.out or str(ROOT / 'examples' / 'results' / ('collective_gate_a_exploratory' if a.exploratory else 'collective_gate_a'))
     out = Path(a.out); out.mkdir(parents=True, exist_ok=True)
     commit, dirty = _git('rev-parse', 'HEAD'), bool(_git('status', '--porcelain'))
     started = time.time()
     seeds = list(range(a.seeds))
     with ProcessPoolExecutor() as ex:
-        results = dict(ex.map(_one, [(sc, seeds, a.n) for sc in GRID]))
+        results = dict(ex.map(_one, [(sc, seeds, a.n) for sc in grid]))
     summary_rows, contrast_rows, verdicts = [], [], {}
-    for sc in GRID:
+    for sc in grid:
         res, traces = results[sc.sid]
         (out / f'{sc.sid}.json').write_text(json.dumps(res, indent=1, sort_keys=True))
         if traces:
@@ -71,17 +74,17 @@ def main():
             w = csv.DictWriter(f, fieldnames=list(rows[0])); w.writeheader(); w.writerows(rows)
     code = {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
             for p in sorted((ROOT / 'qualityrelay17' / 'experiments').glob('*.py')) + [ROOT / 'qualityrelay17' / 'economics.py', ROOT / 'qualityrelay17' / 'factory.py', ROOT / 'qualityrelay17' / 'calibration.py', Path(__file__)]}
-    s01 = verdicts['S01']
-    b7_vs_b0 = s01['B7_safe_mesh_voi vs B0_rules']
-    gate = all(b7_vs_b0.values())
+    first = verdicts[grid[0].sid]
+    gate = all(first['B7_safe_mesh_voi vs B0_rules'].values()) and not a.exploratory
     manifest = dict(origin='SIMULATED', registration='docs/research/COLLECTIVE_GATE_A_REGISTRATION.md',
                     git_commit=commit, dirty_before_run=dirty, python=platform.python_version(),
                     started_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(started)), runtime_s=round(time.time() - started, 1),
                     seeds=seeds, n_per_seed=a.n, calibration_seeds=list(range(1000, 1010)),
-                    belief_model=calibrate_belief_model().as_dict(), scenarios=[sc.as_dict() for sc in GRID],
+                    belief_model=calibrate_belief_model().as_dict(), scenarios=[sc.as_dict() for sc in grid],
+                    exploratory=a.exploratory,
                     code_sha256=code, verdicts=verdicts,
-                    research_gate=dict(S01_B7_beats_B0_on_all_three_rules=gate,
-                                       result='POSITIVE_CANDIDATE (check ablations)' if gate else 'NEGATIVE at S01 -- see results doc'))
+                    research_gate=dict(S01_B7_beats_B0_on_all_three_rules=None if a.exploratory else gate,
+                                       result='EXPLORATORY_NOT_A_GATE' if a.exploratory else ('POSITIVE_CANDIDATE (check ablations)' if gate else 'NEGATIVE at S01 -- see results doc')))
     (out / 'manifest.json').write_text(json.dumps(manifest, indent=1, sort_keys=True))
     print(json.dumps(manifest['research_gate']), f"runtime {manifest['runtime_s']}s")
 
