@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>QualityRelay measurement logger — caliper readings to CSV</title>
+<style>
+:root{--bg:#0b1017;--panel:#151d29;--panel2:#1b2635;--muted:#9aadc5;--line:#344154;--ink:#e9f0fb;--accent:#77c7d7;--good:#5ccc91;--warn:#efba71;--bad:#ee8e97}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+h1{font-size:19px;margin:0}h2{font-size:16px;margin:0 0 8px}h3{font-size:13px;margin:12px 0 4px;color:var(--accent);text-transform:uppercase;letter-spacing:.4px}
+a{color:#9cdeeb}
+.badge{font-size:11px;font-weight:700;letter-spacing:.4px;padding:5px 10px;border-radius:9px;background:#3a2b1b;color:#ffd79c}
+main{max-width:1320px;margin:auto;padding:14px 18px 44px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:#121925;color:var(--muted);border-radius:9px;padding:8px 13px;font:inherit;cursor:pointer}
+.tabs button.active{border-color:var(--accent);color:var(--accent);background:#15313b}
+.view{display:none}.view.active{display:block}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.cols{display:grid;grid-template-columns:1fr 1.3fr;gap:12px}
+@media(max-width:980px){.cols{grid-template-columns:1fr}}
+.tiny{font-size:12px;color:var(--muted)}.muted{color:var(--muted)}
+label.fld{display:block;font-size:12px;color:var(--muted);margin:8px 0 3px}
+input,select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:7px 8px;font:inherit;width:100%}
+input[type=number]{width:100%}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px 10px}
+.metagrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 10px}
+button.primary{background:var(--accent);color:#07151e;border:0;padding:9px 15px;border-radius:9px;cursor:pointer;font:inherit;font-weight:800}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 13px;border-radius:9px;cursor:pointer;font:inherit}
+button:disabled{opacity:.4;cursor:not-allowed}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:12px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;white-space:nowrap}
+th{color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--panel)}
+.scroll{max-height:320px;overflow:auto;border:1px solid var(--line);border-radius:9px}
+.note{padding:9px 11px;border-radius:9px;background:#332b21;color:#ffdda7;font-size:12.5px;margin-top:8px}
+.ok{padding:9px 11px;border-radius:9px;background:#183326;color:#bff3d6;font-size:12.5px;margin-top:8px}
+.danger{padding:9px 11px;border-radius:9px;background:#3a1b20;color:#ffc2c8;font-size:12.5px;margin-top:8px}
+video,canvas,img.thumb{width:100%;border-radius:9px;background:#05080c;max-height:220px;object-fit:contain}
+.sum{font-size:12.5px;margin-top:6px}
+.sum b{color:var(--ink)}
+.dev-ok{color:var(--good)}.dev-warn{color:var(--warn)}.dev-bad{color:var(--bad)}
+code{background:#0c121b;padding:1px 5px;border-radius:5px}
+.wire{fill:none;stroke-width:3;stroke-linecap:round}
+.part{fill:#18324a;stroke:#77c7d7}.pin{fill:#e9f0fb;font-size:10px}.lbls{fill:#9aadc5;font-size:10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>QualityRelay measurement logger · caliper readings → CSV</h1>
+  <span class="badge">YOU MEASURE WITH THE CALIPER · the camera image is a visual record, not a measurement</span>
+</header>
+<main>
+<div class="tabs">
+  <button class="active" data-view="log">1 · Log measurements</button>
+  <button data-view="bb">2 · Breadboard: do you need any?</button>
+  <button data-view="schema">3 · CSV schema &amp; agent handoff</button>
+</div>
+
+<!-- ============================ LOG ============================ -->
+<section id="log" class="view active">
+  <div class="cols">
+    <div class="panel">
+      <h3>Camera (visual record)</h3>
+      <video id="video" autoplay playsinline muted></video>
+      <canvas id="canvas" style="display:none"></canvas>
+      <div class="actions">
+        <button class="ghost" id="camStart">Start camera</button>
+        <button class="ghost" id="camShot" disabled>Capture still</button>
+        <button class="ghost" id="camStop" disabled>Stop</button>
+      </div>
+      <div id="camNote" class="tiny" style="margin-top:6px">Optional. The still is saved to your computer and its filename is attached to this specimen's rows. The millimetres come from the caliper, typed below.</div>
+      <div id="shotWrap" style="display:none;margin-top:8px">
+        <img id="thumb" class="thumb" alt="captured still"/>
+        <div class="tiny" id="shotInfo"></div>
+        <a id="dl" class="ghost" style="display:inline-block;text-decoration:none;margin-top:6px" download>Download image</a>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Specimen</h3>
+      <div class="metagrid">
+        <div><label class="fld">Known part (autofills nominal)</label>
+          <select id="manualId"><option value="">— custom —</option></select></div>
+        <div><label class="fld">Specimen ID</label><input id="specId" placeholder="e.g. S-GOOD-01"/></div>
+        <div><label class="fld">Part type</label>
+          <select id="partType"><option value="slot">slot</option><option value="tab">tab</option><option value="bar">bar</option></select></div>
+        <div><label class="fld">Operator ID</label><input id="operator" placeholder="your name/initials"/></div>
+        <div><label class="fld">Caliper instrument ID</label><input id="instrument" placeholder="e.g. caliper-01"/></div>
+        <div><label class="fld">Calibration ID</label><input id="calibration" placeholder="e.g. cal-2026-01"/></div>
+        <div><label class="fld">Image filename</label><input id="imageFile" placeholder="auto-filled on capture"/></div>
+      </div>
+
+      <h3>Dimensions (mm) — leave blank to skip</h3>
+      <div id="dims" class="grid"></div>
+
+      <div class="actions">
+        <button class="primary" id="add">Add specimen to log</button>
+        <button class="ghost" id="clearDims">Clear dimension fields</button>
+      </div>
+      <div id="specSum" class="sum"></div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:12px">
+    <h3>Measurement device — spare ESP32 over USB</h3>
+    <p class="tiny" style="margin-top:0">Put a spare ESP32 to work: it sends each reading straight into the log, so you don't type. Needs Chrome or Edge served from https or localhost (<code>file://</code> and other browsers can't open USB serial — you can still type by hand). Wiring and firmware are on the <b>Breadboard</b> tab.</p>
+    <div class="actions" style="margin-top:4px">
+      <label class="tiny">source&nbsp;
+        <select id="devSource" style="width:auto;display:inline-block"><option value="caliper_data_output">digital caliper data port</option><option value="potentiometer_adc">potentiometer / linear gauge</option></select></label>
+      <button class="ghost" id="devConnect">Connect ESP32 (USB)</button>
+      <button class="ghost" id="devDisconnect" disabled>Disconnect</button>
+      <span id="devStatus" class="tiny">not connected</span>
+    </div>
+    <div id="devNote" class="tiny" style="margin-top:6px"></div>
+  </div>
+
+  <div class="panel" style="margin-top:12px">
+    <div class="actions" style="margin-top:0">
+      <h2 style="margin:0;flex:1">Logged rows <span class="tiny" id="rowCount"></span></h2>
+      <button class="primary" id="export">Export CSV (opens in Excel)</button>
+      <button class="ghost" id="clearAll">Clear all</button>
+    </div>
+    <div class="tiny" style="margin:6px 0">One row per individual reading (tidy format). Saved in this browser until you clear it.</div>
+    <div class="scroll"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+  </div>
+</section>
+
+<!-- ============================ BREADBOARD ============================ -->
+<section id="bb" class="view">
+  <div class="panel">
+    <h2 style="margin-top:0">Give the spare ESP32 a job</h2>
+    <p style="margin:0 0 6px">With the servo gone, a spare ESP32 is free. Use it as the <b>measurement station</b>: it reads the caliper or a gauge and sends each number straight into the logger over USB (the "Connect ESP32" button on tab 1, via Web Serial). You press one button on the bench, the number lands in the CSV, and the optional QAPASS 16×2 LCD shows it. Less typing, fewer transcription mistakes.</p>
+    <div class="note">You still don't <i>have</i> to build this. Pure manual — read the caliper, type the number on tab 1 — needs no wiring at all, and the page does the maths. The ESP32 is a convenience and gives the spare board something to do.</div>
+    <div class="ok">Whatever the source, the number is <b>evidence</b>: the operator-confirmed caliper reading stays authoritative, and the repo never lets a raw sensor value set a verdict on its own.</div>
+  </div>
+
+  <div class="cols" style="margin-top:12px">
+    <div class="panel">
+      <h2>Option A — potentiometer / linear gauge (reliable)</h2>
+      <p class="muted" style="margin-top:0">A linear slide potentiometer is a cheap position gauge: easy to wire and always works, but lower precision than your digital caliper and it <b>must be calibrated</b>. Good for a second axis (say height) or as a backup. It reuses the repo's existing <code>potentiometer_to_mm()</code> in <code>qualityrelay17/hardware_ingest.py</code> and the <code>/hardware/caliper-reading</code> endpoint.</p>
+      <svg viewBox="0 0 660 400" aria-label="ESP32 measurement-station schematic">
+        <!-- ESP32 -->
+        <rect x="270" y="70" width="150" height="300" rx="8" class="part"/>
+        <text x="345" y="60" text-anchor="middle" class="lbls">ESP32 DevKit — use pins by their printed labels</text>
+        <g font-size="11" fill="#e9f0fb">
+          <circle cx="270" cy="110" r="4" fill="#ff7b7b"/><text x="280" y="114">3V3</text>
+          <circle cx="270" cy="150" r="4" fill="#9aadc5"/><text x="280" y="154">GND</text>
+          <circle cx="270" cy="210" r="4" fill="#ff9d2e"/><text x="280" y="214">GPIO34</text>
+          <circle cx="270" cy="280" r="4" fill="#5ccc91"/><text x="280" y="284">GPIO32</text>
+          <circle cx="420" cy="110" r="4" fill="#ff7b7b"/><text x="410" y="114" text-anchor="end">5V/VIN</text>
+          <circle cx="420" cy="150" r="4" fill="#9aadc5"/><text x="410" y="154" text-anchor="end">GND</text>
+          <circle cx="420" cy="210" r="4" fill="#6ea8ff"/><text x="410" y="214" text-anchor="end">GPIO21</text>
+          <circle cx="420" cy="260" r="4" fill="#efd271"/><text x="410" y="264" text-anchor="end">GPIO22</text>
+        </g>
+        <text x="345" y="335" text-anchor="middle" class="lbls" font-size="9">GPIO34 = ADC in · GPIO21 = SDA · GPIO22 = SCL</text>
+        <!-- potentiometer -->
+        <rect x="40" y="90" width="120" height="60" rx="6" class="part" fill="#1b2635"/>
+        <text x="100" y="84" text-anchor="middle" class="lbls">linear pot / slide gauge (~10 kΩ)</text>
+        <g font-size="9" fill="#9aadc5"><text x="55" y="165">pin1</text><text x="90" y="165">wiper</text><text x="126" y="165">pin2</text></g>
+        <circle cx="65" cy="150" r="3" fill="#ff7b7b"/><circle cx="100" cy="150" r="3" fill="#ff9d2e"/><circle cx="135" cy="150" r="3" fill="#9aadc5"/>
+        <!-- button -->
+        <rect x="55" y="250" width="100" height="55" rx="6" class="part" fill="#1b2635"/>
+        <text x="105" y="244" text-anchor="middle" class="lbls">push button (send reading)</text>
+        <circle cx="80" cy="305" r="3" fill="#5ccc91"/><circle cx="130" cy="305" r="3" fill="#9aadc5"/>
+        <!-- LCD optional -->
+        <rect x="470" y="90" width="160" height="90" rx="6" class="part" fill="#141d2a" stroke-dasharray="5 3"/>
+        <text x="550" y="84" text-anchor="middle" class="lbls">QAPASS 16×2 I²C LCD (optional)</text>
+        <g font-size="9" fill="#9aadc5"><text x="483" y="196">VCC</text><text x="518" y="196">GND</text><text x="553" y="196">SDA</text><text x="588" y="196">SCL</text></g>
+        <circle cx="490" cy="180" r="3" fill="#ff7b7b"/><circle cx="525" cy="180" r="3" fill="#9aadc5"/><circle cx="560" cy="180" r="3" fill="#6ea8ff"/><circle cx="595" cy="180" r="3" fill="#efd271"/>
+        <!-- wires -->
+        <path class="wire" stroke="#ff7b7b" d="M65,150 V80 L255,80 V110 H270"/>
+        <path class="wire" stroke="#ff9d2e" d="M100,150 V200 H270"/>
+        <path class="wire" stroke="#9aadc5" d="M135,150 V172 H252 V150 H270"/>
+        <path class="wire" stroke="#5ccc91" d="M80,305 V290 H256 V280 H270"/>
+        <path class="wire" stroke="#9aadc5" d="M130,305 V330 H260 V150 H270"/>
+        <path class="wire" stroke="#ff7b7b" d="M490,180 V110 H420"/>
+        <path class="wire" stroke="#9aadc5" d="M525,180 V150 H420"/>
+        <path class="wire" stroke="#6ea8ff" d="M560,180 V210 H420"/>
+        <path class="wire" stroke="#efd271" d="M595,180 V260 H420"/>
+        <!-- legend -->
+        <g font-size="9" fill="#9aadc5"><text x="40" y="360">red = 3V3/5V · grey = GND · orange = wiper→GPIO34 · green = button→GPIO32 · blue = SDA · yellow = SCL</text>
+        <text x="40" y="376">GND is shared: pot pin2, button, and LCD all return to any ESP32 GND pin.</text></g>
+      </svg>
+      <table><thead><tr><th>from</th><th>to</th><th>why</th></tr></thead><tbody>
+        <tr><td>pot outer pin 1</td><td>ESP32 3V3</td><td>top of the divider</td></tr>
+        <tr><td>pot outer pin 2</td><td>ESP32 GND</td><td>bottom of the divider</td></tr>
+        <tr><td>pot wiper (middle)</td><td>ESP32 GPIO34 (ADC, input-only)</td><td>the position voltage</td></tr>
+        <tr><td>button leg 1</td><td>ESP32 GPIO32</td><td>"send reading" button (INPUT_PULLUP)</td></tr>
+        <tr><td>button leg 2</td><td>ESP32 GND</td><td>pressed = LOW</td></tr>
+        <tr><td>QAPASS LCD VCC / GND</td><td>ESP32 5V (VIN) / GND</td><td>power the 16×2 display (optional)</td></tr>
+        <tr><td>QAPASS LCD SDA / SCL</td><td>ESP32 GPIO21 / GPIO22</td><td>I²C data / clock (optional)</td></tr>
+      </tbody></table>
+      <div class="note"><b>Calibrate first.</b> Measure at least five known positions against the real caliper, then set <code>ADC_MIN/ADC_MAX</code> and <code>MM_MIN/MM_MAX</code> in the sketch. Without that the millimetres are meaningless.</div>
+      <p class="tiny">Firmware: <code>firmware/measurement_station/esp32_measurement_station.ino</code> (default mode). GPIO34 is input-only and ADC-safe.</p>
+      <h3>Wire it and test (USB unplugged while wiring)</h3>
+      <ol class="tiny" style="margin:0;padding-left:18px">
+        <li>Wire the three pot pins, then the button. The LCD is optional — skip it for the first test.</li>
+        <li>Multimeter across the pot: wiper (GPIO34 wire) should read 0 → 3.3 V as you slide it. If it does not, swap pin1/pin2.</li>
+        <li>Plug in USB. Flash <code>esp32_measurement_station.ino</code> with <code>READ_SOURCE = SOURCE_POT</code>. Open Serial Monitor at 115200; you should see <code># QRM ready</code>.</li>
+        <li>Press the button. A number prints each press. Slide the gauge, press again: the number changes.</li>
+        <li>Calibrate: at ≥ 5 known caliper positions, note the printed raw/number, then set <code>ADC_MIN/ADC_MAX</code> and <code>MM_MIN/MM_MAX</code> in the sketch and reflash.</li>
+        <li>In this page (tab 1) click <b>Connect ESP32</b>, pick the port, then press the button — the value lands in the focused field. Click "Add specimen to log".</li>
+      </ol>
+      <div class="danger">Never feed more than 3.3 V into any GPIO: the pot's top pin must go to <b>3V3</b>, not 5V/VIN. The ADC is slightly non-linear near 0 V and 3.3 V, which the calibration absorbs.</div>
+    </div>
+    <div class="panel">
+      <h2>Option B — digital caliper data port (precise, advanced)</h2>
+      <p class="muted" style="margin-top:0">If your caliper has a 4-pad <b>data port</b> under a cover, the ESP32 can read the exact number it shows. Precise, but the logic is ~1.5 V and the frame format varies by brand, so this is experimental and <b>untested here</b>.</p>
+      <svg viewBox="0 0 520 250" aria-label="Optional caliper data-port wiring">
+        <rect x="20" y="40" width="140" height="150" rx="8" class="part" fill="#1b2635"/>
+        <text x="90" y="30" text-anchor="middle" class="lbls">digital caliper (1.5 V port)</text>
+        <g font-size="11" fill="#e9f0fb">
+          <circle cx="40" cy="80" r="4" fill="#ee8e97"/><text x="50" y="84">V+ ~1.5 V</text>
+          <circle cx="40" cy="110" r="4" fill="#efba71"/><text x="50" y="114">CLK</text>
+          <circle cx="40" cy="140" r="4" fill="#77c7d7"/><text x="50" y="144">DATA</text>
+          <circle cx="40" cy="170" r="4" fill="#9aadc5"/><text x="50" y="174">GND</text>
+        </g>
+        <rect x="205" y="70" width="110" height="120" rx="8" class="part" fill="#1b2635"/>
+        <text x="260" y="62" text-anchor="middle" class="lbls">level shifter</text>
+        <text x="260" y="130" text-anchor="middle" class="pin">LV ◄► HV</text>
+        <text x="260" y="150" text-anchor="middle" class="lbls">(BSS138 ×2)</text>
+        <rect x="360" y="40" width="140" height="160" rx="8" class="part"/>
+        <text x="430" y="30" text-anchor="middle" class="lbls">ESP32</text>
+        <g font-size="11" fill="#e9f0fb">
+          <circle cx="372" cy="80" r="4" fill="#efba71"/><text x="380" y="84">GPIO (CLK)</text>
+          <circle cx="372" cy="110" r="4" fill="#77c7d7"/><text x="380" y="114">GPIO (DATA)</text>
+          <circle cx="372" cy="150" r="4" fill="#5ccc91"/><text x="380" y="154">3V3 → HV</text>
+          <circle cx="372" cy="180" r="4" fill="#9aadc5"/><text x="380" y="184">GND</text>
+        </g>
+        <path class="wire" stroke="#efba71" d="M44,110 H205"/>
+        <path class="wire" stroke="#77c7d7" d="M44,140 H205"/>
+        <path class="wire" stroke="#ee8e97" d="M44,80 H140 V200 H205"/>
+        <path class="wire" stroke="#9aadc5" d="M44,170 H110 V215 H430 V200"/>
+        <path class="wire" stroke="#efba71" d="M315,110 Q345,95 372,80"/>
+        <path class="wire" stroke="#77c7d7" d="M315,130 Q345,120 372,110"/>
+        <path class="wire" stroke="#5ccc91" d="M372,150 H340 V232 H260 V190"/>
+      </svg>
+      <div class="danger"><b>Caveats.</b> ~1.5 V logic is below many BSS138 level shifters' usable range; a per-line transistor stage or a caliper-specific reader may be needed, and the 24-bit format differs by brand. Verify on your bench before trusting it; in the firmware this mode is a documented stub.</div>
+    </div>
+  </div>
+
+  <div class="panel" style="margin-top:12px">
+    <h3>How the ESP32 talks to the logger</h3>
+    <p class="muted" style="margin-top:0">The sketch prints at 115200 baud, one reading per button press. The logger (tab 1 → Connect ESP32) reads each line and either fills the field you are on or appends a row.</p>
+    <table><thead><tr><th>ESP32 prints</th><th>the logger does</th></tr></thead><tbody>
+      <tr><td><code>20.01</code> (a bare number)</td><td>fills the dimension field you have selected — use it like a numeric keypad, then click "Add specimen to log"</td></tr>
+      <tr><td><code>QRM,width,mid,20.01</code></td><td>appends a full row (feature, location, value) with method = the "source" you picked</td></tr>
+      <tr><td><code># QRM ready</code></td><td>ignored (banner / comment)</td></tr>
+    </tbody></table>
+    <p class="tiny">Device rows are tagged <code>evidence_tier = PHYSICAL_CAPTURE</code>; typed rows are <code>OPERATOR_CONFIRMED</code>. Confirm device readings against the display when it matters.</p>
+  </div>
+</section>
+
+<!-- ============================ SCHEMA ============================ -->
+<section id="schema" class="view">
+  <div class="panel">
+    <h2>CSV columns (tidy / long format)</h2>
+    <p class="muted" style="margin-top:0">One row per individual reading. This is the format the Export button writes and that <code>docs/engineering/templates/specimen_measurements.csv</code> documents. Excel opens it directly; use a pivot table to view width-per-position etc.</p>
+    <table><thead><tr><th>column</th><th>meaning</th></tr></thead><tbody id="schemaBody"></tbody></table>
+  </div>
+  <div class="panel" style="margin-top:12px">
+    <h2>Handoff to a later agent (not run here)</h2>
+    <p style="margin-top:0">This page and the summarizer only <b>record and describe</b> the measurements. They do not change code. A later agent (your "CMC agent") could read this CSV and propose updates, for example:</p>
+    <ul>
+      <li>group rows by <code>specimen_id</code> and <code>feature</code>, then compare the measured mean against <code>nominal_mm</code>;</li>
+      <li>flag critical features (<code>width</code>, <code>slot_inner_width</code>) whose deviation exceeds the chosen tolerance;</li>
+      <li>propose new nominal/tolerance constants or decision thresholds for review.</li>
+    </ul>
+    <div class="note">Guardrail: any such change is a <b>proposal for a human to review</b>. Measured data is evidence; it does not by itself re-tune the safety policy. Keep the raw CSV so every proposed change is traceable to real readings.</div>
+    <p class="tiny">Summarize a CSV now, without any agent: <code>python3 scripts/summarize_measurements.py your_file.csv</code> prints per-specimen min/max/mean/spread and deviation from nominal, and can write a JSON summary with <code>--json out.json</code>.</p>
+  </div>
+</section>
+</main>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===b.dataset.view));});
+
+// ---- known parts and nominal geometry ----
+const KNOWN={
+  'S-GOOD':{type:'slot',crit:21.20},'S-NOM':{type:'slot',crit:21.00},'S-RISK':{type:'slot',crit:20.70},'S-DEF':{type:'slot',crit:19.40},
+  'T-GOOD':{type:'tab',crit:19.80},'T-NOM':{type:'tab',crit:20.00},'T-RISK':{type:'tab',crit:20.30},'T-DEF':{type:'tab',crit:21.60},
+  'RPT-20':{type:'bar',crit:20.00}
+};
+const RAIL=6, BASE=12, LEN=60, HGT=6;
+// feature -> locations and nominal function (s = {crit})
+const FEATURES={
+  slot:[
+    {f:'slot_inner_width',locs:['near','mid','far'],nom:s=>s?s.crit:null,critical:true},
+    {f:'outer_width',locs:['overall'],nom:s=>s?s.crit+2*RAIL:null},
+    {f:'rail_width',locs:['left','right'],nom:()=>RAIL},
+    {f:'base_length',locs:['overall'],nom:()=>BASE},
+    {f:'length',locs:['overall'],nom:()=>LEN},
+    {f:'height',locs:['corner_FL','corner_FR','corner_BL','corner_BR'],nom:()=>HGT}
+  ],
+  tab:[
+    {f:'width',locs:['near','mid','far'],nom:s=>s?s.crit:null,critical:true},
+    {f:'length',locs:['overall'],nom:()=>LEN},
+    {f:'height',locs:['corner_FL','corner_FR','corner_BL','corner_BR'],nom:()=>HGT}
+  ],
+  bar:[
+    {f:'width',locs:['near','mid','far'],nom:s=>s?s.crit:null,critical:true},
+    {f:'length',locs:['overall'],nom:()=>LEN},
+    {f:'height',locs:['corner_FL','corner_FR','corner_BL','corner_BR'],nom:()=>HGT}
+  ]
+};
+const COLS=['timestamp_iso','specimen_id','manual_id','part_type','feature','location','reading_no','value_mm','nominal_mm','deviation_mm','unit','instrument_id','calibration_id','operator_id','method','image_file','image_sha256','evidence_tier','notes'];
+const COLDOC={
+  timestamp_iso:'when the row was added (ISO 8601)', specimen_id:'your label for this physical part',
+  manual_id:'CAD id if a known part (S-GOOD, T-RISK, ...), else blank', part_type:'slot | tab | bar',
+  feature:'what was measured: length, width, slot_inner_width, outer_width, rail_width, base_length, height',
+  location:'where on the part: near/mid/far, left/right, corner_FL.._BR, overall', reading_no:'repeat index (1 unless you re-measure the same spot)',
+  value_mm:'the caliper reading in millimetres', nominal_mm:'design value for this feature/location, if known',
+  deviation_mm:'value_mm − nominal_mm (blank if no nominal)', unit:'always mm', instrument_id:'which caliper',
+  calibration_id:'caliper calibration reference', operator_id:'who measured', method:'caliper_manual | caliper_data_output | potentiometer_adc | camera_uncalibrated',
+  image_file:'filename of the camera still for this specimen (record only)', image_sha256:'hash of that image if computed',
+  evidence_tier:'OPERATOR_CONFIRMED for hand caliper readings', notes:'free text'
+};
+
+const manualSel=$('#manualId');
+Object.keys(KNOWN).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent=k+' ('+KNOWN[k].type+', crit '+KNOWN[k].crit.toFixed(2)+')';manualSel.appendChild(o);});
+$('#schemaBody').innerHTML=COLS.map(c=>`<tr><td><code>${c}</code></td><td>${COLDOC[c]||''}</td></tr>`).join('');
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function known(){return KNOWN[manualSel.value]||null;}
+
+function buildDims(){
+  const type=$('#partType').value, k=known();
+  const dims=$('#dims'); dims.innerHTML='';
+  for(const spec of FEATURES[type]){
+    for(const loc of spec.locs){
+      const id='d_'+spec.f+'_'+loc;
+      const nom=spec.nom(k&&k.type===type?k:null);
+      const w=document.createElement('div');
+      const nomTxt=nom!=null?` <span class="tiny">(nom ${nom.toFixed(2)})</span>`:'';
+      w.innerHTML=`<label class="fld">${spec.f} · ${loc}${nomTxt}</label><input type="number" step="0.01" inputmode="decimal" id="${id}" data-f="${spec.f}" data-loc="${loc}" data-nom="${nom!=null?nom:''}" data-crit="${spec.critical?1:0}"/>`;
+      dims.appendChild(w);
+    }
+  }
+}
+manualSel.onchange=()=>{const k=known();if(k){$('#partType').value=k.type;if(!$('#specId').value)$('#specId').value=manualSel.value+'-01';}buildDims();};
+$('#partType').onchange=buildDims;
+buildDims();
+
+// ---- rows store ----
+const KEY='qr_specimen_measurements';
+let rows=[];try{rows=JSON.parse(localStorage.getItem(KEY)||'[]');}catch(e){rows=[];}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(rows));}catch(e){}renderRows();}
+function renderRows(){
+  $('#tbl thead').innerHTML='<tr>'+COLS.map(c=>`<th>${c}</th>`).join('')+'</tr>';
+  $('#tbl tbody').innerHTML=rows.slice(-200).map(r=>'<tr>'+COLS.map(c=>`<td>${esc(r[c]==null?'':r[c])}</td>`).join('')+'</tr>').join('');
+  $('#rowCount').textContent=rows.length?('· '+rows.length+' rows'):'';
+}
+renderRows();
+
+function addSpecimen(){
+  const specId=$('#specId').value.trim();
+  if(!specId){$('#specSum').innerHTML='<span class="dev-bad">Enter a Specimen ID first.</span>';return;}
+  const meta={specimen_id:specId,manual_id:manualSel.value,part_type:$('#partType').value,
+    operator_id:$('#operator').value.trim(),instrument_id:$('#instrument').value.trim(),
+    calibration_id:$('#calibration').value.trim(),image_file:$('#imageFile').value.trim(),image_sha256:lastSha||''};
+  const ts=new Date().toISOString();
+  const added=[];
+  document.querySelectorAll('#dims input').forEach(inp=>{
+    if(inp.value==='')return;
+    const v=parseFloat(inp.value); if(isNaN(v))return;
+    const nom=inp.dataset.nom!==''?parseFloat(inp.dataset.nom):null;
+    added.push({timestamp_iso:ts,specimen_id:meta.specimen_id,manual_id:meta.manual_id,part_type:meta.part_type,
+      feature:inp.dataset.f,location:inp.dataset.loc,reading_no:1,value_mm:v.toFixed(2),
+      nominal_mm:nom!=null?nom.toFixed(2):'',deviation_mm:nom!=null?(v-nom).toFixed(2):'',unit:'mm',
+      instrument_id:meta.instrument_id,calibration_id:meta.calibration_id,operator_id:meta.operator_id,
+      method:'caliper_manual',image_file:meta.image_file,image_sha256:meta.image_sha256,
+      evidence_tier:'OPERATOR_CONFIRMED',notes:''});
+  });
+  if(!added.length){$('#specSum').innerHTML='<span class="dev-bad">Fill at least one dimension.</span>';return;}
+  rows=rows.concat(added);save();
+  // quick summary of the critical feature
+  const crit=added.filter(r=>FEATURES[meta.part_type].some(s=>s.critical&&s.f===r.feature));
+  let html=`<span class="ok" style="display:inline-block">Added ${added.length} readings for <b>${esc(specId)}</b>.</span>`;
+  if(crit.length){const vals=crit.map(r=>parseFloat(r.value_mm));const mn=Math.min(...vals),mx=Math.max(...vals),mean=vals.reduce((a,b)=>a+b,0)/vals.length;
+    const nom=crit[0].nominal_mm!==''?parseFloat(crit[0].nominal_mm):null;const spread=mx-mn;
+    let dcls='dev-ok';if(nom!=null&&Math.abs(mean-nom)>0.15)dcls='dev-bad';else if(spread>0.05)dcls='dev-warn';
+    html+=`<div class="sum ${dcls}">critical ${crit[0].feature}: mean ${mean.toFixed(2)} mm, spread ${spread.toFixed(2)} mm`+(nom!=null?`, nominal ${nom.toFixed(2)}, deviation ${(mean-nom>=0?'+':'')+(mean-nom).toFixed(2)} mm`:'')+'</div>';}
+  $('#specSum').innerHTML=html;
+  clearDims();
+}
+function clearDims(){document.querySelectorAll('#dims input').forEach(i=>i.value='');}
+$('#add').onclick=addSpecimen;
+$('#clearDims').onclick=clearDims;
+$('#clearAll').onclick=()=>{if(confirm('Delete all logged rows in this browser?')){rows=[];save();}};
+
+// ---- CSV ----
+function buildCSV(){
+  const q=v=>{v=v==null?'':String(v);return /[",\r\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;};
+  const lines=[COLS.join(',')];
+  for(const r of rows)lines.push(COLS.map(c=>q(r[c])).join(','));
+  return '\ufeff'+lines.join('\r\n')+'\r\n';
+}
+window.buildCSV=buildCSV; // for inspection
+$('#export').onclick=()=>{
+  if(!rows.length){alert('Nothing to export yet.');return;}
+  const blob=new Blob([buildCSV()],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='specimen_measurements_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(a.href);
+};
+
+// ---- camera ----
+let stream=null,lastSha='';
+const video=$('#video');
+async function sha256(blob){
+  try{if(!crypto.subtle)return '';const buf=await blob.arrayBuffer();const h=await crypto.subtle.digest('SHA-256',buf);
+    return Array.from(new Uint8Array(h)).map(b=>b.toString(16).padStart(2,'0')).join('');}catch(e){return '';}
+}
+$('#camStart').onclick=async()=>{
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){$('#camNote').innerHTML='<span class="dev-warn">This browser does not expose a camera API here. Type the image filename by hand, or serve the page from https/localhost.</span>';return;}
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{width:1280,height:720}});video.srcObject=stream;
+    $('#camShot').disabled=false;$('#camStop').disabled=false;$('#camStart').disabled=true;$('#camNote').textContent='Camera on. Capture a still per specimen; the file is attached to its rows.';}
+  catch(e){$('#camNote').innerHTML='<span class="dev-warn">Camera unavailable ('+esc(e.name||'error')+'). Browsers only allow the camera on https or localhost. You can still log by hand and type an image filename.</span>';}
+};
+$('#camStop').onclick=()=>{if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}$('#camShot').disabled=true;$('#camStop').disabled=true;$('#camStart').disabled=false;$('#camNote').textContent='Camera stopped.';};
+$('#camShot').onclick=()=>{
+  const c=$('#canvas');c.width=video.videoWidth||1280;c.height=video.videoHeight||720;
+  c.getContext('2d').drawImage(video,0,0,c.width,c.height);
+  c.toBlob(async blob=>{
+    const url=URL.createObjectURL(blob);$('#thumb').src=url;$('#dl').href=url;
+    const fname=(($('#specId').value.trim()||'specimen')+'_'+new Date().toISOString().replace(/[:.]/g,'-')+'.png');
+    $('#dl').download=fname;$('#imageFile').value=fname;
+    lastSha=await sha256(blob);
+    $('#shotInfo').textContent='file: '+fname+(lastSha?(' · sha256 '+lastSha.slice(0,12)+'…'):' · (hash needs https/localhost)');
+    $('#shotWrap').style.display='';
+  },'image/png');
+};
+
+// ---- measurement device over USB (Web Serial) ----
+let port=null,reader=null,serialBuf='',keepReading=false;
+const devStatusEl=$('#devStatus');
+function devNote(m){$('#devNote').innerHTML=m?('<span class="dev-warn">'+esc(m)+'</span>'):'';}
+function setDevConnected(on){devStatusEl.textContent=on?'connected':'not connected';devStatusEl.className='tiny '+(on?'dev-ok':'');$('#devConnect').disabled=on;$('#devDisconnect').disabled=!on;}
+function flash(inp){if(!inp)return;const o=inp.style.background;inp.style.background='#15313b';setTimeout(()=>inp.style.background=o,400);}
+function fillFocused(num){
+  let inp=document.activeElement;
+  if(!(inp&&inp.matches&&inp.matches('#dims input')))inp=[...document.querySelectorAll('#dims input')].find(i=>i.value==='')||null;
+  if(inp){inp.value=num.toFixed(2);flash(inp);}
+}
+function appendDeviceRow(feature,location,value){
+  if(isNaN(value))return;
+  const specId=$('#specId').value.trim();
+  if(!specId){devNote('Set a Specimen ID before logging from the device.');return;}
+  const type=$('#partType').value,k=known();
+  const spec=(FEATURES[type]||[]).find(s=>s.f===feature);
+  const nom=spec?spec.nom(k&&k.type===type?k:null):null;
+  rows.push({timestamp_iso:new Date().toISOString(),specimen_id:specId,manual_id:manualSel.value,part_type:type,
+    feature:feature,location:location||'overall',reading_no:1,value_mm:value.toFixed(2),
+    nominal_mm:nom!=null?nom.toFixed(2):'',deviation_mm:nom!=null?(value-nom).toFixed(2):'',unit:'mm',
+    instrument_id:$('#instrument').value.trim(),calibration_id:$('#calibration').value.trim(),operator_id:$('#operator').value.trim(),
+    method:$('#devSource').value,image_file:$('#imageFile').value.trim(),image_sha256:lastSha||'',
+    evidence_tier:'PHYSICAL_CAPTURE',notes:'from ESP32'});
+  save();
+  $('#specSum').innerHTML=`<span class="ok" style="display:inline-block">Logged ${esc(feature)} ${esc(location||'')} = ${value.toFixed(2)} mm from the device.</span>`;
+}
+function handleSerialLine(line){
+  line=(line||'').trim();if(!line||line[0]==='#')return;
+  if(/^QRM,/i.test(line)){const p=line.split(',');if(p.length>=4)appendDeviceRow(p[1].trim(),p[2].trim(),parseFloat(p[3]));return;}
+  const num=parseFloat(line.replace(/[^0-9.\-]/g,''));if(!isNaN(num))fillFocused(num);
+}
+window._feedLine=handleSerialLine; // test hook
+async function readLoop(){
+  try{const dec=new TextDecoderStream();const closed=port.readable.pipeTo(dec.writable).catch(()=>{});reader=dec.readable.getReader();keepReading=true;
+    while(keepReading){const {value,done}=await reader.read();if(done)break;serialBuf+=value;let i;while((i=serialBuf.indexOf('\n'))>=0){handleSerialLine(serialBuf.slice(0,i));serialBuf=serialBuf.slice(i+1);}}
+    await closed;}catch(e){}
+}
+$('#devConnect').onclick=async()=>{
+  if(!('serial'in navigator)){devNote('Web Serial is not available here. Use Chrome or Edge served from https or localhost; otherwise type readings by hand.');return;}
+  try{port=await navigator.serial.requestPort();await port.open({baudRate:115200});setDevConnected(true);devNote('');readLoop();}
+  catch(e){devNote('Connect cancelled or failed: '+(e.name||e));}
+};
+$('#devDisconnect').onclick=async()=>{keepReading=false;try{if(reader){await reader.cancel();reader=null;}if(port){await port.close();port=null;}}catch(e){}setDevConnected(false);};
+</script>
+</body>
+</html>

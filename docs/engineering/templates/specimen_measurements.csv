@@ -1,0 +1,1 @@
+timestamp_iso,specimen_id,manual_id,part_type,feature,location,reading_no,value_mm,nominal_mm,deviation_mm,unit,instrument_id,calibration_id,operator_id,method,image_file,image_sha256,evidence_tier,notes

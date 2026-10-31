@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>QualityRelay physical build: breadboard, jumpers, bench layout, and bench test</title>
+<style>
+:root{--bg:#0b1017;--panel:#151d29;--panel2:#1b2635;--muted:#9aadc5;--line:#344154;--ink:#e9f0fb;--accent:#77c7d7;--good:#5ccc91;--warn:#efba71;--bad:#ee8e97}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+h1{font-size:19px;margin:0}h2{font-size:16px;margin:0 0 8px}h3{font-size:14px;margin:10px 0 4px;color:var(--accent)}
+a{color:#9cdeeb}
+.badge{font-size:11px;font-weight:700;letter-spacing:.5px;padding:5px 10px;border-radius:9px;background:#3a2b1b;color:#ffd79c}
+main{max-width:1360px;margin:auto;padding:14px 18px 40px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:#121925;color:var(--muted);border-radius:9px;padding:8px 13px;font:inherit;cursor:pointer}
+.tabs button.active{border-color:var(--accent);color:var(--accent);background:#15313b}
+.view{display:none}.view.active{display:block}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.cols{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-top:12px}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:1000px){.cols,.cols2{grid-template-columns:1fr}}
+svg{width:100%;height:auto;display:block}
+.tiny{font-size:12px;color:var(--muted)}.muted{color:var(--muted)}
+button.primary{background:var(--accent);color:#07151e;border:0;padding:9px 15px;border-radius:9px;cursor:pointer;font:inherit;font-weight:800}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 13px;border-radius:9px;cursor:pointer;font:inherit}
+button:disabled{opacity:.4;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:0;border-right:1px solid var(--line);background:#121925;color:var(--muted);padding:7px 12px;font:inherit;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:#15313b;color:var(--accent);font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+tr.hl td{background:#15313b}
+ol.steps{margin:0;padding-left:22px}
+ol.steps li{padding:5px 6px;border-radius:7px;cursor:pointer;margin:1px 0}
+ol.steps li.cur{background:#15313b;outline:1px solid var(--accent)}
+ol.steps li.past{color:var(--muted)}
+.note{padding:9px 11px;border-radius:9px;background:#332b21;color:#ffdda7;font-size:12.5px;margin-top:8px}
+.danger{padding:9px 11px;border-radius:9px;background:#3a1b20;color:#ffc2c8;font-size:12.5px;margin-top:8px}
+.ok{padding:9px 11px;border-radius:9px;background:#183326;color:#bff3d6;font-size:12.5px;margin-top:8px}
+.pill{display:inline-block;font-size:11px;font-weight:800;padding:2px 7px;border-radius:6px;background:#1d2838;border:1px solid var(--line)}
+.caption{font-size:15px;font-weight:600;min-height:44px}
+select,input[type=text]{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:7px;padding:5px 7px;font:inherit;font-size:12.5px;width:100%}
+td select{min-width:92px}
+.res-PASS{color:var(--good);font-weight:700}.res-FAIL{color:var(--bad);font-weight:700}
+.sum{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+.legend{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:700px){.legend{grid-template-columns:1fr}}
+/* svg */
+.hole{fill:#2a2a2a}.holeRail{fill:#2a2a2a}
+.bb{fill:#ece8de;stroke:#b9b3a3}
+.lbl{fill:#e9f0fb;font-size:11px}.lbls{fill:#9aadc5;font-size:9px}.lbld{fill:#333;font-size:8px}
+.dim{opacity:.08}
+.curEl{animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.4}}
+.clk{cursor:pointer}
+</style>
+</head>
+<body>
+<header>
+  <h1>QualityRelay physical build · breadboard, jumpers, bench layout, bench test</h1>
+  <span><a href="tabletop_demo.html" style="color:#9cdeeb;font-size:13px;margin-right:10px">Tabletop demo →</a><a href="measurement_logger.html" style="color:#9cdeeb;font-size:13px;margin-right:10px">Measurement logger →</a><span class="badge">BUILD AID · drawings are not evidence · your board's printed labels win</span></span>
+</header>
+<main>
+<div class="tabs">
+  <button class="active" data-view="bb">1 · Breadboard &amp; jumpers</button>
+  <button data-view="sys">2 · Whole bench (3D view) &amp; transport</button>
+  <button data-view="test">3 · Bench test protocol</button>
+  <button data-view="bom">4 · Parts &amp; jumper shopping list</button>
+  <button data-view="print">5 · What to 3D print</button>
+</div>
+
+<!-- =============================== BREADBOARD =============================== -->
+<section id="bb" class="view active">
+  <div class="cols" style="margin-top:0">
+    <div class="panel">
+      <svg id="bbSvg" viewBox="0 -110 1000 420" aria-label="Breadboard wiring, hole by hole"></svg>
+      <div class="actions">
+        <button class="ghost" id="bPrev">◀ Previous</button>
+        <button class="primary" id="bNext">Next ▶</button>
+        <button class="ghost" id="bAll">Show finished board</button>
+        <span class="seg" id="layoutSeg"><button data-l="A" class="on">Layout A: ESP32 on breadboard</button><button data-l="B">Layout B: ESP32 off breadboard</button></span>
+        <span class="seg" id="powerSeg"><button data-p="module" class="on">Servo power: ELEGOO Power MB V2</button><button data-p="usb">USB charger lead</button></span>
+      </div>
+      <div class="tiny" style="margin-top:6px">Drawn for a standard 830-hole breadboard (columns 1–63, rows a–j) and a 30-pin "ESP32 DEVKIT V1" (DOIT style), lying sideways with USB to the left. Other ESP32 boards have different pin orders: always match the <b>printed label</b> (GND, D13 / G13 / IO13, D32 / G32 / IO32), not the drawing position.</div>
+    </div>
+    <div class="panel">
+      <h2 id="bTitle"></h2>
+      <div id="bBody"></div>
+      <div id="bWarn"></div>
+    </div>
+  </div>
+  <div class="cols2">
+    <div class="panel">
+      <h2>Every connection on the board</h2>
+      <table id="bTable"><thead><tr><th>ID</th><th>jumper type</th><th>colour</th><th>from</th><th>to</th><th>purpose</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="panel">
+      <h2>How to tell jumpers apart</h2>
+      <svg viewBox="0 0 520 170" aria-label="Jumper types">
+        <g transform="translate(10,10)">
+          <text x="0" y="12" class="lbl" font-weight="700">Male–Male (M–M)</text>
+          <rect x="0" y="30" width="14" height="8" fill="#bbb"/><rect x="14" y="27" width="16" height="14" rx="2" fill="#222"/><path d="M30,34 C80,10 120,58 150,34" stroke="#d93a3a" stroke-width="4" fill="none"/><rect x="150" y="27" width="16" height="14" rx="2" fill="#222"/><rect x="166" y="30" width="14" height="8" fill="#bbb"/>
+          <text x="0" y="62" class="lbls">metal pin on both ends. Goes into breadboard holes</text><text x="0" y="74" class="lbls">and into the servo plug's sockets.</text>
+        </g>
+        <g transform="translate(10,95)">
+          <text x="0" y="12" class="lbl" font-weight="700">Male–Female (M–F / F–M)</text>
+          <rect x="0" y="30" width="14" height="8" fill="#bbb"/><rect x="14" y="27" width="16" height="14" rx="2" fill="#222"/><path d="M30,34 C80,10 120,58 150,34" stroke="#5ccc91" stroke-width="4" fill="none"/><rect x="150" y="26" width="24" height="16" rx="2" fill="#222"/><rect x="170" y="31" width="4" height="6" fill="#555"/>
+          <text x="0" y="62" class="lbls">pin on one end, square socket on the other. The socket</text><text x="0" y="74" class="lbls">slides onto a header pin of the ESP32 (Layout B only).</text>
+        </g>
+        <g transform="translate(270,10)">
+          <text x="0" y="12" class="lbl" font-weight="700">Female–Female (F–F)</text>
+          <rect x="0" y="26" width="24" height="16" rx="2" fill="#222"/><rect x="0" y="31" width="4" height="6" fill="#555"/><path d="M24,34 C74,10 114,58 144,34" stroke="#efba71" stroke-width="4" fill="none"/><rect x="144" y="26" width="24" height="16" rx="2" fill="#222"/><rect x="164" y="31" width="4" height="6" fill="#555"/>
+          <text x="0" y="62" class="lbls">sockets on both ends: pin-to-pin. Not needed</text><text x="0" y="74" class="lbls">in this build.</text>
+        </g>
+        <g transform="translate(270,95)">
+          <text x="0" y="12" class="lbl" font-weight="700">Servo plug (female, 3 sockets)</text>
+          <rect x="0" y="24" width="48" height="20" rx="2" fill="#222"/><circle cx="9" cy="34" r="3" fill="#555"/><circle cx="24" cy="34" r="3" fill="#555"/><circle cx="39" cy="34" r="3" fill="#555"/>
+          <path d="M9,24 v-10" stroke="#8b5a2b" stroke-width="3"/><path d="M24,24 v-10" stroke="#d93a3a" stroke-width="3"/><path d="M39,24 v-10" stroke="#ff9d2e" stroke-width="3"/>
+          <text x="58" y="30" class="lbls">brown/black = −</text><text x="58" y="42" class="lbls">red = +5 V</text><text x="58" y="54" class="lbls">orange/yellow = signal</text>
+          <text x="0" y="70" class="lbls">Push one M–M pin into each socket; tape the plug down.</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== SYSTEM =============================== -->
+<section id="sys" class="view">
+  <div class="panel">
+    <div class="actions" style="margin-top:0">
+      <span class="tiny">Transport:</span>
+      <span class="seg" id="modeSeg"><button data-m="manual" class="on">Manual sliding track (build this)</button><button data-m="gravity">Gravity chute</button><button data-m="belt">Motorized belt (comparison only)</button></span>
+      <span class="tiny" style="margin-left:10px">Outcome:</span>
+      <span class="seg" id="outSeg"><button data-o="PASS" class="on">PASS</button><button data-o="HOLD">HOLD</button><button data-o="REJECT">REJECT</button></span>
+    </div>
+    <svg id="sysSvg" viewBox="0 70 1180 690" aria-label="Bench layout, 3D oblique view" style="margin-top:8px"></svg>
+    <div class="actions">
+      <button class="ghost" id="sPrev">◀ Previous</button>
+      <button class="primary" id="sNext">Next station ▶</button>
+      <button class="ghost" id="sReset">Reset</button>
+      <span class="pill" id="sStep"></span>
+    </div>
+    <div class="caption" id="sCap" style="margin-top:8px"></div>
+    <div id="sModeNote"></div>
+  </div>
+  <div class="cols2">
+    <div class="panel">
+      <h2 id="sInfoT">Click any labeled part</h2>
+      <div id="sInfo" class="muted">The labels in the drawing are clickable.</div>
+    </div>
+    <div class="panel">
+      <h2>Exit and diverter, side view (to scale)</h2>
+      <svg id="sideSvg" viewBox="0 0 520 230" aria-label="Side view of exit"></svg>
+      <div class="tiny">Board top 120–130 mm above the table. Then the chute's rounded back edge sits below the carrier floor and its outlet (about 53 mm high) clears 35 mm bins. The slope stays 30° in every direction because the chute turns about a vertical axis.</div>
+    </div>
+  </div>
+</section>
+
+<!-- =============================== TEST =============================== -->
+<section id="test" class="view">
+  <div class="panel">
+    <h2>Bench test protocol</h2>
+    <p class="muted" style="margin:0">Run the phases in order. Do not start a phase until every test in the previous phase is PASS. Results are saved in this browser only (local storage) until you export them. Nothing here is pre-filled; NOT RUN is the default.</p>
+    <div class="actions">
+      <input type="text" id="tOperator" placeholder="operator ID" style="width:160px"/>
+      <input type="text" id="tBoard" placeholder="ESP32 board model" style="width:200px"/>
+      <input type="text" id="tVersions" placeholder="esp32 core / ESP32Servo versions" style="width:240px"/>
+      <button class="primary" id="tExport">Export CSV</button>
+      <button class="ghost" id="tPrint">Print</button>
+      <button class="ghost" id="tClear">Clear all results</button>
+    </div>
+    <div class="sum" id="tSum" style="margin-top:10px"></div>
+  </div>
+  <div id="tPhases"></div>
+</section>
+
+<section id="print" class="view">
+  <div class="panel">
+    <h2>What to print, and on which printer</h2>
+    <p class="muted" style="margin:0">Specimens on the <b>Formlabs</b> printer (resin, more accurate): one file with all 11 parts. Sorter on the <b>Bambu Lab</b> printer (PLA): swivel chute, hub, and servo tower. Track, carrier, and bins can stay cardboard, wood, or boxes.</p>
+  </div>
+  <div class="cols2">
+    <div class="panel">
+      <h2>Formlabs: all specimens in one print</h2>
+      <p style="margin-top:0">File: <code>examples/cad/formlabs/qualityrelay_specimen_plate.stl</code>. It holds the 9 required specimens plus spares S-RISK-2 and T-RISK-2: 11 separate solids, 106 × 54 × 60 mm, so it fits every Formlabs platform (the smallest are 145 × 145 mm on Form 2/3/3+ and 200 × 125 mm on Form 4).</p>
+      <img src="../examples/cad/formlabs/plate_map.svg" alt="Top view of the plate with each specimen's label" style="width:100%;background:#fff;border-radius:8px"/>
+      <p class="tiny">Print this map (<code>examples/cad/formlabs/plate_map.svg</code>) and keep it next to the printer. The slots and tabs look almost identical once printed.</p>
+      <ol>
+        <li>Open the file in PreForm (it accepts STL, OBJ, 3MF, and FORM). Units: millimetres.</li>
+        <li>Optional: right-click the model and choose <b>Separate Bodies</b> (PreForm 3.60 or newer) to get 11 separate models. If PreForm reports broken models, let it repair them; every solid in the file is closed.</li>
+        <li><b>Do not use auto-orient.</b> Every part already stands on its end, so PreForm puts supports only on the bottom end faces. Supports on a long side face or inside a slot would change exactly the width you measure.</li>
+        <li>Generate supports with the default settings. Check that no touchpoint lands on a long side face or inside a slot.</li>
+        <li>Resin: Grey or White standard resin, 0.1 mm layers. Avoid Clear (hard for the camera) and Black (no contrast on the dark pad).</li>
+        <li>After printing: wash, dry, and post-cure with the settings for your resin. Wear nitrile gloves; uncured resin irritates skin.</li>
+        <li><b>Before</b> cutting parts off the supports, write each label on its part with a permanent marker, using the map.</li>
+        <li>Remove the supports and sand only the end faces. Never sand the long faces or inside the slots. Measure after post-curing, at room temperature.</li>
+      </ol>
+      <div class="note">More in one go: the plate uses a fraction of the platform. In PreForm you can duplicate it for a second set; PreForm shows whether it fits. On a Form 4 the extra parts add little print time; on a Form 3/3+ they add some.</div>
+      <div class="note">Resin parts are brittle: push the defect pairs together gently, by hand. Resin prints come out closer to CAD than FDM, so S-RISK + T-RISK (0.40 mm CAD clearance) may slide together easily. Record the fit you actually see.</div>
+    </div>
+    <div class="panel">
+      <h2>Bambu Lab: servo sorter (PLA)</h2>
+      <table><thead><tr><th>file (<code>examples/cad/sorter/</code>)</th><th>what it is</th><th>size, mm</th></tr></thead><tbody>
+        <tr><td><b>swivel_chute.stl</b></td><td>Sloped channel the specimen slides down. 76 mm inside (wider than the 68.6 mm specimen diagonal, so a turned part cannot jam), 15 mm walls, rounded inlet that catches the part at every chute angle, 9 mm hole for the horn screw.</td><td>125 × 79 × 17</td></tr>
+        <tr><td><b>chute_hub.stl</b></td><td>30° wedge glued under the chute at the hole. It turns the flat print into a 30° slope.</td><td>Ø 40 × 27</td></tr>
+        <tr><td><b>servo_tower.stl</b></td><td>Stands on the table and holds the SG90 shaft-up. Tabs rest on the end walls; windows let the cable out.</td><td>70 × 50 × 66</td></tr>
+      </tbody></table>
+      <h3>Print settings</h3>
+      <ul>
+        <li>PLA, 0.2 mm layers, 3 walls, 15–20% infill. Print in the orientation the files are in; no supports, no brim needed. All three fit on one plate, even on an A1 mini: drag them into Bambu Studio together and press Arrange.</li>
+        <li>Chute: the floor's top surface is the sliding surface. Ironing (top surfaces) makes it smoother; optional.</li>
+        <li>Bambu Studio may show the chute and tower as several overlapping solids; it merges them when slicing.</li>
+      </ul>
+      <h3>Assemble</h3>
+      <ol>
+        <li>Glue the hub under the chute floor with CA glue (superglue) or hot glue: holes lined up (push a pencil or 6 mm rod through both), thick side of the hub towards the rounded inlet. Stand it on the hub on a table: the walls must be level side to side and the floor must slope down to the open end.</li>
+        <li>Glue the SG90's two-arm horn flat on the hub's bottom face, centre hole over the hole, arms along the chute.</li>
+        <li>Put the servo in the tower from the top, shaft towards the front (the bins), long end towards the board. Drive the two tab screws from the servo bag into the end-wall tops (or hot-glue the tabs).</li>
+        <li>Stand the tower on the table with the servo shaft <b>45 mm in front of the board's end face</b>, on the track centre line. Tape or hot-glue the base down.</li>
+        <li>Wire the servo (tab 1). Boot the ESP32: the sketch moves the servo to 90° (HOLD). Switch servo power off.</li>
+        <li>Press the horn (with hub and chute) onto the servo shaft with the chute pointing straight along the track. Drive the horn screw through the holes.</li>
+        <li>Board top must be 120–130 mm above the table (books or blocks). At HOLD, the chute's rounded back edge must sit at least 4 mm below the carrier floor.</li>
+        <li>Bins: three trays at most 35 mm high and at least 80 mm deep, near edge about 80 mm from the servo axis (just past the chute outlet), one in each chute direction.</li>
+        <li>Run phase M of the bench test.</li>
+      </ol>
+      <p class="tiny">Designed from published SG90 sizes; clones differ by a millimetre or two, which only changes how far the specimen drops into the chute. Not printed or tested yet. Change the numbers at the top of <code>examples/cad/generate_sorter_stl.py</code> and re-run it to adjust; it checks the clearances before writing files.</p>
+    </div>
+  </div>
+  <div class="cols2">
+    <div class="panel">
+      <h2>Specimens on the plate</h2>
+      <table><thead><tr><th>label</th><th>file</th><th>CAD width</th><th>used in</th></tr></thead><tbody>
+        <tr><td>S-GOOD</td><td>slot_good_21p20</td><td>21.20 mm slot</td><td>Run A</td></tr>
+        <tr><td>T-GOOD</td><td>tab_good_19p80</td><td>19.80 mm tab</td><td>Run A</td></tr>
+        <tr><td>S-RISK (+ spare S-RISK-2)</td><td>slot_risk_20p70</td><td>20.70 mm slot</td><td>Run B</td></tr>
+        <tr><td>T-RISK (+ spare T-RISK-2)</td><td>tab_risk_20p30</td><td>20.30 mm tab</td><td>Run B</td></tr>
+        <tr><td>T-NOM</td><td>tab_nominal_20p00</td><td>20.00 mm tab</td><td>Run C (add a disclosed sticker marker), mate for S-DEF</td></tr>
+        <tr><td>S-NOM</td><td>slot_nominal_21p00</td><td>21.00 mm slot</td><td>reference image, mate for T-DEF</td></tr>
+        <tr><td>RPT-20</td><td>repeatability_bar_20p00</td><td>20.00 mm bar</td><td>repeatability test R1</td></tr>
+        <tr class="hl"><td><b>S-DEF</b></td><td>slot_defect_19p40</td><td>19.40 mm slot, 1.60 mm undersize</td><td>Run D</td></tr>
+        <tr class="hl"><td><b>T-DEF</b></td><td>tab_defect_21p60</td><td>21.60 mm tab, 1.60 mm oversize</td><td>Run D</td></tr>
+      </tbody></table>
+      <p class="tiny">The plate uses clean single-body copies with the same dimensions as <code>examples/cad/stl/</code>. The original slot files are three touching boxes each, which resin slicers can report as broken models. The originals stay unchanged. Rebuild the plate with <code>python3 examples/cad/generate_specimen_stl.py plate</code>.</p>
+      <p class="tiny">Printing specimens on an FDM printer instead: PLA, flat on the bed as in <code>examples/cad/stl/</code>, 0.2 mm layers, no brim, no scaling, and measure at mid-height (the first layer prints wider).</p>
+    </div>
+    <div class="panel">
+      <h2>Which slot fits which tab (CAD clearance, mm)</h2>
+      <table><thead><tr><th>slot \ tab</th><th>T-GOOD 19.80</th><th>T-NOM 20.00</th><th>T-RISK 20.30</th><th>T-DEF 21.60</th></tr></thead><tbody>
+        <tr><td><b>S-GOOD 21.20</b></td><td class="res-PASS">+1.40</td><td class="res-PASS">+1.20</td><td class="res-PASS">+0.90</td><td class="res-FAIL">−0.40</td></tr>
+        <tr><td><b>S-NOM 21.00</b></td><td class="res-PASS">+1.20</td><td class="res-PASS">+1.00</td><td class="res-PASS">+0.70</td><td class="res-FAIL">−0.60</td></tr>
+        <tr><td><b>S-RISK 20.70</b></td><td class="res-PASS">+0.90</td><td class="res-PASS">+0.70</td><td style="color:var(--warn);font-weight:700">+0.40 tight</td><td class="res-FAIL">−0.90</td></tr>
+        <tr><td><b>S-DEF 19.40</b></td><td class="res-FAIL">−0.40</td><td class="res-FAIL">−0.60</td><td class="res-FAIL">−0.90</td><td class="res-FAIL">−2.20</td></tr>
+      </tbody></table>
+      <p class="tiny">Clearance = slot gap − tab width. Positive fits by design; negative is interference and cannot fit. Values measured from the STL triangles with <code>python3 examples/cad/generate_specimen_stl.py check</code>. Printed parts differ from CAD, so measure and fit-test them (bench test phase S).</p>
+      <h3>Run D: seeded defect pair</h3>
+      <ul>
+        <li>Use S-DEF with T-NOM (or S-NOM with T-DEF, or S-DEF with T-DEF).</li>
+        <li>The caliper reading is far outside nominal and the tab does not slide in: fit FAIL.</li>
+        <li>A person confirms the nonconformance, then you stage R and the part goes to REJECT. Without that confirmation, the route is HOLD.</li>
+        <li>Call them seeded defect specimens. They are designed undersize/oversize, not real manufacturing defects.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:12px">
+    <h2>Other fixtures (no CAD in the repository; make by hand)</h2>
+    <table><thead><tr><th>part</th><th>size</th><th>how</th></tr></thead><tbody>
+      <tr><td><b>Carrier</b></td><td>≈ 75 × 45 mm plate, 2–3 mm thick, 3–5 mm lip on 3 sides, front open, arrow on top</td><td>Foam board or thick card with glued strips</td></tr>
+      <tr><td><b>Track</b></td><td>Two rails 700–800 mm long, 10–20 mm high; clear width = carrier width + 2–3 mm</td><td>Straight wood strips or aluminium angle glued to the board</td></tr>
+      <tr><td><b>Caliper registration blocks</b></td><td>2 small L-blocks ≈ 20 × 20 × 10 mm</td><td>Wood offcuts or a tape outline</td></tr>
+      <tr><td><b>Webcam B arm clip</b></td><td>Holds the webcam on a wood strip</td><td>Zip ties, or the webcam's own clip</td></tr>
+      <tr><td><b>Stop pins (gravity version only)</b></td><td>3 pins ≈ 4 mm diameter × 40 mm</td><td>Bolts, nails, or wooden dowels</td></tr>
+    </tbody></table>
+  </div>
+</section>
+
+<!-- =============================== BOM =============================== -->
+<section id="bom" class="view">
+  <div class="panel"><h2>What to use, what to get, what to leave in the box</h2>
+    <p class="muted" style="margin:0">Based on what you have: two ESP32 boards, the ELEGOO kit with the Power MB V2, two Logitech webcams, a laptop, and a 3D printer. Optional items are skipped. You said you can find cables, so they are listed without models.</p></div>
+  <div id="bomGroups"></div>
+</section>
+</main>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent,text){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(text!==undefined)e.textContent=text;if(parent)parent.appendChild(e);return e;}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===b.dataset.view));});
+
+/* =====================================================================
+   1. BREADBOARD
+   ===================================================================== */
+const P=13, colX=c=>70+(c-1)*P;
+const ROWY={'T+':60,'T-':73,a:98,b:111,c:124,d:137,e:150,f:176,g:189,h:202,i:215,j:228,'B+':253,'B-':266};
+const hole=(r,c)=>[colX(c),ROWY[r]];
+const railHas=c=>c>=2&&c<=62&&((c-2)%6)!==5;
+const TOP_PINS=['VIN','GND','D13','D12','D14','D27','D26','D25','D33','D32','D35','D34','VN','VP','EN'];
+const BOT_PINS=['3V3','GND','D15','D2','D4','RX2','TX2','D5','D18','D19','D21','RX0','TX0','D22','D23'];
+const SERVO_SOCK={orange:[474,-14],red:[487,-14],brown:[500,-14]};
+const JACK={plus:[905,-34],minus:[945,-34]};
+let layout='A',power='module';
+const V=x=>typeof x==='function'?x():x;
+function wires(){
+  const B=layout==='B';
+  const esp=(pin)=>B?ESPB[pin]:hole('a',{GND:4,D13:5,D32:12}[pin]);
+  return [
+    ...(power==='usb'?[
+    {id:'W7',step:2,type:'USB lead wire',color:'#d93a3a',cname:'red',from:JACK.plus,to:hole('T+',52),fromT:'USB power lead, red wire (+5 V)',toT:'top + rail, column 52',why:'5 V servo supply into the + rail'},
+    {id:'W8',step:2,type:'USB lead wire',color:'#3b3b3b',cname:'black',from:JACK.minus,to:hole('T-',53),fromT:'USB power lead, black wire (GND)',toT:'top − rail, column 53',why:'Supply return into the − rail'}]:[]),
+    {id:'W1',step:4,type:B?'F–M':'M–M',color:'#3b3b3b',cname:'black',from:esp('GND'),to:hole('T-',36),fromT:B?'ESP32 GND pin (socket end)':'hole a4 (ESP32 GND)',toT:'top − rail, column 36',why:'Common ground: the only link between the ESP32 and the servo supply'},
+    {id:'W4',step:5,type:'M–M',color:'#8b5a2b',cname:'brown',from:SERVO_SOCK.brown,to:hole('T-',44),fromT:'servo plug brown/black socket',toT:'top − rail, column 44',why:'Servo ground'},
+    {id:'W3',step:6,type:'M–M',color:'#d93a3a',cname:'red',from:SERVO_SOCK.red,to:hole('T+',42),fromT:'servo plug red socket',toT:'top + rail, column 42',why:'Servo +5 V from the external supply only'},
+    {id:'W2',step:7,type:B?'M–F':'M–M',color:'#ff9d2e',cname:'orange',from:SERVO_SOCK.orange,to:esp('D13'),fromT:'servo plug orange/yellow socket',toT:B?'ESP32 D13 pin (socket end)':'hole a5 (ESP32 D13)',why:'PWM signal, SERVO_PIN = 13'},
+    {id:'W5',step:9,type:B?'F–M':'M–M',color:'#5ccc91',cname:'green',from:esp('D32'),to:hole('j',22),fromT:B?'ESP32 D32 pin (socket end)':'hole a12 (ESP32 D32)',toT:'hole j22 (button leg f22)',why:'Button input, CONFIRM_BUTTON_PIN = 32, INPUT_PULLUP'},
+    {id:'W6',step:10,type:'M–M',color:'#3b3b3b',cname:'black',from:hole('a',24),to:hole('T-',38),fromT:'hole a24 (button leg e24)',toT:'top − rail, column 38',why:'Button to ground: pressed = LOW'}
+  ];
+}
+const ESPB={GND:[189,352],D13:[213,352],D32:[381,352]}; // layout B: ESP32 lying below the breadboard, pins facing up
+const MOD_TEXT=`You have this module, so no 5 V adapter is needed. Press the <b>ELEGOO Power MB V2</b> onto the <b>right end</b> of the breadboard so its pins go into both pairs of power rails, with its <b>+</b> pins on the red lines and <b>−</b> pins on the blue lines. Put the jumper on the side that feeds the <b>top rails on 5V</b> and the other jumper on <b>OFF</b> (the bottom rails stay unused). Plug the kit's 9 V battery clip (barrel plug), or a 6.5–9 V DC adapter with a 5.5 × 2.1 mm centre-positive plug, into the module's barrel jack. Leave the module switched off and its USB socket empty.`;
+const MOD_WARN=`Never put the servo-side jumper on 3.3 V. The USB socket on the module is an output: do not connect it to the laptop. The module is rated 700 mA, below the 1 A the build guide asks for. That is enough for one SG90 turning a light card chute, not for a jammed or larger servo: if the servo stutters or the module gets hot, check the chute for binding, fit a fresh battery, or use the USB charger lead (toggle above).`;
+const USB_TEXT=`Use this only if the Power MB V2 has no battery or adapter. Power comes from a <b>USB phone charger</b> (label: Output 5 V, at least 1 A) through a USB lead with two loose ends: either a <b>USB-A breakout board</b> plugged into the charger, with F–M jumpers from its VBUS (+5 V) and GND pins, or an <b>old USB cable</b> with its USB-A plug kept and the other end cut off: red = +5 V, black = GND, trim and tape the green and white data wires, and crimp or solder a male pin on red and black (bare stranded wire does not hold in a breadboard). Red into the <b>top + rail</b> (column 52), black into the <b>top − rail</b> (column 53). Keep the charger unplugged until step 13.`;
+const USB_WARN=`Use a wall charger, not the laptop or the hub: servo current spikes can make the webcams drop out. A charger with only USB-C ports gives 0 V on a cut USB-C cable; use a USB-A port. Wire colours inside cut cables are not always standard: check polarity with the multimeter (bench test P1) before you connect the servo.`;
+const BSTEPS=[
+  {t:'Unplug everything',b:'USB cable out, servo power off (Power MB V2 switched off and battery unplugged, or USB charger out of the wall), servo flap/chute removed. Look along the top rail lines: if the red/blue line has a break in the middle, your rails are split. Then add a short M–M jumper across the break on both the + and − rails, or keep all rail connections on the right half (columns 36–62, as drawn).'},
+  {t:'Place the ESP32',b:'Layout A: press the ESP32 into the breadboard so its two pin rows sit in <b>row b</b> and <b>row i</b>, columns 3–17, USB end hanging over the left edge. Rows a and j stay free: hole a4 now connects to GND, a5 to D13, a12 to D32. Press evenly on both pin rows. If your ESP32 is too wide to leave row a free, use Layout B.',show:['esp']},
+  {t:()=>power==='usb'?'USB charger power lead (W7, W8)':'Servo power: ELEGOO Power MB V2',b:()=>power==='usb'?USB_TEXT:MOD_TEXT,show:()=>power==='usb'?['jack','W7','W8']:['module'],warn:()=>power==='usb'?USB_WARN:MOD_WARN},
+  {t:'Capacitor C1 (optional)',b:'Skip this step if you have no suitable capacitor; the sorter works without it. If you have one of 100 µF or more, rated 10 V or higher: long leg into the top + rail at column 47, short leg (the side with the stripe) into the top − rail at column 47. No jumper needed.',show:['cap'],warn:'Electrolytic capacitors are polarized. Stripe = −. Reversed, they can burst.'},
+  {t:'Common ground (W1)',b:'Black jumper from <b>a4</b> (ESP32 GND) to the <b>top − rail</b>, column 36. This is the only wire between the ESP32 and the servo supply side.',show:['W1']},
+  {t:'Servo ground (W4)',b:'Push the pin of a brown (or black) M–M jumper into the servo plug socket on the <b>brown/black</b> wire. Other end into the <b>top − rail</b>, column 44.',show:['servo','W4']},
+  {t:'Servo power (W3)',b:'Red M–M jumper from the servo plug <b>red</b> socket to the <b>top + rail</b>, column 42.',show:['W3'],warn:'The red servo wire must never go to the ESP32 3V3, VIN, 5V, or any GPIO pin.'},
+  {t:'Servo signal (W2)',b:'Orange M–M jumper from the servo plug <b>orange/yellow</b> socket to hole <b>a5</b> (ESP32 D13). Tape the servo plug to the table so the three jumpers do not pull out.',show:['W2']},
+  {t:'Button SW1',b:'Push a 4-leg 6 × 6 mm tactile button across the center gap: legs in <b>e22, e24, f22, f24</b>. We use the diagonal legs e24 and f22, which always switch together regardless of button orientation.',show:['btn']},
+  {t:'Button to GPIO32 (W5)',b:'Green M–M jumper from <b>a12</b> (ESP32 D32) to <b>j22</b> (same column as button leg f22, bottom half).',show:['W5']},
+  {t:'Button to ground (W6)',b:'Black M–M jumper from <b>a24</b> (same column as button leg e24, top half) to the <b>top − rail</b>, column 38.',show:['W6']},
+  {t:'Check with a multimeter (power off)',b:'Continuity (beep) mode:<br>1. Top − rail ↔ ESP32 GND pin: beep.<br>2. Top + rail ↔ top − rail: <b>no</b> beep (it may beep briefly while the capacitor charges, then stop).<br>3. Servo red socket ↔ ESP32 3V3 and VIN: <b>no</b> beep.<br>4. ESP32 D13 pin ↔ servo orange socket: beep.<br>5. ESP32 D32 pin ↔ top − rail: beep only while the button is held.',show:[]},
+  {t:'USB data cable',b:'ESP32 USB → powered USB hub (or laptop). Use a cable that carries data: a new serial port must appear (on macOS: <code>/dev/cu.usbserial-…</code> or <code>/dev/cu.SLAB_USBtoUART</code>). Charge-only cables show nothing.',show:['usb']},
+  {t:'Upload, then switch on servo power',b:'Upload <code>firmware/manual_sorter/esp32_manual_sorter.ino</code>, open Serial Monitor at 115200 baud, wait for "QualityRelay sorter ready.", then switch on servo power (Power MB V2 switch, or USB charger into the wall). The servo should go to 90° and hold. Now run phase F of the bench test with the chute still off.',show:[]}
+];
+let bStep=0,bAll=false;
+function drawBB(){
+  const s=$('#bbSvg');s.innerHTML='';
+  const vis=k=>bAll||BSTEPS.slice(0,bStep+1).some(x=>(V(x.show)||[]).includes(k));
+  const cur=k=>!bAll&&(V(BSTEPS[bStep].show)||[]).includes(k);
+  const grp=(k)=>{const g=el('g',{},s);if(!vis(k))g.setAttribute('class','dim');else if(cur(k))g.setAttribute('class','curEl');return g;};
+  // board
+  el('rect',{x:52,y:42,width:842,height:240,rx:6,class:'bb'},s);
+  el('rect',{x:52,y:160,width:842,height:8,fill:'#d6d0c2'},s);
+  for(const r of ['T+','T-','B+','B-']){const y=ROWY[r];const red=r.endsWith('+');
+    el('line',{x1:62,x2:884,y1:y+(r[0]==='T'?(red?-8:8):(red?-8:8)),y2:y+(red?-8:8),stroke:red?'#d93a3a':'#2f6fd6','stroke-width':1.4},s);
+    el('text',{x:58,y:y+3,class:'lbld','font-weight':700,fill:red?'#d93a3a':'#2f6fd6'},s,red?'+':'−');
+    for(let c=1;c<=63;c++)if(railHas(c))el('rect',{x:colX(c)-2.5,y:y-2.5,width:5,height:5,class:'holeRail'},s);}
+  for(const r of 'abcdefghij'){el('text',{x:58,y:ROWY[r]+3,class:'lbld'},s,r);el('text',{x:886,y:ROWY[r]+3,class:'lbld'},s,r);
+    for(let c=1;c<=63;c++)el('rect',{x:colX(c)-2.5,y:ROWY[r]-2.5,width:5,height:5,class:'hole'},s);}
+  for(let c=1;c<=63;c+=1)if(c===1||c%5===0){el('text',{x:colX(c),y:88,'text-anchor':'middle',class:'lbld'},s,c);el('text',{x:colX(c),y:244,'text-anchor':'middle',class:'lbld'},s,c);}
+  el('text',{x:888,y:63,class:'lbld',fill:'#d93a3a'},s,'top +');el('text',{x:888,y:76,class:'lbld',fill:'#2f6fd6'},s,'top −');
+  // ESP32
+  let g=grp('esp');
+  if(layout==='A'){
+    el('rect',{x:62,y:146,width:26,height:22,rx:2,fill:'#9aa3ad'},g);
+    el('rect',{x:84,y:104,width:206,height:118,rx:4,fill:'#1f2a44',stroke:'#0d1220'},g);
+    el('rect',{x:226,y:120,width:56,height:86,rx:2,fill:'#c8ccd2',stroke:'#888'},g);
+    el('text',{x:254,y:167,'text-anchor':'middle',class:'lbld',fill:'#333'},g,'ESP32-WROOM');
+    el('text',{x:150,y:168,'text-anchor':'middle',class:'lbl','font-size':12},g,'ESP32 DEVKIT');
+    for(let i=0;i<15;i++){const c=3+i;
+      el('rect',{x:colX(c)-3,y:ROWY.b-3,width:6,height:6,fill:'#d4af37'},g);el('rect',{x:colX(c)-3,y:ROWY.i-3,width:6,height:6,fill:'#d4af37'},g);
+      const hot=['GND','D13','D32'].includes(TOP_PINS[i]);
+      el('text',{x:colX(c)+3,y:ROWY.b+8,class:'lbls',transform:`rotate(90 ${colX(c)+3} ${ROWY.b+8})`,fill:hot?'#ffd79c':'#9aadc5','font-weight':hot?700:400},g,TOP_PINS[i]);
+      el('text',{x:colX(c)+3,y:ROWY.i-30,class:'lbls',transform:`rotate(90 ${colX(c)+3} ${ROWY.i-30})`},g,BOT_PINS[i]);}
+    el('text',{x:60,y:140,class:'lbls'},g,'USB');
+  }else{
+    el('rect',{x:140,y:340,width:300,height:60,rx:4,fill:'#1f2a44',stroke:'#0d1220'},g);
+    el('rect',{x:120,y:358,width:24,height:22,rx:2,fill:'#9aa3ad'},g);
+    el('rect',{x:380,y:346,width:56,height:48,rx:2,fill:'#c8ccd2'},g);
+    el('text',{x:270,y:378,'text-anchor':'middle',class:'lbl'},g,'ESP32 (off board, pins up)');
+    for(let i=0;i<15;i++){const x=165+i*24;el('rect',{x:x-3,y:349,width:6,height:6,fill:'#d4af37'},g);
+      const hot=['GND','D13','D32'].includes(TOP_PINS[i]);el('text',{x:x,y:336,'text-anchor':'middle',class:'lbls',fill:hot?'#ffd79c':'#9aadc5','font-weight':hot?700:400},g,TOP_PINS[i]);}
+  }
+  // servo power source
+  if(power==='usb'){
+    g=grp('jack');
+    el('rect',{x:930,y:-106,width:60,height:40,rx:6,fill:'#e6e6e6',stroke:'#888'},g);
+    el('rect',{x:944,y:-86,width:32,height:9,rx:1,fill:'#333'},g);
+    el('text',{x:960,y:-93,'text-anchor':'middle',class:'lbld'},g,'5 V ≥ 1 A');
+    el('path',{d:'M960,-77 C960,-58 925,-70 925,-58',stroke:'#555','stroke-width':4,fill:'none'},g);
+    el('rect',{x:893,y:-58,width:64,height:12,rx:3,fill:'#444'},g);
+    el('path',{d:'M905,-46 V-34',stroke:'#d93a3a','stroke-width':3},g);el('path',{d:'M945,-46 V-34',stroke:'#222','stroke-width':3},g);
+    el('text',{x:924,y:-96,'text-anchor':'end',class:'lbls'},g,'USB wall charger, 5 V, at least 1 A');
+    el('text',{x:924,y:-84,'text-anchor':'end',class:'lbls'},g,'lead: red = +5 V, black = GND');
+  }else{
+    g=grp('module');
+    const x0=colX(50)-7,x1=colX(63)+7,cx=(x0+x1)/2;
+    el('rect',{x:x0,y:38,width:x1-x0,height:248,rx:5,fill:'#1d5c2e',stroke:'#0f3a1c',opacity:.95},g);
+    for(const r of ['T+','T-','B+','B-'])for(const c of [59,60])el('rect',{x:colX(c)-3,y:ROWY[r]-3,width:6,height:6,fill:'#d4af37'},g);
+    const header=(y,capIdx,txt,col)=>{el('rect',{x:colX(52)-6,y,width:48,height:14,rx:2,fill:'#111'},g);
+      ['3.3','OFF','5V'].forEach((t,i)=>el('text',{x:colX(52)+1+i*16,y:y+(y<160?24:-4),'text-anchor':'middle',class:'lbls',fill:'#fff'},g,t));
+      el('rect',{x:colX(52)-6+capIdx*16,y:y-2,width:16,height:18,rx:2,fill:col},g);
+      el('text',{x:colX(52)-6,y:y<160?y+38:y+28,class:'lbls',fill:'#fff','font-weight':700},g,txt);};
+    header(88,2,'top: jumper on 5V','#efba71');
+    header(222,1,'bottom: jumper OFF','#9aadc5');
+    el('text',{x:cx,y:140,'text-anchor':'middle',class:'lbl','font-weight':700},g,'ELEGOO');
+    el('text',{x:cx,y:155,'text-anchor':'middle',class:'lbl'},g,'Power MB V2');
+    el('rect',{x:colX(52)-7,y:173,width:14,height:14,rx:2,fill:'#ddd',stroke:'#333'},g);el('text',{x:colX(52),y:200,'text-anchor':'middle',class:'lbls',fill:'#fff'},g,'switch');
+    el('circle',{cx:colX(56),cy:180,r:3.5,fill:'#5ccc91'},g);el('text',{x:colX(56),y:200,'text-anchor':'middle',class:'lbls',fill:'#fff'},g,'LED');
+    el('rect',{x:x1-6,y:124,width:24,height:28,rx:3,fill:'#111',stroke:'#777'},g);
+    el('rect',{x:x1-6,y:166,width:14,height:30,rx:1,fill:'#c8ccd2',stroke:'#777'},g);
+    el('text',{x:x1+12,y:184,class:'lbls'},g,'USB out:');el('text',{x:x1+12,y:195,class:'lbls'},g,'leave empty');
+    el('rect',{x:918,y:20,width:56,height:80,rx:5,fill:'#3b3b3b',stroke:'#888'},g);
+    el('rect',{x:930,y:12,width:12,height:8,fill:'#bbb'},g);el('rect',{x:950,y:12,width:12,height:8,fill:'#bbb'},g);
+    el('text',{x:946,y:64,'text-anchor':'middle',class:'lbl','font-weight':700},g,'9 V');
+    el('path',{d:`M936,12 C936,-10 ${x1+60},90 ${x1+18},134`,stroke:'#d93a3a','stroke-width':2.5,fill:'none'},g);
+    el('path',{d:`M956,12 C956,-16 ${x1+70},96 ${x1+18},140`,stroke:'#222','stroke-width':2.5,fill:'none'},g);
+    el('text',{x:946,y:114,'text-anchor':'middle',class:'lbls'},g,'battery clip →');
+    el('text',{x:946,y:125,'text-anchor':'middle',class:'lbls'},g,'barrel jack');
+    el('text',{x:946,y:-4,'text-anchor':'middle',class:'lbls'},g,'or 6.5–9 V adapter');
+  }
+  // capacitor
+  g=grp('cap');
+  el('line',{x1:colX(47),y1:ROWY['T+'],x2:colX(47)-4,y2:28,stroke:'#ccc','stroke-width':1.6},g);
+  el('line',{x1:colX(47),y1:ROWY['T-'],x2:colX(47)+4,y2:28,stroke:'#ccc','stroke-width':1.6},g);
+  el('rect',{x:colX(47)-10,y:-6,width:20,height:34,rx:4,fill:'#24324e',stroke:'#aab'},g);
+  el('rect',{x:colX(47)+3,y:-6,width:6,height:34,fill:'#cfd6e0'},g);
+  el('text',{x:colX(47)+14,y:12,class:'lbls'},g,'C1 optional (stripe = −)');
+  // servo
+  g=grp('servo');
+  el('rect',{x:400,y:-104,width:70,height:40,rx:4,fill:'#2d6cdf',stroke:'#9cc0ff'},g);
+  el('circle',{cx:418,cy:-84,r:8,fill:'#fff'},g);
+  el('text',{x:435,y:-80,class:'lbls',fill:'#fff'},g,'SG90');
+  el('path',{d:'M470,-84 C485,-84 487,-60 487,-24',stroke:'#8b5a2b','stroke-width':3,fill:'none'},g);
+  el('path',{d:'M470,-80 C480,-80 487,-60 487,-24',stroke:'#d93a3a','stroke-width':3,fill:'none',transform:'translate(0,0)'},g);
+  el('rect',{x:464,y:-24,width:46,height:18,rx:2,fill:'#222'},g);
+  for(const [k,[x,y]] of Object.entries(SERVO_SOCK)){el('circle',{cx:x,cy:y+3,r:3,fill:'#555'},g);}
+  el('path',{d:'M474,-24 v-6',stroke:'#ff9d2e','stroke-width':3},g);el('path',{d:'M487,-24 v-6',stroke:'#d93a3a','stroke-width':3},g);el('path',{d:'M500,-24 v-6',stroke:'#8b5a2b','stroke-width':3},g);
+  el('text',{x:516,y:-12,class:'lbls'},g,'servo plug: orange · red · brown');
+  // button
+  g=grp('btn');
+  el('rect',{x:colX(22)-8,y:ROWY.e-8,width:42,height:42,rx:3,fill:'#333',stroke:'#888'},g);
+  el('circle',{cx:colX(23),cy:(ROWY.e+ROWY.f)/2,r:11,fill:'#c42232',stroke:'#5a1d22','stroke-width':2},g);
+  for(const [r,c] of [['e',22],['e',24],['f',22],['f',24]])el('rect',{x:colX(c)-3,y:ROWY[r]-3,width:6,height:6,fill:'#bbb'},g);
+  el('text',{x:colX(25)+6,y:ROWY.e+10,class:'lbld'},g,'SW1 (e22 e24 f22 f24)');
+  // USB
+  g=grp('usb');
+  if(layout==='A')el('path',{d:'M62,157 C30,157 20,240 0,290',stroke:'#777','stroke-width':5,fill:'none'},g);
+  else el('path',{d:'M120,369 C60,369 40,380 0,395',stroke:'#777','stroke-width':5,fill:'none'},g);
+  el('text',{x:4,y:layout==='A'?306:410,class:'lbls'},g,'USB data cable → hub → laptop');
+  // wires
+  for(const w of wires()){
+    const g2=grp(w.id);
+    const [x1,y1]=w.from,[x2,y2]=w.to;
+    const mx=(x1+x2)/2, my=Math.min(y1,y2)-26-Math.abs(x2-x1)*0.08;
+    let d=`M${x1},${y1} Q${mx},${my} ${x2},${y2}`;
+    if(w.id==='W5'&&layout==='A')d=`M${x1},${y1} C300,60 330,262 ${x2},${y2}`;
+    if(w.id==='W5'&&layout==='B')d=`M${x1},${y1} C${x1+40},300 ${x2},300 ${x2},${y2}`;
+    if((w.id==='W1'||w.id==='W2')&&layout==='B')d=`M${x1},${y1} C${x1},300 ${x2},${y2+120} ${x2},${y2}`;
+    el('path',{d,stroke:'#0b1017','stroke-width':6.5,fill:'none','stroke-linecap':'round'},g2);
+    el('path',{d,stroke:w.color,'stroke-width':4,fill:'none','stroke-linecap':'round'},g2);
+    const endFemale=(i)=>w.type==='F–M'?i===0:w.type==='M–F'?i===1:false;
+    [[x1,y1],[x2,y2]].forEach((p,i)=>{if(endFemale(i))el('rect',{x:p[0]-5,y:p[1]-5,width:10,height:10,fill:'#111',stroke:'#ddd'},g2);else el('circle',{cx:p[0],cy:p[1],r:3.2,fill:'#e6e6e6',stroke:'#111'},g2);});
+    const tx=(x1+x2)/2, ty=w.id==='W5'?160:(my+Math.max(y1,y2))/2-6;
+    el('rect',{x:tx-15,y:ty-9,width:30,height:13,rx:3,fill:'#0b1017',opacity:.85},g2);
+    el('text',{x:tx,y:ty+1,'text-anchor':'middle',class:'lbls',fill:'#fff','font-weight':700},g2,w.id);
+  }
+  // side panel
+  const st=BSTEPS[bAll?BSTEPS.length-1:bStep];
+  $('#bTitle').textContent=bAll?'Finished board':`Step ${bStep} of ${BSTEPS.length-1} · ${V(st.t)}`;
+  $('#bBody').innerHTML=bAll?'All connections shown. Compare your board against this drawing hole by hole, then run the multimeter checks (step 11).':V(st.b)+(layout==='B'&&(V(st.show)||[]).some(k=>['W1','W2','W5','esp'].includes(k))?'<div class="note">Layout B: the ESP32 lies off the breadboard (on a foam pad, pins facing up, or in its own small breadboard). The jumpers to its pins have a <b>socket</b> end that slides onto the pin.</div>':'');
+  $('#bWarn').innerHTML=(!bAll&&V(st.warn))?`<div class="danger">${V(st.warn)}</div>`:'';
+  // table
+  const tb=$('#bTable tbody');tb.innerHTML='';
+  const ws=wires();
+  const extra=[{id:'C1',type:'(legs)',cname:'—',fromT:'+ (long leg): top + rail col 47',toT:'− (stripe): top − rail col 47',why:'Optional: smooths servo current spikes',step:3},
+               {id:'SW1',type:'(legs)',cname:'—',fromT:'legs e22, e24',toT:'legs f22, f24',why:'Human confirmation button',step:8},
+               {id:'USB',type:'USB data cable',cname:'—',fromT:'ESP32 USB',toT:'hub / laptop',why:'Power + serial for the ESP32',step:12}];
+  if(power==='module')extra.push({id:'PM',type:'(plugs into the rails)',cname:'—',fromT:'ELEGOO Power MB V2 pins',toT:'top and bottom rail pairs, right end',why:'5 V servo supply: top jumper 5V, bottom jumper OFF',step:2},
+    {id:'BAT',type:'battery clip, barrel plug',cname:'—',fromT:'9 V battery (or 6.5–9 V adapter)',toT:'Power MB V2 barrel jack',why:'Input to the power module',step:2});
+  for(const w of [...ws,...extra].sort((a,b)=>a.step-b.step)){
+    const tr=document.createElement('tr');tr.innerHTML=`<td><b>${w.id}</b></td><td>${esc(w.type)}</td><td>${esc(w.cname)}</td><td>${esc(w.fromT)}</td><td>${esc(w.toT)}</td><td>${esc(w.why)}</td>`;
+    if(!bAll&&w.step===bStep)tr.className='hl';tb.appendChild(tr);}
+  $('#bPrev').disabled=!bAll&&bStep===0;$('#bNext').disabled=!bAll&&bStep===BSTEPS.length-1;
+}
+$('#bPrev').onclick=()=>{if(bAll){bAll=false;bStep=BSTEPS.length-1;}else bStep=Math.max(0,bStep-1);drawBB();};
+$('#bNext').onclick=()=>{if(bAll){bAll=false;bStep=0;}else bStep=Math.min(BSTEPS.length-1,bStep+1);drawBB();};
+$('#bAll').onclick=()=>{bAll=true;drawBB();};
+document.querySelectorAll('#layoutSeg button').forEach(b=>b.onclick=()=>{layout=b.dataset.l;document.querySelectorAll('#layoutSeg button').forEach(x=>x.classList.toggle('on',x===b));drawBB();});
+document.querySelectorAll('#powerSeg button').forEach(b=>b.onclick=()=>{power=b.dataset.p;document.querySelectorAll('#powerSeg button').forEach(x=>x.classList.toggle('on',x===b));drawBB();});
+drawBB();
+
+/* =====================================================================
+   2. WHOLE BENCH, oblique 3D
+   ===================================================================== */
+const Pj=(x,y,z)=>[40+x*0.95+y*0.55, 600-y*0.42-z*0.95];
+const pts=a=>a.map(p=>Pj(...p).map(v=>v.toFixed(1)).join(',')).join(' ');
+function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=(n>>8)&255,b=n&255;r=Math.min(255,r*f|0);g=Math.min(255,g*f|0);b=Math.min(255,b*f|0);return `rgb(${r},${g},${b})`;}
+function poly(par,a,fill,extra){return el('polygon',Object.assign({points:pts(a),fill,stroke:'#0b1017','stroke-width':.6,'stroke-linejoin':'round'},extra||{}),par);}
+function box(par,x,y,z,dx,dy,dz,c,extra){
+  poly(par,[[x,y,z],[x+dx,y,z],[x+dx,y,z+dz],[x,y,z+dz]],shade(c,.8),extra);
+  poly(par,[[x+dx,y,z],[x+dx,y+dy,z],[x+dx,y+dy,z+dz],[x+dx,y,z+dz]],shade(c,.62),extra);
+  poly(par,[[x,y,z+dz],[x+dx,y,z+dz],[x+dx,y+dy,z+dz],[x,y+dy,z+dz]],shade(c,1.05),extra);
+}
+let mode='manual',outcome='PASS',sStep=0,anim=null;
+const TILT=0.14;
+const BOARD=125; // board top above the table; the printed sorter needs 120-130
+const zTop=x=>mode==='gravity'?BOARD+(800-x)*TILT:BOARD;
+const STX={load:80,caliper:250,vision:450,decision:600,diverter:762};
+const PIV=[845,125]; // servo axis 45 mm in front of the board end (x = 800)
+const CH={c:Math.cos(Math.PI/6),s:0.5,b:39.6,fwd:85,wall:15,drop:29}; // swivel_chute.stl in floor coordinates
+const ANG={PASS:35,HOLD:90,REJECT:145};
+let chuteAng=90, chuteTarget=90;
+let part={x:80,y:125,z:null,visible:true,inBin:null};
+const binCenter=b=>{const th=(90-ANG[b])*Math.PI/180;return [PIV[0]+125*Math.cos(th),PIV[1]+125*Math.sin(th)];};
+const CAPS={
+  manual:[
+    ['LOAD (80 mm)','Put the labeled specimen in the carrier, orientation arrow forward. Gate is at HOLD (chute straight).'],
+    ['CALIPER (250 mm)','Push the carrier to the caliper mark. Lift the specimen into the two registration blocks, measure 3 times, hold the caliper display toward Webcam A for one still, return the specimen in the same orientation.'],
+    ['VISION (450 mm)','Push to the vision mark on the dark pad. Hands off. Capture one still from Webcam B (overhead).'],
+    ['DECISION (600 mm)','Review the evidence on the laptop. Type P, H or R in the Serial Monitor. The ESP32 only stages it; nothing moves.'],
+    ['DIVERTER (762 mm, track end)','Push the carrier to the end stop. Press the red button within 15 s: the servo turns the swivel chute toward the chosen bin.'],
+    ['RELEASE','Tip the specimen off the open front of the carrier into the chute. It slides down into the bin. Write down the bin it actually landed in.'],
+    ['RESET','Send H and press the button: chute returns to center. Pull the empty carrier back to LOAD.']],
+  gravity:[
+    ['LOAD (top of slope)','Base tilted about 8° (start end raised ~110 mm more than the exit). Put the specimen in the carrier behind stop pin 1.'],
+    ['CALIPER','Pull stop pin 1: the carrier slides to stop pin 2 at the caliper. Measure 3 times, Webcam A still, return the specimen.'],
+    ['VISION','Pull stop pin 2: carrier slides to stop pin 3 on the vision pad. Webcam B still.'],
+    ['DECISION','Review and stage P/H/R. The carrier waits at pin 3.'],
+    ['DIVERTER','Pull pin 3: carrier slides to the end stop. Press the button: chute turns.'],
+    ['RELEASE','Tip the specimen into the chute; record the observed bin.'],
+    ['RESET','Send H + button. Carry the carrier back up to LOAD.']],
+  belt:[
+    ['LOAD','Comparison only. Place the part directly on the belt at the start.'],
+    ['CALIPER','A motor driver would run the belt until an IR presence sensor sees the part, then stop. The caliper step stays manual.'],
+    ['VISION','Belt advances to the second sensor and stops for Webcam B.'],
+    ['DECISION','Stage P/H/R as before.'],
+    ['DIVERTER','Belt advances to the end; button turns the chute.'],
+    ['RELEASE','The belt drops the part into the chute.'],
+    ['RESET','Needs states for run, stop, timeout, jam, e-stop, and safe restart. Not implemented in this repository.']]
+};
+const MODE_NOTE={
+  manual:'<div class="ok"><b>Recommended build.</b> The carrier is the transport: you push it from mark to mark. No motor, no driver. One ESP32 runs only the servo chute.</div>',
+  gravity:'<div class="note"><b>Alternative.</b> Same parts plus three removable stop pins (e.g. 4 mm dowels or long bolts through holes in the rails). Test friction first: PLA carriers can tilt, rotate, or stick. Start at 6–10° and adjust. The pins are pulled by hand, so no extra servo is needed.</div>',
+  belt:'<div class="danger"><b>Comparison only, not in this build.</b> Adds a geared DC motor, a motor driver (e.g. DRV8833) and its own supply, two rollers with shafts and bearings, belt and tensioner, an emergency stop switch, and presence sensors. Never connect the motor directly to an ESP32 pin. The repository has no conveyor firmware or software, and the approved scope excludes it.</div>'
+};
+const INFO3={
+  base:['Baseboard on blocks','≈ 800 × 250 mm plywood/MDF. Raise it so its top is 120–130 mm above the table (books or blocks, about 110 mm under a 12 mm board). The printed sorter is sized for that height. Gravity mode: make the blocks at the start end taller.'],
+  rails:['Rails','Two straight strips 10–20 mm high. Clear width between them = carrier width + 2–3 mm. Fix them only after the carrier slides end to end freely.'],
+  carrier:['Carrier','≈ 75 × 45 mm plate, 3–5 mm lip on three sides, front open, orientation arrow. The 60 × 33 × 6 mm coupon rides on it.'],
+  caliper:['Caliper station','Digital caliper on the operator side with two registration blocks for the specimen. Measure by hand; never motorize the caliper.'],
+  camA:['Webcam A on clamp','Small clamp or gooseneck about 100–150 mm above the caliper resting spot, aimed at the display. Tilt to avoid glare.'],
+  camB:['Webcam B overhead arm','Pole at the back, horizontal arm over the vision pad. Start with the lens ~200 mm above the pad and adjust until the specimen fills about a third of the frame. Lock focus and exposure if possible.'],
+  lights:['Two diffuse lights','Desk lamps with paper diffusers or LED panels, one each side of the vision pad, angled down. Keep them fixed between runs.'],
+  pad:['Vision pad','Dark matte sheet. Mark the carrier outline on it so every capture has the same pose.'],
+  breadboard:['Breadboard + ESP32 + button','Sits on the front-right corner of the base, within reach of the diverter stop. See tab 1 for every hole.'],
+  servo:['Servo tower and swivel chute','Printed on the Bambu. servo_tower.stl stands on the table with the SG90 shaft 45 mm in front of the board end, on the track centre line. swivel_chute.stl (76 mm inside, 15 mm walls, rounded inlet) is glued onto chute_hub.stl, which gives it a 30° slope; the servo horn is glued under the hub. Angles: PASS 35°, HOLD 90°, REJECT 145°.'],
+  bins:['Three bins','Trays or boxes at most 35 mm high and at least 80 mm deep, near edge about 80 mm from the servo axis, one in each chute direction: PASS on the left (back), HOLD straight ahead, REJECT on the right (front), seen looking along the track.'],
+  laptop:['Laptop','Runs the Arduino IDE Serial Monitor (today) and the dashboard. Place it so you can read it from the decision mark.'],
+  hub:['Powered USB hub','Three data ports: Webcam A, Webcam B, ESP32. Its own power adapter prevents webcams from dropping out.'],
+  psu:['Servo power: ELEGOO Power MB V2','The module sits on the right end of the breadboard and feeds only the servo rails (top jumper 5V, bottom jumper OFF). The 9 V battery, or a 6.5–9 V adapter, plugs into its barrel jack. Switch it on last.'],
+  belt:['Belt (comparison)','Flexible belt over two rollers.'],motor:['Motor + driver (comparison)','Geared DC motor on the drive roller, DRV8833 driver, separate motor supply.'],estop:['E-stop (comparison)','Latching stop switch that cuts motor power.'],
+  pins:['Stop pins (gravity)','Removable pins through the rails hold the carrier at each station. Pull one to let the carrier slide to the next.']
+};
+function drawSys(){
+  const s=$('#sysSvg');s.innerHTML='';
+  const L=[]; // labels
+  const lab=(k,x,y,z,dx,dy,text)=>L.push({k,p:Pj(x,y,z),dx,dy,text});
+  // table plane
+  poly(s,[[-20,-230,0],[1060,-230,0],[1060,330,0],[-20,330,0]],'#1a222e');
+  // blocks
+  const blk=(x,y)=>box(s,x,y,0,40,40,zTop(x+20)-12,'#6b5a43');
+  blk(10,200);blk(740,200);
+  // 5V adapter at back
+  box(s,880,290,0,40,30,25,'#2a2a2a');lab('psu',900,305,25,-20,-40,'9 V battery → Power MB V2');
+  // back pole camB
+  box(s,446,236,zTop(450),8,8,300,'#6c7686');
+  // lights (back)
+  for(const lx of [360,540]){box(s,lx-3,222,zTop(lx),6,6,150,'#6c7686');box(s,lx-14,205,zTop(lx)+150,28,26,12,'#ffe9a8');}
+  lab('lights',540,215,zTop(540)+162,40,-20,'diffuse lights');
+  // base (sloped prism)
+  const zb=x=>zTop(x)-12;
+  poly(s,[[0,0,zb(0)],[800,0,zb(800)],[800,0,zTop(800)],[0,0,zTop(0)]],shade('#8a6f4e',.8));
+  poly(s,[[800,0,zb(800)],[800,250,zb(800)],[800,250,zTop(800)],[800,0,zTop(800)]],shade('#8a6f4e',.62));
+  poly(s,[[0,0,zTop(0)],[800,0,zTop(800)],[800,250,zTop(800)],[0,250,zTop(0)]],'#9a7d58');
+  lab('base',120,0,zb(120),20,45,'baseboard 800 × 250 on blocks');
+  blk(10,10);blk(740,10);
+  // station marks
+  for(const [k,x] of Object.entries(STX)){const xx=k==='diverter'?800:x;poly(s,[[xx-1,95,zTop(xx)+.3],[xx+1,95,zTop(xx)+.3],[xx+1,155,zTop(xx)+.3],[xx-1,155,zTop(xx)+.3]],'#e9f0fb',{opacity:.6});
+    const p=Pj(xx,250,zTop(xx));el('text',{x:p[0],y:p[1]-6,'text-anchor':'middle',class:'lbls'},s,k.toUpperCase());}
+  // vision pad
+  poly(s,[[395,80,zTop(395)+.5],[505,80,zTop(505)+.5],[505,170,zTop(505)+.5],[395,170,zTop(395)+.5]],'#111');
+  lab('pad',505,170,zTop(505),40,-6,'dark pad');
+  // rails / belt
+  const rail=(y0)=>{const h=15;poly(s,[[30,y0,zTop(30)],[800,y0,zTop(800)],[800,y0,zTop(800)+h],[30,y0,zTop(30)+h]],shade('#b5a283',.8));
+    poly(s,[[30,y0,zTop(30)+h],[800,y0,zTop(800)+h],[800,y0+12,zTop(800)+h],[30,y0+12,zTop(30)+h]],'#cbb994');
+    poly(s,[[800,y0,zTop(800)],[800,y0+12,zTop(800)],[800,y0+12,zTop(800)+h],[800,y0,zTop(800)+h]],shade('#b5a283',.62));};
+  if(mode==='belt'){
+    poly(s,[[20,95,104],[800,95,104],[800,155,104],[20,155,104]],'#222');
+    box(s,10,92,92,14,66,14,'#888');box(s,792,92,92,14,66,14,'#888');
+    box(s,790,165,80,40,30,30,'#444');lab('motor',810,195,110,30,-30,'motor + DRV8833 + motor supply');
+    box(s,560,10,100,18,18,12,'#c42232');lab('estop',569,10,112,-40,30,'e-stop');
+    for(const sx of [250,450]){box(s,sx-4,160,100,8,10,14,'#2b3a4f');}
+    lab('belt',300,95,104,-30,60,'belt on rollers');
+  }
+  rail(149);
+  // carrier + part
+  const cx=part.x;
+  if(mode!=='belt'&&!(part.inBin&&sStep>=6&&false)){
+    const carX=Math.min(part.x,STX.diverter);
+    box(s,carX-37.5,102.5,zTop(carX)+1,75,45,4,'#c9d4e3');
+    lab('carrier',carX,102,zTop(carX)+5,-30,58,'carrier');
+  }
+  if(part.visible&&!part.inBin&&!part.onChute){const pz=part.z??(zTop(part.x)+5);box(s,part.x-30,108,pz,60,33,6,'#f4f4ef');}
+  rail(89);
+  if(mode==='gravity'){for(const px of [212,412,562,800-38]){box(s,px,84,zTop(px),5,5,40,'#d4af37');box(s,px,158,zTop(px),5,5,40,'#d4af37');}lab('pins',412,84,zTop(412)+40,-20,-30,'stop pins');}
+  // caliper station (front)
+  box(s,215,30,zTop(215),10,40,10,'#7b8794');box(s,285,30,zTop(285),10,40,10,'#7b8794');
+  box(s,190,8,zTop(190),150,14,5,'#b9c2cc');box(s,235,4,zTop(235),40,10,14,'#20262e');
+  lab('caliper',250,8,zTop(250)+12,-60,50,'caliper + fixture');
+  box(s,350,0,zTop(350),6,6,130,'#6c7686');box(s,322,-2,zTop(350)+118,32,20,18,'#2b3a4f');
+  lab('camA',336,0,zTop(350)+136,-70,-20,'Webcam A');
+  // camB arm + cam
+  box(s,446,118,zTop(450)+290,8,124,8,'#6c7686');box(s,436,112,zTop(450)+262,28,26,24,'#2b3a4f');
+  lab('camB',450,112,zTop(450)+286,-90,-24,'Webcam B (overhead)');
+  // breadboard + esp32 + button
+  box(s,630,12,zTop(630),130,50,8,'#ece8de');box(s,640,24,zTop(640)+8,52,24,5,'#1f2a44');box(s,728,32,zTop(728)+8,12,12,8,'#c42232');
+  lab('breadboard',700,12,zTop(700)+10,-20,50,'breadboard · ESP32 · button');
+  // exit: servo + chute + bins
+  const order=['PASS','HOLD','REJECT'];
+  for(const b of order){const [bx,by]=binCenter(b);const col=b==='PASS'?'#5ccc91':b==='HOLD'?'#efba71':'#ee8e97';
+    box(s,bx-42,by-42,0,84,84,35,col,{opacity:.85});const p=Pj(bx,by+42,35);el('text',{x:p[0],y:p[1]-4,'text-anchor':'middle',class:'lbl','font-weight':700},s,b);}
+  lab('bins',binCenter('REJECT')[0]+40,binCenter('REJECT')[1]-42,0,30,40,'bins on table');
+  const pz=zTop(800)-CH.drop; // chute floor height on the servo axis
+  box(s,PIV[0]-40.5,PIV[1]-25,0,70,50,4,'#8a94a6');               // servo_tower.stl base
+  box(s,PIV[0]-23.3,PIV[1]-9.5,4,35.6,19,pz-30.3-4,'#8a94a6');     // tower column, deck at 65.7 mm
+  box(s,PIV[0]-16.9,PIV[1]-6.1,pz-30.3,22.8,12.2,7,'#2d6cdf');     // SG90 above its tabs
+  box(s,PIV[0]-10,PIV[1]-10,pz-17.3,20,20,5,'#d0d0d0');            // chute_hub.stl (simplified)
+  // swivel chute: floor coordinates (x' along the chute, y' across) -> world
+  const th=(90-chuteAng)*Math.PI/180,dx=Math.cos(th),dy=Math.sin(th),nx=-dy,ny=dx;
+  const A=(xp,yp,dz)=>[PIV[0]+dx*xp*CH.c+nx*yp,PIV[1]+dy*xp*CH.c+ny*yp,pz-xp*CH.s+dz];
+  const floorPts=[];for(let k=0;k<=16;k++){const a=Math.PI/2+Math.PI*k/16;floorPts.push(A(CH.b*Math.cos(a),CH.b*Math.sin(a),0));}
+  floorPts.push(A(CH.fwd,-CH.b,0),A(CH.fwd,CH.b,0));
+  const wall=y=>poly(s,[A(0,y,CH.wall),A(CH.fwd,y,CH.wall),A(CH.fwd,y,0),A(0,y,0)],y>0?'#c4c4c4':'#d9d9d9');
+  wall(CH.b*Math.sign(dx||1));poly(s,floorPts,'#f0f0f0');wall(-CH.b*Math.sign(dx||1));
+  lab('servo',PIV[0]+12,PIV[1]-9.5,40,30,50,`servo tower + swivel chute (${chuteAng}°)`);
+  if(part.visible&&(part.inBin||part.onChute)){box(s,part.x-30,part.y,part.z,60,33,6,'#f4f4ef');}
+  // laptop + hub (front, on table)
+  box(s,500,-190,0,170,110,6,'#3a4250');poly(s,[[500,-80,6],[670,-80,6],[670,-60,110],[500,-60,110]],'#0f1620');
+  const sp=Pj(585,-70,70);el('text',{x:sp[0],y:sp[1],'text-anchor':'middle',fill:'#a0e8f5','font-size':12,'font-weight':700},s,['READY','CALIPER','VISION',outcome,'STAGED: '+outcome[0],'ROUTED?','HOLD'][sStep]);
+  lab('laptop',520,-190,6,-60,20,'laptop');
+  box(s,700,-150,0,60,25,12,'#2a2a2a');lab('hub',730,-150,12,30,30,'powered USB hub');
+  // cables (screen-space curves)
+  const cable=(a,b,color,lift)=>{const p=Pj(...a),q=Pj(...b);el('path',{d:`M${p[0]},${p[1]} C${p[0]},${p[1]-lift} ${q[0]},${q[1]+lift} ${q[0]},${q[1]}`,stroke:color,'stroke-width':2.2,fill:'none',opacity:.9},s);};
+  cable([700,-140,6],[670,-130,4],'#9aadc5',10);
+  cable([735,-140,12],[338,0,zTop(350)+125],'#77c7d7',140);
+  cable([745,-140,12],[450,240,zTop(450)+150],'#77c7d7',160);
+  cable([755,-140,12],[645,30,zTop(640)+10],'#efba71',40);
+  cable([880,300,10],[755,50,zTop(755)+8],'#ee8e97',30);
+  cable([700,40,zTop(700)+8],[PIV[0]-17,PIV[1]-6,pz-36],'#ff9d2e',20);
+  // labels last
+  for(const l of L){const [x,y]=l.p;const tx=x+l.dx,ty=y+l.dy;
+    el('line',{x1:x,y1:y,x2:tx,y2:ty,stroke:'#9aadc5','stroke-width':.8},s);
+    const g=el('g',{class:'clk'},s);const t=el('text',{x:tx+(l.dx<0?-3:3),y:ty+(l.dy<0?-3:11),'text-anchor':l.dx<0?'end':'start',class:'lbl'},g,l.text);
+    g.onclick=()=>{const i=INFO3[l.k];if(i){$('#sInfoT').textContent=i[0];$('#sInfo').textContent=i[1];}};}
+  // legend for cables
+  const lg=[['USB data','#77c7d7'],['ESP32 USB','#efba71'],['servo 5 V supply','#ee8e97'],['servo cable','#ff9d2e']];
+  lg.forEach(([t,c],i)=>{el('line',{x1:20,x2:44,y1:90+i*16,y2:90+i*16,stroke:c,'stroke-width':3},s);el('text',{x:50,y:94+i*16,class:'lbls'},s,t);});
+  // captions
+  const cap=CAPS[mode][sStep];$('#sCap').innerHTML=`<span class="pill">${esc(cap[0])}</span> ${esc(cap[1])}`;
+  $('#sStep').textContent=`Step ${sStep+1} of 7`;$('#sModeNote').innerHTML=MODE_NOTE[mode];
+  $('#sPrev').disabled=sStep===0||!!anim;$('#sNext').disabled=sStep===6||!!anim;
+}
+function tween(ms,f){return new Promise(res=>{const t0=performance.now();const tick=n=>{const k=Math.min(1,(n-t0)/ms);f(k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2,k);drawSys();if(k<1)requestAnimationFrame(tick);else res();};requestAnimationFrame(tick);});}
+async function goStep(n){
+  if(anim)return;anim=true;
+  const to={0:STX.load,1:STX.caliper,2:STX.vision,3:STX.decision,4:STX.diverter}[n];
+  if(n<=4&&to!==undefined&&part.visible&&!part.inBin){const from=part.x;await tween(Math.max(300,Math.abs(to-from)*3),k=>{part.x=from+(to-from)*k;part.z=null;});}
+  if(n===4){const a0=chuteAng,a1=ANG[outcome];await tween(500,k=>{chuteAng=Math.round(a0+(a1-a0)*k);});}
+  if(n===5){
+    const th=(90-chuteAng)*Math.PI/180,pz=zTop(800)-CH.drop;const x0=part.x,z0=zTop(part.x)+5;
+    const W=xp=>[PIV[0]+Math.cos(th)*xp*CH.c,PIV[1]+Math.sin(th)*xp*CH.c,pz-xp*CH.s];
+    const L0=W(-20); // lands on the rounded inlet, behind the axis
+    part.onChute=true;await tween(350,k=>{part.x=x0+(L0[0]-x0)*k;part.y=108+(L0[1]-16.5-108)*k;part.z=z0+(L0[2]+1-z0)*k;});
+    const [bx,by]=binCenter(outcome);
+    await tween(500,k=>{const p=W(-20+105*k);part.x=p[0];part.y=p[1]-16.5;part.z=p[2]+1;});
+    const z1=part.z,x1=part.x,y1=part.y;await tween(300,k=>{part.x=x1+(bx-x1)*k;part.y=y1+(by-16.5-y1)*k;part.z=z1+(3-z1)*k;});
+    part.onChute=false;part.inBin=outcome;
+  }
+  if(n===6){const a0=chuteAng;await tween(500,k=>{chuteAng=Math.round(a0+(90-a0)*k);});}
+  sStep=n;anim=null;drawSys();
+}
+function resetSys(){part={x:STX.load,y:125,z:null,visible:true,inBin:null};chuteAng=90;sStep=0;anim=null;drawSys();}
+$('#sNext').onclick=()=>goStep(sStep+1);
+$('#sPrev').onclick=()=>{if(sStep>=5){resetSys();return;}sStep=Math.max(0,sStep-1);part.x={0:STX.load,1:STX.caliper,2:STX.vision,3:STX.decision,4:STX.diverter}[sStep];part.z=null;if(sStep<4)chuteAng=90;drawSys();};
+$('#sReset').onclick=resetSys;
+document.querySelectorAll('#modeSeg button').forEach(b=>b.onclick=()=>{mode=b.dataset.m;document.querySelectorAll('#modeSeg button').forEach(x=>x.classList.toggle('on',x===b));resetSys();});
+document.querySelectorAll('#outSeg button').forEach(b=>b.onclick=()=>{if(anim)return;outcome=b.dataset.o;document.querySelectorAll('#outSeg button').forEach(x=>x.classList.toggle('on',x===b));if(sStep>=4)resetSys();else drawSys();});
+resetSys();
+
+/* side view: numbers from examples/cad/generate_sorter_stl.py */
+(function(){
+  const s=$('#sideSvg');const S=1.45,ox=6,oy=222;const X=x=>ox+x*S,Y=z=>oy-z*S;
+  const R=(x0,z0,x1,z1,fill,extra)=>el('rect',Object.assign({x:X(x0),y:Y(z1),width:(x1-x0)*S,height:(z1-z0)*S,fill},extra||{}),s);
+  const T=(x,z,t,extra)=>el('text',Object.assign({x:X(x),y:Y(z),class:'lbls'},extra||{}),s,t);
+  el('line',{x1:0,x2:520,y1:Y(0),y2:Y(0),stroke:'#9aadc5'},s);T(2,-9,'table');
+  const end=150,axis=end+45,c=Math.cos(Math.PI/6),sn=0.5,zf=96;
+  R(118,0,146,113,'#6b5a43');T(120,40,'books',{fill:'#fff'});
+  R(0,113,end,125,'#9a7d58');T(2,129,'board top 125 (120–130)');
+  R(75,125,end,127,'#c9d4e3');R(92,127,end,133,'#f4f4ef');T(70,139,'carrier + specimen');
+  R(axis-40.5,0,axis+29.5,4,'#8a94a6');R(axis-23.3,4,axis+12.3,65.7,'#8a94a6');T(axis-22,30,'servo tower',{fill:'#111'});
+  R(axis-16.9,65.7,axis+5.9,72.7,'#2d6cdf');R(axis-2.5,72.7,axis+2.5,78.7,'#e9f0fb');
+  const fu=zf-2.31,t30=Math.tan(Math.PI/6);
+  el('polygon',{points:[[axis-20,78.7],[axis+20,78.7],[axis+20,fu-20*t30],[axis-20,fu+20*t30]].map(([x,z])=>X(x)+','+Y(z)).join(' '),fill:'#d0d0d0'},s);
+  const back=[axis-39.6*c,zf+39.6*sn],out=[axis+85*c,zf-85*sn];
+  el('line',{x1:X(back[0]),y1:Y(back[1]),x2:X(out[0]),y2:Y(out[1]),stroke:'#f0f0f0','stroke-width':4},s);
+  el('line',{x1:X(axis),y1:Y(zf+15),x2:X(out[0]),y2:Y(out[1]+15),stroke:'#c4c4c4','stroke-width':2},s);
+  el('line',{x1:X(axis),y1:Y(40),x2:X(axis),y2:Y(138),stroke:'#77c7d7','stroke-dasharray':'3 3'},s);T(axis+3,134,'servo axis');
+  el('line',{x1:X(end),y1:Y(141),x2:X(axis),y2:Y(141),stroke:'#efba71'},s);
+  el('line',{x1:X(end),y1:Y(137),x2:X(end),y2:Y(145),stroke:'#efba71'},s);el('line',{x1:X(axis),y1:Y(137),x2:X(axis),y2:Y(145),stroke:'#efba71'},s);
+  T(end+12,144,'45 mm',{fill:'#efba71'});
+  el('line',{x1:X(back[0]),y1:Y(back[1]),x2:X(axis+12),y2:Y(121),stroke:'#9aadc5','stroke-width':.8},s);
+  T(axis+14,119,`back edge ${back[1].toFixed(1)} mm`);
+  T(axis+30,zf+2,'chute 30° down');
+  R(axis+78,0,axis+158,35,'#efba71',{opacity:.6});T(axis+80,16,'bin ≤ 35 mm high',{fill:'#111'});
+  T(out[0]+4,out[1]+4,`outlet ${out[1].toFixed(1)} mm`);
+  T(axis-23,86,'hub',{'text-anchor':'end'});
+})();
+
+/* =====================================================================
+   3. BENCH TEST
+   ===================================================================== */
+const TESTS=[
+ {ph:'A · Parts and mechanics (no electricity)',items:[
+  ['A1','','Lay out every part from tab 4. Check the ELEGOO Power MB V2 and its 9 V battery (or 6.5–9 V adapter), or the USB charger label (5 V, at least 1 A).','All parts present; servo power source ready','power source'],
+  ['A2','','Push the empty carrier from LOAD to the end and back 10 times.','No jam, rotation, or lift in 10/10 passes','passes OK /10'],
+  ['A3','','With a specimen on the carrier, stop at each mark 5 times. Measure how far the carrier edge is from the mark.','Within ±2 mm every time','max offset mm'],
+  ['A4','','Place each of the 3 live specimens on the carrier.','Sits flat, no rocking','']]},
+ {ph:'W · Wiring checks (power OFF, USB unplugged, multimeter in continuity mode)',items:[
+  ['W1','H5','Top − rail ↔ ESP32 GND pin.','Beep',''],
+  ['W2','H5','Top + rail ↔ top − rail.','No beep (a short beep that stops = capacitor charging, OK)',''],
+  ['W3','H5','Servo red socket ↔ ESP32 3V3 pin, and ↔ ESP32 VIN pin.','No beep on either',''],
+  ['W4','','ESP32 D13 pin ↔ servo orange socket.','Beep',''],
+  ['W5','','ESP32 D32 pin ↔ top − rail, button released / held.','Released: no beep. Held: beep',''],
+  ['W6','','Capacitor stripe side is in the − rail (visual). Skip if no capacitor is fitted.','Stripe on −, or no capacitor fitted','']]},
+ {ph:'P · Power checks (servo plug disconnected first)',items:[
+  ['P1','H5','Switch on servo power only (Power MB V2 switch, or charger into the wall). Multimeter DC volts: red probe on the top + rail, black on the top − rail. Then measure the bottom rails.','Top rails 4.75–5.25 V and positive; bottom rails 0 V. A negative reading means + and − are swapped: switch off and fix','measured V'],
+  ['P2','','Switch servo power off. Plug the ESP32 USB cable into the hub/laptop.','Board LED on; a new serial port appears','port name (do not commit)'],
+  ['P3','','Reconnect the servo plug. Switch servo power on.','No smoke, smell, or heat; servo may twitch once','']]},
+ {ph:'F · Firmware tests (chute/flap NOT attached)',items:[
+  ['F1','H4','Compile and upload esp32_manual_sorter.ino for your exact board.','Upload succeeds; record esp32 core and ESP32Servo versions','versions'],
+  ['F2','','Open Serial Monitor at 115200 baud, press EN/RESET.','"QualityRelay sorter ready." appears; horn at 90°',''],
+  ['F3','H6','Send P. Wait 5 s without pressing the button.','"Route staged: P…" and the servo does NOT move',''],
+  ['F4','H7','Press the button once.','"AUTHORIZED MOVE -> route P, angle 35"; moves once',''],
+  ['F5','H7','Send H, press and HOLD the button for 3 s.','Exactly one AUTHORIZED MOVE line; no repeat',''],
+  ['F6','','Press the button with nothing staged.','"No route staged; gate did not move."; no movement',''],
+  ['F7','H8','Send R, wait 16 s, then press the button.','"Staged route expired…" then "No route staged…"; no movement',''],
+  ['F8','','Repeat P/H/R + button 10 times in a row.','No ESP32 reboot (no ready banner), no stutter','moves OK /10']]},
+ {ph:'M · Diverter calibration (fit the chute with the servo at HOLD 90°, servo power off while fitting)',items:[
+  ['M1','H9','Stage P, H, R (button each time) with the chute fitted. Watch it turn and listen to the servo.','Never touches the board end, tower, or bins; at HOLD the rounded back edge is at least 4 mm below the carrier floor; no buzzing at rest','final angles P/H/R'],
+  ['M2','H9','Release a specimen from the end stop into each lane 10 times (30 drops).','Lands in the intended bin ≥ 29/30; no jams','hits /30'],
+  ['M3','','Leave the chute at PASS, then send H + button.','Chute returns to center (do this before every new specimen)','']]},
+ {ph:'C · Cameras',items:[
+  ['C1','H1','Open Webcam A and Webcam B at the same time for 5 minutes.','Both stay live, no disconnect','minutes stable'],
+  ['C2','H2','Capture the caliper display 3 times at the caliper station.','Digits readable in 3/3 images, no glare','file names'],
+  ['C3','H3','Capture the same specimen 5 times at the vision mark, re-seating the carrier each time.','Same scale and position in all 5 (overlay check)','file names'],
+  ['C4','','Capture reference images of the good tab and slot at the vision mark.','Saved and named as references','file names']]},
+ {ph:'R · Measurement repeatability',items:[
+  ['R1','','Measure RPT-20 ten times, re-seating each time.','Record max − min; use it as your uncertainty','spread mm'],
+  ['R2','','Measure S-GOOD and T-GOOD three times each.','Spread ≤ R1 spread + 0.02 mm','values']]},
+ {ph:'S · Printed specimens and fit (before the end-to-end runs)',items:[
+  ['S1','','Measure the critical width of all 9 printed specimens at mid-height, 3 readings each (slot: gap between the rails; tab and bar: width).','All readings recorded in the run log','values'],
+  ['S2','','Compare the S1 means of the defect parts with the other printed parts.','S-DEF gap is smaller than every printed tab; T-DEF is wider than every printed slot gap','smallest margin mm'],
+  ['S3','','Fit test S-GOOD + T-GOOD and S-NOM + T-NOM: slide the tab into the slot by hand.','Both slide fully to the base by hand without force',''],
+  ['S4','','Fit test S-DEF + T-NOM, S-NOM + T-DEF, and S-DEF + T-DEF. Push gently, by hand only.','None of the 3 slides fully in without force','depth reached mm']]},
+ {ph:'E · End-to-end runs (one log row each in manual_track_run_log.csv)',items:[
+  ['E1','H10','Run A (S-GOOD + T-GOOD) three times.','Complete evidence; human-authorized PASS; observed bin PASS 3/3','observed bins'],
+  ['E2','H10','Run B (S-RISK + T-RISK) three times.','Fit tight/INDETERMINATE → HOLD 3/3','observed bins'],
+  ['E3','H10','Run C (T-NOM-ANOM) three times.','REJECT only when a person confirms; otherwise HOLD','observed bins'],
+  ['E4','','Run D (S-DEF with T-NOM, or S-DEF + T-DEF) three times.','Width out of tolerance and fit FAIL; REJECT only after a person confirms, otherwise HOLD; observed bin REJECT 3/3','observed bins'],
+  ['E5','','Unplug Webcam B before the vision step.','Decision HOLD; recapture requested',''],
+  ['E6','','Stage PASS, then deliberately put the part into HOLD by hand.','Log shows requested ≠ observed (mismatch recorded)',''],
+  ['E7','H11','Arrival sensor.','Either correlated with the action, or recorded as disabled','enabled / disabled']]}
+];
+const KEY='qr_physical_bench_test_v2';
+let saved={};try{saved=JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){saved={};}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(saved));}catch(e){}renderSum();}
+function renderTests(){
+  const root=$('#tPhases');root.innerHTML='';
+  for(const ph of TESTS){
+    const p=document.createElement('div');p.className='panel';p.style.marginTop='12px';
+    p.innerHTML=`<h2>${esc(ph.ph)}</h2><table><thead><tr><th>ID</th><th>H#</th><th>procedure</th><th>pass criterion</th><th>result</th><th>measured</th><th>notes</th></tr></thead><tbody></tbody></table>`;
+    const tb=p.querySelector('tbody');
+    for(const [id,h,proc,crit,meas] of ph.items){
+      const r=saved[id]||{};const tr=document.createElement('tr');
+      tr.innerHTML=`<td><b>${id}</b></td><td>${h}</td><td>${esc(proc)}</td><td>${esc(crit)}</td>
+        <td><select data-id="${id}" data-f="res"><option>NOT RUN</option><option>PASS</option><option>FAIL</option></select></td>
+        <td><input type="text" data-id="${id}" data-f="val" placeholder="${esc(meas)}"/></td>
+        <td><input type="text" data-id="${id}" data-f="note"/></td>`;
+      const sel=tr.querySelector('select');sel.value=r.res||'NOT RUN';sel.className='res-'+sel.value;
+      tr.querySelector('[data-f=val]').value=r.val||'';tr.querySelector('[data-f=note]').value=r.note||'';
+      tb.appendChild(tr);
+    }
+    root.appendChild(p);
+  }
+  root.querySelectorAll('[data-id]').forEach(i=>i.addEventListener('input',()=>{const id=i.dataset.id;saved[id]=saved[id]||{};saved[id][i.dataset.f]=i.value;if(i.tagName==='SELECT'){saved[id].at=new Date().toISOString();i.className='res-'+i.value;}save();}));
+  for(const k of ['tOperator','tBoard','tVersions']){const i=document.getElementById(k);i.value=(saved._meta||{})[k]||'';i.oninput=()=>{saved._meta=saved._meta||{};saved._meta[k]=i.value;save();};}
+  renderSum();
+}
+function renderSum(){
+  let n=0,pass=0,fail=0;for(const ph of TESTS)for(const it of ph.items){n++;const r=(saved[it[0]]||{}).res;if(r==='PASS')pass++;else if(r==='FAIL')fail++;}
+  $('#tSum').innerHTML=`<span>Total <b>${n}</b></span><span class="res-PASS">PASS ${pass}</span><span class="res-FAIL">FAIL ${fail}</span><span class="muted">NOT RUN ${n-pass-fail}</span>`+(fail?'<span class="res-FAIL">Fix every FAIL before moving to the next phase.</span>':'');
+}
+$('#tExport').onclick=()=>{
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';const m=saved._meta||{};
+  const rows=[['test_id','hardware_check','phase','procedure','pass_criterion','result','measured','notes','result_set_at','operator','board','versions'].join(',')];
+  for(const ph of TESTS)for(const [id,h,proc,crit] of ph.items){const r=saved[id]||{};rows.push([id,h,ph.ph,proc,crit,r.res||'NOT RUN',r.val||'',r.note||'',r.at||'',m.tOperator||'',m.tBoard||'',m.tVersions||''].map(q).join(','));}
+  const blob=new Blob([rows.join('\n')+'\n'],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='qualityrelay_bench_test_'+new Date().toISOString().slice(0,10)+'.csv';a.click();URL.revokeObjectURL(a.href);
+};
+$('#tPrint').onclick=()=>window.print();
+$('#tClear').onclick=()=>{if(confirm('Clear all recorded results in this browser?')){saved={};save();renderTests();}};
+renderTests();
+
+/* =====================================================================
+   4. BOM
+   ===================================================================== */
+const BOMG=[
+ {t:'You already have these: use them',col:'var(--good)',rows:[
+  ['ESP32 dev board','1 of your 2','Controls only the servo.'],
+  ['Breadboard, 830 holes','1','ELEGOO kit.'],
+  ['Male–male jumpers','6','W1–W6 in Layout A. Layout B: 3 male–male + 3 male–female.'],
+  ['SG90 servo with horns and screws','1','ELEGOO kit.'],
+  ['Tactile pushbutton','1','ELEGOO kit: the physical confirmation button.'],
+  ['ELEGOO Power MB V2 + 9 V battery clip with barrel plug','1','Servo power instead of a 5 V adapter. A 6.5–9 V DC adapter (5.5 × 2.1 mm, centre +) can replace the battery.'],
+  ['Logitech webcams','2','Webcam A at the caliper display, Webcam B at the vision station.'],
+  ['Laptop; Formlabs printer; Bambu Lab printer','1 each','Formlabs for the specimens, Bambu Lab for the sorter parts.']]},
+ {t:'Get or borrow',col:'var(--warn)',rows:[
+  ['Digital caliper','1','Required: the measurement station depends on it.'],
+  ['Grey or White Formlabs resin','≈ 75 mL + supports','For the 11-part specimen plate (part volume 73 mL; PreForm shows the total).'],
+  ['PLA','< 100 g','For the chute, hub, and servo tower (my estimate).'],
+  ['CA glue (superglue) or hot glue','—','Hub onto the chute, horn onto the hub.'],
+  ['Fresh 9 V battery','1','If the kit battery is old or used.'],
+  ['Multimeter','1','Borrow one: polarity, voltage and short checks before power-up (bench test W and P).'],
+  ['Cables you said you can find','—','ESP32 USB data cable; adapters or a hub for 3 devices (2 webcams + ESP32).']]},
+ {t:'Make from household material',col:'var(--accent)',rows:[
+  ['Baseboard ≈ 800 × 250 mm','1','Plywood, MDF, foam board, or stiff cardboard.'],
+  ['Two straight rails','2','Wood strips or folded cardboard, 10–20 mm high.'],
+  ['Books or blocks','4 stacks','Board top 120–130 mm above the table (about 110 mm under a 12 mm board).'],
+  ['Bins: at most 35 mm high, at least 80 mm deep','3','Trays or box lids: PASS, HOLD, REJECT.'],
+  ['Dark matte sheet','1','Black paper or felt under Webcam B.'],
+  ['Desk lamp','1–2','Fixed position at the vision station.'],
+  ['Tape, hot glue, zip ties','—','Rails, camera mounts, servo plug.']]},
+ {t:'Skipped (optional)',col:'var(--muted)',rows:[
+  ['Capacitor 470–1000 µF','—','Use one if the kit has 100 µF or more; the build works without it.'],
+  ['USB charger power lead','—','Only if you have no battery or adapter for the Power MB V2.'],
+  ['Powered USB hub','—','Only if a webcam drops out (bench test C1).'],
+  ['Dedicated lights and camera stands','—','Improvise with lamps, clamps, books, and tape.'],
+  ['Arrival sensor (LDR + 4N35)','—','Optional later phase; its action_id correlation is not implemented yet.']]},
+ {t:'Not used in this demo (leave in the box)',col:'var(--bad)',rows:[
+  ['Second ESP32','—','Reserved for the optional arrival sensor later.'],
+  ['Camera module','—','The two Logitech webcams cover both stations.'],
+  ['Raspberry Pi 5 + Hailo AI HAT+','—','No Pi capture code or Hailo model exists in the current code, and Hailo inference must not be claimed without real weights and run evidence.'],
+  ['Arduino','—','The ESP32 runs the servo firmware.'],
+  ['Bluetooth serial module','—','Route commands stay on the USB cable; no wireless actuator path.'],
+  ['QAPASS LCD screen','—','The laptop shows the route. A display on the device would be a later firmware change.'],
+  ['Gas, raindrop, flame, sound, and touch sensors; reed switch','—','Not related to dimensional or visual inspection.'],
+  ['Potentiometer','—','Belongs to the old placeholder ADC path, not the manual caliper.'],
+  ['DC motor, motor driver, belt','—','No powered conveyor in this scope.']]}
+];
+$('#bomGroups').innerHTML=BOMG.map(g=>`<div class="panel" style="margin-top:12px;border-left:4px solid ${g.col}"><h2>${esc(g.t)}</h2><table><thead><tr><th>item</th><th>qty</th><th>notes</th></tr></thead><tbody>${g.rows.map(r=>`<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td></tr>`).join('')}</tbody></table></div>`).join('');
+</script>
+</body>
+</html>

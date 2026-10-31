@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>QualityRelay manual-track demo — virtual line, wiring and run guide</title>
+<style>
+:root{--bg:#0b1017;--panel:#151d29;--panel2:#1b2635;--muted:#9aadc5;--line:#344154;--ink:#e9f0fb;--accent:#77c7d7;--good:#5ccc91;--warn:#efba71;--bad:#ee8e97;--wood:#3a3024}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+h1{font-size:19px;margin:0}
+h2{font-size:16px;margin:0 0 8px}
+h3{font-size:14px;margin:12px 0 4px;color:var(--accent)}
+.badge{font-size:11px;font-weight:700;letter-spacing:.5px;padding:5px 10px;border-radius:9px;background:#3a2b1b;color:#ffd79c}
+main{max-width:1320px;margin:auto;padding:14px 18px 40px}
+.tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.tabs button{border:1px solid var(--line);background:#121925;color:var(--muted);border-radius:9px;padding:8px 13px;font:inherit;cursor:pointer}
+.tabs button.active{border-color:var(--accent);color:var(--accent);background:#15313b}
+.view{display:none}.view.active{display:block}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.cols{display:grid;grid-template-columns:1.25fr 1fr;gap:12px;margin-top:12px}
+.cols3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:980px){.cols,.cols3{grid-template-columns:1fr}}
+svg{width:100%;height:auto;display:block}
+.tiny{font-size:12px;color:var(--muted)}
+.muted{color:var(--muted)}
+button.primary{background:var(--accent);color:#07151e;border:0;padding:9px 15px;border-radius:9px;font-weight:800;cursor:pointer;font:inherit;font-weight:800}
+button.primary:disabled,button.ghost:disabled{opacity:.4;cursor:not-allowed}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 13px;border-radius:9px;cursor:pointer;font:inherit}
+button.warnb{border-color:var(--warn);color:var(--warn)}
+button.badb{border-color:var(--bad);color:var(--bad)}
+select,input[type=text]{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:7px 9px;font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.chip{font-size:11px;padding:4px 7px;border-radius:7px;background:#1d2838;color:var(--muted);border:1px solid var(--line)}
+.chip.done{color:var(--good);border-color:#2c5a43}
+.chip.now{color:#07151e;background:var(--accent);border-color:var(--accent);font-weight:700}
+.chip.flag-hold{color:#1b1206;background:var(--warn);font-weight:700}
+.chip.flag-fault{color:#200608;background:var(--bad);font-weight:700}
+.step{border-left:3px solid var(--accent);padding:4px 0 4px 12px}
+.step ul{margin:4px 0 4px 18px;padding:0}
+.step li{margin:2px 0}
+.tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.4px;padding:2px 6px;border-radius:5px;margin-right:4px;vertical-align:1px}
+.t-hands{background:#203a2d;color:#9ef0c2}.t-today{background:#3a2f1b;color:#ffd79c}.t-plan{background:#1b2f3a;color:#a0e8f5}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.reason{color:var(--warn)}
+.decision{font-size:22px;font-weight:800}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+tr.hl td{background:#15313b}
+.console{background:#05080c;border:1px solid var(--line);border-radius:9px;height:190px;overflow:auto;padding:8px;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap}
+.console .tx{color:#a0e8f5}.console .sys{color:#7d8ba0}
+.fwrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+.bigbtn{width:96px;height:96px;border-radius:50%;border:6px solid #5a1d22;background:radial-gradient(circle at 40% 35%,#ff7b86,#c42232);color:#fff;font-weight:800;font-size:11px;cursor:pointer;user-select:none;touch-action:none}
+.bigbtn.down{transform:scale(.94);background:radial-gradient(circle at 40% 35%,#d4505b,#8e1723)}
+.meter{height:8px;background:#263448;border-radius:5px;overflow:hidden;width:100%}
+.meter>span{display:block;height:100%;background:var(--warn);width:0}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;font-size:12.5px}
+.kv b{color:var(--muted);font-weight:600}
+.note{padding:9px 11px;border-radius:9px;background:#332b21;color:#ffdda7;font-size:12.5px;margin-top:8px}
+.danger{padding:9px 11px;border-radius:9px;background:#3a1b20;color:#ffc2c8;font-size:12.5px;margin-top:8px}
+ol.wsteps{margin:0;padding-left:20px}
+ol.wsteps li{padding:5px 6px;border-radius:7px;cursor:pointer}
+ol.wsteps li.cur{background:#15313b;outline:1px solid var(--accent)}
+ol.wsteps li.past{color:var(--muted)}
+/* SVG styling */
+.board{fill:var(--wood);stroke:#6b5a43}
+.rail{fill:#8c7a62;stroke:#b5a283}
+.pad{fill:#0d0d0f;stroke:#333}
+.stationLine{stroke:#e9f0fb;stroke-dasharray:3 3;opacity:.55}
+.lbl{fill:var(--ink);font-size:11px}
+.lbls{fill:var(--muted);font-size:9px}
+.comp{cursor:pointer}
+.comp:hover>*{filter:brightness(1.3)}
+.fov{fill:#77c7d7;opacity:.13;stroke:#77c7d7;stroke-dasharray:3 2}
+.carrier{fill:#c9d4e3;stroke:#7d8ba0}
+.spec{fill:#f4f4ef;stroke:#9aa}
+.bin{stroke-width:2;fill-opacity:.18}
+.wire{fill:none;stroke-width:4;stroke-linecap:round;stroke-linejoin:round}
+.wire.cur{stroke-width:6;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.hiddenStep{opacity:.07}
+.part{fill:#1b2635;stroke:#9aadc5}
+.pin{fill:#e9f0fb;font-size:10px}
+.forbid{stroke:#ee8e97;stroke-width:3;stroke-dasharray:6 5;fill:none}
+</style>
+</head>
+<body>
+<header>
+  <h1>QualityRelay manual-track demo · virtual line, wiring, and step-by-step run</h1>
+  <a href="physical_build_guide.html" style="color:#9cdeeb">Physical build →</a> <a href="tabletop_demo.html" style="color:#9cdeeb">Tabletop demo →</a> <span class="badge">VIRTUAL SIMULATION · no hardware connected · produces no evidence</span>
+</header>
+<main>
+<div class="tabs" role="tablist">
+  <button class="active" data-view="run">1 · Virtual line &amp; guided run</button>
+  <button data-view="wiring">2 · Wiring, step by step</button>
+  <button data-view="about">3 · What is real today</button>
+</div>
+
+<!-- ============================ RUN ============================ -->
+<section id="run" class="view active">
+  <div class="panel">
+    <svg id="lineSvg" viewBox="-30 -62 1050 345" aria-label="Top view of the manual track">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#9aadc5"/></marker>
+      </defs>
+      <text x="0" y="-48" class="lbl">Baseboard ≈ 800 × 250 mm, top view. Operator stands at the bottom edge and pushes the carrier left → right. Click any part for details.</text>
+      <rect x="0" y="0" width="800" height="250" rx="6" class="board"/>
+      <g id="ticks"></g>
+      <!-- vision pad -->
+      <g class="comp" data-info="pad"><rect x="395" y="80" width="110" height="90" class="pad"/></g>
+      <!-- rails -->
+      <g class="comp" data-info="rails">
+        <rect x="30" y="89" width="770" height="12" class="rail"/>
+        <rect x="30" y="149" width="770" height="12" class="rail"/>
+      </g>
+      <g id="stations"></g>
+      <!-- caliper station -->
+      <g class="comp" data-info="caliper">
+        <rect x="185" y="186" width="130" height="9" rx="2" fill="#b9c2cc"/>
+        <rect x="185" y="176" width="7" height="22" fill="#b9c2cc"/>
+        <rect x="226" y="198" width="48" height="24" rx="3" fill="#20262e" stroke="#9aadc5"/>
+        <text id="calDisp" x="250" y="215" text-anchor="middle" fill="#9ef0c2" font-size="12" font-family="monospace">--.--</text>
+        <text x="250" y="240" text-anchor="middle" class="lbls">digital caliper (manual)</text>
+      </g>
+      <g class="comp" data-info="camA">
+        <polygon points="334,232 226,198 274,198" class="fov"/>
+        <rect x="324" y="224" width="22" height="16" rx="4" fill="#2b3a4f" stroke="#77c7d7"/>
+        <circle cx="335" cy="232" r="4" fill="#77c7d7"/>
+        <text x="352" y="236" class="lbls">CALIPER-CAM-A</text>
+      </g>
+      <g class="comp" data-info="camB">
+        <polygon points="450,34 400,86 500,86" class="fov"/>
+        <rect x="400" y="86" width="100" height="78" class="fov"/>
+        <rect x="439" y="22" width="22" height="16" rx="4" fill="#2b3a4f" stroke="#77c7d7"/>
+        <circle cx="450" cy="30" r="4" fill="#77c7d7"/>
+        <text x="468" y="30" class="lbls">VISION-CAM-B (overhead)</text>
+      </g>
+      <g class="comp" data-info="lights">
+        <circle cx="365" cy="62" r="8" fill="#ffe9a8" opacity=".8"/><circle cx="535" cy="62" r="8" fill="#ffe9a8" opacity=".8"/>
+        <text x="352" y="66" text-anchor="end" class="lbls">diffuse light</text><text x="548" y="66" class="lbls">diffuse light</text>
+      </g>
+      <!-- decision screen -->
+      <g class="comp" data-info="laptop">
+        <rect x="560" y="185" width="84" height="50" rx="4" fill="#0f1620" stroke="#77c7d7"/>
+        <text id="screenTxt" x="602" y="208" text-anchor="middle" fill="#a0e8f5" font-size="11" font-weight="700">—</text>
+        <text id="screenTxt2" x="602" y="223" text-anchor="middle" fill="#9aadc5" font-size="8">dashboard</text>
+      </g>
+      <!-- ESP32 + button -->
+      <g class="comp" data-info="esp32">
+        <rect x="660" y="198" width="54" height="30" rx="3" fill="#18324a" stroke="#77c7d7"/>
+        <text x="687" y="217" text-anchor="middle" fill="#e9f0fb" font-size="10">ESP32</text>
+        <path d="M714,205 C750,200 770,180 780,140" fill="none" stroke="#efba71" stroke-dasharray="3 3"/>
+      </g>
+      <g class="comp" data-info="button" id="btnIcon">
+        <circle cx="740" cy="222" r="11" fill="#c42232" stroke="#5a1d22" stroke-width="3"/>
+        <text x="740" y="246" text-anchor="middle" class="lbls">confirm button</text>
+      </g>
+      <!-- servo + flap -->
+      <g class="comp" data-info="servo">
+        <rect x="772" y="112" width="24" height="26" rx="3" fill="#2d6cdf" stroke="#9cc0ff"/>
+        <g id="flap"><rect x="800" y="122" width="58" height="6" rx="2" fill="#f0f0f0" stroke="#aaa"/></g>
+        <circle cx="800" cy="125" r="5" fill="#fff" stroke="#333"/>
+        <text x="784" y="176" text-anchor="middle" class="lbls">servo + flap</text>
+      </g>
+      <!-- bins -->
+      <g class="comp" data-info="bins">
+        <rect x="878" y="8" width="112" height="78" rx="6" class="bin" stroke="#5ccc91" fill="#5ccc91"/>
+        <rect x="878" y="92" width="112" height="66" rx="6" class="bin" stroke="#efba71" fill="#efba71"/>
+        <rect x="878" y="164" width="112" height="78" rx="6" class="bin" stroke="#ee8e97" fill="#ee8e97"/>
+        <text x="934" y="26" text-anchor="middle" class="lbl" font-weight="700">PASS (left)</text>
+        <text x="934" y="110" text-anchor="middle" class="lbl" font-weight="700">HOLD (center)</text>
+        <text x="934" y="182" text-anchor="middle" class="lbl" font-weight="700">REJECT (right)</text>
+        <text id="cntPASS" x="934" y="80" text-anchor="middle" class="lbls">0 parts</text>
+        <text id="cntHOLD" x="934" y="152" text-anchor="middle" class="lbls">0 parts</text>
+        <text id="cntREJECT" x="934" y="236" text-anchor="middle" class="lbls">0 parts</text>
+        <text x="934" y="262" text-anchor="middle" class="lbls">left/right as seen looking along travel</text>
+      </g>
+      <g id="binTokens"></g>
+      <!-- carrier -->
+      <g id="carrier" class="comp" data-info="carrier" transform="translate(80,0)">
+        <rect x="-37.5" y="102.5" width="75" height="45" rx="3" class="carrier"/>
+        <path d="M-37.5,102.5 h75 M-37.5,102.5 v45 h75" stroke="#55627a" stroke-width="3" fill="none"/>
+        <path d="M-20,98 l8,-5 l0,10z" fill="#55627a"/>
+        <g id="specimen"></g>
+        <text id="specLbl" x="0" y="176" text-anchor="middle" class="lbl" font-weight="700"></text>
+      </g>
+      <g id="flying"></g>
+    </svg>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <label class="tiny" for="scenario">Scenario</label>
+        <select id="scenario">
+          <option value="A">Run A — comfortable/good pair → PASS</option>
+          <option value="B">Run B — tight/uncertain pair → HOLD</option>
+          <option value="C">Run C — visible anomaly fixture → REJECT if human confirms</option>
+          <option value="F">Run D — seeded defect pair, cannot fit → REJECT if human confirms</option>
+          <option value="D">Failure — Webcam B unplugged → HOLD</option>
+          <option value="E">Failure — OCR candidate ≠ operator value → HOLD</option>
+        </select>
+        <button class="ghost" id="restart">Restart run</button>
+      </div>
+      <div class="chips" id="stateChips"></div>
+      <div id="stepBox" class="step"></div>
+      <div class="actions" id="stepActions"></div>
+      <div id="stepMsg" class="tiny" style="margin-top:8px"></div>
+    </div>
+    <div class="panel">
+      <h2>ESP32 firmware emulator <span class="tiny">(logic copied from firmware/manual_sorter/esp32_manual_sorter.ino)</span></h2>
+      <div class="kv">
+        <b>Gate angle</b><span id="fwAngle">90° (HOLD)</span>
+        <b>Staged route</b><span id="fwPending">none</span>
+        <b>Constants</b><span>PASS 35° · HOLD 90° · REJECT 145° · timeout 15 s · debounce 250 ms · 115200 baud</span>
+      </div>
+      <div class="meter" style="margin-top:6px"><span id="fwMeter"></span></div>
+      <div class="fwrow">
+        <button class="bigbtn" id="fwButton" title="Press and hold works like the real button">CONFIRM<br/>GPIO32</button>
+        <div style="flex:1;min-width:220px">
+          <div class="tiny">Serial Monitor (115200 baud). Type P, H or R and press Enter, exactly as you would in the Arduino IDE.</div>
+          <div style="display:flex;gap:6px;margin-top:5px">
+            <input type="text" id="fwInput" maxlength="8" placeholder="P / H / R" style="flex:1"/>
+            <button class="ghost" id="fwSend">Send</button>
+            <button class="ghost" id="fwReset" title="Like pressing EN/RESET or re-opening the serial port">Reset ESP32</button>
+          </div>
+        </div>
+      </div>
+      <div class="console" id="fwConsole" aria-live="polite"></div>
+      <div class="note" id="fwNote">After a move the gate stays at that angle. Return it to HOLD (send H, press the button) before the next specimen.</div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <h2>Session evidence (virtual)</h2>
+      <div class="tiny">Every row is tier <b>SIMULATED</b>. In a real run you record these fields in the CSV log (today) or the planned app.</div>
+      <table id="evTable"><thead><tr><th>#</th><th>event</th><th>source</th><th>value / result</th></tr></thead><tbody></tbody></table>
+    </div>
+    <div class="panel">
+      <h2 id="infoTitle">Part details</h2>
+      <div id="infoBody" class="muted">Click any part of the line drawing above.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ WIRING ============================ -->
+<section id="wiring" class="view">
+  <div class="cols" style="margin-top:0">
+    <div class="panel">
+      <svg id="wireSvg" viewBox="0 0 1000 560" aria-label="Wiring diagram">
+        <!-- laptop / hub / cams -->
+        <g data-step="12"><rect x="20" y="30" width="180" height="100" rx="8" class="part"/><text x="110" y="70" text-anchor="middle" class="pin" font-size="13">Laptop</text><text x="110" y="90" text-anchor="middle" class="pin">dashboard · Arduino IDE</text></g>
+        <g data-step="12"><rect x="250" y="45" width="150" height="70" rx="8" class="part"/><text x="325" y="76" text-anchor="middle" class="pin" font-size="12">Powered USB hub</text><text x="325" y="94" text-anchor="middle" class="pin">3 data ports</text></g>
+        <g data-step="13"><rect x="470" y="20" width="150" height="46" rx="8" class="part"/><text x="545" y="48" text-anchor="middle" class="pin">Webcam A (CALIPER-CAM-A)</text></g>
+        <g data-step="13"><rect x="470" y="88" width="150" height="46" rx="8" class="part"/><text x="545" y="116" text-anchor="middle" class="pin">Webcam B (VISION-CAM-B)</text></g>
+        <!-- supply -->
+        <g data-step="2"><rect x="30" y="320" width="150" height="80" rx="8" class="part"/><text x="105" y="352" text-anchor="middle" class="pin" font-size="12">Servo 5 V supply</text><text x="105" y="370" text-anchor="middle" class="pin">ELEGOO Power MB V2</text><text x="172" y="354" class="pin" fill="#ee8e97">+</text><text x="172" y="388" class="pin">−</text></g>
+        <!-- breadboard rails -->
+        <g data-step="1"><rect x="40" y="455" width="320" height="60" rx="6" fill="#d9d4c5" opacity=".14" stroke="#9aadc5"/>
+          <line x1="60" y1="470" x2="340" y2="470" stroke="#ee8e97" stroke-width="3"/><text x="45" y="474" class="pin" fill="#ee8e97">+</text>
+          <line x1="60" y1="500" x2="340" y2="500" stroke="#7aa7ff" stroke-width="3"/><text x="45" y="504" class="pin" fill="#7aa7ff">−</text>
+          <text x="200" y="532" text-anchor="middle" class="pin">breadboard power rails (servo supply only)</text></g>
+        <!-- capacitor -->
+        <g data-step="4"><line x1="300" y1="470" x2="300" y2="480" stroke="#ccc" stroke-width="2"/><rect x="288" y="480" width="24" height="12" rx="2" fill="#26324a" stroke="#ccc"/><line x1="300" y1="492" x2="300" y2="500" stroke="#ccc" stroke-width="2"/><text x="318" y="486" class="pin">470–1000 µF (+ up, stripe down)</text></g>
+        <!-- servo -->
+        <g data-step="6"><rect x="30" y="170" width="150" height="72" rx="8" fill="#1f3f7a" stroke="#9cc0ff"/><text x="105" y="200" text-anchor="middle" class="pin" font-size="12">Servo (SG90/MG90)</text><text x="105" y="218" text-anchor="middle" class="pin">flap OFF for first test</text></g>
+        <!-- ESP32 -->
+        <g data-step="1"><rect x="400" y="230" width="130" height="250" rx="8" fill="#18324a" stroke="#77c7d7"/>
+          <rect x="450" y="222" width="30" height="14" rx="2" fill="#9aadc5"/>
+          <text x="465" y="420" text-anchor="middle" class="pin" font-size="13">ESP32</text>
+          <text x="465" y="438" text-anchor="middle" class="pin">dev board</text>
+          <circle cx="400" cy="260" r="4" fill="#ee8e97"/><text x="408" y="264" class="pin">3V3 ✗ servo</text>
+          <circle cx="400" cy="300" r="4" fill="#7aa7ff"/><text x="408" y="304" class="pin">GND</text>
+          <circle cx="400" cy="340" r="4" fill="#efba71"/><text x="408" y="344" class="pin">GPIO13</text>
+          <circle cx="530" cy="300" r="4" fill="#7aa7ff"/><text x="490" y="304" class="pin">GND</text>
+          <circle cx="530" cy="380" r="4" fill="#5ccc91"/><text x="478" y="384" class="pin">GPIO32</text>
+        </g>
+        <!-- button -->
+        <g data-step="9"><rect x="640" y="360" width="90" height="80" rx="8" class="part"/><circle cx="685" cy="400" r="18" fill="#c42232" stroke="#5a1d22" stroke-width="4"/><text x="685" y="458" text-anchor="middle" class="pin">momentary button</text></g>
+        <!-- wires -->
+        <path data-step="2" class="wire" stroke="#ee8e97" d="M180,350 H220 V470"/>
+        <path data-step="3" class="wire" stroke="#7aa7ff" d="M180,385 H205 V500"/>
+        <path data-step="5" class="wire" stroke="#7aa7ff" d="M340,500 H372 V300 H400"/>
+        <path data-step="6" class="wire" stroke="#8b5a2b" d="M180,226 H272 V500"/>
+        <path data-step="7" class="wire" stroke="#d93a3a" d="M180,210 H256 V470"/>
+        <path data-step="8" class="wire" stroke="#ff9d2e" d="M180,194 H356 V340 H400"/>
+        <path data-step="9" class="wire" stroke="#5ccc91" d="M640,380 H530"/>
+        <path data-step="10" class="wire" stroke="#7aa7ff" d="M640,420 H572 V300 H530"/>
+        <path data-step="12" class="wire" stroke="#9aadc5" d="M200,80 H250"/>
+        <path data-step="12" class="wire" stroke="#9aadc5" d="M325,115 V170 H465 V222"/>
+        <path data-step="13" class="wire" stroke="#9aadc5" d="M400,70 H435 V43 H470"/>
+        <path data-step="13" class="wire" stroke="#9aadc5" d="M400,95 H435 V111 H470"/>
+        <!-- labels on wires -->
+        <g data-step="6"><text x="276" y="250" class="pin">brown/black</text></g>
+        <g data-step="7"><text x="214" y="206" class="pin" fill="#ff9da0">red</text></g>
+        <g data-step="8"><text x="286" y="190" class="pin" fill="#ffc07a">orange/yellow → GPIO13</text></g>
+        <g data-step="5"><text x="376" y="470" class="pin" fill="#a8c4ff" transform="rotate(-90 376 470)">common GND</text></g>
+        <!-- forbidden -->
+        <g id="forbidden" style="display:none">
+          <path class="forbid" d="M180,212 C300,150 360,240 400,260"/>
+          <text x="300" y="168" class="pin" fill="#ee8e97" font-size="12">✗ servo red → 3V3 / any GPIO</text>
+          <rect x="760" y="250" width="200" height="70" rx="8" fill="none" stroke="#ee8e97" stroke-dasharray="6 5"/>
+          <text x="860" y="280" text-anchor="middle" class="pin" fill="#ee8e97" font-size="12">✗ DC motor directly on a pin</text>
+          <text x="860" y="300" text-anchor="middle" class="pin" fill="#ee8e97">(out of scope: no conveyor)</text>
+          <path class="forbid" d="M760,285 H530 V340"/>
+        </g>
+      </svg>
+      <div class="actions">
+        <button class="ghost" id="wPrev">◀ Previous</button>
+        <button class="primary" id="wNext">Next connection ▶</button>
+        <button class="ghost" id="wAll">Show everything</button>
+        <label class="tiny"><input type="checkbox" id="wForbid"/> Show forbidden connections</label>
+      </div>
+      <div class="tiny" style="margin-top:6px">Pin positions differ between ESP32 boards. Follow the printed silkscreen labels, not the drawing position.</div>
+    </div>
+    <div class="panel">
+      <h2>Connect in this order (everything unplugged)</h2>
+      <ol class="wsteps" id="wSteps" start="0"></ol>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:12px">
+    <h2>Connection table</h2>
+    <table id="wTable"><thead><tr><th>step</th><th>from</th><th>to</th><th>why</th><th>check</th></tr></thead><tbody></tbody></table>
+  </div>
+</section>
+
+<!-- ============================ ABOUT ============================ -->
+<section id="about" class="view">
+  <div class="cols3" style="margin-top:0">
+    <div class="panel"><h2>Works today with this repository</h2><ul>
+      <li>Printable specimens in <code>examples/cad/stl/</code>.</li>
+      <li>Servo firmware <code>firmware/manual_sorter/esp32_manual_sorter.ino</code>: stage P/H/R over serial, move only on a button press, 15 s expiry.</li>
+      <li>You stage the route by typing P/H/R in the Arduino Serial Monitor.</li>
+      <li>You record readings, captures, and the actual bin by hand in <code>docs/engineering/templates/manual_track_run_log.csv</code>.</li>
+    </ul></div>
+    <div class="panel"><h2>Planned, not implemented yet</h2><ul>
+      <li><code>/demo/sessions</code> API with the state machine shown in the chips.</li>
+      <li>Browser two-webcam capture with source identity and image digests.</li>
+      <li>Operator caliper confirmation form and fit form.</li>
+      <li>Local serial bridge that writes P/H/R for you (button stays the final authority).</li>
+      <li>Correlated arrival acknowledgement (<code>action_id</code>).</li>
+    </ul></div>
+    <div class="panel"><h2>What this page is</h2><ul>
+      <li>A training and planning aid. Thresholds used for the illustrative decision are placeholders shown on screen.</li>
+      <li>The firmware emulator copies the sketch logic and message strings, so you can rehearse timing, held buttons, and expiry.</li>
+      <li>Nothing here is physical evidence. Hardware checks H1–H11 stay unchecked until you run them on your bench.</li>
+    </ul></div>
+  </div>
+</section>
+</main>
+
+<script>
+'use strict';
+/* ---------------- tabs ---------------- */
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===b.dataset.view));
+}));
+const $=s=>document.querySelector(s);
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+/* ---------------- static line drawing ---------------- */
+const STATIONS=[['load',80,'LOAD'],['caliper',250,'CALIPER'],['vision',450,'VISION'],['decision',600,'DECISION'],['diverter',700,'DIVERTER']];
+const POS=Object.fromEntries(STATIONS.map(s=>[s[0],s[1]]));
+(function(){
+  const t=$('#ticks');
+  for(let x=0;x<=800;x+=100){el('line',{x1:x,y1:0,x2:x,y2:6,stroke:'#b5a283'},t);el('text',{x:x,y:16,'text-anchor':'middle',class:'lbls'},t).textContent=x+' mm';}
+  const g=$('#stations');
+  for(const [id,x,name] of STATIONS){
+    el('line',{x1:x,y1:101,x2:x,y2:149,class:'stationLine'},g);
+    el('rect',{x:x+36,y:101,width:4,height:48,fill:'#e9f0fb',opacity:.35},g); // hard stop face
+    el('text',{x:x,y:-24,'text-anchor':'middle',class:'lbl','font-weight':700},g).textContent=name;
+    el('text',{x:x,y:-11,'text-anchor':'middle',class:'lbls'},g).textContent=x+' mm';
+  }
+})();
+
+const INFO={
+  rails:['Track rails','Two straight rails, 700–800 mm long, 10–20 mm high. Clear width = measured carrier width + 2–3 mm, so the 75 × 45 mm carrier slides without rotating. Fix the rails only after the carrier moves freely end to end.'],
+  carrier:['Manual carrier','≈ 75 × 45 mm flat plate with a 3–5 mm lip on three sides (front open), an orientation arrow, and a carrier ID. Coupons are 60 mm long, ≤ 33.2 mm wide, 6 mm high. You push it between stops; nothing is motorized.'],
+  caliper:['Caliper station (250 mm)','Two small registration blocks or tape outlines repeat the specimen position. Lift the specimen, measure the critical width three times with the digital caliper, then return it in the same orientation. The caliper stays manual; never attach a servo to the jaws.'],
+  camA:['Webcam A · CALIPER-CAM-A','Fixed on a clamp, aimed at the caliper display so the digits fill most of the image without glare. Its image is a record of the display (and a possible OCR candidate). The number you confirm is authoritative. It is not a second inspection camera for the specimen.'],
+  camB:['Webcam B · VISION-CAM-B','Fixed overhead (or fixed oblique) above the dark pad at 450 mm. Lock resolution, focus, and exposure if the driver allows it. Capture a reference image of a known-good specimen from this exact pose before testing others. Its output is uncalibrated visual evidence, not millimetres.'],
+  pad:['Vision pad','Dark matte sheet under Webcam B for contrast with white PLA. Mark the carrier stop so every specimen appears at the same scale and orientation.'],
+  lights:['Diffuse lights','Two diffuse lights (or one lightbox) from both sides of the vision station. Avoid moving shadows; record the light setup in the run log.'],
+  laptop:['Decision / authorization (600 mm)','The laptop shows the evidence and the decision. Today you decide with the run log and type P/H/R in the Arduino Serial Monitor. Planned: the dashboard stages the route through a local serial bridge. In both cases the physical button is the final authority.'],
+  esp32:['ESP32 (one board)','Controls only the servo diverter. USB to the laptop or powered hub provides power and serial at 115200 baud. Servo signal on GPIO13, confirmation button on GPIO32 (INPUT_PULLUP). Verify that both pins exist and are free on your exact board.'],
+  button:['Physical confirmation button','Momentary button between GPIO32 and GND. The firmware moves the gate only on a new press edge while a route is staged and less than 15 s old. Holding it down does not repeat the move.'],
+  servo:['Servo diverter (700 mm, track exit)','Small 3-wire servo with a ≈ 50 × 40 mm lightweight flap on the horn. Power comes from the external regulated supply, never from ESP32 3V3 or a GPIO. Starting angles: PASS 35°, HOLD 90°, REJECT 145°. Calibrate in 5° steps and never drive the flap into a hard stop. Printable version: swivel chute + servo tower in examples/cad/sorter/ (see physical_build_guide.html, tab 5).'],
+  bins:['Collection bins','PASS left, HOLD center, REJECT right (looking along the direction of travel). If your servo turns the other way, swap PASS_ANGLE and REJECT_ANGLE in the firmware and re-test. The bin a part actually lands in is recorded by observation, never assumed from the requested route.']
+};
+document.querySelectorAll('#lineSvg .comp').forEach(g=>g.addEventListener('click',e=>{
+  const k=g.dataset.info;if(!INFO[k])return;$('#infoTitle').textContent=INFO[k][0];$('#infoBody').textContent=INFO[k][1];e.stopPropagation();
+}));
+
+/* ---------------- tween helper ---------------- */
+function tween(from,to,ms,step){return new Promise(res=>{const t0=performance.now();function f(now){const k=Math.min(1,(now-t0)/ms);const e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;step(from+(to-from)*e);if(k<1)requestAnimationFrame(f);else res();}requestAnimationFrame(f);});}
+
+/* ---------------- carrier + specimen ---------------- */
+let carrierX=80;
+async function moveCarrier(x){const from=carrierX;carrierX=x;await tween(from,x,Math.max(250,Math.abs(x-from)*3),v=>$('#carrier').setAttribute('transform',`translate(${v},0)`));}
+function drawSpecimen(group,type){
+  group.innerHTML='';
+  if(!type)return;
+  if(type==='slot'){el('path',{d:'M-30,108.4 h60 v33.2 h-60 z M-12,108.4 v18 h24 v-18',class:'spec','fill-rule':'evenodd'},group);
+    el('rect',{x:-12,y:107,width:24,height:19,fill:'#c9d4e3'},group);}
+  else{el('path',{d:'M-30,113 h46 v-4 h14 v32 h-14 v-4 h-46 z',class:'spec'},group);}
+}
+
+/* ---------------- gate rendering ---------------- */
+let shownAngle=90,targetAngle=90;
+function renderGate(){
+  const diff=targetAngle-shownAngle;
+  if(Math.abs(diff)>0.1){shownAngle+=Math.sign(diff)*Math.min(Math.abs(diff),8);} // ≈ 400°/s at 50 fps
+  $('#flap').setAttribute('transform',`rotate(${shownAngle-90} 800 125)`);
+  requestAnimationFrame(renderGate);
+}
+requestAnimationFrame(renderGate);
+function angleName(a){return a===35?'PASS':a===90?'HOLD':a===145?'REJECT':'custom';}
+function binForAngle(a){const c=[[35,'PASS'],[90,'HOLD'],[145,'REJECT']].sort((p,q)=>Math.abs(p[0]-a)-Math.abs(q[0]-a))[0];return Math.abs(c[0]-a)<=12?c[1]:'JAM';}
+const BIN_Y={PASS:47,HOLD:125,REJECT:203};
+const binCount={PASS:0,HOLD:0,REJECT:0};
+async function dropIntoBin(type){
+  const spec=$('#specimen');spec.style.display='none';
+  const fly=el('g',{},$('#flying'));drawSpecimen(fly,type);
+  const bin=binForAngle(targetAngle);
+  const x0=carrierX,y0=0;
+  await tween(0,1,350,k=>fly.setAttribute('transform',`translate(${x0+(800-x0)*k},${y0})`));
+  if(bin==='JAM'){fly.setAttribute('transform',`translate(800,0)`);return 'JAM';}
+  const tx=934,ty=BIN_Y[bin]-125;
+  // scale around the specimen centre (y = 125) so it lands inside the bin
+  await tween(0,1,450,k=>fly.setAttribute('transform',`translate(${800+(tx-800)*k},${125+ty*k}) scale(${1-.45*k}) translate(0,-125)`));
+  fly.remove();
+  binCount[bin]++;
+  const n=binCount[bin];
+  el('rect',{x:888+((n-1)%6)*16,y:BIN_Y[bin]-14+Math.floor((n-1)/6)*8,width:13,height:7,rx:1.5,fill:'#f4f4ef'},$('#binTokens'));
+  $('#cnt'+bin).textContent=n+(n===1?' part':' parts');
+  return bin;
+}
+
+/* ---------------- firmware emulator (mirrors esp32_manual_sorter.ino) ---------------- */
+const FW={PASS_ANGLE:35,HOLD_ANGLE:90,REJECT_ANGLE:145,DEBOUNCE_MS:250,STAGE_TIMEOUT_MS:15000};
+const fw={bootAt:0,pending:null,pendingAngle:90,stagedAt:0,lastPressMs:0,lastPressed:false,pressed:false,rx:[],listeners:[]};
+const millis=()=>performance.now()-fw.bootAt;
+function println(s,cls){const c=$('#fwConsole');const d=document.createElement('div');if(cls)d.className=cls;d.textContent=s;c.appendChild(d);c.scrollTop=c.scrollHeight;}
+function emit(type,data){fw.listeners.forEach(f=>f(type,data));}
+function routeToAngle(r){return r==='P'?FW.PASS_ANGLE:r==='H'?FW.HOLD_ANGLE:r==='R'?FW.REJECT_ANGLE:null;}
+function clearPending(reason){fw.pending=null;fw.pendingAngle=FW.HOLD_ANGLE;fw.stagedAt=0;println(reason);}
+function fwBoot(){
+  fw.bootAt=performance.now();fw.pending=null;fw.pendingAngle=FW.HOLD_ANGLE;fw.stagedAt=0;fw.lastPressMs=0;fw.lastPressed=false;fw.rx=[];
+  targetAngle=FW.HOLD_ANGLE; // setup(): diverter.write(HOLD_ANGLE)
+  println('--- ESP32 boot (reset) ---','sys');
+  println('QualityRelay sorter ready.');
+  println('Type P, H, or R, then press the physical confirmation button.');
+  emit('boot');
+}
+function fwSerialWrite(text,source){println('> '+JSON.stringify(text)+(source?'  ['+source+']':''),'tx');for(const ch of text)fw.rx.push(ch);}
+function fwLoop(){
+  if(fw.rx.length>0){ // one byte per loop(), like Serial.read()
+    const route=fw.rx.shift().toUpperCase();
+    const a=routeToAngle(route);
+    if(a!==null){
+      const replaced=fw.pending;
+      fw.pending=route;fw.pendingAngle=a;fw.stagedAt=millis();
+      println(`Route staged: ${route}. Press confirmation button within 15 seconds.`);
+      emit('staged',{route,replaced});
+    }
+  }
+  if(fw.pending!==null&&millis()-fw.stagedAt>FW.STAGE_TIMEOUT_MS){clearPending('Staged route expired; gate did not move.');emit('expired');}
+  const pressed=fw.pressed;const newPress=pressed&&!fw.lastPressed;fw.lastPressed=pressed;
+  if(newPress&&millis()-fw.lastPressMs>FW.DEBOUNCE_MS){
+    fw.lastPressMs=millis();
+    if(fw.pending===null){println('No route staged; gate did not move.');emit('nostage');}
+    else{const r=fw.pending,a=fw.pendingAngle;targetAngle=a;println(`AUTHORIZED MOVE -> route ${r}, angle ${a}`);clearPending('Route consumed; stage the next specimen separately.');emit('moved',{route:r,angle:a});}
+  }
+  // UI
+  $('#fwAngle').textContent=`${targetAngle}° (${angleName(targetAngle)})`;
+  if(fw.pending){const left=Math.max(0,FW.STAGE_TIMEOUT_MS-(millis()-fw.stagedAt));$('#fwPending').textContent=`${fw.pending} → ${fw.pendingAngle}°, ${(left/1000).toFixed(1)} s left`;$('#fwMeter').style.width=(100*left/FW.STAGE_TIMEOUT_MS)+'%';}
+  else{$('#fwPending').textContent='none';$('#fwMeter').style.width='0';}
+  $('#fwNote').className=targetAngle===FW.HOLD_ANGLE?'note':'danger';
+  $('#fwNote').textContent=targetAngle===FW.HOLD_ANGLE?'Gate is at HOLD (neutral).':`Gate is still at ${targetAngle}° (${angleName(targetAngle)}). The sketch does not return to HOLD by itself. Send H and press the button before loading the next specimen.`;
+}
+setInterval(fwLoop,10);
+const btn=$('#fwButton');
+const down=e=>{e.preventDefault();fw.pressed=true;btn.classList.add('down');};
+const up=()=>{fw.pressed=false;btn.classList.remove('down');};
+btn.addEventListener('pointerdown',down);['pointerup','pointerleave','pointercancel'].forEach(t=>btn.addEventListener(t,up));
+function sendInput(){const v=$('#fwInput').value;if(!v)return;fwSerialWrite(v+'\n','you');$('#fwInput').value='';}
+$('#fwSend').onclick=sendInput;$('#fwInput').addEventListener('keydown',e=>{if(e.key==='Enter')sendInput();});
+$('#fwReset').onclick=()=>fwBoot();
+fwBoot();
+
+/* ---------------- scenarios ---------------- */
+const TOL=0.15, SPREAD=0.05, OCR_TOL=0.005; // illustrative placeholders only
+const SCN={
+  A:{name:'Run A',id:'S-GOOD',type:'slot',nominal:21.20,readings:[21.18,21.20,21.19],ocr:21.19,pair:'T-GOOD',fit:'PASS',vision:'clear',camB:true,anomaly:false},
+  B:{name:'Run B',id:'S-RISK',type:'slot',nominal:20.70,readings:[20.66,20.71,20.69],ocr:20.69,pair:'T-RISK',fit:'INDETERMINATE',vision:'clear',camB:true,anomaly:false},
+  C:{name:'Run C',id:'T-NOM-ANOM',type:'tab',nominal:20.00,readings:[20.02,20.01,20.02],ocr:20.02,pair:null,fit:null,vision:'anomaly candidate',camB:true,anomaly:true},
+  D:{name:'Camera failure',id:'T-NOM',type:'tab',nominal:20.00,readings:[20.01,20.00,20.01],ocr:20.01,pair:null,fit:null,vision:null,camB:false,anomaly:false},
+  E:{name:'OCR mismatch',id:'S-NOM',type:'slot',nominal:21.00,readings:[20.98,21.00,20.99],ocr:20.89,pair:'T-NOM',fit:'PASS',vision:'clear',camB:true,anomaly:false},
+  // S-DEF is slot_defect_19p40.stl: a seeded 1.60 mm undersize slot, judged against the 21.00 mm nominal slot spec
+  F:{name:'Run D',id:'S-DEF',type:'slot',nominal:21.00,readings:[19.41,19.39,19.40],ocr:19.40,pair:'T-NOM',fit:'FAIL',vision:'clear',camB:true,anomaly:false,defect:true}
+};
+const STATES=['CREATED','LOADED','MEASURED','VISION_CAPTURED','REVIEW_READY','ROUTE_STAGED','WAITING_PHYSICAL_CONFIRMATION','GATE_MOVED','ROUTED','ARRIVAL_ACKED'];
+
+let S=null; // run state
+function newRun(){
+  const sc=SCN[$('#scenario').value];
+  S={sc,step:0,state:null,flags:new Set(),reasons:[],ev:[],decision:null,route:null,actionId:null,actual:null,
+     humanPass:false,humanReject:null,confirmed:null,waiting:false,busy:false,msg:''};
+  $('#evTable tbody').innerHTML='';
+  drawSpecimen($('#specimen'),null);$('#specimen').style.display='';$('#specLbl').textContent='';
+  $('#calDisp').textContent='--.--';$('#screenTxt').textContent='—';$('#screenTxt2').textContent='dashboard';
+  moveCarrier(80);
+  render();
+}
+function rid(p){return p+'-'+Math.random().toString(16).slice(2,8);}
+function addEv(event,source,value){S.ev.push([event,source,value]);const tr=document.createElement('tr');tr.innerHTML=`<td>${S.ev.length}</td><td>${esc(event)}</td><td>${esc(source)}</td><td>${esc(value)}</td>`;$('#evTable tbody').appendChild(tr);}
+function setState(s){S.state=s;}
+function mean(a){return a.reduce((x,y)=>x+y,0)/a.length;}
+
+function decide(){
+  const sc=S.sc,r=[];
+  const confirmed=S.confirmed, spread=+(Math.max(...sc.readings)-Math.min(...sc.readings)).toFixed(3);
+  if(spread>SPREAD)r.push(`Caliper repeatability spread ${spread.toFixed(2)} mm > ${SPREAD} mm.`);
+  if(Math.abs(confirmed-sc.nominal)>TOL)r.push(`Confirmed value ${confirmed.toFixed(2)} mm is outside nominal ${sc.nominal.toFixed(2)} ± ${TOL} mm.`);
+  if(sc.ocr!==null&&Math.abs(sc.ocr-confirmed)>OCR_TOL)r.push(`OCR candidate ${sc.ocr.toFixed(2)} mm differs from operator value ${confirmed.toFixed(2)} mm. Re-read the display and confirm again.`);
+  if(!sc.camB)r.push('VISION-CAM-B capture missing (device not found). Reconnect the webcam and recapture.');
+  if(sc.pair&&sc.fit!=='PASS')r.push(`Fit test with ${sc.pair} is ${sc.fit}. No automatic PASS.`);
+  if(!sc.pair)r.push('No fit test recorded for this specimen, so PASS is not allowed.');
+  if(sc.defect){
+    if(S.humanReject===true)return {state:'CONFIRMED_REJECT',route:'REJECT',reasons:['Human confirmed the nonconformance: width out of tolerance and fit FAIL (seeded defect specimen).']};
+    r.push('Out-of-tolerance width and fit FAIL still need a person to confirm the nonconformance before REJECT.');
+  }
+  if(sc.anomaly){
+    if(S.humanReject===true)return {state:'CONFIRMED_REJECT',route:'REJECT',reasons:['Human confirmed the visible nonconformance (anomaly-detection fixture).']};
+    r.push('Visual anomaly candidate is not human-confirmed, so it cannot cause REJECT.');
+  }
+  if(r.length)return {state:'HOLD',route:'HOLD',reasons:r};
+  return {state:'PASS_REVIEW',route:null,reasons:['All required evidence present and consistent. Human release authorization required.']};
+}
+
+/* step definitions: hands = physical action, today = how with current repo, plan = planned app */
+const STEPS=[
+  {title:'Before the run',station:'load',
+   hands:['Gate at HOLD (90°) and flap free to move.','Both webcams on their stands, views locked.','ESP32 on USB, Serial Monitor open at 115200 baud, servo supply ON.'],
+   today:['Open a new row in docs/engineering/templates/manual_track_run_log.csv.'],
+   plan:['POST /demo/sessions creates session_id; state CREATED.'],
+   next:'Create session',
+   run(){const g=targetAngle;if(g!==90){S.msg=`Gate is at ${g}°. Send H and press the button first, or proceed knowingly.`;}
+     setState('CREATED');S.sid=rid('SES');addEv('SESSION_CREATED','operator',S.sid);$('#screenTxt').textContent='CREATED';}},
+  {title:'LOAD station (80 mm)',station:'load',
+   hands:['Put the labeled specimen in the carrier, orientation arrow forward.','Read the specimen ID on its label.'],
+   today:['Write specimen ID, pair ID (if any), carrier ID, and time in the log.'],
+   plan:['POST /load with specimen_id; one session per specimen; state LOADED.'],
+   next:'Specimen loaded',
+   run(){drawSpecimen($('#specimen'),S.sc.type);$('#specLbl').textContent=S.sc.id;setState('LOADED');addEv('LOAD','operator',`${S.sc.id}${S.sc.pair?' (pair '+S.sc.pair+')':''}`);}},
+  {title:'CALIPER station (250 mm) + Webcam A',station:'caliper',
+   hands:['Push the carrier to the caliper stop.','Place the specimen in the registration fixture.','Measure the critical width 3 times; return the specimen in the same orientation.','Hold the caliper so Webcam A sees the display, capture one still.'],
+   today:['Record all 3 readings, instrument ID, calibration ID, and the image file name.','Type the number you read as the confirmed value.'],
+   plan:['POST /caliper with value, uncertainty, operator, instrument, calibration IDs, confirmed=true.','POST /camera/CALIPER-CAM-A with image digest; OCR is only a candidate.'],
+   next:'Push, measure ×3, capture, confirm',
+   async run(){await moveCarrier(POS.caliper);const sc=S.sc;
+     for(const v of sc.readings){$('#calDisp').textContent=v.toFixed(2);await new Promise(r=>setTimeout(r,300));}
+     sc.readings.forEach((v,i)=>addEv('CALIPER_READING_'+(i+1),'digital caliper (manual)',v.toFixed(2)+' mm'));
+     addEv('CAPTURE','CALIPER-CAM-A',`still ${rid('img')} · display record${sc.ocr!==null?' · OCR candidate '+sc.ocr.toFixed(2)+' mm':''}`);
+     S.confirmed=+mean(sc.readings).toFixed(2);
+     addEv('OPERATOR_CONFIRMED','operator',`${S.confirmed.toFixed(2)} mm ± ${(Math.max(...sc.readings)-Math.min(...sc.readings)).toFixed(2)} (confirmed)`);
+     if(sc.ocr!==null&&Math.abs(sc.ocr-S.confirmed)>OCR_TOL)S.flags.add('HOLD');
+     setState('MEASURED');}},
+  {title:'VISION station (450 mm) + Webcam B',station:'vision',
+   hands:['Push the carrier to the vision stop on the dark pad.','Do not touch the specimen; capture one still from Webcam B.'],
+   today:['Save the image with specimen ID, camera ID, timestamp, capture number.','Compare against this station\'s reference image (e.g., Photo / CAD Lab tab of web/index.html).'],
+   plan:['POST /camera/VISION-CAM-B; distinct device and digest from Webcam A; score labeled uncalibrated.'],
+   next:'Push and capture',
+   async run(){await moveCarrier(POS.vision);const sc=S.sc;
+     if(!sc.camB){addEv('CAPTURE_FAILED','VISION-CAM-B','device not found → HOLD, recapture requested');S.flags.add('HOLD');}
+     else addEv('CAPTURE','VISION-CAM-B',`still ${rid('img')} · ${sc.vision} (uncalibrated)`);
+     setState('VISION_CAPTURED');}},
+  {title:'Fit test (slot/tab pair)',station:'vision',
+   hands:['If this specimen has a pair, try the predefined fit (e.g., tab slides in by hand without force).','Record PASS / FAIL / INDETERMINATE honestly; tight-but-goes is INDETERMINATE.'],
+   today:['Record pair IDs, criterion, operator, and outcome in the log.'],
+   plan:['POST /fit; raw outcome is never overwritten by a model.'],
+   next:'Record fit result',
+   run(){const sc=S.sc;addEv('FIT',sc.pair?'operator':'—',sc.pair?`${sc.id} + ${sc.pair}: ${sc.fit}`:'not performed (single specimen)');}},
+  {title:'DECISION station (600 mm)',station:'decision',
+   hands:['Push the carrier to the decision stop and review the evidence on screen.'],
+   today:['Apply the agreed rules by hand. Missing or conflicting evidence means HOLD.'],
+   plan:['POST /evaluate → HOLD / PASS_REVIEW / CONFIRMED_REJECT with plain-language reasons; REVIEW_READY.'],
+   next:'Evaluate',
+   async run(){await moveCarrier(POS.decision);S.decision=decide();showDecision();setState('REVIEW_READY');}},
+  {title:'Human authorization',station:'decision',hands:[],today:[],plan:[],next:'Continue',custom:'authorize'},
+  {title:'Stage route over serial',station:'decision',
+   hands:['Do not press the button yet.'],
+   today:['Type the route letter in the Serial Monitor (P, H, or R).'],
+   plan:['POST /route/stage creates a unique action_id, writes one byte; state WAITING_PHYSICAL_CONFIRMATION.'],
+   next:'Send route letter',
+   run(){S.actionId=rid('ACT');const ch=S.route[0];fwSerialWrite(ch,'stage '+S.actionId);addEv('ROUTE_STAGED','sorter service',`${S.route} (${ch}) · ${S.actionId}`);setState('WAITING_PHYSICAL_CONFIRMATION');S.waiting=true;S.stagedOk=true;}},
+  {title:'DIVERTER (700 mm): physical confirmation',station:'diverter',
+   hands:['Push the carrier to the diverter stop.','Check the screen shows the route you expect.','Press the red button once within 15 s (use the CONFIRM button in the emulator).'],
+   today:['Watch the Serial Monitor for "AUTHORIZED MOVE -> route …".'],
+   plan:['Bridge parses the line → GATE_MOVED (reported by firmware; the servo has no position feedback).'],
+   next:'Waiting for the button…',custom:'button'},
+  {title:'Advance the specimen into the bin',station:'diverter',
+   hands:['Slide/tip the specimen off the carrier front past the flap.','Watch which bin it actually lands in.'],
+   today:['Write the observed bin in the log, separately from the requested route.'],
+   plan:['Actual bin comes from an independent observation or sensor, never from the request.'],
+   next:'Advance specimen',
+   async run(){const bin=await dropIntoBin(S.sc.type);S.actual=bin;
+     if(bin==='JAM'){addEv('OBSERVED_BIN','operator','JAM / between bins');S.flags.add('FAULT');}
+     else addEv('OBSERVED_BIN','operator',bin);
+     if(bin!==S.route){S.flags.add('FAULT');addEv('ROUTE_MISMATCH','operator',`requested ${S.route}, observed ${bin}`);}
+     setState('ROUTED');$('#screenTxt').textContent=bin===S.route?'ROUTED':'MISMATCH';$('#screenTxt2').textContent='arrival ACK: disabled';
+     addEv('ARRIVAL_ACK','—','optional sensor disabled → route unconfirmed by sensor');}},
+  {title:'Reset the gate to HOLD',station:'load',
+   hands:['Send H and press the button so the flap returns to 90° before the next specimen.','Pull the empty carrier back to LOAD.'],
+   today:['Mark the log row complete.'],plan:['(Recommended firmware change: return to HOLD automatically.)'],
+   next:'Done → start next run',
+   async run(){await moveCarrier(POS.load);drawSpecimen($('#specimen'),null);$('#specimen').style.display='';$('#specLbl').textContent='';}}
+];
+
+function showDecision(){
+  const d=S.decision;const col=d.state==='HOLD'?'warn':d.state==='PASS_REVIEW'?'good':'bad';
+  $('#screenTxt').textContent=d.state;
+  addEv('DECISION','deterministic policy (illustrative)',`${d.state}: ${d.reasons.join(' ')}`);
+  S.decisionHtml=`<div class="decision ${col}">${d.state}</div><ul>${d.reasons.map(x=>`<li class="${d.state==='HOLD'?'reason':''}">${esc(x)}</li>`).join('')}</ul>`;
+}
+
+fw.listeners.push((type,data)=>{
+  if(!S)return;
+  if(type==='staged'&&data.replaced&&S.waiting){S.msg=`Firmware replaced staged ${data.replaced} with ${data.route}. The sketch accepts a new letter while one is pending; only one route should ever be outstanding.`;render();}
+  if(!S.waiting)return;
+  if(type==='moved'){
+    S.waiting=false;
+    if(data.route!==S.route[0]){S.flags.add('FAULT');S.msg=`Firmware moved to ${data.route} but the session staged ${S.route[0]}. ROUTE_MISMATCH.`;addEv('GATE_REPORTED','ESP32 serial',`route ${data.route}, angle ${data.angle} ≠ staged`);}
+    else{addEv('GATE_REPORTED','ESP32 serial',`AUTHORIZED MOVE -> route ${data.route}, angle ${data.angle}`);S.msg='Gate move reported by firmware.';}
+    setState('GATE_MOVED');S.step++;render();
+  }
+  if(type==='expired'){S.waiting=false;S.flags.add('FAULT');addEv('STAGE_EXPIRED','ESP32 serial','Staged route expired; gate did not move.');S.msg='No confirmation within 15 s. The action is expired. A new action_id is required; nothing retries automatically.';setState('ROUTE_STAGED');render();}
+  if(type==='boot'){S.waiting=false;S.flags.add('FAULT');S.msg='ESP32 reset while a route was staged. The staged route is gone (opening the serial port also resets many boards).';render();}
+});
+
+function render(){
+  // chips
+  const idx=STATES.indexOf(S.state);
+  $('#stateChips').innerHTML=STATES.map((s,i)=>`<span class="chip ${i<idx?'done':''} ${i===idx?'now':''}">${s}</span>`).join('')+
+    (S.flags.has('HOLD')?'<span class="chip flag-hold">HOLD flagged</span>':'')+(S.flags.has('FAULT')?'<span class="chip flag-fault">FAULT</span>':'');
+  const st=STEPS[S.step];const A=$('#stepActions');A.innerHTML='';
+  if(!st){$('#stepBox').innerHTML='<h3>Run finished</h3><p class="muted">Pick another scenario or restart.</p>';return;}
+  let body=`<h3>Step ${S.step+1} of ${STEPS.length} · ${esc(st.title)}</h3>`;
+  const list=(cls,lab,items)=>items.length?`<div><span class="tag ${cls}">${lab}</span><ul>${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'';
+  if(st.custom==='authorize'){
+    const d=S.decision;body+=S.decisionHtml;
+    if(d.state==='PASS_REVIEW'){
+      body+=list('t-hands','DO','Read the evidence. If you agree, authorize release as the named operator.'.split('|'));
+      A.append(mkBtn('Authorize PASS (human)','primary',()=>{S.route='PASS';addEv('HUMAN_AUTHORIZATION','operator','AUTHORIZED_PASS → route PASS');S.step++;render();}));
+      A.append(mkBtn('Not convinced → HOLD','ghost warnb',()=>{S.route='HOLD';addEv('HUMAN_AUTHORIZATION','operator','declined → route HOLD');S.step++;render();}));
+    }else if((S.sc.anomaly||S.sc.defect)&&S.humanReject===null){
+      body+=list('t-hands','DO',[S.sc.defect?'Check the part yourself: the width is far outside nominal and the tab does not enter the slot. Is this a real nonconformance?':'Look at the specimen itself. Is the visible nonconformance real (documented anomaly fixture)?']);
+      A.append(mkBtn('Yes, confirm nonconformance','ghost badb',()=>{S.humanReject=true;addEv('HUMAN_CONFIRMATION','operator','nonconformance confirmed');S.decision=decide();showDecision();render();}));
+      A.append(mkBtn('Not confirmed','ghost warnb',()=>{S.humanReject=false;addEv('HUMAN_CONFIRMATION','operator','nonconformance NOT confirmed');S.decision=decide();showDecision();render();}));
+    }else{
+      S.route=d.route;
+      body+=list('t-hands','DO',[`Route is ${d.route}. Continue to stage it.`]);
+      A.append(mkBtn('Continue','primary',()=>{addEv('ROUTE_SELECTED','policy + operator',d.route);S.step++;render();}));
+    }
+  }else if(st.custom==='button'){
+    body+=list('t-hands','DO',st.hands)+list('t-today','TODAY',st.today)+list('t-plan','PLANNED APP',st.plan);
+    if(carrierX!==POS.diverter)moveCarrier(POS.diverter);
+    if(S.waiting){A.append(mkBtn('Press the red CONFIRM button in the emulator →','ghost',()=>{},true));}
+    else{
+      A.append(mkBtn('Re-stage with a new action_id','primary',()=>{S.flags.delete('FAULT');S.step--;S.msg='';render();}));
+      A.append(mkBtn('Advance specimen anyway (shows where the gate really points)','ghost badb',()=>{S.step++;render();}));
+    }
+  }else{
+    body+=list('t-hands','DO',st.hands)+list('t-today','TODAY',st.today)+list('t-plan','PLANNED APP',st.plan);
+    const b=mkBtn(st.next,'primary',async()=>{if(S.busy)return;S.busy=true;b.disabled=true;S.msg='';
+      try{await st.run();}finally{S.busy=false;}
+      if(S.step===STEPS.length-1){newRun();return;}
+      S.step++;render();});
+    A.append(b);
+  }
+  $('#stepBox').innerHTML=body;
+  $('#stepMsg').textContent=S.msg||'';
+}
+function mkBtn(t,c,f,dis){const b=document.createElement('button');b.className=c;b.textContent=t;b.onclick=f;if(dis)b.disabled=true;return b;}
+$('#restart').onclick=newRun;$('#scenario').onchange=newRun;
+newRun();
+
+/* ---------------- wiring guide ---------------- */
+const WSTEPS=[
+  {t:'Prepare: unplug USB and servo supply. Remove the flap from the servo horn.',from:'—',to:'—',why:'No live wiring changes.',chk:'Supply switch OFF, USB unplugged.'},
+  {t:'Place the ESP32 on the breadboard across the center gap.',from:'ESP32',to:'breadboard',why:'Each pin gets its own row.',chk:'Pins not shorted across the gap.'},
+  {t:'Servo supply + → breadboard + rail (servo rail). With the ELEGOO Power MB V2, plugging it onto the rail end does steps 2 and 3 at once (+ pins on the red line, servo-side jumper on 5V, other side OFF).',from:'supply +',to:'+ rail',why:'Servo power comes only from the external supply.',chk:'Multimeter: supply voltage matches servo rating (5 V for SG90/MG90).'},
+  {t:'Servo supply − → breadboard − rail.',from:'supply −',to:'− rail',why:'Servo return path.',chk:'Polarity correct.'},
+  {t:'Capacitor 470–1000 µF across the rails near the servo.',from:'cap + (long leg)',to:'+ rail; stripe/− to − rail',why:'Smooths current spikes that can brown out the servo.',chk:'Stripe side on − rail. Reversed electrolytics can fail violently.'},
+  {t:'Common ground: − rail → ESP32 GND.',from:'− rail',to:'ESP32 GND',why:'The signal needs a shared reference. Only ground is shared.',chk:'Continuity between supply − and ESP32 GND.'},
+  {t:'Servo brown/black → − rail.',from:'servo brown/black',to:'− rail',why:'Servo ground.',chk:'Check your servo\'s colour code.'},
+  {t:'Servo red → + rail.',from:'servo red',to:'+ rail',why:'Servo power. Never to ESP32 3V3 or a GPIO.',chk:'Red goes to the external supply only.'},
+  {t:'Servo orange/yellow → ESP32 GPIO13.',from:'servo signal',to:'GPIO13',why:'PWM position command from the sketch (SERVO_PIN = 13).',chk:'Board actually exposes GPIO13; change SERVO_PIN if not.'},
+  {t:'Button leg 1 → ESP32 GPIO32.',from:'button leg 1',to:'GPIO32',why:'Human authorization input (INPUT_PULLUP).',chk:'On 4-leg tactile buttons use two diagonal legs.'},
+  {t:'Button leg 2 → ESP32 GND.',from:'button leg 2',to:'ESP32 GND',why:'Pressed = LOW.',chk:'No resistor needed; internal pull-up is used.'},
+  {t:'Inspect before power: no wire from servo red to the ESP32; no short between + and − rails.',from:'—',to:'—',why:'Catches the two expensive mistakes.',chk:'Multimeter: + to − rail not shorted.'},
+  {t:'USB: ESP32 → powered hub → laptop (use a data cable).',from:'ESP32 USB',to:'hub/laptop',why:'Firmware upload, serial at 115200, ESP32 power.',chk:'A new serial port appears on the laptop.'},
+  {t:'Webcam A and Webcam B → separate hub ports.',from:'webcams',to:'hub',why:'Three data devices in total.',chk:'Both cameras open at the same time in your camera app.'},
+  {t:'Power-up order: upload sketch, open Serial Monitor (115200), see "QualityRelay sorter ready.", then switch the servo supply ON.',from:'—',to:'—',why:'The sketch writes HOLD (90°) at boot.',chk:'Servo holds 90°. Then test P/H/R + button with the flap still OFF.'}
+];
+let wStep=0,wShowAll=false;
+const wList=$('#wSteps');
+WSTEPS.forEach((s,i)=>{const li=document.createElement('li');li.textContent=s.t;li.onclick=()=>{wShowAll=false;wStep=i;wRender();};wList.appendChild(li);
+  const tr=document.createElement('tr');tr.innerHTML=`<td>${i}</td><td>${esc(s.from)}</td><td>${esc(s.to)}</td><td>${esc(s.why)}</td><td>${esc(s.chk)}</td>`;$('#wTable tbody').appendChild(tr);});
+function wRender(){
+  document.querySelectorAll('#wireSvg [data-step]').forEach(e=>{const n=+e.dataset.step;e.classList.toggle('hiddenStep',!wShowAll&&n>wStep);e.classList.toggle('cur',!wShowAll&&n===wStep&&e.classList.contains('wire'));});
+  [...wList.children].forEach((li,i)=>{li.className=i===wStep?'cur':i<wStep?'past':'';});
+  [...$('#wTable tbody').children].forEach((tr,i)=>tr.classList.toggle('hl',i===wStep));
+  $('#wPrev').disabled=wStep===0;$('#wNext').disabled=wStep===WSTEPS.length-1;
+}
+$('#wPrev').onclick=()=>{wShowAll=false;wStep=Math.max(0,wStep-1);wRender();};
+$('#wNext').onclick=()=>{wShowAll=false;wStep=Math.min(WSTEPS.length-1,wStep+1);wRender();};
+$('#wAll').onclick=()=>{wShowAll=true;wStep=WSTEPS.length-1;wRender();};
+$('#wForbid').onchange=e=>{$('#forbidden').style.display=e.target.checked?'':'none';};
+wRender();
+</script>
+</body>
+</html>
