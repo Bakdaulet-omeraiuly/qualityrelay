@@ -110,3 +110,5 @@ code{font-family:var(--mono);font-size:12.5px;background:var(--bg2);padding:1px 
   border-top:1px solid var(--line);color:var(--ink3);font-size:12.5px}
 @media (max-width:1000px){.hero,.factory-grid,.parts-grid,.two,.charts{grid-template-columns:1fr}.runkpis{grid-template-columns:repeat(3,1fr)}
   .topbar nav{display:none}.hero h1{font-size:34px}}
+.cta{display:inline-block;margin:0 0 20px;background:var(--accent);color:#0b0d10;font-weight:700;padding:11px 18px;border-radius:9px}
+.cta:hover{background:var(--accent2);text-decoration:none}
