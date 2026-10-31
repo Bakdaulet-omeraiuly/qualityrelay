@@ -1003,7 +1003,7 @@ const REASON = {
   STALE_OR_MISSING_EVIDENCE: 'Missing / late evidence', UNVERIFIED_EVIDENCE: 'Evidence failed VERIFY', RULE_CLEARANCE: 'Rule: clearance < 0.5', RULE_ANY_FLAG_OR_MISSING: 'Rule: camera flag',
   HOLD_ALL_POLICY: 'Hold-all policy', RULE_CLEARANCE_AFTER_REVIEW: 'Rule after review',
 };
-const agState = { last: 0, side: null, tab: 'agents' };
+const agState = { last: 0, side: null, tab: 'agents', focus: null };
 const agRun = () => { const i = agState.side ?? lab.runs.length - 1; return lab.runs[i]; };
 const shortId = (id) => String(id).replace(/^P-/, '').replace(/([ST])-\d+-0*(\d+)/g, '$1$2');
 const lastIdx = (msgs, t) => { let lo = 0, hi = msgs.length; while (lo < hi) { const m = (lo + hi) >> 1; if (msgs[m][0] <= t) lo = m + 1; else hi = m; } return lo; };
@@ -1070,7 +1070,7 @@ function agNet(run, s, t) {
   for (const [id, [x, y]] of Object.entries(AG_NODES)) {
     const cls = ['node', s.sent[id] ? 'active' : '', id === 'process' && recentAlarm ? 'alarm' : '', id === 'learning' && s.proposals ? 'prop' : ''].join(' ');
     const r = run.agents.roster[id]; if (!r) continue;
-    svg += `<g class="${cls}" transform="translate(${x - 50},${y - 18})"><title>${r.name}${r.role ? ` = adilnurgg role ${r.role}` : ''}: ${r.what} (${r.inside}, no LLM)</title>
+    svg += `<g class="${cls}" data-agent="${id}" style="cursor:pointer" transform="translate(${x - 50},${y - 18})"><title>${r.name}${r.role ? ` = adilnurgg role ${r.role}` : ''}: ${r.what} (${r.inside}, no LLM)</title>
       <rect width="100" height="36" rx="8"/><text x="10" y="15">${AG_NAME[id]}</text><text class="sub" x="10" y="28">${s.sent[id] || 0} sent</text>
       <text class="sub" x="92" y="15" text-anchor="end">${r.inside === 'statistic' ? 'stat' : 'rule'}</text></g>`;
   }
@@ -1126,12 +1126,82 @@ function agLine(m) {
   return `<li><span class="t">${fmtT(mt)}</span><span><span class="k ${cls}">${k}</span>${txt}</span></li>`;
 }
 
+// ---- one agent in detail (click a node in "Who talks to whom")
+const AG_KIND_LBL = { OBSERVATION: 'observations', MEASUREMENT: 'measurements', REQUEST_EVIDENCE: 'evidence requests', EVIDENCE_RESPONSE: 'evidence responses',
+  HYPOTHESIS_UPDATE: 'belief updates', DECISION_PROPOSAL: 'decision proposals', DECISION_REQUEST: 'decision requests', DECISION: 'decisions',
+  ALARM: 'alarms', PROPOSE_SETPOINT: 'set-point proposals', REVIEW_OUTCOME: 'review outcomes', SHIPPED: 'shipment notices', PROPOSE_RECALIBRATION: 'recalibration proposals' };
+function agentDetail(run, t, id) {
+  const A = run.agents, r = A.roster[id] || {}, msgs = A.messages.slice(0, lastIdx(A.messages, t));
+  const mine = msgs.filter((m) => m[2] === id || m[3] === id);
+  const sent = {}, recv = {};
+  for (const m of mine) { if (m[2] === id) sent[m[1]] = (sent[m[1]] || 0) + 1; if (m[3] === id && m[2] !== id) recv[m[1]] = (recv[m[1]] || 0) + 1; }
+  const kv = [];
+  const pct = (a, b) => (b ? `${Math.round(100 * a / b)}%` : '—');
+  if (id === 'vision') {
+    const obs = mine.filter((m) => m[1] === 'OBSERVATION'), flags = obs.filter((m) => Object.values(m[5].cams || {}).includes('suspect')).length;
+    const req = mine.filter((m) => m[1] === 'DECISION_REQUEST'), held = mine.filter((m) => m[1] === 'DECISION' && m[5].decision === 'HOLD').length;
+    const ps = req.map((m) => m[5].p_surface).filter((v) => v !== null && v !== undefined);
+    kv.push(['parts observed', obs.length], ['camera flags (suspect)', `${flags} (${pct(flags, obs.length)})`], ['part-gate holds', held],
+      ['median P(surface defect)', ps.length ? `${(100 * ps.sort((a, b) => a - b)[ps.length >> 1]).toFixed(2)}%` : '—'],
+      ['calibration', `sens ${run.model.phone_sens.toFixed(3)} · spec ${run.model.phone_spec.toFixed(3)} (${run.model.calibration_id})`]);
+  } else if (id === 'metrology') {
+    const ms = mine.filter((m) => m[1] === 'MEASUREMENT'), dev = (k) => { const v = ms.filter((m) => m[5].kind === k).map((m) => m[5].reading_mm - A.spc.nominal_mm[k] - m[5].offset_mm); return v.length ? `${(v.reduce((a, b) => a + b, 0) / v.length >= 0 ? '+' : '')}${(v.reduce((a, b) => a + b, 0) / v.length).toFixed(3)} mm (n ${v.length})` : '—'; };
+    const resp = mine.filter((m) => m[1] === 'EVIDENCE_RESPONSE' && m[2] === id);
+    kv.push(['readings taken', ms.length], ['mean slot deviation', dev('slot')], ['mean tab deviation', dev('tab')],
+      ['evidence responses (verified)', `${resp.filter((m) => m[5].outcome === 'GRANTED').length} / ${resp.length}`]);
+  } else if (id === 'process') {
+    const al = mine.filter((m) => m[1] === 'ALARM'), sp = mine.filter((m) => m[1] === 'PROPOSE_SETPOINT');
+    kv.push(['measurements watched', recv.MEASUREMENT || 0], ['CUSUM alarms', al.length], ['set-point proposals', sp.length],
+      ['method', `EWMA + two-sided CUSUM (k ${A.spc.cusum.k}, h ${A.spc.cusum.h}), residuals clipped ±${A.spc.clip_mm} mm`]);
+  } else if (id === 'assembly') {
+    const dec = msgs.filter((m) => m[1] === 'DECISION' && m[5].stage === 'pair'), reqs = mine.filter((m) => m[1] === 'REQUEST_EVIDENCE');
+    const pu = mine.filter((m) => m[1] === 'DECISION_REQUEST').map((m) => m[5].p_unsafe).sort((a, b) => a - b);
+    kv.push(['pairs evaluated', dec.length], ['evidence requests sent (signed)', reqs.length],
+      ['median P(unsafe pair)', pu.length ? `${(100 * pu[pu.length >> 1]).toFixed(3)}%` : '—'], ['max P(unsafe pair)', pu.length ? `${(100 * pu[pu.length - 1]).toFixed(2)}%` : '—'],
+      ['requests planned by', A.planner ? `LLM (cached): ${A.planner.hits} hits, ${A.planner.fallbacks} fallbacks` : 'fixed order (code)']);
+  } else if (id === 'cost') {
+    const d = mine.filter((m) => m[1] === 'DECISION'), hold = d.filter((m) => m[5].decision === 'HOLD');
+    const thr = d.length ? d[d.length - 1][5].threshold : null;
+    kv.push(['decisions', d.length], ['PASS / HOLD', `${d.length - hold.length} / ${hold.length}`], ['hold threshold', thr !== null ? `${(100 * thr).toFixed(2)}% = hold / (hold + escape)` : '—'],
+      ['prices', `hold ${run.costs.hold} · escaped defect ${run.costs.escaped_defect}`], ['rule', A.policy_inside]);
+  } else if (id === 'learning') {
+    const ro = mine.filter((m) => m[1] === 'REVIEW_OUTCOME' && m[3] === id), by = {};
+    for (const m of ro) by[m[5].outcome] = (by[m[5].outcome] || 0) + 1;
+    kv.push(['expert reviews seen', ro.length], ...Object.entries(by).map(([k, v]) => [`  ${k.replace('_', ' ')}`, v]),
+      ['shipments seen', recv.SHIPPED || 0], ['recalibration proposals', sent.PROPOSE_RECALIBRATION || 0]);
+  } else if (id === 'governance') {
+    const pr = mine.filter((m) => m[1] === 'DECISION_PROPOSAL'), h = pr.filter((m) => m[5].state === 'HOLD').length;
+    kv.push(['decision proposals received', pr.length], ['PASS_REVIEW / HOLD', `${pr.length - h} / ${h}`],
+      ['rule', 'missing, late or unverified evidence -> HOLD; never PASS on an LLM or a single camera']);
+  }
+  const kinds = (o) => Object.entries(o).map(([k, v]) => `<span>${AG_KIND_LBL[k] || k}</span><span>${v}</span>`).join('') || '<span class="faint">none yet</span><span></span>';
+  const list = mine.filter((m) => !(m[2] === id && m[3] === id && m[1] === 'OBSERVATION')).slice(-40).reverse();
+  return `<button class="ghost" id="agBack" style="margin-bottom:10px">← All agents</button>
+    <div class="ag-head"><h2>${r.name || id}</h2>${r.role ? `<span class="chk" title="adilnurgg's role registry (roles.py)">role ${r.role}</span>` : ''}</div>
+    <div class="small muted" style="margin:-4px 0 10px"><b>${r.inside || ''}</b>, no LLM: ${r.what || ''}</div>
+    <div class="ag-sec"><h4>Key numbers <em>up to ${fmtT(t)}</em></h4><div class="ag-roster">${kv.map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join('')}</div></div>
+    <div class="ag-sec"><h4>Sent <em>${Object.values(sent).reduce((a, b) => a + b, 0)}</em></h4><div class="ag-roster">${kinds(sent)}</div></div>
+    <div class="ag-sec"><h4>Received <em>${Object.values(recv).reduce((a, b) => a + b, 0)}</em></h4><div class="ag-roster">${kinds(recv)}</div></div>
+    <div class="ag-sec"><h4>Its messages <em>latest 40 · click to open the part</em></h4><ul class="ag-log ag-click">${list.map((m) => agLine(m).replace('<li>', `<li data-case="${m[4]}">`)).join('') || '<li class="faint">Nothing yet at this time.</li>'}</ul></div>`;
+}
+function openCase(cas) {
+  const id = String(cas).startsWith('P-') ? String(cas).slice(2).split('+')[0] : cas;
+  select({ type: 'part', id, side: agState.side ?? lab.runs.length - 1 });
+}
+
 function renderAgents(force) {
   const el = $('#agentsBody'); if (!el || el.hidden) return;
   const now = performance.now(); if (!force && now - agState.last < 220) return; agState.last = now;
   const run = agRun();
   if (!run) { el.innerHTML = '<p class="faint">Run a simulation.</p>'; return; }
   if (!run.agents) { el.innerHTML = '<p class="faint">This run was made without agents.</p>'; return; }
+  if (agState.focus) {
+    if (!force && now - agState.lastFocus < 700) return; agState.lastFocus = now;
+    el.innerHTML = agentDetail(run, lab.t, agState.focus);
+    $('#agBack').onclick = () => { agState.focus = null; renderAgents(true); };
+    $$('[data-case]', el).forEach((li) => (li.onclick = () => openCase(li.dataset.case)));
+    return;
+  }
   const s = agentsAt(run, lab.t), A = run.agents, truth = $('#truth').checked, ck = A.check;
   const tot = Math.max(1, s.decided), mixKeys = ['pass', 'released', 'rework', 'scrap', 'pending'];
   const mixLbl = { pass: 'released first pass', released: 'held → released', rework: 'held → reworked', scrap: 'held → scrapped / split', pending: 'held, in review' };
@@ -1160,7 +1230,7 @@ function renderAgents(force) {
       <div class="ag-kpi"><b>${s.decided ? (s.n / s.decided).toFixed(1) : '0'}</b><span>messages / pair</span></div>
       <div class="ag-kpi"><b>${s.decided ? (s.bytes / s.decided / 1024).toFixed(2) : '0'}<small style="font-size:11px"> KB</small></b><span>data / pair</span></div>
     </div>
-    <div class="ag-sec"><h4>Who talks to whom <em>${s.n} messages</em></h4>${agNet(run, s, lab.t)}</div>
+    <div class="ag-sec"><h4>Who talks to whom <em>${s.n} messages · click an agent</em></h4>${agNet(run, s, lab.t)}</div>
     <div class="ag-sec"><h4>Protocol · adilnurgg's PeerBus <em>role-signed</em></h4>
       <div class="ag-roster">
         <span>evidence requests (ACL checked)</span><span>${s.proto.requests}</span>
@@ -1176,8 +1246,10 @@ function renderAgents(force) {
       ${rs.length ? `<div class="ag-pareto">${rs.map(([r, c]) => { cum += c; return `<span class="lbl" title="${r}">${REASON[r] || r}</span><span class="trk"><i style="width:${(100 * c / rmax).toFixed(1)}%"></i></span><span class="v">${c} <span class="faint">${Math.round(100 * cum / rsum)}%</span></span>`; }).join('')}</div>` : '<span class="faint small">No holds yet.</span>'}</div>
     <div class="ag-sec"><h4>Process agent · control charts <em>${s.alarms.length} alarm${s.alarms.length === 1 ? '' : 's'}</em></h4>${agSpc(run, lab.t)}</div>
     <div class="ag-sec"><h4>Learning agent · calibration check</h4><div class="ag-cal">${calib}</div></div>
-    <div class="ag-sec"><h4>Live log</h4><ul class="ag-log">${s.recent.filter((m) => m[2] !== m[3] || m[1] === 'PROPOSE_SETPOINT').slice(-9).reverse().map(agLine).join('') || '<li class="faint">Waiting for the first part.</li>'}</ul></div>`;
+    <div class="ag-sec"><h4>Live log <em>click a line to open the part</em></h4><ul class="ag-log ag-click">${s.recent.filter((m) => m[2] !== m[3] || m[1] === 'PROPOSE_SETPOINT').slice(-9).reverse().map((m) => agLine(m).replace('<li>', `<li data-case="${m[4]}">`)).join('') || '<li class="faint">Waiting for the first part.</li>'}</ul></div>`;
   $$('[data-agside]', el).forEach((b) => (b.onclick = () => { agState.side = +b.dataset.agside; renderAgents(true); }));
+  $$('[data-agent]', el).forEach((g) => (g.onclick = () => { agState.focus = g.dataset.agent; renderAgents(true); }));
+  $$('.ag-log [data-case]', el).forEach((li) => (li.onclick = () => openCase(li.dataset.case)));
 }
 
 function agentConversation(run, p) {

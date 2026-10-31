@@ -241,3 +241,6 @@ code{font-family:var(--mono);font-size:12px;background:var(--panel2);padding:1px
 .ag-roster span:nth-child(odd){color:var(--muted)}.ag-roster span:nth-child(even){font-family:var(--mono);color:var(--faint);text-align:right}
 .ag-cal{display:grid;grid-template-columns:1fr;gap:4px;font-size:11.5px;color:var(--muted)}
 .ag-conv li{grid-template-columns:44px 1fr}
+
+.ag-click li{cursor:pointer}.ag-click li:hover{background:var(--panel2)}
+.ag-net g[data-agent]:hover rect{stroke:var(--accent)}
