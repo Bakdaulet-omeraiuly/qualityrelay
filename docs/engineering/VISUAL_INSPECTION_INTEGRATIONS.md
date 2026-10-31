@@ -1,6 +1,6 @@
 # QualityRelay Visual Inspection Integrations — Open-Source Feature Pack
 
-**Status:** Implemented CPU visualization + model-output adapters + tested offline CLI. **NOT** a trained new defect detector, live website endpoint, physically validated quality decision, or sorter controller.
+**Status:** Implemented CPU visualization + model-output adapters + tested offline CLI, **and (31 Oct) wired into the website camera panel** via `POST /sim/vision/inspect` (section 9). **NOT** a trained new defect detector, physically validated quality decision, or sorter controller.
 
 **Owner:** Bakdaulet (Computer Vision / research). Integration handoff: adilnurgg (API/Web). Physical photographs, specimens and calibration: HyorinmaruK.
 
@@ -117,3 +117,29 @@ python -m pytest -q
 Local verification on QualityRelay 18 source baseline: **7 new tests passed; 118 total tests passed** (the baseline had 111). Running GitHub CI after integrating this branch and other open PRs is a separate required verification step. Model benchmarks and physical camera validation have **not** been performed by these tests.
 
 **Novelty boundary:** The new library is a practical visual-inspection integration, not CAPE's proposed scientific discovery. Our original research remains provenance-aware multiagent evidence acquisition, capacity-aware inspection and safety-verified action—not the heatmap or bounding boxes themselves.
+
+
+## 9. Website integration (31 Oct, Bakdaulet)
+
+`POST /sim/vision/inspect` (`qualityrelay17/sim/api_routes.py`) exposes these functions in the 3D Lab
+camera panel (click an iPhone camera → photo → "Visual inspection"):
+
+| action | what runs | output |
+|---|---|---|
+| `quality` | `image_quality` | blur / exposure warnings (uncalibrated heuristics) |
+| `set_reference` | ArUco registration (`vision_measure.rectify_by_marker`) | per-lane GOOD reference in `data/reference/` (git-ignored) |
+| `compare` | registration of the new photo to the **same metric frame**, then `reference_difference`, `overlay_heatmap`, `draw_candidate_boxes` | heatmap + candidate boxes + `visual-inspection-v1` report |
+| `roboflow` | `roboflow_predictions` on pasted prediction JSON | model boxes (untrusted, licence review required) |
+
+**What changed compared with the CLI:** `--aligned` is a user assertion there. On the website, the
+reference and the new photo are both warped by the printed ArUco marker's homography onto one 5 px/mm
+grid, so the alignment is computed. Lighting is still not corrected.
+
+**Synthetic check** (20 photo pairs, random camera poses, a 4 × 2 mm scratch):
+- scratch found in 20/20;
+- spurious edge regions 0.9 per photo without the edge band, 0.3 with the default 2 px edge band;
+- the edge band can hide defects that lie exactly on an edge, and the report says so.
+
+**Still the same limits:** every result is `UNVERIFIED_VISUAL_CANDIDATE`, `REVIEW_REQUIRED`, never
+a PASS. The STFPM / Anomalib heatmap is `NOT_CONFIGURED` on the site until a model is trained on
+real photos (the CLI `--mode anomaly-map` remains the path for exported `.npy` maps).

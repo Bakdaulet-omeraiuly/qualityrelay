@@ -9,13 +9,20 @@
 {"imports":{
  "three":"/sim/assets/three.module.js",
  "three/addons/OrbitControls.js":"/sim/assets/OrbitControls.js",
+ "camera-controls":"/sim/assets/camera-controls.module.js",
  "three/addons/STLLoader.js":"/sim/assets/STLLoader.js",
  "three/addons/CSS2DRenderer.js":"/sim/assets/CSS2DRenderer.js",
  "three/addons/RoomEnvironment.js":"/sim/assets/RoomEnvironment.js",
  "three/addons/EffectComposer.js":"/sim/assets/EffectComposer.js",
  "three/addons/RenderPass.js":"/sim/assets/RenderPass.js",
  "three/addons/UnrealBloomPass.js":"/sim/assets/UnrealBloomPass.js",
- "three/addons/OutputPass.js":"/sim/assets/OutputPass.js"}}
+ "three/addons/OutputPass.js":"/sim/assets/OutputPass.js",
+ "three/addons/GTAOPass.js":"/sim/assets/GTAOPass.js",
+ "three/addons/SMAAPass.js":"/sim/assets/SMAAPass.js",
+ "three/addons/RGBELoader.js":"/sim/assets/RGBELoader.js",
+ "three/examples/jsm/postprocessing/Pass.js":"/sim/assets/Pass.js",
+ "three-mesh-bvh":"/sim/assets/three-mesh-bvh.module.js",
+ "three-gpu-pathtracer":"/sim/assets/three-gpu-pathtracer.module.js"}}
 </script>
 </head>
 <body>
@@ -35,6 +42,10 @@
   <button class="iconbtn" id="toggleInspector" title="Show / hide inspector (I)" aria-label="Toggle inspector">⟩</button>
 </header>
 <!-- Sub-navigation per family; WEB-01: each family keeps its own source tier, never mixed. -->
+<nav class="subnav" id="subnav-physical" hidden>
+  <a href="#physical" data-view="physical">Hardware ledger</a><a href="#physical/bench" data-view="bench">Bench &amp; calibration</a>
+  <span class="subnote"><b>PHYSICAL</b> · ledger rows carry their own tier; bench calibration is manual caliper data, not station-authenticated.</span>
+</nav>
 <nav class="subnav" id="subnav-sim" hidden>
   <a href="#sim" data-view="lab">3D Lab</a><a href="#sim/parts" data-view="parts">Parts (CAD)</a><a href="#sim/results" data-view="results">Results: 15 scenarios</a>
   <span class="subnote"><b>SIMULATED</b> · synthetic parts, sensor noise and failures. Not a factory measurement.</span>
@@ -93,6 +104,9 @@
       <div class="pbody">
         <label class="check"><input id="labels" type="checkbox" checked/> Station labels <kbd>L</kbd></label>
         <label class="check"><input id="truth" type="checkbox" checked/> Ground truth (evaluator only) <kbd>T</kbd></label>
+        <label class="check" title="Ambient occlusion, warehouse HDRI lighting, 4K shadows, SMAA. Turn off on slow laptops (reloads)."><input id="hq" type="checkbox"/> High-quality graphics</label>
+        <div class="row2" style="margin-top:8px"><button id="photoBtn" class="btn" title="Pauses the line and path-traces the current view (real light bounces). Same scene, same simulated state.">Photo mode</button><button id="photoSave" class="btn" disabled>Save PNG</button></div>
+        <div id="photoStatus" class="small faint"></div>
         <div class="legend">
           <span><i class="sw slot"></i>Slot</span><span><i class="sw tab"></i>Tab</span>
           <span><i class="sw review"></i>HOLD → review</span><span><i class="sw scrap"></i>Scrapped</span>
@@ -142,6 +156,23 @@
     </aside>
     <div class="vp tall" id="partCanvas"><div class="corner bl" id="partLabel"></div><div class="corner tl faint">CAD_STL_MEASURED</div></div>
   </div>
+</section>
+
+<!-- ================= PHYSICAL BENCH (manual track, calibration) ================= -->
+<section class="view page" id="view-bench" hidden>
+  <div class="pagehead"><h1>Physical bench</h1>
+    <p>HyorinmaruK's manual-track demonstration: printed specimens, caliper and cameras, a human-confirmed servo diverter. These pages are his tools, served unchanged. Measurements exported from the logger into <code>data/measurements/</code> calibrate the simulator below; the caliper stays authoritative.</p></div>
+  <div class="two">
+    <div class="card"><h3>Tools</h3><ul class="claims" style="padding-left:18px">
+      <li><a href="/sim/physical/page/measurement_logger" target="_blank">Measurement logger</a>: caliper readings → CSV, optional ESP32 capture</li>
+      <li><a href="/sim/physical/page/manual_track_visualizer" target="_blank">Manual-track visualizer</a>: virtual line, wiring and firmware emulator</li>
+      <li><a href="/sim/physical/page/physical_build_guide" target="_blank">Physical build guide</a>: breadboard, jumpers, bench layout, bench test, print list</li>
+      <li><a href="/sim/physical/page/tabletop_demo" target="_blank">Tabletop demo</a>: one-spot walkthrough and video storyboard</li></ul>
+      <p class="faint small">Safety rules: AGENTS.md. No model or browser script moves the servo; every route needs a physical button press.</p></div>
+    <div class="card"><h3>Caliper calibration</h3><div id="physCal" class="small faint">Loading…</div></div>
+  </div>
+  <div class="card tablewrap" style="margin-top:12px"><h3>Specimens</h3><table id="physSpec"><thead><tr><th>Specimen</th><th>Design</th><th class="num">Readings</th><th class="num">Mean mm</th><th class="num">Nominal</th><th class="num">Deviation</th><th class="num">Spread</th></tr></thead><tbody></tbody></table></div>
+  <div class="card tablewrap" style="margin-top:12px"><h3>Photo vs caliper (same specimen ID)</h3><table id="physPhoto"><thead><tr><th>Specimen</th><th>Photo file</th><th class="num">Photo mm</th><th class="num">Caliper mm</th><th class="num">Photo − caliper</th><th class="num">px/mm</th></tr></thead><tbody></tbody></table></div>
 </section>
 
 <!-- ================= RESULTS ================= -->

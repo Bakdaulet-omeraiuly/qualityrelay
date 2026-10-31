@@ -4,7 +4,8 @@
 //   #agents/.. Agent Collaboration & Benchmark  TEST_FIXTURE trace + SIMULATED benchmark
 // Nothing from one family is drawn inside another: physical events never animate the simulated line.
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/OrbitControls.js';
+import CameraControls from 'camera-controls';
+CameraControls.install({ THREE });  // yomotsu/camera-controls: smooth orbit / truck / dolly, the de-facto three.js camera rig
 import { STLLoader } from 'three/addons/STLLoader.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/CSS2DRenderer.js';
 import { RoomEnvironment } from 'three/addons/RoomEnvironment.js';
@@ -12,6 +13,10 @@ import { EffectComposer } from 'three/addons/EffectComposer.js';
 import { RenderPass } from 'three/addons/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/OutputPass.js';
+import { GTAOPass } from 'three/addons/GTAOPass.js';
+import { SMAAPass } from 'three/addons/SMAAPass.js';
+import { RGBELoader } from 'three/addons/RGBELoader.js';
+let ptModule = null;  // three-gpu-pathtracer, loaded on first Photo mode
 
 // ---------------------------------------------------------------- utils
 const $ = (s, r = document) => r.querySelector(s);
@@ -30,6 +35,10 @@ const hash = (s) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c
 // Conveyor speed in scene units per SIMULATED second (1 unit ≈ 0.25 m in this layout -> ~0.15 m/s).
 const BELT_SPEED = 0.6;
 const BELT_Y = 0.62;  // conveyor surface height
+const Y_AXIS = new THREE.Vector3(0, 1, 0);
+const QUEUE_GAP = 1.3;  // centre spacing of queued parts: an assembled pair is 72 mm = 1.15 units, plus a visible gap
+// Tab centre relative to slot centre when assembled: +12 mm along the part (0.016 scene units per mm).
+const ASSEMBLED_TAB_OFFSET = new THREE.Vector3(12.3 * 0.016, -0.002, 0);  // 0.3 mm air gap + tiny drop: no coincident faces (z-fighting)
 const LANE_STATIONS = new Set(['phone', 'pi', 'caliper']);
 const laneKey = (st, line) => (LANE_STATIONS.has(st) ? `${st}_${line || 0}` : st);
 const ease = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
@@ -41,9 +50,63 @@ const loadSTL = (name) => {
   if (!stlCache.has(name)) stlCache.set(name, new Promise((res, rej) => stlLoader.load(`/sim/stl/${name}`, (g) => { g.computeVertexNormals(); res(g); }, undefined, rej)));
   return stlCache.get(name);
 };
+// FDM look: 0.2 mm layer lines as a bump map. UV v = height in layers (8 layers per texture tile),
+// computed in mm before scaling, so the line pitch is the true layer height.
+const LAYER_MM = 0.2, LAYERS_PER_TILE = 8;
+const addLayerUV = (g) => {
+  const pos = g.attributes.position, uv = new Float32Array(pos.count * 2);
+  for (let i = 0; i < pos.count; i++) { uv[2 * i] = (pos.getX(i) + pos.getZ(i)) / 4; uv[2 * i + 1] = pos.getY(i) / (LAYER_MM * LAYERS_PER_TILE); }
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+};
+const layerBump = (() => {
+  const c = document.createElement('canvas'); c.width = 4; c.height = 64; const g = c.getContext('2d');
+  for (let y = 0; y < 64; y++) { const v = Math.round(128 + 110 * Math.pow(Math.abs(Math.sin((Math.PI * y * LAYERS_PER_TILE) / 64)), 0.6)); g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(0, y, 4, 1); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+})();
+// Matte PLA: no clearcoat, slight sheen from the layer ridges.
+const plaMat = (color, o = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.5, metalness: 0, bumpMap: layerBump, bumpScale: 0.6, sheen: 0.25, sheenRoughness: 0.6, ...o });
 const metal = (color, o = {}) => new THREE.MeshStandardMaterial({ color, metalness: 0.2, roughness: 0.55, envMapIntensity: 0.45, ...o });
 
-// ---------------------------------------------------------------- renderer stage (env light + bloom + labels)
+// ---------------------------------------------------------------- render quality
+// ?quality=low (or the toggle) drops ambient occlusion, SMAA and the HDRI for slow laptops.
+const QUALITY = (() => { const q = new URLSearchParams(location.search).get('quality') || localStorage.getItem('qr_quality'); return q === 'low' ? 'low' : 'high'; })();
+// Real warehouse lighting (Poly Haven CC0 HDRI), shared by every stage; falls back to RoomEnvironment.
+let hdrPromise = null;
+const loadHDR = () => (hdrPromise ??= new Promise((res) => new RGBELoader().load('/sim/hdri/warehouse.hdr', res, undefined, () => res(null))));
+
+// Photo mode traces a flattened copy of what is visible: one mesh per material group and per instance,
+// plain PBR materials (colour, map, roughness, metalness, emission). The path tracer mis-assigns
+// materials on multi-material and instanced meshes, so it never sees those directly.
+function flattenForTrace(src) {
+  const out = new THREE.Scene(); src.updateMatrixWorld(true);
+  const simple = new Map();
+  const toStd = (m) => {
+    if (!simple.has(m)) simple.set(m, new THREE.MeshStandardMaterial({
+      color: m.color?.clone() ?? new THREE.Color(0xffffff), map: m.map ?? null,
+      roughness: m.roughness ?? 0.8, metalness: m.metalness ?? 0, roughnessMap: m.roughnessMap ?? null,
+      emissive: m.isMeshBasicMaterial ? m.color.clone().multiplyScalar(0.15) : (m.emissive?.clone() ?? new THREE.Color(0)),
+      emissiveIntensity: m.emissiveIntensity ?? 1, transparent: m.transparent, opacity: m.opacity, side: m.side }));
+    return simple.get(m);
+  };
+  src.traverseVisible((o) => {
+    if (o.isLight && (o.isDirectionalLight || o.isPointLight || o.isSpotLight)) { const l = o.clone(); l.matrixAutoUpdate = false; l.matrix.copy(o.matrixWorld); if (o.target) { l.target = o.target.clone(); out.add(l.target); l.target.position.setFromMatrixPosition(o.target.matrixWorld); } out.add(l); return; }
+    if (!o.isMesh || o.isCSS2DObject) return;
+    const base = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    const groups = Array.isArray(o.material) && o.geometry.groups.length ? o.geometry.groups : [{ start: 0, count: Infinity, materialIndex: 0 }];
+    const mtx = o.isInstancedMesh ? Array.from({ length: o.count }, (_, i) => { const m = new THREE.Matrix4(); o.getMatrixAt(i, m); return m.premultiply(o.matrixWorld); }) : [o.matrixWorld];
+    for (const g of groups) {
+      const mat = mats[g.materialIndex]; if (!mat || mat.visible === false) continue;
+      const geo = new THREE.BufferGeometry(); const n = base.attributes.position.count, a = g.start, b = Math.min(n, a + g.count);
+      for (const [k, at] of Object.entries(base.attributes)) geo.setAttribute(k, new THREE.BufferAttribute(at.array.slice(a * at.itemSize, b * at.itemSize), at.itemSize, at.normalized));
+      if (!geo.attributes.normal) geo.computeVertexNormals();
+      for (const m of mtx) { const mesh = new THREE.Mesh(geo, toStd(mat)); mesh.matrixAutoUpdate = false; mesh.matrix.copy(m); mesh.matrixWorld.copy(m); out.add(mesh); }
+    }
+  });
+  return out;
+}
+
+// ---------------------------------------------------------------- renderer stage (env light + AO + bloom + labels)
 function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true, labels = true } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -55,19 +118,32 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
   scene.fog = new THREE.Fog(0x07090c, 38, 80);
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+  let hdrEquirect = null;
+  if (QUALITY === 'high') loadHDR().then((hdr) => { if (hdr) { hdr.mapping = THREE.EquirectangularReflectionMapping; hdrEquirect = hdr; scene.environment = pmrem.fromEquirectangular(hdr).texture; scene.environmentIntensity = 0.8; } });
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
   camera.position.set(...camPos);
-  const controls = new OrbitControls(camera, renderer.domElement);
-  controls.target.set(...target); controls.enableDamping = true; controls.dampingFactor = 0.08;
+  const controls = new CameraControls(camera, renderer.domElement);
+  controls.setLookAt(...camPos, ...target, false);
+  Object.assign(controls, { smoothTime: 0.22, draggingSmoothTime: 0.1, dollyToCursor: true, dollySpeed: 0.8 });
+  const clock = new THREE.Clock(); let autoRotate = false;
+  controls.addEventListener('controlstart', () => (autoRotate = false));
   const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(10, 22, 12); key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -26, right: 26, top: 20, bottom: -20 }); key.shadow.bias = -0.0005;
+  const sm = QUALITY === 'high' ? 4096 : 1024;
+  key.shadow.mapSize.set(sm, sm); Object.assign(key.shadow.camera, { left: -24, right: 24, top: 16, bottom: -16, near: 4, far: 60 });
+  key.shadow.bias = -0.0003; key.shadow.normalBias = 0.02; key.shadow.radius = 3;
   scene.add(key, new THREE.HemisphereLight(0xbfd4ff, 0x15181d, 0.35));
   let composer = null;
   if (bloom) {
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
+    if (QUALITY === 'high') {
+      // Ground-contact shading: radius in scene units (1 unit ≈ 0.25 m), so ~10 cm.
+      const ao = new GTAOPass(scene, camera, 512, 512, undefined, { radius: 0.4, distanceExponent: 1.5, thickness: 1, scale: 1, samples: 16 });
+      ao.blendIntensity = 0.9; composer.addPass(ao);
+    }
     composer.addPass(new UnrealBloomPass(new THREE.Vector2(256, 256), 0.5, 0.4, 0.92));
     composer.addPass(new OutputPass());
+    if (QUALITY === 'high') composer.addPass(new SMAAPass(256, 256));  // composer bypasses the canvas MSAA
   }
   let labelRenderer = null;
   if (labels) {
@@ -81,20 +157,56 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
     camera.aspect = w / h; camera.updateProjectionMatrix();
   };
   new ResizeObserver(resize).observe(el); resize();
-  let tween = null;
+  let tween = null, tracer = null;
   return {
     el, renderer, scene, camera, controls, labelRenderer,
-    flyTo(pos, tgt, dur = 1.3) {
-      tween = { t0: performance.now(), dur: dur * 1000, p0: camera.position.clone(), q0: controls.target.clone(),
-        p1: new THREE.Vector3(...pos), q1: new THREE.Vector3(...tgt) };
-    },
-    render() {
-      if (tween) {
-        const u = Math.min(1, (performance.now() - tween.t0) / tween.dur), e = ease(u);
-        camera.position.lerpVectors(tween.p0, tween.p1, e); controls.target.lerpVectors(tween.q0, tween.q1, e);
-        if (u >= 1) tween = null;
+    set autoRotate(on) { autoRotate = on; },
+    target() { return controls.getTarget(new THREE.Vector3()); },
+    get tracer() { return tracer; },
+    // Photo mode: progressive path tracing of the same scene (three-gpu-pathtracer). Fog is dropped
+    // (unsupported); the environment is the raw warehouse HDRI so light bounces come from a real room.
+    async photo(on) {
+      if (on && !tracer) {
+        // r160 scenes lack background/environmentRotation (added in r162); the path tracer reads them.
+        for (const k of ['backgroundRotation', 'environmentRotation']) if (!(k in THREE.Scene.prototype)) Object.defineProperty(THREE.Scene.prototype, k, { get() { return (this[`_${k}`] ??= new THREE.Euler()); }, configurable: true });
+        ptModule ??= await import('three-gpu-pathtracer');
+        const hdr = hdrEquirect || await loadHDR();
+        if (hdr) hdr.mapping = THREE.EquirectangularReflectionMapping;
+        const flat = flattenForTrace(scene);
+        flat.background = scene.background; flat.environment = hdr || scene.environment; flat.environmentIntensity = 1.1;
+        tracer = new ptModule.WebGLPathTracer(renderer);
+        // Show the normal render until 8 samples exist, then fade the traced image in (no raw noise on screen).
+        // Trace at CSS-pixel resolution: on Retina this is ~4x faster per sample.
+        Object.assign(tracer, { minSamples: 8, renderDelay: 0, fadeDuration: 700, filterGlossyFactor: 0.5, dynamicLowRes: false, rasterizeScene: true,
+          renderScale: 1 / Math.min(window.devicePixelRatio || 1, 2) });
+        tracer.bounces = 6; tracer.tiles.set(2, 2);
+        tracer.setScene(flat, camera);
+        this._camM = camera.matrixWorld.clone();
+        if (labelRenderer) labelRenderer.domElement.style.visibility = 'hidden';
+      } else if (!on && tracer) {
+        const t = tracer; tracer = null;
+        try { t.dispose(); } catch (e) { /* r160 lacks some internals the tracer frees; nothing else to release */ }
+        if (labelRenderer) labelRenderer.domElement.style.visibility = '';
       }
-      controls.update();
+    },
+    snapshot() { if (tracer) tracer.renderSample(); else if (composer) composer.render(); else renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); },
+    move(right, forward) { const k = controls.distance * 0.08; controls.truck(right * k, 0, true); controls.forward(forward * k, true); },
+    zoomBy(f) { controls.dollyTo(THREE.MathUtils.clamp(controls.distance * f, controls.minDistance, controls.maxDistance), true); },
+    focus(point, dist = 4.5) {  // keep the viewing direction, move in on a point
+      const d = camera.position.clone().sub(this.target()).setLength(dist);
+      if (d.y < dist * 0.45) d.y = dist * 0.45;
+      const p = point.clone().add(d); controls.setLookAt(p.x, p.y, p.z, point.x, point.y, point.z, true);
+    },
+    flyTo(pos, tgt) { controls.setLookAt(...pos, ...tgt, true); },
+    render() {
+      const dt = clock.getDelta();
+      if (autoRotate) controls.azimuthAngle += dt * 0.25;
+      controls.update(dt);
+      if (tracer) {
+        camera.updateMatrixWorld();
+        if (!camera.matrixWorld.equals(this._camM)) { this._camM.copy(camera.matrixWorld); tracer.updateCamera(); }  // restart only when the view really moved
+        tracer.renderSample(); return;
+      }
       if (composer) composer.render(); else renderer.render(scene, camera);
       labelRenderer?.render(scene, camera);
     },
@@ -132,7 +244,9 @@ class FactoryView {
   constructor(el, partGeo) {
     this.el = el; this.partGeo = partGeo;
     this.s = makeStage(el, { camPos: [-2, 30, 34], target: [-1.2, 0, -1.2] });
-    this.s.controls.maxPolarAngle = Math.PI / 2.1; this.s.controls.minDistance = 6; this.s.controls.maxDistance = 70;
+    // camera-controls defaults: left-drag turn, right-drag / two fingers move, wheel / pinch zoom (to the cursor)
+    Object.assign(this.s.controls, { maxPolarAngle: Math.PI / 2.1, minDistance: 2.2, maxDistance: 60 });
+    this.s.controls.setBoundary(new THREE.Box3(new THREE.Vector3(-20, 0, -11), new THREE.Vector3(15, 3, 9)));  // the orbit centre stays in the hall
     this.parts = []; this.stations = {}; this.labels = []; this.readouts = {}; this.selected = null; this.data = null;
     this.build();
   }
@@ -140,11 +254,17 @@ class FactoryView {
     const sc = this.s.scene;
     // ---- hall: concrete floor, back wall with windows, pillars
     const fc = document.createElement('canvas'); fc.width = fc.height = 512; const fg = fc.getContext('2d');
-    fg.fillStyle = '#15191e'; fg.fillRect(0, 0, 512, 512);
-    for (let i = 0; i < 9000; i++) { const v = 18 + Math.random() * 16; fg.fillStyle = `rgba(${v},${v + 3},${v + 7},0.5)`; fg.fillRect(Math.random() * 512, Math.random() * 512, 2, 2); }
+    fg.fillStyle = '#23282e'; fg.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 40; i++) { const r = 40 + Math.random() * 120, x = Math.random() * 512, y = Math.random() * 512, gr = fg.createRadialGradient(x, y, 0, x, y, r); const v = 30 + Math.random() * 14;
+      gr.addColorStop(0, `rgba(${v},${v + 2},${v + 5},0.12)`); gr.addColorStop(1, 'rgba(0,0,0,0)'); fg.fillStyle = gr; fg.fillRect(0, 0, 512, 512); }
+    for (let i = 0; i < 9000; i++) { const v = 26 + Math.random() * 18; fg.fillStyle = `rgba(${v},${v + 3},${v + 7},0.45)`; fg.fillRect(Math.random() * 512, Math.random() * 512, 2, 2); }
     fg.strokeStyle = 'rgba(0,0,0,0.35)'; fg.lineWidth = 2; fg.strokeRect(0, 0, 512, 512);
     const floorTex = new THREE.CanvasTexture(fc); floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(24, 18); floorTex.colorSpace = THREE.SRGBColorSpace;
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 90), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.25 }));
+    // roughness varies (worn vs. polished patches) so the HDRI gives soft, uneven reflections like sealed concrete
+    const rc = document.createElement('canvas'); rc.width = rc.height = 256; const rg = rc.getContext('2d'); rg.fillStyle = '#d2d2d2'; rg.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 30; i++) { const x = Math.random() * 256, y = Math.random() * 256, r = 20 + Math.random() * 70, gr = rg.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, 'rgba(165,165,165,0.5)'); gr.addColorStop(1, 'rgba(165,165,165,0)'); rg.fillStyle = gr; rg.fillRect(0, 0, 256, 256); }
+    const roughTex = new THREE.CanvasTexture(rc); roughTex.wrapS = roughTex.wrapT = THREE.RepeatWrapping; roughTex.repeat.set(12, 9);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 90), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 1, roughnessMap: roughTex, metalness: 0.0, envMapIntensity: 0.45 }));
     floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; sc.add(floor);
     const pad = (x, z, w, d, c, o = 1) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, transparent: o < 1, opacity: o })); m.rotation.x = -Math.PI / 2; m.position.set(x, 0.006, z); m.receiveShadow = true; sc.add(m); };
     pad(-1.5, 0, 25, 3.2, 0x1d2a24, 0.8); pad(5.5, -6, 12.5, 4.2, 0x2a2414, 0.8); pad(-14, 0, 4.6, 8.8, 0x1b2230, 0.8);
@@ -205,7 +325,7 @@ class FactoryView {
       const head = add(new THREE.BoxGeometry(0.28, 0.32, 0.26), metal(0xe8eaed, { roughness: 0.4 }), 0, 1.4, 0);
       const nozzle = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.12, 12), new THREE.MeshStandardMaterial({ color: 0xffb347, emissive: 0xff7a00, emissiveIntensity: 0 }));
       nozzle.rotation.x = Math.PI; nozzle.position.set(0, -0.22, 0); head.add(nozzle);
-      const wipMesh = new THREE.Mesh(this.partGeo[kind], new THREE.MeshPhysicalMaterial({ color: kind === 'slot' ? C.slot : C.tab, roughness: 0.5, transparent: true, opacity: 0.9 }));
+      const wipMesh = new THREE.Mesh(this.partGeo[kind], plaMat(kind === 'slot' ? C.slot : C.tab, { transparent: true, opacity: 0.9 }));
       wipMesh.position.set(0, 0.81, 0); wipMesh.scale.set(1, 0.001, 1); wipMesh.visible = false; grp.add(wipMesh);
       const hit = new THREE.Mesh(new THREE.BoxGeometry(2.3, 2.6, 2.1), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
       hit.position.set(x, 1.3, z); hit.userData = { station: key }; sc.add(hit);
@@ -283,18 +403,28 @@ class FactoryView {
 
   load(data, caughtIds = new Set()) {
     const sc = this.s.scene; this.parts.forEach((x) => sc.remove(x.m)); this.parts = []; this.data = data;
-    const bins = { shipped: 0, scrap: 0 };
+    // bin places are given in order of arrival, so piles fill bottom-up (a pair = one place)
+    const arrival = new Map();
+    for (const p of data.parts) if (p.fate === 'shipped' || p.fate === 'scrap') {
+      const key = p.fate === 'shipped' ? `s:${p.pair || p.id}` : `x:${p.id}`, tEnd = pathFor(p, 0).at(-1)[0];
+      arrival.set(key, Math.min(arrival.get(key) ?? Infinity, tEnd));
+    }
+    const rank = (prefix) => new Map([...arrival].filter(([k]) => k.startsWith(prefix)).sort((a, b) => a[1] - b[1]).map(([k], i) => [k, i]));
+    const shipRank = rank('s:'), scrapRank = rank('x:');
     for (const st of Object.values(this.stations)) st.intervals = [];
     for (const p of data.parts) {
-      const kf = pathFor(p, p.fate === 'shipped' ? bins.shipped++ : p.fate === 'scrap' ? bins.scrap++ : 0);
-      const mat = new THREE.MeshPhysicalMaterial({ color: p.kind === 'slot' ? C.slot : C.tab, roughness: 0.38, metalness: 0.05, clearcoat: 0.6, clearcoatRoughness: 0.3 });
+      const bi = p.fate === 'shipped' ? shipRank.get(`s:${p.pair || p.id}`) : p.fate === 'scrap' ? scrapRank.get(`x:${p.id}`) : 0;
+      const kf = pathFor(p, bi);
+      const mat = plaMat(p.kind === 'slot' ? C.slot : C.tab);
       const m = new THREE.Mesh(this.partGeo[p.kind], mat); m.castShadow = true; m.visible = false; m.userData = { part: p.id }; sc.add(m);
       const review = p.events.filter((e) => e[0] === 'review').map((e) => [e[1], e[2]]);
       for (const [stn, a, b] of p.events) this.stations[laneKey(stn, p.line)]?.intervals.push([a, b, p]);
       const endT = kf[kf.length - 1][0];
       this.parts.push({ p, kf, m, review, endT, shipT: p.fate === 'shipped' ? endT : null, scrapT: p.fate === 'scrap' ? endT : null,
-        caught: caughtIds.has(p.id), yaw: (hash(p.id) - 0.5) * 0.5 });
+        caught: caughtIds.has(p.id), yaw: (hash(p.id) - 0.5) * 0.12, bin: bi,
+        asmT: p.events.find((e) => e[0] === 'assembly')?.[1] ?? null });
     }
+    this.slotByPair = new Map(this.parts.filter((x) => x.p.kind === 'slot' && x.p.pair).map((x) => [x.p.pair, x]));  // p.pair is the pair id
     for (const x of this.parts) {  // print jobs: from job start to the moment the part leaves the printer
       const k = x.p.kind === 'slot' ? 'printer_slot' : 'printer_tab';
       this.stations[k].intervals.push([x.p.print_t, x.kf[0][0], x.p]);
@@ -310,11 +440,59 @@ class FactoryView {
     // belt texture: 12 repeats over 23 units -> 1 texture unit = 1.92 scene units
     if (playing) for (const tx of this.beltTexes) tx.offset.x -= (dtReal * lab.speed * BELT_SPEED) / 1.92;
     let ship = 0, hold = 0, scrap = 0, esc = 0; const shipped = new Set(); let selVisible = false;
+    // pass 1: where the event log puts each part
+    let live = [];
     for (const x of this.parts) {
-      const xy = at(x.kf, t); x.m.visible = !!xy; if (!xy) continue;
+      x.xy = at(x.kf, t); x.m.visible = !!x.xy; if (!x.xy) continue;
+      x.inBin = (x.shipT && t >= x.shipT) || (x.scrapT && t >= x.scrapT); x.stack = 0;
+    }
+    for (const x of this.parts) {  // after every part has its xy for this frame
+      if (!x.xy) continue;
+      x.riding = x.p.kind === 'tab' && x.asmT !== null && t >= x.asmT && !x.inBin && !!this.slotByPair.get(x.p.pair)?.xy;  // assembled: tab sits in its slot
+      if (!x.inBin && !x.riding) live.push(x);
+    }
+    // pass 2: parts are solid. Anything that would overlap a part ahead of it on the line waits behind it
+    // (queue), ordered by position along the flow (+x). Display only: event times are untouched.
+    const placed = [], bx = P.buffer[0];
+    const resting = live.filter((x) => Math.abs(x.xy[0] - bx) < 0.85 && Math.abs(x.xy[1]) < 1.75 && !x.xy[2]).sort((a, b) => a.kf[0][0] - b.kf[0][0]);
+    let rackN = 0;
+    // rack sits on the upstream half of the buffer table so the assembly belt (from x = 1.3) stays clear
+    const rack = (x) => { const i = rackN++; x.xy = [bx - 0.3, -1.5 + (i % 6) * 0.6, 0]; x.stack = Math.floor(i / 6); x.w = x.p.kind === 'slot' ? 0.6 : 0.4; placed.push(x); };
+    resting.forEach(rack);
+    live = live.filter((x) => !resting.includes(x));
+    live.sort((a, b) => b.xy[0] - a.xy[0] || a.p.print_t - b.p.print_t);
+    for (const x of live) {
+      const w = x.p.kind === 'slot' ? 0.6 : 0.4;  // footprint width + margin for the small yaw
+      // queue up to 3 places back; a longer queue (e.g. a full buffer) is piled up in place instead,
+      // so parts never get pushed through printers or walls
+      x.stack = 0; let pushes = 0, racked = false;
+      for (let k = 0; k < 40; k++) {
+        // 1e-6 slack: a part just pushed to exactly GAP behind another must not count as touching it again
+        const hit = placed.find((o) => o.stack === x.stack && Math.abs(o.xy[0] - x.xy[0]) < QUEUE_GAP - 1e-6 && Math.abs(o.xy[1] - x.xy[1]) < (w + o.w) / 2);
+        if (!hit) break;
+        const back = hit.xy[0] - QUEUE_GAP;
+        // only queue backwards while staying on the same surface (belt / table); never drop a part onto the floor
+        if (x.stack === 0 && pushes < 3 && Math.abs(heightAt(back, x.xy[1]) - heightAt(x.xy[0], x.xy[1])) < 0.01) { x.xy = [back, x.xy[1], 0, x.xy[3]]; pushes++; }  // keeps its carried height
+        else if (x.xy[0] > bx && x.xy[0] < P.assembly[0] && Math.abs(x.xy[1]) < 0.7) { rack(x); racked = true; break; }  // the assembly queue backs up into the buffer rack
+        else { x.xy = [hit.xy[0], hit.xy[1], hit.xy[2], hit.xy[3]]; x.stack = hit.stack + 1; }  // ride on top, including the part's hop
+      }
+      if (!racked) { x.w = w; placed.push(x); }
+    }
+    // all slots first, so an assembled tab always follows its slot's position from this frame
+    for (const x of [...this.parts.filter((q) => q.p.kind !== 'tab'), ...this.parts.filter((q) => q.p.kind === 'tab')]) {
+      if (!x.xy) continue;
+      const xy = x.xy;
       const inReview = x.review.some(([a, b]) => t >= a && t <= b);
-      const stacked = x.p.kind === 'tab' && x.shipT && t >= x.shipT;
-      x.m.position.set(xy[0], heightAt(xy[0], xy[1]) + (stacked ? 0.11 : 0) + xy[2], xy[1]); x.m.rotation.y = x.yaw;
+      const toBin = (x.shipT || x.scrapT) && t >= x.kf[x.kf.length - 2][0];  // final move into the bin: aim at its layer
+      const layer = toBin ? Math.floor(x.bin / 8) * 0.1 : 0;
+      const slotOf = x.p.kind === 'tab' && x.p.pair && (x.riding || (x.shipT && t >= x.shipT)) ? this.slotByPair.get(x.p.pair) : null;
+      if (slotOf && slotOf.m.visible) {
+        // assembled: the tab sits in the slot channel, pushed to the closed base (CAD: tab x 12..72 mm in a 0..60 mm slot)
+        x.m.rotation.y = slotOf.m.rotation.y;
+        x.m.position.copy(ASSEMBLED_TAB_OFFSET).applyAxisAngle(Y_AXIS, slotOf.m.rotation.y).add(slotOf.m.position);
+      } else {
+        x.m.position.set(xy[0], (xy[3] ?? heightAt(xy[0], xy[1])) + layer + (x.stack || 0) * 0.1 + xy[2], xy[1]); x.m.rotation.y = x.inBin ? 0 : x.yaw;
+      }
       const mat = x.m.material; let col = x.p.kind === 'slot' ? C.slot : C.tab, em = BLACK, ei = 0;
       if (inReview) { col = C.review; em = C.review; ei = 0.35; }
       if (x.scrapT && t >= x.scrapT) col = C.scrap;
@@ -404,26 +582,34 @@ function heightAt(x, z) {
 function pathFor(p, binIndex) {
   const kf = [], j = hash(p.id), jz = (j - 0.5) * 0.6;
   const pos = (k, dx = 0, dz = 0) => { const [x, z] = P[laneKey(k, p.line)] || P.buffer; return [x + dx, z + dz]; };
+  // waiting spot just before a station, pulled in until it is on the station's own surface (belt / table), never the floor
+  const onSurface = (k, dx, dz) => { const [sx, sz] = pos(k), h = heightAt(sx, sz); let f = 1;
+    while (f > 0.05 && Math.abs(heightAt(sx + dx * f, sz + dz * f) - h) > 0.01) f *= 0.8;
+    return [sx + dx * f, sz + dz * f]; };
   const pr = p.kind === 'slot' ? 'printer_slot' : 'printer_tab';
   const first = p.events.length ? p.events[0][1] : p.print_t + 60;
   const out = Math.max(p.print_t, first - 25);
-  kf.push([out, ...pos(pr, 1.7, jz * 0.8)]);
+  // printed part is handed from the printer straight onto the start of its lane belt (never the floor)
+  const laneZ = (P[laneKey('phone', p.line)] || P.phone_0)[1], beltStart = [-12.2, laneZ + jz * 0.25];
+  kf.push([out, ...beltStart]);
   let prevEnd = out + 2, prevKey = pr;
-  kf.push([prevEnd, ...pos(pr, 1.7, jz * 0.8)]);
+  kf.push([prevEnd, ...beltStart]);
   for (const [station, start, end] of p.events) {
-    const [px, pz] = pos(prevKey), [sx, sz] = pos(station);
+    const [px, pz] = prevKey === pr ? beltStart : pos(prevKey), [sx, sz] = pos(station);
     const travel = Math.min(Math.max(0.5, start - prevEnd), Math.hypot(sx - px, sz - pz) / BELT_SPEED);
     const arrive = Math.max(prevEnd, Math.min(start, prevEnd + travel));
-    kf.push([prevEnd, ...pos(prevKey, prevKey.startsWith('printer') ? 1.7 : 0, prevKey.startsWith('printer') ? jz * 0.8 : jz * 0.25)]);
-    if (start - arrive > 1) kf.push([arrive, ...pos(station, -1.15, jz)], [start - 0.5, ...pos(station, -0.95, jz)]);
+    kf.push([prevEnd, ...(prevKey === pr ? beltStart : pos(prevKey, 0, jz * 0.25))]);
+    if (start - arrive > 1) kf.push([arrive, ...onSurface(station, -1.15, jz)], [start - 0.5, ...onSurface(station, -0.95, jz)]);
     kf.push([start, ...pos(station, 0, jz * 0.25)], [end, ...pos(station, 0, jz * 0.25)]);
     prevEnd = end; prevKey = station;
   }
   const last = kf[kf.length - 1][0];
-  const binPos = (k) => { const [x, z] = P[k]; const i = binIndex; return [x - 1.05 + (i % 6) * 0.42, z - 1.05 + (Math.floor(i / 6) % 6) * 0.42]; };
+  // bins hold a 2 x 4 grid per layer; parts are 0.96 x 0.53 (slot) / 0.32 (tab) scene units, so cells never overlap
+  const binPos = (k) => { const [x, z] = P[k]; const c = binIndex % 8; return [x - 0.7 + (c % 2) * 1.25, z - 0.9 + Math.floor(c / 2) * 0.6]; };
   const [lx, lz] = pos(prevKey), toBin = (k) => Math.hypot(P[k][0] - lx, P[k][1] - lz) / BELT_SPEED;
-  if (p.fate === 'shipped') kf.push([last + toBin('ship'), ...binPos('ship')]);
-  else if (p.fate === 'scrap') kf.push([last + toBin('scrap'), ...binPos('scrap')]);
+  // the 4th value is the arc height of that move: parts are lifted over the pile, never through it
+  if (p.fate === 'shipped') kf.push([last + toBin('ship'), ...binPos('ship'), 1.4]);
+  else if (p.fate === 'scrap') kf.push([last + toBin('scrap'), ...binPos('scrap'), 1.0]);
   else kf.push([last + 4, ...pos('buffer', (j - 0.5) * 1.2, jz)]);
   return kf;
 }
@@ -432,9 +618,12 @@ function at(kf, t) {
   for (let i = 1; i < kf.length; i++) if (t <= kf[i][0]) {
     const [t0, x0, z0] = kf[i - 1], [t1, x1, z1] = kf[i]; const u = t1 > t0 ? (t - t0) / (t1 - t0) : 1;
     const moving = Math.hypot(x1 - x0, z1 - z0) > 0.5;
-    return [x0 + (x1 - x0) * u, z0 + (z1 - z0) * u, moving ? Math.sin(Math.PI * u) * 0.15 : 0];
+    // while moving between two surfaces the part is carried at a height blended between them, so it
+    // never dips to the floor over a gap (4th value: surface height)
+    const x = x0 + (x1 - x0) * u, z = z0 + (z1 - z0) * u;
+    return [x, z, moving ? Math.sin(Math.PI * u) * (kf[i][3] ?? 0.15) : 0, moving ? heightAt(x0, z0) + (heightAt(x1, z1) - heightAt(x0, z0)) * u : heightAt(x, z)];
   }
-  const l = kf[kf.length - 1]; return [l[1], l[2], 0];
+  const l = kf[kf.length - 1]; return [l[1], l[2], 0, heightAt(l[1], l[2])];
 }
 
 // ---------------------------------------------------------------- lab controller
@@ -451,7 +640,7 @@ const lab = { mode: 'single', views: [], runs: [], t: 0, T: 1, t0: 0, playing: t
 
 async function initLab() {
   const [sg, tg] = await Promise.all([loadSTL('slot_nominal_21p00.stl'), loadSTL('tab_nominal_20p00.stl')]);
-  const prep = (g) => { const c = g.clone(); c.rotateX(-Math.PI / 2); c.center(); c.scale(0.016, 0.016, 0.016); return c; };
+  const prep = (g) => { const c = g.clone(); c.rotateX(-Math.PI / 2); c.center(); addLayerUV(c); c.scale(0.016, 0.016, 0.016); return c; };
   const partGeo = { slot: prep(sg), tab: prep(tg) };
   lab.views = [new FactoryView($('#vpA'), partGeo), new FactoryView($('#vpB'), partGeo)];
   const sc = await api('/sim/scenarios');
@@ -466,13 +655,31 @@ async function initLab() {
   $('#truth').onchange = () => renderInspector();
   $('#storyNext').onclick = () => story(lab.story + 1); $('#storyPrev').onclick = () => story(lab.story - 1);
   $('#toggleInspector').onclick = () => $('#studio').classList.toggle('noinsp');
-  lab.views.forEach((v, i) => bindPicking(v, i));
+  lab.views.forEach((v, i) => { bindPicking(v, i); viewControls(v); });
+  // Compare mode: the other camera follows the one being moved, so the two lines stay comparable
+  let leader = 0;
+  lab.views.forEach((v, i) => {
+    v.s.controls.addEventListener('controlstart', () => (leader = i));
+    v.s.controls.addEventListener('update', () => {
+      if (lab.mode !== 'compare' || leader !== i) return;
+      const o = lab.views[1 - i].s, p = v.s.camera.position, t = v.s.target();
+      o.controls.setLookAt(p.x, p.y, p.z, t.x, t.y, t.z, false);
+    });
+  });
   window.addEventListener('keydown', (e) => {
     if (['INPUT', 'SELECT'].includes(document.activeElement?.tagName) || $('#view-lab').hidden) return;
     if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
     else if (e.key === 'l' || e.key === 'L') { $('#labels').checked = !$('#labels').checked; $('#labels').onchange(); }
     else if (e.key === 't' || e.key === 'T') { $('#truth').checked = !$('#truth').checked; renderInspector(); }
     else if (e.key === 'i' || e.key === 'I') $('#studio').classList.toggle('noinsp');
+    else if ('wasdWASD'.includes(e.key) && e.key.length === 1) {  // WASD: move over the floor
+      const k = { w: [0, 1], s: [0, -1], a: [-1, 0], d: [1, 0] }[e.key.toLowerCase()];
+      lab.views.forEach((v) => v.s.move(...k));
+    }
+    else if (e.key === '+' || e.key === '=') lab.views.forEach((v) => v.s.zoomBy(0.7));
+    else if (e.key === '-' || e.key === '_') lab.views.forEach((v) => v.s.zoomBy(1.4));
+    else if (e.key === '0') lab.views.forEach(resetView);
+    else if ((e.key === 'f' || e.key === 'F') && lab.sel) lab.views.forEach((v) => focusOn(v, lab.sel));
     else if (e.key === 'ArrowRight') story(lab.story + 1);
     else if (e.key === 'ArrowLeft') story(lab.story - 1);
   });
@@ -481,6 +688,7 @@ async function initLab() {
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
     if (!$('#view-lab').hidden) {
       if (lab.runs.length) {
+        if (lab.views[0]?.s.tracer && lab.playing) { lab.playing = false; $('#playBtn').textContent = '▶'; }  // Photo mode freezes the line
         if (lab.playing) { lab.t += dt * lab.speed; if (lab.t > lab.T) lab.t = lab.t0; $('#timeline').value = Math.round(1000 * (lab.t - lab.t0) / Math.max(1, lab.T - lab.t0)); }
         $('#clock').textContent = mmss(lab.t);
         const truth = $('#truth').checked;
@@ -507,6 +715,8 @@ async function initLab() {
   lab.views.forEach((v) => v.s.flyTo(fitCam(v, STORY[0][2], STORY[0][3]), STORY[0][3], 2.6));
   if (q.get('select')?.startsWith('phone_') || q.get('select')?.startsWith('caliper_')) select({ type: 'station', id: q.get('select'), side: 0 });
   if (q.get('part')) select({ type: 'part', id: q.get('part'), side: lab.runs.length - 1 });
+  if (q.get('debug') === '1') window.__qrLab = lab;  // test hook (overlap check)
+  if (q.get('photo') === '1') setTimeout(() => $('#photoBtn')?.click(), 3200);  // URL preset: open in Photo mode
   if (q.get('select') === 'caught') { const id = [...lab.caught][0] || lab.runs.at(-1)?.parts.find((p) => p.pair)?.id; if (id) select({ type: 'part', id, side: lab.runs.length - 1 }); }
 }
 
@@ -539,6 +749,30 @@ function bindPicking(v, side) {
     else tip.hidden = true;
   });
   el.addEventListener('pointerleave', () => (tip.hidden = true));
+  el.addEventListener('dblclick', (e) => {  // double-click: fly to the part/station; on empty floor: back to the overview
+    const hit = v.pick(e);
+    if (hit) { select({ ...hit, side }); focusOn(v, hit); } else resetView(v);
+  });
+}
+function objPoint(v, sel) {
+  if (sel?.type === 'part') { const x = v.parts.find((q) => q.p.id === sel.id); return x?.m.visible ? x.m.position.clone() : null; }
+  if (sel?.type === 'station') { const st = v.stations[sel.id]; return st ? st.mesh.getWorldPosition(new THREE.Vector3()) : null; }
+  return null;
+}
+function focusOn(v, sel) { const pt = objPoint(v, sel); if (pt) v.s.focus(pt, sel.type === 'part' ? 2.6 : 5); }
+function resetView(v) { v.s.flyTo(fitCam(v, STORY[0][2], STORY[0][3]), STORY[0][3], 0.9); }
+function viewControls(v) {
+  const box = document.createElement('div'); box.className = 'viewctl';
+  box.innerHTML = `<button data-a="in" title="Zoom in (+)">+</button><button data-a="out" title="Zoom out (−)">−</button>
+    <button data-a="focus" title="Fly to the selected part or station (F)">◎</button><button data-a="reset" title="Whole line (0 or double-click empty floor)">⤢</button>`;
+  box.onclick = (e) => { const a = e.target.dataset.a; if (!a) return;
+    if (a === 'in') v.s.zoomBy(0.7); else if (a === 'out') v.s.zoomBy(1.4); else if (a === 'reset') resetView(v);
+    else if (a === 'focus' && lab.sel) focusOn(v, lab.sel); };
+  const hint = document.createElement('div'); hint.className = 'viewhint';
+  hint.innerHTML = 'drag: turn · right-drag: move<br>scroll / pinch: zoom to cursor<br>WASD: move · double-click: fly to';
+  v.s.el.append(box, hint);
+  setTimeout(() => hint.classList.add('gone'), 9000);  // shown once at start, then out of the way
+  box.onmouseenter = () => hint.classList.remove('gone'); box.onmouseleave = () => hint.classList.add('gone');
 }
 
 // Narrow viewports (compare mode) need the camera further back to show the whole line.
@@ -566,6 +800,7 @@ function story(i) {
 }
 
 async function run() {
+  if (lab.views[0]?.s.tracer) await exitPhoto();
   const btn = $('#runBtn'); btn.disabled = true; $('#runStatus').textContent = 'Running the discrete-event engine…';
   const base = { scenario: $('#scenario').value || 'F01', seed: +$('#seed').value, n_pairs: +$('#npairs').value };
   const right = { ...base, policy: $('#policy').value, pairing: $('#pairing').value };
@@ -672,9 +907,24 @@ function cameraSection(k) {
     <div class="row2" style="margin-top:8px"><button class="ghost" id="camDevice">📷 Open device camera</button>
       <label class="ghost filebtn">⬆ Upload photo<input type="file" accept="image/*" capture="environment" id="camFile" hidden></label></div>
     <video id="camVideo" class="camimg" playsinline muted hidden></video><img id="camPhoto" class="camimg" alt="captured photo" hidden>
-    <div class="row2" style="margin-top:8px"><select id="camLabel" aria-label="Label"><option value="inbox">label later</option><option value="good">good part</option><option value="defect">defective part</option></select>
-      <button class="primary" id="camSave" disabled>Save + NVIDIA check</button></div>
-    <div id="camResult" class="faint small" style="margin-top:8px">The photo is saved as PHYSICAL_CAPTURE training data (data/prints/…). The NVIDIA anomaly model scores it once it has been trained on real photos.</div></section>`;
+    <div class="row2" style="margin-top:8px">
+      <label>Purpose<select id="camPurpose"><option value="training">training photo (model)</option><option value="measurement">measurement / reference</option></select></label>
+      <label>Specimen ID<input id="camSpec" type="text" list="specIds" placeholder="e.g. S-GOOD-01" maxlength="40" style="display:block;width:100%;margin-top:4px;background:var(--panel2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:6px 8px"></label></div>
+    <datalist id="specIds">${['S-GOOD', 'S-NOM', 'S-RISK', 'S-DEF', 'T-GOOD', 'T-NOM', 'T-RISK', 'T-DEF'].map((x) => `<option value="${x}-01">`).join('')}</datalist>
+    <div class="row2">
+      <label>Label<select id="camLabel"><option value="inbox">label later</option><option value="good">good part</option><option value="defect">defective part</option></select></label>
+      <label>Defect type<select id="camDefect" disabled><option value="">—</option>${['warp', 'stringing', 'chip', 'hole', 'crack', 'layer_shift', 'under_extrusion', 'wrong_size', 'other'].map((d) => `<option>${d}</option>`).join('')}</select></label></div>
+    <div class="row2"><label>Caliper reading, mm (optional)<input id="camCal" type="number" step="0.01" min="0" max="99"></label>
+      <button class="primary" id="camSave" disabled style="align-self:end;margin-bottom:10px">Save + NVIDIA check</button></div>
+    <p class="faint small">Training photos: marker in the same corner every time, turn good parts a little between shots, mix part types. Measurement photos: part placed the same way against the marker; add the caliper reading. See PHOTO_CAPTURE_GUIDE.md.</p>
+    <div id="camResult" class="faint small" style="margin-top:8px">The photo is saved as PHYSICAL_CAPTURE training data (data/prints/…). The NVIDIA anomaly model scores it once it has been trained on real photos.</div></section>
+    <section><h4>Visual inspection <span class="badge mute">candidates · review required</span></h4>
+      <p class="faint small">Uses the open-source inspection pack: image-quality gate, photo-vs-reference difference after ArUco registration, heatmap, candidate boxes, and Roboflow prediction boxes. Results are UNVERIFIED_VISUAL_CANDIDATE and never pass or reject a part.</p>
+      <div class="row2"><button class="ghost" id="visRef" disabled>★ Set as GOOD reference</button><button class="ghost" id="visCmp" disabled>⇄ Compare with reference</button></div>
+      <details style="margin-top:8px"><summary class="faint small">Model output (Roboflow prediction JSON)</summary>
+        <textarea id="visRf" rows="4" style="width:100%;margin-top:6px;background:var(--panel2);color:var(--text);border:1px solid var(--border2);border-radius:6px;font:11px var(--mono)" placeholder='{"predictions":[{"x":120,"y":80,"width":30,"height":20,"confidence":0.7,"class":"crack"}]}'></textarea>
+        <button class="ghost" id="visRfBtn" disabled style="width:100%">Draw model boxes</button></details>
+      <div id="visOut" class="small" style="margin-top:8px"></div></section>`;
 }
 function passportURL(id) {
   const r = lab.runs.at(-1); const q = new URLSearchParams({ scenario: r.scenario, seed: r.seed, pairs: r.n_pairs, policy: r.policy, pairing: r.pairing, part: id });
@@ -722,7 +972,7 @@ function summaryCard() {
   html += `<section><h4>How to read this</h4><ul class="tl">
     <li><span>click a part</span><span class="faint">evidence chain behind its decision</span><span></span></li>
     <li><span>click a station</span><span class="faint">its load in this run</span><span></span></li>
-    <li><span>keys</span><span class="faint"><kbd>space</kbd> play · <kbd>L</kbd> labels · <kbd>T</kbd> truth · <kbd>←</kbd><kbd>→</kbd> tour</span><span></span></li></ul></section>
+    <li><span>keys</span><span class="faint"><kbd>space</kbd> play · <kbd>L</kbd> labels · <kbd>T</kbd> truth · <kbd>←</kbd><kbd>→</kbd> tour · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move · <kbd>+</kbd><kbd>−</kbd> zoom · <kbd>F</kbd> fly to selection · <kbd>0</kbd> whole line</span><span></span></li></ul></section>
     <section><h4>Provenance</h4><p class="faint small">SIMULATED. Toy part generator, illustrative station timings, held-out calibration ${r.model.calibration_id}. Not a factory measurement.
       This 3D Lab runs two lanes with one iPhone camera each (cameras: ${(r.cameras || []).join(', ')}) and reprints confirmed defects. The pre-registered results in the Results tab used phone + Pi cameras without reprint.</p></section>`;
   return html;
@@ -752,7 +1002,29 @@ function bindCameraPanel(k, side) {
   cam.up.set(0, 0, -1); cam.position.set(...st.camPos); cam.lookAt(...st.camTarget);
   lab.camView = { view, cam, renderer: camRenderer };
   let photo = null;
-  const setPhoto = (dataUrl) => { photo = dataUrl; $('#camPhoto').src = dataUrl; $('#camPhoto').hidden = false; $('#camVideo').hidden = true; $('#camSave').disabled = false; };
+  const setPhoto = (dataUrl) => { photo = dataUrl; $('#camPhoto').src = dataUrl; $('#camPhoto').hidden = false; $('#camVideo').hidden = true; $('#camSave').disabled = false;
+    for (const id of ['#visRef', '#visCmp', '#visRfBtn']) $(id).disabled = false; inspect('quality'); };
+  const lane = k === 'phone_0' ? 'slot' : 'tab';
+  const inspect = async (action) => {
+    const out = $('#visOut'); out.innerHTML = '<span class="faint">Running…</span>';
+    try {
+      const r = await api('/sim/vision/inspect', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lane, action, image_b64: photo, roboflow_json: action === 'roboflow' ? $('#visRf').value : null }) });
+      const q = r.quality, rep = r.report;
+      let html = `<div class="kv"><span>image quality</span><span>${q.warnings.length ? `<span class="badge hold">${q.warnings.join(', ')}</span>` : '<span class="badge ok">usable</span>'}</span>
+        <span>sharpness (Laplacian var.)</span><span>${fmt(q.blur_laplacian_variance, 0)}</span>`;
+      if (r.registration) html += `<span>registration</span><span>${r.registration.status === 'REGISTERED' ? 'ArUco ✔' : r.registration.status}</span>`;
+      if (rep) html += `<span>candidate regions</span><span>${rep.regions.length}</span><span>decision</span><span><span class="badge hold">${rep.decision}</span></span>`;
+      html += '</div>';
+      if (r.reference_saved) html += `<div class="why">GOOD reference saved for the ${lane} lane (registered to the marker frame).</div><img class="camimg" src="${r.preview}" alt="reference">`;
+      if (r.heatmap) html += `<div class="row2" style="margin-top:6px"><figure style="margin:0"><img class="camimg" src="${r.heatmap}" alt="difference heatmap"><figcaption class="faint small">difference heatmap</figcaption></figure><figure style="margin:0"><img class="camimg" src="${r.boxes}" alt="candidate boxes"><figcaption class="faint small">candidate boxes</figcaption></figure></div>`;
+      else if (r.boxes) html += `<img class="camimg" src="${r.boxes}" alt="model boxes"><p class="faint small">Model boxes: untrusted predictions; check the model's licence and weights.</p>`;
+      if (rep) html += `<p class="faint small">${rep.claim_boundary} ${rep.warnings.join(' · ')}</p>`;
+      html += `<p class="faint small">Anomaly heatmap (STFPM / Anomalib): ${r.anomaly_model.status}.</p>`;
+      out.innerHTML = html;
+    } catch (err) { out.innerHTML = `<span class="faint">${err.message.includes('409') ? 'No GOOD reference for this lane yet: set one first.' : err.message.includes('422') ? 'Needs the printed ArUco marker in the photo (or valid Roboflow JSON).' : err.message}</span>`; }
+  };
+  $('#visRef').onclick = () => inspect('set_reference'); $('#visCmp').onclick = () => inspect('compare'); $('#visRfBtn').onclick = () => inspect('roboflow');
   $('#camFile').onchange = (e) => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = () => setPhoto(r.result); r.readAsDataURL(f); };
   $('#camDevice').onclick = async () => {
     if (camStream) {   // second click = capture a frame
@@ -765,23 +1037,27 @@ function bindCameraPanel(k, side) {
       $('#camDevice').textContent = '⏺ Capture photo';
     } catch (err) { $('#camResult').textContent = `Camera unavailable: ${err.message}. Use "Upload photo" instead.`; }
   };
+  $('#camLabel').onchange = () => { $('#camDefect').disabled = $('#camLabel').value !== 'defect'; if ($('#camDefect').disabled) $('#camDefect').value = ''; };
   $('#camSave').onclick = async () => {
     $('#camSave').disabled = true; $('#camResult').textContent = 'Saving…';
     try {
       const r = await api('/sim/vision/capture', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lane: k === 'phone_0' ? 'slot' : 'tab', label: $('#camLabel').value, image_b64: photo }) });
+        body: JSON.stringify({ lane: k === 'phone_0' ? 'slot' : 'tab', label: $('#camLabel').value, image_b64: photo, purpose: $('#camPurpose').value,
+          specimen_id: $('#camSpec').value.trim() || null, defect_type: $('#camDefect').value || null,
+          caliper_mm: $('#camCal').value ? +$('#camCal').value : null }) });
       const n = r.nvidia_anomaly, c = r.dataset_counts;
       const ms = r.measurement || {};
       const meas = ms.status === 'MEASURED' ? `<span>width from photo</span><span>${ms.kind === 'slot_opening' ? 'slot opening' : 'tab width'} <b>${fmt(ms.width_mm, 3)} mm</b></span><span>photo resolution</span><span>${fmt(ms.photo_px_per_mm, 1)} px/mm${ms.photo_px_per_mm < 15 ? ' (low: move closer)' : ''}</span>`
         : `<span>width from photo</span><span class="faint">${ms.status || '—'}: put the ArUco sheet next to the part</span>`;
-      $('#camResult').innerHTML = `<div class="kv">${meas}<span>saved</span><span>${r.saved.split('/').slice(-2).join('/')}</span><span>size</span><span>${r.width} × ${r.height}</span>
+      const cal = r.photo_minus_caliper_mm !== null && r.photo_minus_caliper_mm !== undefined ? `<span>photo − caliper</span><span><b>${sign(r.photo_minus_caliper_mm, 3)} mm</b></span>` : '';
+      $('#camResult').innerHTML = `<div class="kv">${meas}${cal}<span>saved</span><span>${r.saved.split('/').slice(-2).join('/')}</span><span>size</span><span>${r.width} × ${r.height}</span>
         <span>tier</span><span>${r.source_tier}</span><span>dataset</span><span>good ${c.good} · defect ${c.defect} · inbox ${c.inbox}</span></div>
         <div class="why"><b>NVIDIA anomaly model: ${n.status}.</b> ${n.reason} ${n.ready_to_train ? '<b>Enough photos to train now:</b>' : `Need ≥ ${n.need.good} good and ≥ ${n.need.defect} defect photos, then:`} <code>${n.train_command}</code></div>`;
       try {
         const sg = await api('/sim/vision/suggest?limit=3');
         if (sg.suggestions.length) $('#camResult').insertAdjacentHTML('beforeend', `<div class="why"><b>Label next (most informative first):</b><br>${sg.suggestions.map((x) => `${x.file}: ${x.reason}`).join('<br>')}</div>`);
       } catch { /* suggestions are optional */ }
-    } catch (err) { $('#camResult').textContent = `Save failed: ${err.message}`; }
+    } catch (err) { $('#camResult').textContent = err.message.includes('422') ? 'Not saved: a defective training photo needs a defect type; specimen ID may use letters, digits, - and _ only.' : `Save failed: ${err.message}`; }
     $('#camSave').disabled = false;
   };
 }
@@ -828,7 +1104,7 @@ async function initParts() {
   $('#fitSlot').onchange = fit; $('#fitTab').onchange = fit;
   $('#modeSingle').onclick = () => { $('#modeSingle').classList.add('on'); $('#modeFit').classList.remove('on'); $('#fitPick').classList.add('hidden'); list.classList.remove('hidden'); $('#partList button.on')?.click(); };
   $('#modeFit').onclick = () => { $('#modeFit').classList.add('on'); $('#modeSingle').classList.remove('on'); $('#fitPick').classList.remove('hidden'); list.classList.add('hidden'); fit(); };
-  s.controls.autoRotate = true; s.controls.autoRotateSpeed = 0.8;
+  s.autoRotate = true;
   (function loop() { if (!$('#view-parts').hidden) s.render(); requestAnimationFrame(loop); })();
 }
 
@@ -954,10 +1230,42 @@ async function initAgents() {
   await runCollective();
 }
 
+// ---------------------------------------------------------------- physical bench: manual caliper calibration (HyorinmaruK data)
+async function initBench() {
+  const d = await api('/sim/physical/summary');
+  if (d.status === 'NOT_AVAILABLE') { $('#physCal').innerHTML = `No measurements yet. ${d.hint}.`; return; }
+  const c = d.calibration, f = c.fits;
+  $('#physCal').innerHTML = `<div class="kv"><span>files</span><span>${d.files.join(', ')}</span><span>status</span><span>${c.status}</span>
+    <span>caliper repeatability σ</span><span>${c.caliper_repeatability_sd_mm ?? '—'} mm</span>
+    ${Object.entries(f).map(([k, v]) => `<span>${k} bias / scatter</span><span>${sign(v.bias_mm, 3)} / ${fmt(v.width_sd_mm, 3)} mm (${v.n_specimens} parts)</span>`).join('')}</div>
+    <p class="faint small">${c.note}</p>`;
+  $('#physSpec tbody').innerHTML = c.specimens.map((s) => `<tr><td class="num">${s.specimen_id}</td><td>${s.manual_id || '—'}</td><td class="num">${s.n}</td><td class="num">${fmt(s.mean_mm, 3)}</td>
+    <td class="num">${s.nominal_mm ?? '—'}</td><td class="num">${s.deviation_mm === null ? '—' : sign(s.deviation_mm, 3)}</td><td class="num">${fmt(s.spread_mm, 3)}</td></tr>`).join('');
+  $('#physPhoto tbody').innerHTML = d.photo_vs_caliper.length ? d.photo_vs_caliper.map((r) => `<tr><td class="num">${r.specimen_id}</td><td>${r.file}</td><td class="num">${fmt(r.photo_mm, 3)}</td>
+    <td class="num">${fmt(r.caliper_mm, 3)}</td><td class="num">${sign(r.photo_minus_caliper_mm, 3)}</td><td class="num">${fmt(r.photo_px_per_mm, 1)}</td></tr>`).join('')
+    : '<tr><td colspan="6" class="faint">No photos with a matching specimen ID yet.</td></tr>';
+}
+
+let exitPhoto = async () => {};
+{ const btn = $('#photoBtn'), save = $('#photoSave'), st = $('#photoStatus'); let on = false, tick = null;
+  if (btn) btn.onclick = async () => {
+    const v = lab.views[0]; if (!v) return;
+    on = !on; btn.textContent = on ? 'Exit photo mode' : 'Photo mode'; save.disabled = !on;
+    if (on) { lab.playing = false; $('#playBtn').textContent = '▶'; st.textContent = 'Building the path-tracing scene…';
+      try { await v.s.photo(true); } catch (e) { st.textContent = `Photo mode unavailable: ${e.message}`; console.error("PHOTO", e.stack); on = false; btn.textContent = 'Photo mode'; save.disabled = true; return; }
+      tick = setInterval(() => { const t = v.s.tracer; if (t) st.textContent = t.isCompiling ? 'Compiling the path tracer…' : t.samples < 8 ? `Warming up (${Math.floor(t.samples)}/8 samples)…` : `${Math.floor(t.samples)} samples · path traced, SIMULATED scene (left view). Sharper the longer you wait; dragging restarts.`; }, 500);
+    } else { clearInterval(tick); await v.s.photo(false); st.textContent = ''; }
+  };
+  exitPhoto = async () => { if (on) await btn.onclick(); };
+  if (save) save.onclick = () => { const a = document.createElement('a'); a.href = lab.views[0].s.snapshot(); a.download = 'qualityrelay_photo_SIMULATED.png'; a.click(); };
+}
+{ const hq = $('#hq'); if (hq) { hq.checked = QUALITY === 'high';
+  hq.addEventListener('change', () => { localStorage.setItem('qr_quality', hq.checked ? 'high' : 'low'); const u = new URL(location.href); u.searchParams.delete('quality'); location.href = u.href; }); } }
+
 // ---------------------------------------------------------------- router + boot
 // family -> sub-views and the one tier badge shown for the whole screen. Families never share a screen.
 const FAMILY = {
-  physical: { views: { '': 'physical' }, tier: 'PHYSICAL', title: 'Hardware ledger only. Each row carries its own tier: PHYSICAL_CAPTURE until a recorded ground-truth check makes it VERIFIED_PHYSICAL.' },
+  physical: { views: { '': 'physical', bench: 'bench' }, tier: 'PHYSICAL', title: 'Hardware ledger only. Each row carries its own tier: PHYSICAL_CAPTURE until a recorded ground-truth check makes it VERIFIED_PHYSICAL.' },
   sim: { views: { '': 'lab', parts: 'parts', results: 'results' }, tier: 'SIMULATED', title: 'Every number here comes from simulation, not from a factory.' },
   agents: { views: { '': 'agents', benchmark: 'science' }, tier: 'TEST_FIXTURE · SIMULATED', title: 'Collaboration runs on fixture evidence; the benchmark runs on simulated lots. Neither is a physical measurement.' },
   claims: { views: { '': 'claims' }, tier: 'CLAIMS', title: 'What the evidence does and does not support.' },
@@ -983,6 +1291,7 @@ function route() {
   if (view === 'physical') { if (!inited.physical) { inited.physical = true; initPhysical(); } refreshPhysical().catch((e) => ($('#physUpdated').textContent = e.message)); }
   if (view === 'agents' && !inited.agents) { inited.agents = true; initAgents().catch((e) => ($('#colStatus').textContent = e.message)); }
   if (view === 'parts' && !inited.parts) { inited.parts = true; initParts().catch((e) => ($('#partLabel').textContent = e.message)); }
+  if (view === 'bench' && !inited.bench) { inited.bench = true; initBench().catch((e) => ($('#physCal').textContent = e.message)); }
   if ((view === 'results' || view === 'science') && !inited.results) { inited.results = true; initResults().catch((e) => ($('#kpis').textContent = e.message)); }
   if (view === 'lab' && !inited.lab) {  // lazy: the 3D stage must be visible to size and frame its cameras
     inited.lab = true; initLab().catch((e) => { $('#runStatus').textContent = `Lab failed to start: ${e.message}`; console.error(e); });

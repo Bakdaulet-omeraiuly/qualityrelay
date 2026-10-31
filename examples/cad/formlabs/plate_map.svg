@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="655" height="428" viewBox="0 0 655 428" font-family="Arial, sans-serif">
+<rect width="655" height="428" fill="#ffffff"/>
+<text x="30" y="26" font-size="16" font-weight="700">QualityRelay specimen plate: which part is which</text>
+<text x="30" y="44" font-size="11">Top view of qualityrelay_specimen_plate.stl, parts standing on end, scale 4 px = 1 mm.</text>
+<text x="30" y="58" font-size="11">Rows 1-3: the 9 required specimens. Row 4: optional spares.</text>
+<rect x="30.0" y="284.0" width="132.8" height="24.0" fill="none" stroke="#555" stroke-dasharray="3 2"/>
+<rect x="30.0" y="284.0" width="24.0" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<rect x="138.8" y="284.0" width="24.0" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<text x="96.4" y="279.0" font-size="12" font-weight="700" text-anchor="middle">S-GOOD</text>
+<text x="96.4" y="320.0" font-size="9" text-anchor="middle">slot 21.20</text>
+<rect x="202.8" y="284.0" width="132.0" height="24.0" fill="none" stroke="#555" stroke-dasharray="3 2"/>
+<rect x="202.8" y="284.0" width="24.0" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<rect x="310.8" y="284.0" width="24.0" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<text x="268.8" y="279.0" font-size="12" font-weight="700" text-anchor="middle">S-NOM</text>
+<text x="268.8" y="320.0" font-size="9" text-anchor="middle">slot 21.00</text>
+<rect x="374.8" y="284.0" width="80.0" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<text x="414.8" y="279.0" font-size="12" font-weight="700" text-anchor="middle">RPT-20</text>
+<text x="414.8" y="320.0" font-size="9" text-anchor="middle">tab 20.00</text>
+<rect x="30.0" y="220.0" width="130.8" height="24.0" fill="none" stroke="#555" stroke-dasharray="3 2"/>
+<rect x="30.0" y="220.0" width="24.0" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<rect x="136.8" y="220.0" width="24.0" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<text x="95.4" y="215.0" font-size="12" font-weight="700" text-anchor="middle">S-RISK</text>
+<text x="95.4" y="256.0" font-size="9" text-anchor="middle">slot 20.70</text>
+<rect x="200.8" y="220.0" width="125.6" height="24.0" fill="none" stroke="#555" stroke-dasharray="3 2"/>
+<rect x="200.8" y="220.0" width="24.0" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<rect x="302.4" y="220.0" width="24.0" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<text x="263.6" y="215.0" font-size="12" font-weight="700" text-anchor="middle">S-DEF</text>
+<text x="263.6" y="256.0" font-size="9" text-anchor="middle">slot 19.40</text>
+<rect x="366.4" y="220.0" width="86.4" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<text x="409.6" y="215.0" font-size="12" font-weight="700" text-anchor="middle">T-DEF</text>
+<text x="409.6" y="256.0" font-size="9" text-anchor="middle">tab 21.60</text>
+<rect x="30.0" y="156.0" width="79.2" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<text x="69.6" y="151.0" font-size="12" font-weight="700" text-anchor="middle">T-GOOD</text>
+<text x="69.6" y="192.0" font-size="9" text-anchor="middle">tab 19.80</text>
+<rect x="149.2" y="156.0" width="80.0" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<text x="189.2" y="151.0" font-size="12" font-weight="700" text-anchor="middle">T-NOM</text>
+<text x="189.2" y="192.0" font-size="9" text-anchor="middle">tab 20.00</text>
+<rect x="269.2" y="156.0" width="81.2" height="24.0" fill="#d8ecf3" stroke="#222"/>
+<text x="309.8" y="151.0" font-size="12" font-weight="700" text-anchor="middle">T-RISK</text>
+<text x="309.8" y="192.0" font-size="9" text-anchor="middle">tab 20.30</text>
+<rect x="30.0" y="92.0" width="130.8" height="24.0" fill="none" stroke="#555" stroke-dasharray="3 2"/>
+<rect x="30.0" y="92.0" width="24.0" height="24.0" fill="#fde7c4" stroke="#222"/>
+<rect x="136.8" y="92.0" width="24.0" height="24.0" fill="#fde7c4" stroke="#222"/>
+<text x="95.4" y="87.0" font-size="12" font-weight="700" text-anchor="middle">S-RISK-2</text>
+<text x="95.4" y="128.0" font-size="9" text-anchor="middle">slot 20.70</text>
+<rect x="200.8" y="92.0" width="81.2" height="24.0" fill="#fde7c4" stroke="#222"/>
+<text x="241.4" y="87.0" font-size="12" font-weight="700" text-anchor="middle">T-RISK-2</text>
+<text x="241.4" y="128.0" font-size="9" text-anchor="middle">tab 20.30</text>
+<text x="468.8" y="300.0" font-size="11">row 1</text>
+<text x="468.8" y="236.0" font-size="11">row 2</text>
+<text x="468.8" y="172.0" font-size="11">row 3</text>
+<text x="468.8" y="108.0" font-size="11">row 4 (spares)</text>
+<line x1="30.0" y1="388.0" x2="70.0" y2="388.0" stroke="#222" stroke-width="2"/>
+<text x="74.0" y="392.0" font-size="11">+X</text>
+<line x1="30.0" y1="388.0" x2="30.0" y2="348.0" stroke="#222" stroke-width="2"/>
+<text x="24.0" y="344.0" font-size="11">+Y</text>
+<text x="110.0" y="380.0" font-size="10">If your view is mirrored or rotated, or parts got mixed up: measure the critical width.</text>
+<text x="110.0" y="394.0" font-size="10">Slots by gap: S-DEF &lt; S-RISK &lt; S-NOM &lt; S-GOOD.  Tabs by width: T-GOOD &lt; T-NOM = RPT-20 &lt; T-RISK &lt; T-DEF.</text>
+</svg>
