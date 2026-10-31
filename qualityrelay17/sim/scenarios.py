@@ -66,7 +66,7 @@ STATION_S = dict(phone=5.0, pi=6.0, caliper=7.0, assembly=9.0, sorting=3.0, revi
 
 
 def draw_part(sc: FactoryScenario, seed: int, kind: str, idx: int, site: SiteConfig, t_print_s: float, lot_id: str,
-              design: dict, *, seq_idx: int | None = None, corrected: bool = False) -> dict:
+              design: dict, *, seq_idx: int | None = None, corrected: bool = False, offset_mm: float = 0.0) -> dict:
     """Ground truth + the observations each sensor WOULD produce, from part-keyed streams so every
     policy sees identical parts and identical sensor noise (common random numbers)."""
     rng = Random(f'part:{seed}:{kind}:{idx}')
@@ -82,6 +82,8 @@ def draw_part(sc: FactoryScenario, seed: int, kind: str, idx: int, site: SiteCon
     warped = rng.random() < sc.warp_p
     if warped:
         width += -sc.warp_mm if kind == 'slot' else sc.warp_mm
+    latent = width          # process outcome before any printer correction (truth-hash basis)
+    width = latent + offset_mm  # closed-loop printer correction (0 unless feedback is on)
     crack = rng.random() < sc.crack_p
     lot_flip = Random(f'lot:{seed}:{lot_id}').random() < sc.lot_lighting_flip_p
     cams = {}
@@ -91,14 +93,14 @@ def draw_part(sc: FactoryScenario, seed: int, kind: str, idx: int, site: SiteCon
         cams[cam] = None if missing else flag
     readings = [width + rng.gauss(0, site.caliper_sd_mm) for _ in range(3)]  # supplier, assembly re-measure, review
     return dict(part_id=f'{kind[0].upper()}-{seed}-{idx:06d}', idx=idx, seq_idx=seq, kind=kind, site=site.name, lot_id=lot_id,
-                t_print_s=round(t_print_s, 3), true_width_mm=width, printed_width_mm=width, warped=warped, crack=crack, lot_lighting_flip=lot_flip,
+                t_print_s=round(t_print_s, 3), true_width_mm=width, printed_width_mm=width, latent_width_mm=latent, offset_mm=offset_mm, warped=warped, crack=crack, lot_lighting_flip=lot_flip,
                 cam=cams, caliper=readings, expert_crack_seen=crack if rng.random() > 0.02 else False,
                 expert_width_mm=width + rng.gauss(0, 0.01), rework_ok=rng.random() < 0.8)
 
 
 def truth_hash(parts: list[dict]) -> str:
     parts = [p for p in parts if not p.get('root_id')]  # originals only: reprints depend on the policy by design
-    keys = ('part_id', 'kind', 'site', 'lot_id', 'printed_width_mm', 'warped', 'crack')  # printed, not post-rework
+    keys = ('part_id', 'kind', 'site', 'lot_id', 'latent_width_mm', 'warped', 'crack')  # latent = before correction / rework
     blob = json.dumps([[p[k] if not isinstance(p[k], float) else round(p[k], 9) for k in keys] for p in parts])
     return hashlib.sha256(blob.encode()).hexdigest()
 

@@ -107,7 +107,7 @@ class Factory:
     def __init__(self, sc: FactoryScenario, seed: int, policy: str, pairing: str = 'fifo', *, costs: Costs | None = None,
                  model: PartModel | None = None, batch_k: int = 8, keep_log: bool = True,
                  pair_timeout_s: float | None = None, reprint: bool = False, max_reprints: int = 2,
-                 lane_by_kind: bool = False):
+                 lane_by_kind: bool = False, feedback: str = 'none', ewma_lambda: float = 0.1, deadband_mm: float = 0.05):
         if policy not in POLICIES or pairing not in PAIRINGS:
             raise ValueError('unknown policy/pairing')
         if sc.evidence_sharing not in ('full', 'summary', 'none'):
@@ -124,6 +124,14 @@ class Factory:
         self.reprint, self.max_reprints = reprint, max_reprints
         # lane_by_kind: slots always use inspection line 0 and tabs line 1 (two conveyor lanes)
         self.lane_by_kind = lane_by_kind
+        # Closed-loop process control (innovation 1): an EWMA of caliper residuals per (site, kind)
+        # estimates the printer's process deviation; outside a dead band the printer offset is set to
+        # cancel it. A two-sided CUSUM on the same residuals raises root-cause alarms (innovation 6).
+        if feedback not in ('none', 'ewma'):
+            raise ValueError('feedback must be none|ewma')
+        self.feedback, self.ewma_lambda, self.deadband = feedback, ewma_lambda, deadband_mm
+        self.offset, self.bias_est, self.cusum = {}, {}, {}
+        self.corrections, self.alarms = [], []
         self.design = nominal_design()
         self.env = env = Env()
         self.site = {s.name: s for s in sc.sites}
@@ -207,8 +215,9 @@ class Factory:
             delay = self._failure_delay(pr)
             yield ('timeout', delay + self._svc(f'print:{job_id}', site.print_setup_s + site.print_per_part_s * len(idxs)))
             yield ('release', {pr: 1})
+            off = self.offset.get((site.name, kind), 0.0)
             for k, i in enumerate(idxs):
-                p = draw_part(self.sc, self.seed, kind, i, site, t0, f'{site.name}:{job_id}', self.design)
+                p = draw_part(self.sc, self.seed, kind, i, site, t0, f'{site.name}:{job_id}', self.design, offset_mm=off)
                 p['line'] = ((0 if kind == 'slot' else 1) if self.lane_by_kind else i) % site.inspection_lines
                 self.parts.append(p)
                 self.env.process(self.part(p, site))
@@ -230,6 +239,7 @@ class Factory:
         p['obs_raw'] = {k: v for k, (v, _t) in obs.items()}  # display copy; review may clear p['obs']
         p['measured_mm'] = p['caliper'][0]
         p['caliper_sd'] = site.caliper_sd_mm
+        self._monitor(p, site)
         p['evidence_at'] = self.env.now + sc.evidence_latency_s
         # supplier-side part gate
         if self._part_hold(p, ('phone', 'pi')):
@@ -261,6 +271,29 @@ class Factory:
         self._try_pair()
         if self.pairing == 'optimized' and self.pair_timeout_s is not None:
             self.env.process(self._pair_timer(p))
+
+    def _monitor(self, p, site):
+        key = (site.name, p['kind'])
+        nominal = self.design['slot_opening_mm'] if p['kind'] == 'slot' else self.design['tab_width_mm']
+        r = p['measured_mm'] - nominal - p.get('offset_mm', 0.0)          # process deviation, correction removed
+        r_c = max(-0.2, min(0.2, r))                                    # Huber-style clip: one warped part must not steer the printer
+        sigma = (site.width_sd_mm ** 2 + site.caliper_sd_mm ** 2) ** 0.5
+        hi, lo = self.cusum.get(key, (0.0, 0.0))
+        z = r_c / sigma
+        hi, lo = max(0.0, hi + z - 0.5), max(0.0, lo - z - 0.5)
+        if hi > 5 or lo > 5:
+            self.alarms.append(dict(t=round(self.env.now, 1), site=site.name, kind=p['kind'], direction='wide' if hi > 5 else 'narrow',
+                                    part=p['part_id']))
+            hi = lo = 0.0
+        self.cusum[key] = (hi, lo)
+        if self.feedback != 'ewma':
+            return
+        est = (1 - self.ewma_lambda) * self.bias_est.get(key, 0.0) + self.ewma_lambda * r_c
+        self.bias_est[key] = est
+        new = -est if abs(est) > self.deadband else self.offset.get(key, 0.0)
+        if abs(new - self.offset.get(key, 0.0)) > 0.02:
+            self.offset[key] = new
+            self.corrections.append(dict(t=round(self.env.now, 1), site=site.name, kind=p['kind'], estimate_mm=round(est, 4), offset_mm=round(new, 4)))
 
     def _upstream_exit(self):
         self.upstream -= 1
@@ -491,6 +524,9 @@ class Factory:
             operator_seconds=sum(r.busy_time for r in self.env.resources if 'operator' in r.name),
             utilization=util,
             escape_cost_units=sum(p['escape_cost_multiplier'] for p in shipped if p['escaped']),
+            feedback=self.feedback, corrections=len(self.corrections), final_offsets={f'{a}:{b}': round(v, 4) for (a, b), v in self.offset.items()},
+            cusum_alarms=len(self.alarms), first_alarm_s=self.alarms[0]['t'] if self.alarms else None,
+            correction_log=self.corrections[:200], alarm_log=self.alarms[:100],
             genealogy=shipped[:50] if self.keep_log else [],
         )
 
