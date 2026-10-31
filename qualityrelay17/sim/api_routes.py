@@ -50,7 +50,8 @@ def stl(name: str):
 VENDOR = ROOT / 'web' / 'vendor'
 ASSETS = {'three.module.js', 'OrbitControls.js', 'STLLoader.js', 'CSS2DRenderer.js', 'RoomEnvironment.js',
           'EffectComposer.js', 'RenderPass.js', 'UnrealBloomPass.js', 'OutputPass.js', 'ShaderPass.js', 'MaskPass.js',
-          'Pass.js', 'CopyShader.js', 'LuminosityHighPassShader.js', 'OutputShader.js', 'qrcode.js', 'site.js', 'site.css'}
+          'Pass.js', 'CopyShader.js', 'LuminosityHighPassShader.js', 'OutputShader.js', 'GTAOPass.js', 'GTAOShader.js', 'PoissonDenoiseShader.js', 'SimplexNoise.js',
+          'SMAAPass.js', 'SMAAShader.js', 'RGBELoader.js', 'qrcode.js', 'site.js', 'site.css'}
 
 
 @router.get('/assets/{name}')
@@ -60,6 +61,11 @@ def asset(name: str):
     base = VENDOR if name not in ('site.js', 'site.css') else ROOT / 'web'
     media = 'text/css' if name.endswith('.css') else 'text/javascript'
     return FileResponse(base / name, media_type=media)
+
+
+@router.get('/hdri/warehouse.hdr')
+def hdri():
+    return FileResponse(VENDOR / 'hdri' / 'empty_warehouse_01_1k.hdr', media_type='application/octet-stream')
 
 
 @router.get('/charts/{name}.svg')

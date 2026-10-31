@@ -8,6 +8,9 @@ import { EffectComposer } from 'three/addons/EffectComposer.js';
 import { RenderPass } from 'three/addons/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/OutputPass.js';
+import { GTAOPass } from 'three/addons/GTAOPass.js';
+import { SMAAPass } from 'three/addons/SMAAPass.js';
+import { RGBELoader } from 'three/addons/RGBELoader.js';
 
 // ---------------------------------------------------------------- utils
 const $ = (s, r = document) => r.querySelector(s);
@@ -35,9 +38,31 @@ const loadSTL = (name) => {
   if (!stlCache.has(name)) stlCache.set(name, new Promise((res, rej) => stlLoader.load(`/sim/stl/${name}`, (g) => { g.computeVertexNormals(); res(g); }, undefined, rej)));
   return stlCache.get(name);
 };
+// FDM look: 0.2 mm layer lines as a bump map. UV v = height in layers (8 layers per texture tile),
+// computed in mm before scaling, so the line pitch is the true layer height.
+const LAYER_MM = 0.2, LAYERS_PER_TILE = 8;
+const addLayerUV = (g) => {
+  const pos = g.attributes.position, uv = new Float32Array(pos.count * 2);
+  for (let i = 0; i < pos.count; i++) { uv[2 * i] = (pos.getX(i) + pos.getZ(i)) / 4; uv[2 * i + 1] = pos.getY(i) / (LAYER_MM * LAYERS_PER_TILE); }
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+};
+const layerBump = (() => {
+  const c = document.createElement('canvas'); c.width = 4; c.height = 64; const g = c.getContext('2d');
+  for (let y = 0; y < 64; y++) { const v = Math.round(128 + 110 * Math.pow(Math.abs(Math.sin((Math.PI * y * LAYERS_PER_TILE) / 64)), 0.6)); g.fillStyle = `rgb(${v},${v},${v})`; g.fillRect(0, y, 4, 1); }
+  const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+})();
+// Matte PLA: no clearcoat, slight sheen from the layer ridges.
+const plaMat = (color, o = {}) => new THREE.MeshPhysicalMaterial({ color, roughness: 0.5, metalness: 0, bumpMap: layerBump, bumpScale: 0.6, sheen: 0.25, sheenRoughness: 0.6, ...o });
 const metal = (color, o = {}) => new THREE.MeshStandardMaterial({ color, metalness: 0.2, roughness: 0.55, envMapIntensity: 0.45, ...o });
 
-// ---------------------------------------------------------------- renderer stage (env light + bloom + labels)
+// ---------------------------------------------------------------- render quality
+// ?quality=low (or the toggle) drops ambient occlusion, SMAA and the HDRI for slow laptops.
+const QUALITY = (() => { const q = new URLSearchParams(location.search).get('quality') || localStorage.getItem('qr_quality'); return q === 'low' ? 'low' : 'high'; })();
+// Real warehouse lighting (Poly Haven CC0 HDRI), shared by every stage; falls back to RoomEnvironment.
+let hdrPromise = null;
+const loadHDR = () => (hdrPromise ??= new Promise((res) => new RGBELoader().load('/sim/hdri/warehouse.hdr', res, undefined, () => res(null))));
+
+// ---------------------------------------------------------------- renderer stage (env light + AO + bloom + labels)
 function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true, labels = true } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -49,19 +74,28 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
   scene.fog = new THREE.Fog(0x07090c, 38, 80);
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
+  if (QUALITY === 'high') loadHDR().then((hdr) => { if (hdr) { scene.environment = pmrem.fromEquirectangular(hdr).texture; scene.environmentIntensity = 0.8; } });
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
   camera.position.set(...camPos);
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.set(...target); controls.enableDamping = true; controls.dampingFactor = 0.08;
   const key = new THREE.DirectionalLight(0xffffff, 1.6); key.position.set(10, 22, 12); key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048); Object.assign(key.shadow.camera, { left: -26, right: 26, top: 20, bottom: -20 }); key.shadow.bias = -0.0005;
+  const sm = QUALITY === 'high' ? 4096 : 1024;
+  key.shadow.mapSize.set(sm, sm); Object.assign(key.shadow.camera, { left: -24, right: 24, top: 16, bottom: -16, near: 4, far: 60 });
+  key.shadow.bias = -0.0003; key.shadow.normalBias = 0.02; key.shadow.radius = 3;
   scene.add(key, new THREE.HemisphereLight(0xbfd4ff, 0x15181d, 0.35));
   let composer = null;
   if (bloom) {
     composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
+    if (QUALITY === 'high') {
+      // Ground-contact shading: radius in scene units (1 unit ≈ 0.25 m), so ~10 cm.
+      const ao = new GTAOPass(scene, camera, 512, 512, undefined, { radius: 0.4, distanceExponent: 1.5, thickness: 1, scale: 1, samples: 16 });
+      ao.blendIntensity = 0.9; composer.addPass(ao);
+    }
     composer.addPass(new UnrealBloomPass(new THREE.Vector2(256, 256), 0.5, 0.4, 0.92));
     composer.addPass(new OutputPass());
+    if (QUALITY === 'high') composer.addPass(new SMAAPass(256, 256));  // composer bypasses the canvas MSAA
   }
   let labelRenderer = null;
   if (labels) {
@@ -134,11 +168,17 @@ class FactoryView {
     const sc = this.s.scene;
     // ---- hall: concrete floor, back wall with windows, pillars
     const fc = document.createElement('canvas'); fc.width = fc.height = 512; const fg = fc.getContext('2d');
-    fg.fillStyle = '#15191e'; fg.fillRect(0, 0, 512, 512);
-    for (let i = 0; i < 9000; i++) { const v = 18 + Math.random() * 16; fg.fillStyle = `rgba(${v},${v + 3},${v + 7},0.5)`; fg.fillRect(Math.random() * 512, Math.random() * 512, 2, 2); }
+    fg.fillStyle = '#23282e'; fg.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 40; i++) { const r = 40 + Math.random() * 120, x = Math.random() * 512, y = Math.random() * 512, gr = fg.createRadialGradient(x, y, 0, x, y, r); const v = 30 + Math.random() * 14;
+      gr.addColorStop(0, `rgba(${v},${v + 2},${v + 5},0.12)`); gr.addColorStop(1, 'rgba(0,0,0,0)'); fg.fillStyle = gr; fg.fillRect(0, 0, 512, 512); }
+    for (let i = 0; i < 9000; i++) { const v = 26 + Math.random() * 18; fg.fillStyle = `rgba(${v},${v + 3},${v + 7},0.45)`; fg.fillRect(Math.random() * 512, Math.random() * 512, 2, 2); }
     fg.strokeStyle = 'rgba(0,0,0,0.35)'; fg.lineWidth = 2; fg.strokeRect(0, 0, 512, 512);
     const floorTex = new THREE.CanvasTexture(fc); floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(24, 18); floorTex.colorSpace = THREE.SRGBColorSpace;
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 90), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.25 }));
+    // roughness varies (worn vs. polished patches) so the HDRI gives soft, uneven reflections like sealed concrete
+    const rc = document.createElement('canvas'); rc.width = rc.height = 256; const rg = rc.getContext('2d'); rg.fillStyle = '#d2d2d2'; rg.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 30; i++) { const x = Math.random() * 256, y = Math.random() * 256, r = 20 + Math.random() * 70, gr = rg.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, 'rgba(165,165,165,0.5)'); gr.addColorStop(1, 'rgba(165,165,165,0)'); rg.fillStyle = gr; rg.fillRect(0, 0, 256, 256); }
+    const roughTex = new THREE.CanvasTexture(rc); roughTex.wrapS = roughTex.wrapT = THREE.RepeatWrapping; roughTex.repeat.set(12, 9);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 90), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 1, roughnessMap: roughTex, metalness: 0.0, envMapIntensity: 0.45 }));
     floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; sc.add(floor);
     const pad = (x, z, w, d, c, o = 1) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, transparent: o < 1, opacity: o })); m.rotation.x = -Math.PI / 2; m.position.set(x, 0.006, z); m.receiveShadow = true; sc.add(m); };
     pad(-1.5, 0, 25, 3.2, 0x1d2a24, 0.8); pad(5.5, -6, 12.5, 4.2, 0x2a2414, 0.8); pad(-14, 0, 4.6, 8.8, 0x1b2230, 0.8);
@@ -199,7 +239,7 @@ class FactoryView {
       const head = add(new THREE.BoxGeometry(0.28, 0.32, 0.26), metal(0xe8eaed, { roughness: 0.4 }), 0, 1.4, 0);
       const nozzle = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.12, 12), new THREE.MeshStandardMaterial({ color: 0xffb347, emissive: 0xff7a00, emissiveIntensity: 0 }));
       nozzle.rotation.x = Math.PI; nozzle.position.set(0, -0.22, 0); head.add(nozzle);
-      const wipMesh = new THREE.Mesh(this.partGeo[kind], new THREE.MeshPhysicalMaterial({ color: kind === 'slot' ? C.slot : C.tab, roughness: 0.5, transparent: true, opacity: 0.9 }));
+      const wipMesh = new THREE.Mesh(this.partGeo[kind], plaMat(kind === 'slot' ? C.slot : C.tab, { transparent: true, opacity: 0.9 }));
       wipMesh.position.set(0, 0.81, 0); wipMesh.scale.set(1, 0.001, 1); wipMesh.visible = false; grp.add(wipMesh);
       const hit = new THREE.Mesh(new THREE.BoxGeometry(2.3, 2.6, 2.1), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
       hit.position.set(x, 1.3, z); hit.userData = { station: key }; sc.add(hit);
@@ -281,7 +321,7 @@ class FactoryView {
     for (const st of Object.values(this.stations)) st.intervals = [];
     for (const p of data.parts) {
       const kf = pathFor(p, p.fate === 'shipped' ? bins.shipped++ : p.fate === 'scrap' ? bins.scrap++ : 0);
-      const mat = new THREE.MeshPhysicalMaterial({ color: p.kind === 'slot' ? C.slot : C.tab, roughness: 0.38, metalness: 0.05, clearcoat: 0.6, clearcoatRoughness: 0.3 });
+      const mat = plaMat(p.kind === 'slot' ? C.slot : C.tab);
       const m = new THREE.Mesh(this.partGeo[p.kind], mat); m.castShadow = true; m.visible = false; m.userData = { part: p.id }; sc.add(m);
       const review = p.events.filter((e) => e[0] === 'review').map((e) => [e[1], e[2]]);
       for (const [stn, a, b] of p.events) this.stations[laneKey(stn, p.line)]?.intervals.push([a, b, p]);
@@ -450,7 +490,7 @@ const lab = { mode: 'single', views: [], runs: [], t: 0, T: 1, t0: 0, playing: t
 
 async function initLab() {
   const [sg, tg] = await Promise.all([loadSTL('slot_nominal_21p00.stl'), loadSTL('tab_nominal_20p00.stl')]);
-  const prep = (g) => { const c = g.clone(); c.rotateX(-Math.PI / 2); c.center(); c.scale(0.016, 0.016, 0.016); return c; };
+  const prep = (g) => { const c = g.clone(); c.rotateX(-Math.PI / 2); c.center(); addLayerUV(c); c.scale(0.016, 0.016, 0.016); return c; };
   const partGeo = { slot: prep(sg), tab: prep(tg) };
   lab.views = [new FactoryView($('#vpA'), partGeo), new FactoryView($('#vpB'), partGeo)];
   const sc = await api('/sim/scenarios');
@@ -915,6 +955,9 @@ async function initPhysical() {
     <td class="num">${fmt(r.caliper_mm, 3)}</td><td class="num">${sign(r.photo_minus_caliper_mm, 3)}</td><td class="num">${fmt(r.photo_px_per_mm, 1)}</td></tr>`).join('')
     : '<tr><td colspan="6" class="faint">No photos with a matching specimen ID yet.</td></tr>';
 }
+
+{ const hq = $('#hq'); if (hq) { hq.checked = QUALITY === 'high';
+  hq.addEventListener('change', () => { localStorage.setItem('qr_quality', hq.checked ? 'high' : 'low'); const u = new URL(location.href); u.searchParams.delete('quality'); location.href = u.href; }); } }
 
 // ---------------------------------------------------------------- router + boot
 const inited = {};

@@ -15,7 +15,10 @@
  "three/addons/EffectComposer.js":"/sim/assets/EffectComposer.js",
  "three/addons/RenderPass.js":"/sim/assets/RenderPass.js",
  "three/addons/UnrealBloomPass.js":"/sim/assets/UnrealBloomPass.js",
- "three/addons/OutputPass.js":"/sim/assets/OutputPass.js"}}
+ "three/addons/OutputPass.js":"/sim/assets/OutputPass.js",
+ "three/addons/GTAOPass.js":"/sim/assets/GTAOPass.js",
+ "three/addons/SMAAPass.js":"/sim/assets/SMAAPass.js",
+ "three/addons/RGBELoader.js":"/sim/assets/RGBELoader.js"}}
 </script>
 </head>
 <body>
@@ -61,6 +64,7 @@
       <div class="pbody">
         <label class="check"><input id="labels" type="checkbox" checked/> Station labels <kbd>L</kbd></label>
         <label class="check"><input id="truth" type="checkbox" checked/> Ground truth (evaluator only) <kbd>T</kbd></label>
+        <label class="check" title="Ambient occlusion, warehouse HDRI lighting, 4K shadows, SMAA. Turn off on slow laptops (reloads)."><input id="hq" type="checkbox"/> High-quality graphics</label>
         <div class="legend">
           <span><i class="sw slot"></i>Slot</span><span><i class="sw tab"></i>Tab</span>
           <span><i class="sw review"></i>HOLD → review</span><span><i class="sw scrap"></i>Scrapped</span>
