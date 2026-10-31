@@ -124,7 +124,6 @@
   "rework": 8.0,
   "scrap": 20.0
  },
- "elapsed_s": 1.25,
  "mean_pi_request_rate_structured_request_lite": 0.8518666666666667,
  "method": "identical_seed_paired_policy_comparison_cluster_bootstrap_over_seed",
  "n_per_seed": 1000,
