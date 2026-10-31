@@ -58,6 +58,13 @@ plan before this goes on a slide as a result rather than "the wiring now works."
    HyorinmaruK's Pi images (`data/prints/good|defect/`); one command, see the write-up. Hailo
    compile not attempted (adilnurgg). The other seven NVIDIA adapters stay `NOT_CONFIGURED`.
 
+5. **18.1 science P0 (branch `science/18-1-p0`).** SCI-01/02 cost accounting fixed (peer
+   requests were never charged); SCI-03 re-run: `voi_driven` verdicts unchanged, the 17.1
+   request slice's "cheaper" result reversed. SCI-05..08: Gate-A B0..B7 + ablations, 14
+   registered scenarios, pre-registered. **Primary result NEGATIVE**: at default prices B7 holds
+   every part; it beats B0 only when holds are priced as review labour or messages are cheap.
+   Pitch-approved claims: `docs/research/COLLECTIVE_GATE_A_RESULTS_31OCT.md` section 4.
+
 Reviewer for this branch: adilnurgg or HyorinmaruK (one review per `TEAM_OWNERSHIP_AND_GITHUB.md`;
 no safety/actuation code touched).
 

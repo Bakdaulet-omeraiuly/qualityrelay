@@ -1,5 +1,11 @@
 # Results — pre-registered synthetic VOI protocol, 31 October 2026
 
+> **Correction (18.1 SCI-02, later 31 Oct):** `structured_request_lite`'s peer-request cost was
+> reported but not charged in this run. Re-run with corrected accounting, same seeds:
+> `examples/results/protocol_31oct_rerun_18_1/`. Every `voi_driven` verdict below is unchanged;
+> the request slice's cost comparisons reverse (now more expensive than fusion in 12/12
+> scenarios). See `COLLECTIVE_GATE_A_RESULTS_31OCT.md` section 2. Original files kept unedited.
+
 **Owner:** Bakdaulet. **Tier:** `SIMULATED`, every number. **Registration:**
 `PROTOCOL_REGISTRATION_31OCT.md` (committed before the run). **Artefacts:**
 `examples/results/protocol_31oct/` — `manifest.json` (commit, code hashes, verdicts), `S01.json` …
