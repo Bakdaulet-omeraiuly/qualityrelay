@@ -73,3 +73,20 @@ def run(alpha=0.002, cal_seeds=range(2000, 2010), test_seeds=range(30), n=1000, 
             conformal_nominal_calibration=dict(lam=lam_nom, **evaluate(lam_nom, lots, m)),
             conformal_recalibrated=dict(lam=lam_re, **evaluate(lam_re, lots, m)))
     return out
+
+
+def calibrate_threshold_pac(p, unsafe, alpha, delta=0.1):
+    """PAC variant (Learn-then-Test style, monotone loss): largest lam whose one-sided Clopper-Pearson
+    (1-delta) upper bound on R(lam) is <= alpha. Then P(R(lam_hat) <= alpha) >= 1 - delta over
+    calibration sets, i.e. a per-batch guarantee instead of one in expectation."""
+    from scipy.stats import beta
+    n = len(p); order = np.argsort(p); ps, us = p[order], unsafe[order]
+    k = np.cumsum(us)
+    ucb = beta.ppf(1 - delta, k + 1, n - k)            # CP upper bound for k events in n
+    ok = ucb <= alpha
+    if not ok[0]:
+        return 0.0
+    # monotone loss: scan from the smallest threshold, stop at the first violation (fixed-sequence testing)
+    first_bad = np.argmax(~ok) if (~ok).any() else n
+    last = first_bad - 1
+    return float(ps[last] + 1e-12) if last + 1 >= n else float((ps[last] + ps[last + 1]) / 2)

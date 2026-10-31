@@ -16,3 +16,10 @@ def test_guarantee_holds_when_exchangeable_small():
     out = run(alpha=0.004, cal_seeds=range(2000, 2004), test_seeds=range(8), n=500)
     s01 = out['scenarios']['S01']['conformal_recalibrated']
     assert s01['false_pass_ci95'][0] <= 0.004
+
+
+def test_pac_threshold_is_more_conservative():
+    from qualityrelay17.experiments.conformal import calibrate_threshold_pac
+    rng = np.random.default_rng(1)
+    p = rng.random(8000); unsafe = rng.random(8000) < p * 0.02
+    assert calibrate_threshold_pac(p, unsafe, 0.005) <= calibrate_threshold(p, unsafe, 0.005)
