@@ -75,6 +75,10 @@ def verdict(out, alias='voi'):
 def main(out_dir: Path = ROOT / 'examples' / 'results' / 'protocol_31oct'):
     out_dir.mkdir(parents=True, exist_ok=True)
     started = time.time()
+    # Record tree state BEFORE this run writes anything, otherwise the run's own output
+    # files make every run look dirty.
+    git_commit, git_dirty = _git('rev-parse', 'HEAD'), bool(_git('status', '--porcelain'))
+    timings = {}
     s01_cal = estimate_likelihoods(seeds=CAL_SEEDS, n=N, process_shift_mm=BASE['shift'], camera_noise=BASE['camera_noise'],
                                    network_outage=BASE['network_outage'], shared_camera_noise=BASE['shared_camera_noise'])
     summary_rows, paired_rows, verdicts = [], [], {}
@@ -90,7 +94,7 @@ def main(out_dir: Path = ROOT / 'examples' / 'results' / 'protocol_31oct'):
         out = run_benchmark(**kwargs)
         out['scenario_id'] = sid
         out['scenario_label'] = label
-        out['elapsed_s'] = round(time.time() - t0, 2)
+        timings[sid] = round(time.time() - t0, 2)  # kept out of S*.json so results stay byte-reproducible
         (out_dir / f'{sid}.json').write_text(json.dumps(out, indent=1, sort_keys=True))
         verdicts[sid] = {'voi_driven': verdict(out, 'voi'), 'entropy_driven': verdict(out, 'entropy'),
                          'collective_fusion': verdict(out, 'fusion')}
@@ -102,7 +106,7 @@ def main(out_dir: Path = ROOT / 'examples' / 'results' / 'protocol_31oct'):
                 ci = out.get(ci_key) if ci_key else None
                 paired_rows.append({'scenario': sid, 'comparison': key, 'mean_difference': val,
                                     'ci95_low': ci[0] if ci else '', 'ci95_high': ci[1] if ci else ''})
-        print(f'{sid} {label}: {out["elapsed_s"]}s  voi={verdicts[sid]["voi_driven"]}', flush=True)
+        print(f'{sid} {label}: {timings[sid]}s  voi={verdicts[sid]["voi_driven"]}', flush=True)
 
     with (out_dir / 'summary.csv').open('w', newline='') as fh:
         keys = sorted({k for r in summary_rows for k in r}, key=lambda k: (k not in ('scenario', 'label', 'policy'), k))
@@ -114,10 +118,11 @@ def main(out_dir: Path = ROOT / 'examples' / 'results' / 'protocol_31oct'):
         'origin': 'SIMULATED',
         'protocol': 'docs/research/PROTOCOL_REGISTRATION_31OCT.md',
         'protocol_sha256': _sha(ROOT / 'docs' / 'research' / 'PROTOCOL_REGISTRATION_31OCT.md'),
-        'git_commit': _git('rev-parse', 'HEAD'),
-        'git_dirty': bool(_git('status', '--porcelain')),
+        'git_commit': git_commit,
+        'git_dirty_before_run': git_dirty,
         'timestamp_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime(started)),
         'elapsed_s': round(time.time() - started, 1),
+        'elapsed_s_by_scenario': timings,
         'python': sys.version.split()[0], 'platform': platform.platform(),
         'code_sha256': {f: _sha(ROOT / 'qualityrelay17' / f) for f in ('factory.py', 'vder.py', 'benchmark.py', 'calibration.py', 'economics.py')},
         'test_seeds': list(TEST_SEEDS), 'calibration_seeds': list(CAL_SEEDS), 'n_per_seed': N,
@@ -131,7 +136,7 @@ def main(out_dir: Path = ROOT / 'examples' / 'results' / 'protocol_31oct'):
         'hardware': 'laptop CPU, no GPU, no cloud',
     }
     (out_dir / 'manifest.json').write_text(json.dumps(manifest, indent=1, sort_keys=True))
-    print(f'wrote {out_dir} in {manifest["elapsed_s"]}s; commit {manifest["git_commit"]} dirty={manifest["git_dirty"]}')
+    print(f'wrote {out_dir} in {manifest["elapsed_s"]}s; commit {manifest["git_commit"]} dirty_before_run={manifest["git_dirty_before_run"]}')
 
 
 if __name__ == '__main__':
