@@ -71,6 +71,9 @@ plan before this goes on a slide as a result rather than "the wiring now works."
    proposed schema for adilnurgg (`docs/research/sim_api/`). Product config safer + cheaper per
    good unit in 15/15 scenarios, throughput kept in only 4/15; hold-all cuts throughput 82%.
    Pitch claims: `docs/research/SIM_18_1_RESULTS.md`.
+7. **NVIDIA Warp + tuning (same branch).** Warp kernels with CPU-identical decisions, 10^7 parts x 8
+   scenarios on CPU (GPU run pending: Brev SSH blocked on this network); post-hoc pairing/deadline
+   tuning: `docs/research/WARP_MC_AND_TUNING_31OCT.md`.
 
 Reviewer for this branch: adilnurgg or HyorinmaruK (one review per `TEAM_OWNERSHIP_AND_GITHUB.md`;
 no safety/actuation code touched).

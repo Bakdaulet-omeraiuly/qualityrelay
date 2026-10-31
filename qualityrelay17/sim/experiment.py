@@ -24,10 +24,11 @@ def cfg_name(cfg):
 
 def _cell(args):
     global _MODEL
-    sc, seed, pol, pr = args
+    sc, seed, pol, pr, *rest = args
+    kw = rest[0] if rest else {}
     if _MODEL is None:
         _MODEL = calibrate_part_model()
-    out = run_factory(sc, seed, pol, pr, model=_MODEL, keep_log=(seed == 0))
+    out = run_factory(sc, seed, pol, pr, model=_MODEL, keep_log=(seed == 0), **kw)
     a = modes()
     platform = (pol, pr) != BASELINE and pol != 'hold_all'
     printers = sum(s.printers for s in sc.sites)

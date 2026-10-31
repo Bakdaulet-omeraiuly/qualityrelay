@@ -105,7 +105,8 @@ def pair_unsafe_probability(slot_post, tab_post, ps_slot, ps_tab):
 
 class Factory:
     def __init__(self, sc: FactoryScenario, seed: int, policy: str, pairing: str = 'fifo', *, costs: Costs | None = None,
-                 model: PartModel | None = None, batch_k: int = 8, keep_log: bool = True):
+                 model: PartModel | None = None, batch_k: int = 8, keep_log: bool = True,
+                 pair_timeout_s: float | None = None):
         if policy not in POLICIES or pairing not in PAIRINGS:
             raise ValueError('unknown policy/pairing')
         if sc.evidence_sharing not in ('full', 'summary', 'none'):
@@ -113,6 +114,9 @@ class Factory:
         self.sc, self.seed, self.policy, self.pairing = sc, seed, policy, pairing
         self.costs = costs or Costs(); self.model = model or calibrate_part_model()
         self.batch_k, self.keep_log = batch_k, keep_log
+        # Optimised pairing waits for batch_k of each kind. pair_timeout_s (None = registered
+        # behaviour) releases a partial batch once a part has waited that long.
+        self.pair_timeout_s = pair_timeout_s
         self.design = nominal_design()
         self.env = env = Env()
         self.site = {s.name: s for s in sc.sites}
@@ -246,6 +250,8 @@ class Factory:
         self.buffer[p['kind']].append(p)
         self._upstream_exit()
         self._try_pair()
+        if self.pairing == 'optimized' and self.pair_timeout_s is not None:
+            self.env.process(self._pair_timer(p))
 
     def _upstream_exit(self):
         self.upstream -= 1
@@ -299,6 +305,11 @@ class Factory:
             del S[:take]; del T[:take]
             for s, t in match_batch(ss, ts, self):
                 self._spawn_pair(s, t)
+
+    def _pair_timer(self, p):
+        yield ('timeout', self.pair_timeout_s)
+        if p in self.buffer[p['kind']]:
+            self._try_pair(flush=True)
 
     def _ps(self, p):
         if p.get('expert_cleared'):

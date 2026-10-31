@@ -211,3 +211,12 @@ def test_charts_are_well_formed_and_labelled_simulated():
 def test_full_size_runs_that_used_to_deadlock_now_complete(sid, seed, cfg):
     o = run_factory(BY_ID[sid], seed, *cfg, model=MODEL, keep_log=False)
     assert o['conservation_ok'] and o['parts'] == 2 * BY_ID[sid].n_pairs
+
+
+def test_pair_timeout_releases_partial_batches_and_conserves_parts():
+    sc = replace(BY_ID['M01'], n_pairs=120)
+    slow = run_factory(sc, 2, 'bayes', 'optimized', model=MODEL, keep_log=False)
+    fast = run_factory(sc, 2, 'bayes', 'optimized', model=MODEL, keep_log=False, batch_k=2, pair_timeout_s=60.0)
+    assert fast['conservation_ok'] and slow['conservation_ok']
+    assert fast['truth_sha256'] == slow['truth_sha256']
+    assert fast['mean_cycle_s'] < slow['mean_cycle_s']
