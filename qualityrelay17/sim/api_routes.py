@@ -48,7 +48,9 @@ def stl(name: str):
 
 
 VENDOR = ROOT / 'web' / 'vendor'
-ASSETS = {'three.module.js', 'OrbitControls.js', 'STLLoader.js', 'CSS2DRenderer.js', 'site.js', 'site.css'}
+ASSETS = {'three.module.js', 'OrbitControls.js', 'STLLoader.js', 'CSS2DRenderer.js', 'RoomEnvironment.js',
+          'EffectComposer.js', 'RenderPass.js', 'UnrealBloomPass.js', 'OutputPass.js', 'ShaderPass.js', 'MaskPass.js',
+          'Pass.js', 'CopyShader.js', 'LuminosityHighPassShader.js', 'OutputShader.js', 'site.js', 'site.css'}
 
 
 @router.get('/assets/{name}')
@@ -101,25 +103,55 @@ def run(req: RunRequest):
         for pid in ids:
             if pid in tl:
                 tl[pid].append([STATION_OF.get(kind, station), start, end])
+    from math import sqrt
+    from .engine import surface_posterior, width_posterior, phi, TOL
     pair_of = {}
     for pr in f.pairs:
         pair_of[pr['slot_id']] = pr
         pair_of[pr['tab_id']] = pr
+    by_id = {p['part_id']: p for p in f.parts}
+    m = f.model
     parts = []
     for p in f.parts:
         pr = pair_of.get(p['part_id'], {})
+        raw = p.get('obs_raw', {})
+        ps = surface_posterior(raw, m, tuple(raw)) if raw else None
         parts.append(dict(id=p['part_id'], kind=p['kind'], site=p['site'], lot=p['lot_id'], print_t=p['t_print_s'],
                           crack=p['crack'], warped=p['warped'], fate=p.get('fate', 'unpaired'),
                           width_mm=round(p['printed_width_mm'], 3), measured_mm=round(p.get('measured_mm', 0.0), 3),
+                          caliper_sd=p.get('caliper_sd'), cams={k: (None if v is None else bool(v)) for k, v in raw.items()},
+                          surface_posterior=None if ps is None else round(ps, 5), reviewed=bool(p.get('reviewed')),
                           events=sorted(tl[p['part_id']], key=lambda e: e[1]),
                           pair=pr.get('pair_id'), decision=pr.get('decision'), escaped=bool(pr.get('escaped'))))
+    pairs = []
+    for pr in f.pairs:
+        s, t = by_id.get(pr['slot_id']), by_id.get(pr['tab_id'])
+        ev = dict(pair_id=pr['pair_id'], slot=pr['slot_id'], tab=pr['tab_id'], decision=pr.get('decision'),
+                  reason=pr.get('reason'), fate=pr.get('fate'), escaped=bool(pr.get('escaped')), shipped_s=pr.get('shipped_s'),
+                  formed_s=pr.get('formed_s'), truly_safe=pr.get('truly_safe'), true_clearance_mm=pr.get('true_clearance_mm'),
+                  threshold=round(f.costs.hold / (f.costs.hold + f.costs.escaped_defect), 5))
+        if s and t and 'measured_mm' in s and 'measured_mm' in t:
+            (ms, vs), (mt, vt) = width_posterior(s['measured_mm'], 'slot', m, s['caliper_sd']), width_posterior(t['measured_mm'], 'tab', m, t['caliper_sd'])
+            ev.update(measured_clearance_mm=round(s['measured_mm'] - t['measured_mm'], 4),
+                      posterior_clearance_mm=round(ms - mt, 4), posterior_clearance_sd=round(sqrt(vs + vt), 4),
+                      p_dimensional=round(phi((TOL - (ms - mt)) / sqrt(vs + vt)), 6),
+                      p_surface_slot=round(f._ps(s), 6), p_surface_tab=round(f._ps(t), 6),
+                      p_unsafe=pr.get('p_unsafe', round(f.pair_risk(s, t), 6)))
+        pairs.append(ev)
+    stations = {}
+    for start, end, station, key in f.events:
+        st_ = STATION_OF.get(key.partition(':')[0], station)
+        d = stations.setdefault(st_, dict(visits=0, busy_s=0.0))
+        d['visits'] += 1; d['busy_s'] += end - start
+    for d in stations.values():
+        d['busy_share'] = round(d['busy_s'] / max(1e-9, summary['makespan_s']), 4); d['busy_s'] = round(d['busy_s'], 2)
     keep = ('makespan_s', 'shipped', 'shipped_good', 'escaped', 'good_per_hour', 'mean_cycle_s', 'part_holds', 'pair_holds',
             'holds_stale_evidence', 'scrapped_parts', 'reworks', 'downtime_s', 'conservation_ok', 'truth_sha256')
     return dict(source_tier=SOURCE_TIER, model_version=MODEL_VERSION, scenario=req.scenario, title=sc.title,
                 policy=req.policy, pairing=req.pairing, seed=req.seed, n_pairs=req.n_pairs,
-                kpis={k: summary[k] for k in keep}, parts=parts,
-                pairs=[{k: pr.get(k) for k in ('pair_id', 'decision', 'reason', 'fate', 'escaped', 'shipped_s', 'p_unsafe',
-                                                'true_clearance_mm')} for pr in f.pairs])
+                kpis={k: summary[k] for k in keep}, parts=parts, pairs=pairs, stations=stations,
+                model=dict(calibration_id=m.calibration_id, phone_sens=m.phone_sens, phone_spec=m.phone_spec,
+                           pi_sens=m.pi_sens, pi_spec=m.pi_spec, crack_prior=m.crack_prior))
 
 
 def _csv(path):

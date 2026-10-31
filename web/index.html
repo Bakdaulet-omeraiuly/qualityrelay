@@ -3,179 +3,159 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>QualityRelay · SAFE-MESH 18.1</title>
+<title>QualityRelay Studio · SAFE-MESH 18.1</title>
 <link rel="stylesheet" href="/sim/assets/site.css"/>
 <script type="importmap">
-{"imports":{"three":"/sim/assets/three.module.js","three/addons/OrbitControls.js":"/sim/assets/OrbitControls.js",
-"three/addons/STLLoader.js":"/sim/assets/STLLoader.js","three/addons/CSS2DRenderer.js":"/sim/assets/CSS2DRenderer.js"}}
+{"imports":{
+ "three":"/sim/assets/three.module.js",
+ "three/addons/OrbitControls.js":"/sim/assets/OrbitControls.js",
+ "three/addons/STLLoader.js":"/sim/assets/STLLoader.js",
+ "three/addons/CSS2DRenderer.js":"/sim/assets/CSS2DRenderer.js",
+ "three/addons/RoomEnvironment.js":"/sim/assets/RoomEnvironment.js",
+ "three/addons/EffectComposer.js":"/sim/assets/EffectComposer.js",
+ "three/addons/RenderPass.js":"/sim/assets/RenderPass.js",
+ "three/addons/UnrealBloomPass.js":"/sim/assets/UnrealBloomPass.js",
+ "three/addons/OutputPass.js":"/sim/assets/OutputPass.js"}}
 </script>
 </head>
 <body>
-<header class="topbar">
-  <a class="brand" href="#top" aria-label="QualityRelay home">
-    <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><path d="M16 2 29 9.5v13L16 30 3 22.5v-13z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 16.5l4 4 8-9" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <span>QualityRelay</span><small>SAFE-MESH 18.1</small>
+<header class="appbar">
+  <a class="brand" href="#lab" aria-label="QualityRelay Studio">
+    <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true"><path d="M16 2 29 9.5v13L16 30 3 22.5v-13z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 16.5l4 4 8-9" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    QualityRelay <span>Studio</span>
   </a>
-  <nav>
-    <a href="#factory"><b>3D Lab</b></a><a href="#parts">Parts 3D</a><a href="#results">Results</a>
-    <a href="#science">Science</a><a href="#claims">Claims</a>
+  <nav class="tabs" role="tablist">
+    <a href="#lab" data-view="lab">3D Lab</a><a href="#parts" data-view="parts">Parts</a>
+    <a href="#results" data-view="results">Results</a><a href="#science" data-view="science">Science</a><a href="#claims" data-view="claims">Claims</a>
   </nav>
-  <span class="tier" title="Every number on this page comes from simulation, not from a factory">SIMULATED · research build</span>
+  <div class="context" id="context">—</div>
+  <span class="tier" title="Every number in this studio comes from simulation, not from a factory">SIMULATED</span>
+  <button class="iconbtn" id="toggleInspector" title="Show / hide inspector (I)" aria-label="Toggle inspector">⟩</button>
 </header>
 
-<main id="top">
-<section class="hero">
-  <div class="hero-copy">
-    <p class="eyebrow">Assured inspection for 3D-printed Slot/Tab assemblies</p>
-    <h1>Ship fewer defective parts, and show the evidence.</h1>
-    <p class="lead">Two cameras, a caliper and CAD geometry feed a calibrated decision layer.
-      We tested it in a discrete-event digital factory across 15 fault scenarios and reported what
-      worked and what did not.</p>
-    <a class="cta" href="#factory">▶ Open the 3D Lab: watch the factory run</a>
-    <div class="kpis" id="heroKpis">
-      <div class="kpi"><strong>—</strong><span>loading results…</span></div>
-    </div>
-  </div>
-  <div class="hero-visual">
-    <div id="heroCanvas" class="canvas"></div>
-    <div class="caption">Slot + Tab from the team's STL files · nominal design clearance <b id="heroClear">1.0 mm</b></div>
-  </div>
-</section>
-
-<section id="factory" class="block">
-  <div class="block-head">
-    <h2>3D Lab: digital factory, live replay</h2>
-    <p>Every part below is one simulated part from our discrete-event engine, timed by the station it
-      is at: print → phone camera → Pi camera → caliper → pairing → assembly → sorting. Held parts go to
-      review, failed rework goes to scrap.</p>
-  </div>
-  <div class="factory-grid">
-    <aside class="panel controls">
-      <label>Scenario<select id="scenario"></select></label>
-      <label>Decision policy
-        <select id="policy"><option value="bayes">Calibrated Bayes (QualityRelay)</option><option value="rules">Fixed rule (today)</option><option value="hold_all">Hold everything</option></select></label>
-      <label>Pairing
-        <select id="pairing"><option value="optimized">Risk-optimised (SciPy)</option><option value="fifo">First-in first-out</option></select></label>
-      <div class="row2">
-        <label>Seed<input id="seed" type="number" min="0" max="999" value="0"/></label>
-        <label>Pairs<input id="npairs" type="number" min="10" max="150" value="60"/></label>
+<!-- ================= 3D LAB ================= -->
+<section class="view" id="view-lab">
+  <div class="studio" id="studio">
+    <aside class="dock left">
+      <div class="phead"><span>Run</span></div>
+      <div class="pbody">
+        <div class="seg" id="modeSeg"><button data-mode="single" class="on">Single</button><button data-mode="compare">Compare</button></div>
+        <label>Scenario<select id="scenario"></select></label>
+        <label><span id="policyLabel">Decision policy</span>
+          <select id="policy"><option value="bayes">Calibrated Bayes (QualityRelay)</option><option value="rules">Fixed rule (today)</option><option value="hold_all">Hold everything</option></select></label>
+        <label>Pairing<select id="pairing"><option value="optimized">Risk-optimised (SciPy)</option><option value="fifo">First-in first-out</option></select></label>
+        <div class="row2"><label>Seed<input id="seed" type="number" min="0" max="999" value="0"/></label>
+          <label>Pairs<input id="npairs" type="number" min="10" max="150" value="60"/></label></div>
+        <div id="compareHint" hidden><p class="hint">Left: today (fixed rule + FIFO). Right: the policy above. Same parts, same sensor noise, same failures (common random numbers).</p><button class="ghost" id="demoBtn" style="width:100%;margin-bottom:10px">★ Demo: warping burst F03 · seed 3 · 100 pairs</button></div>
+        <button id="runBtn" class="primary">Run simulation</button>
+        <div id="runStatus" class="status" role="status"></div>
       </div>
-      <button id="runBtn" class="primary">Run simulation</button>
-      <div id="runStatus" class="muted small" role="status">—</div>
-      <hr/>
-      <div class="legend">
-        <span><i class="sw slot"></i>Slot</span><span><i class="sw tab"></i>Tab</span>
-        <span><i class="sw review"></i>In review (HOLD)</span><span><i class="sw scrap"></i>Scrapped</span>
-        <span><i class="sw escape"></i>Escaped defect (truth)</span>
+      <div class="phead"><span>Story</span><span class="faint" id="storyStep">0 / 7</span></div>
+      <div class="pbody">
+        <p id="storyText" class="story">Take the guided tour of the line. The camera moves to each station.</p>
+        <div class="row2"><button class="ghost" id="storyPrev">◀ Back</button><button class="ghost" id="storyNext">Start tour ▶</button></div>
       </div>
-      <label class="check"><input id="truth" type="checkbox" checked/> Reveal ground truth (evaluator only)</label>
+      <div class="phead"><span>Layers</span></div>
+      <div class="pbody">
+        <label class="check"><input id="labels" type="checkbox" checked/> Station labels <kbd>L</kbd></label>
+        <label class="check"><input id="truth" type="checkbox" checked/> Ground truth (evaluator only) <kbd>T</kbd></label>
+        <div class="legend">
+          <span><i class="sw slot"></i>Slot</span><span><i class="sw tab"></i>Tab</span>
+          <span><i class="sw review"></i>HOLD → review</span><span><i class="sw scrap"></i>Scrapped</span>
+          <span><i class="sw escape"></i>Escaped defect</span><span><i class="sw caught"></i>Caught (compare)</span>
+        </div>
+      </div>
     </aside>
-    <div class="stage">
-      <div id="factoryCanvas" class="canvas tall"></div>
-      <div class="hud">
-        <div><small>sim clock</small><b id="clock">0:00</b></div>
-        <div><small>shipped good</small><b id="cShip">0</b></div>
-        <div><small>held → review</small><b id="cHold">0</b></div>
-        <div><small>scrapped</small><b id="cScrap">0</b></div>
-        <div><small>escaped</small><b id="cEsc" class="bad">0</b></div>
+
+    <div class="center">
+      <div class="viewports" id="viewports">
+        <div class="vp" id="vpA">
+          <div class="corner tl" id="titleA">QualityRelay</div>
+          <div class="corner tr counters" id="countA"></div>
+          <div class="corner bl faint" id="provA"></div>
+        </div>
+        <div class="vp" id="vpB" hidden>
+          <div class="corner tl" id="titleB">QualityRelay</div>
+          <div class="corner tr counters" id="countB"></div>
+          <div class="corner bl faint" id="provB"></div>
+        </div>
       </div>
       <div class="transport">
-        <button id="playBtn" aria-label="Play or pause">❚❚</button>
+        <button id="playBtn" class="iconbtn" aria-label="Play / pause (space)">❚❚</button>
+        <span class="clock num" id="clock">0:00</span>
         <input id="timeline" type="range" min="0" max="1000" value="0" aria-label="Timeline"/>
         <select id="speed" aria-label="Playback speed"><option value="30">30×</option><option value="60" selected>60×</option><option value="150">150×</option><option value="400">400×</option></select>
       </div>
-      <div class="runkpis" id="runKpis"></div>
+      <div class="metricstrip" id="metrics"></div>
     </div>
-  </div>
-</section>
 
-<section id="parts" class="block">
-  <div class="block-head">
-    <h2>Parts from CAD, measured from the mesh</h2>
-    <p>Widths are measured from each STL by a mid-length cross-section, not read from file names. The fit
-      check shows the clearance a Slot/Tab pair would have. It is a design check, not a physical
-      measurement.</p>
-  </div>
-  <div class="parts-grid">
-    <aside class="panel">
-      <div class="seg" role="tablist">
-        <button id="modeSingle" class="on">Single part</button><button id="modeFit">Fit check</button>
-      </div>
-      <div id="partList" class="partlist"></div>
-      <div id="fitPick" class="fitpick hidden">
-        <label>Slot<select id="fitSlot"></select></label>
-        <label>Tab<select id="fitTab"></select></label>
-        <div id="fitVerdict" class="verdict"></div>
-      </div>
+    <aside class="dock right" id="inspector">
+      <div class="phead"><span>Inspector</span><span class="faint" id="inspHint">click a part or a station</span></div>
+      <div class="pbody insp" id="inspBody"></div>
     </aside>
-    <div class="stage">
-      <div id="partCanvas" class="canvas tall"></div>
-      <div id="partLabel" class="overlay-label"></div>
-    </div>
   </div>
 </section>
 
-<section id="results" class="block">
-  <div class="block-head">
-    <h2>Factory results: 15 scenarios × 20 seeds</h2>
-    <p><b>Product</b> means calibrated Bayes with risk-optimised pairing; <b>today</b> means the fixed rule
-      with FIFO. Each verdict uses the pre-registered rules with 95% cluster-bootstrap intervals.
-      ROI is a scenario outcome under illustrative prices, not a saving.</p>
+<!-- ================= PARTS ================= -->
+<section class="view page" id="view-parts" hidden>
+  <div class="pagehead"><h1>Parts from CAD, measured from the mesh</h1>
+    <p>Widths come from a mid-length cross-section of each STL, not from file names. The fit check is a design check, not a physical measurement.</p></div>
+  <div class="partsgrid">
+    <aside class="dock">
+      <div class="phead"><div class="seg small"><button id="modeSingle" class="on">Single part</button><button id="modeFit">Fit check</button></div></div>
+      <div class="pbody"><div id="partList" class="partlist"></div>
+        <div id="fitPick" class="hidden"><label>Slot<select id="fitSlot"></select></label><label>Tab<select id="fitTab"></select></label><div id="fitVerdict" class="verdict"></div></div></div>
+    </aside>
+    <div class="vp tall" id="partCanvas"><div class="corner bl" id="partLabel"></div><div class="corner tl faint">CAD_STL_MEASURED</div></div>
   </div>
-  <div class="panel tablewrap">
-    <table id="resultsTable"><thead><tr>
-      <th>Scenario</th><th class="num">Δ good / h</th><th class="num">Δ escapes / 1000</th><th class="num">Δ cost / good unit</th>
-      <th>Safety</th><th>Throughput</th><th>Cost</th><th class="num">P(product worse) ROI</th></tr></thead><tbody></tbody></table>
-  </div>
+</section>
+
+<!-- ================= RESULTS ================= -->
+<section class="view page" id="view-results" hidden>
+  <div class="pagehead"><h1>Factory results: 15 scenarios × 20 seeds</h1>
+    <p><b>Product</b> means calibrated Bayes with risk-optimised pairing; <b>today</b> means the fixed rule with FIFO. Verdicts use the pre-registered rules (95% cluster bootstrap). ROI is a scenario outcome under illustrative prices, never a saving.</p></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="card tablewrap"><table id="resultsTable"><thead><tr>
+    <th>Scenario</th><th class="num">Δ good / h</th><th class="num">Δ escapes / 1000</th><th class="num">Δ cost / good unit</th>
+    <th>Safety</th><th>Throughput</th><th>Cost</th><th class="num">P(product worse)</th></tr></thead><tbody></tbody></table></div>
   <div class="charts">
-    <figure class="panel chart" data-chart="good_per_hour"></figure>
-    <figure class="panel chart" data-chart="delta_profit_interval"></figure>
-    <figure class="panel chart" data-chart="hold_all_throughput"></figure>
-    <figure class="panel chart" data-chart="scale"></figure>
+    <figure class="card chart" data-chart="good_per_hour"></figure><figure class="card chart" data-chart="delta_profit_interval"></figure>
+    <figure class="card chart" data-chart="hold_all_throughput"></figure><figure class="card chart" data-chart="scale"></figure>
   </div>
 </section>
 
-<section id="science" class="block">
-  <div class="block-head">
-    <h2>Collective-intelligence benchmark (Gate A, pre-registered)</h2>
-    <p>Mock agents with hidden truth. Each policy pays for every observation and every message. The
-      primary result is <b>negative</b>: at default prices the full SAFE-MESH + VOI agent holds every part.</p>
-  </div>
+<!-- ================= SCIENCE ================= -->
+<section class="view page" id="view-science" hidden>
+  <div class="pagehead"><h1>Collective-intelligence benchmark (Gate A, pre-registered)</h1>
+    <p>Mock agents with hidden truth. Each policy pays for every observation and every message. The primary result is <b>negative</b>: at default prices, the full SAFE-MESH + VOI agent holds every part.</p></div>
   <div class="two">
-    <div class="panel tablewrap"><h3>S01 nominal, 30 lots × 1000 parts</h3><table id="gateTable"><thead><tr>
+    <div class="card tablewrap"><h3>S01 nominal · 30 lots × 1000 parts</h3><table id="gateTable"><thead><tr>
       <th>Policy</th><th class="num">Unsafe PASS / 1000</th><th class="num">Released good</th><th class="num">Cost / unit</th></tr></thead><tbody></tbody></table></div>
-    <div class="panel tablewrap"><h3>NVIDIA Warp: 10⁷ parts per scenario</h3><table id="warpTable"><thead><tr>
-      <th>Scenario</th><th class="num">Rule</th><th class="num">Calibrated</th><th class="num">Δ (95% CI)</th></tr></thead><tbody></tbody></table>
-      <p class="muted small">Unsafe PASS per 1000 parts. The Warp kernels make decisions identical to the CPU code,
-        part for part (tested). Run on Warp's CPU backend; the GPU run is pending.</p></div>
+    <div class="card tablewrap"><h3>NVIDIA Warp · 10⁷ parts per scenario</h3><table id="warpTable"><thead><tr>
+      <th>Scenario</th><th class="num">Rule</th><th class="num">Calibrated</th><th class="num">Δ [95% CI]</th></tr></thead><tbody></tbody></table>
+      <p class="faint small">Unsafe PASS per 1000 parts. Warp kernels make decisions identical to the CPU code, part for part (tested). Run on Warp's CPU backend; the GPU run is pending.</p></div>
   </div>
 </section>
 
-<section id="claims" class="block">
-  <div class="block-head"><h2>What we can and cannot claim</h2></div>
+<!-- ================= CLAIMS ================= -->
+<section class="view page" id="view-claims" hidden>
+  <div class="pagehead"><h1>What we can and cannot claim</h1></div>
   <div class="two">
-    <div class="panel claims ok"><h3>Supported, in simulation</h3><ul>
+    <div class="card claims ok"><h3>Supported, in simulation</h3><ul>
       <li>The calibrated policy with risk-based pairing shipped fewer defective assemblies in <b>15/15</b> scenarios and kept throughput in <b>4/15</b>.</li>
-      <li>When a camera reading goes missing or the network drops, the calibrated policy kept about <b>95 more good assemblies per hour</b> than a rule that holds on missing data.</li>
+      <li>When a camera reading goes missing or the network drops, it kept about <b>95 more good assemblies per hour</b> than a rule that holds on missing data.</li>
       <li>Optimising part matching against a pass/fail rule <b>increased</b> escapes under drift. It is safe only with a calibrated-risk objective.</li>
       <li>Holding everything through one review station cut throughput by <b>82%</b>.</li>
-      <li>Correcting the cost accounting <b>reversed</b> an earlier "peer requests save money" result; we published the correction.</li>
-    </ul></div>
-    <div class="panel claims no"><h3>Not claimed</h3><ul>
+      <li>Correcting the cost accounting <b>reversed</b> an earlier "peer requests save money" result. We published the correction.</li></ul></div>
+    <div class="card claims no"><h3>Not claimed</h3><ul>
       <li>Any factory measurement or proven saving. No physical run exists yet.</li>
       <li>"21 agents collaborate". There are 21 <i>roles</i>, not 21 running models.</li>
       <li>"8 NVIDIA systems running". Warp is used; the other adapters are <code>NOT_CONFIGURED</code>.</li>
-      <li>A payback period or annual saving.</li>
-    </ul></div>
+      <li>A payback period or annual saving.</li></ul></div>
   </div>
+  <p class="faint small foot">Write-ups: docs/research/SIM_18_1_RESULTS.md · COLLECTIVE_GATE_A_RESULTS_31OCT.md · WARP_MC_AND_TUNING_31OCT.md · <a href="/legacy">17.0 page</a></p>
 </section>
-</main>
 
-<footer class="foot">
-  <span>Tiers: <b>SIMULATED</b> (all numbers here) · PHYSICAL_CAPTURE · VERIFIED_PHYSICAL</span>
-  <span>Write-ups: docs/research/SIM_18_1_RESULTS.md · COLLECTIVE_GATE_A_RESULTS_31OCT.md · WARP_MC_AND_TUNING_31OCT.md</span>
-  <a href="/legacy">17.0 page</a>
-</footer>
 <script type="module" src="/sim/assets/site.js"></script>
 </body>
 </html>

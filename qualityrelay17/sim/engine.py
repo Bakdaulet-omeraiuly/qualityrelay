@@ -220,6 +220,7 @@ class Factory:
         yield from self._work([self.res[(site.name, 'caliper', line)], self.res[(site.name, 'operator')]],
                               f'cal:{p["part_id"]}', STATION_S['caliper'], 'caliper')
         p['obs'] = obs
+        p['obs_raw'] = {k: v for k, (v, _t) in obs.items()}  # display copy; review may clear p['obs']
         p['measured_mm'] = p['caliper'][0]
         p['caliper_sd'] = site.caliper_sd_mm
         p['evidence_at'] = self.env.now + sc.evidence_latency_s
@@ -239,6 +240,7 @@ class Factory:
                 yield from self._work([self.res[(a, 'caliper_local')], self.res[(a, 'operator')]], f'cl:{p["part_id"]}',
                                       STATION_S['caliper'], 'caliper_local')
                 p['obs'] = {'phone_local': (p['cam']['phone_local'], self.env.now)}
+                p['obs_raw'] = {'phone_local': p['cam']['phone_local']}
                 p['measured_mm'] = p['caliper'][1]
                 p['caliper_sd'] = self.site[a].caliper_sd_mm if a in self.site else 0.05
                 p['evidence_at'] = self.env.now
