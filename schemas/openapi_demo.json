@@ -2666,6 +2666,11 @@
             "type": "boolean",
             "title": "Two Lanes",
             "default": true
+          },
+          "agents": {
+            "type": "boolean",
+            "title": "Agents",
+            "default": true
           }
         },
         "type": "object",
