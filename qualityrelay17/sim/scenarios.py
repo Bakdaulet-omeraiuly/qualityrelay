@@ -65,7 +65,7 @@ STATION_S = dict(phone=5.0, pi=6.0, caliper=7.0, assembly=9.0, sorting=3.0, revi
 
 
 def draw_part(sc: FactoryScenario, seed: int, kind: str, idx: int, site: SiteConfig, t_print_s: float, lot_id: str,
-              design: dict) -> dict:
+              design: dict, *, seq_idx: int | None = None, corrected: bool = False) -> dict:
     """Ground truth + the observations each sensor WOULD produce, from part-keyed streams so every
     policy sees identical parts and identical sensor noise (common random numbers)."""
     rng = Random(f'part:{seed}:{kind}:{idx}')
@@ -73,9 +73,11 @@ def draw_part(sc: FactoryScenario, seed: int, kind: str, idx: int, site: SiteCon
     # Drift is indexed by PRODUCTION SEQUENCE (planned print time of part idx), not by the actual
     # print time: actual time depends on the policy (WIP blocking), and drift keyed to it would give
     # each policy different parts. Tool wear by part count is the physical reading of this.
-    t_planned = idx * (site.print_setup_s / site.print_batch + site.print_per_part_s) * 2 / max(1, site.printers)
+    seq = idx if seq_idx is None else seq_idx  # a reprint keeps the production position of the part it replaces
+    t_planned = seq * (site.print_setup_s / site.print_batch + site.print_per_part_s) * 2 / max(1, site.printers)
     drift = sc.process_drift_mm_per_h * t_planned / 3600.0
-    width = rng.gauss(nominal + site.printer_bias_mm + (-drift / 2 if kind == 'slot' else drift), site.width_sd_mm)
+    bias = 0.0 if corrected else site.printer_bias_mm  # reprint: printer re-zeroed to the nominal CAD model
+    width = rng.gauss(nominal + bias + (-drift / 2 if kind == 'slot' else drift), site.width_sd_mm)
     warped = rng.random() < sc.warp_p
     if warped:
         width += -sc.warp_mm if kind == 'slot' else sc.warp_mm
@@ -87,13 +89,14 @@ def draw_part(sc: FactoryScenario, seed: int, kind: str, idx: int, site: SiteCon
         flag = bool(crack ^ (rng.random() < sc.camera_noise) ^ lot_flip)
         cams[cam] = None if missing else flag
     readings = [width + rng.gauss(0, site.caliper_sd_mm) for _ in range(3)]  # supplier, assembly re-measure, review
-    return dict(part_id=f'{kind[0].upper()}-{seed}-{idx:06d}', kind=kind, site=site.name, lot_id=lot_id,
+    return dict(part_id=f'{kind[0].upper()}-{seed}-{idx:06d}', idx=idx, seq_idx=seq, kind=kind, site=site.name, lot_id=lot_id,
                 t_print_s=round(t_print_s, 3), true_width_mm=width, printed_width_mm=width, warped=warped, crack=crack, lot_lighting_flip=lot_flip,
                 cam=cams, caliper=readings, expert_crack_seen=crack if rng.random() > 0.02 else False,
                 expert_width_mm=width + rng.gauss(0, 0.01), rework_ok=rng.random() < 0.8)
 
 
 def truth_hash(parts: list[dict]) -> str:
+    parts = [p for p in parts if not p.get('root_id')]  # originals only: reprints depend on the policy by design
     keys = ('part_id', 'kind', 'site', 'lot_id', 'printed_width_mm', 'warped', 'crack')  # printed, not post-rework
     blob = json.dumps([[p[k] if not isinstance(p[k], float) else round(p[k], 9) for k in keys] for p in parts])
     return hashlib.sha256(blob.encode()).hexdigest()

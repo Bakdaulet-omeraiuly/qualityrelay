@@ -106,7 +106,7 @@ def pair_unsafe_probability(slot_post, tab_post, ps_slot, ps_tab):
 class Factory:
     def __init__(self, sc: FactoryScenario, seed: int, policy: str, pairing: str = 'fifo', *, costs: Costs | None = None,
                  model: PartModel | None = None, batch_k: int = 8, keep_log: bool = True,
-                 pair_timeout_s: float | None = None):
+                 pair_timeout_s: float | None = None, reprint: bool = False, max_reprints: int = 2):
         if policy not in POLICIES or pairing not in PAIRINGS:
             raise ValueError('unknown policy/pairing')
         if sc.evidence_sharing not in ('full', 'summary', 'none'):
@@ -117,6 +117,10 @@ class Factory:
         # Optimised pairing waits for batch_k of each kind. pair_timeout_s (None = registered
         # behaviour) releases a partial batch once a part has waited that long.
         self.pair_timeout_s = pair_timeout_s
+        # Closed loop: a confirmed-defective part is replaced by a reprint from the nominal CAD model
+        # (printer re-zeroed), which goes through the full inspection again. Off by default so the
+        # registered SIM results are unchanged.
+        self.reprint, self.max_reprints = reprint, max_reprints
         self.design = nominal_design()
         self.env = env = Env()
         self.site = {s.name: s for s in sc.sites}
@@ -150,7 +154,7 @@ class Factory:
         self.hold_part_seconds = 0.0
         self.stats = dict(part_reviews=0, pair_reviews=0, reworks=0, rework_ok=0, scrapped_parts=0, scrapped_good_parts=0,
                           shipped=0, escaped=0, shipped_good=0, holds_stale_evidence=0, part_holds=0, pair_holds=0,
-                          local_reinspections=0, released_after_review=0)
+                          local_reinspections=0, released_after_review=0, reprints=0)
 
     # ---- helpers -------------------------------------------------------------------
     def _svc(self, key, mean_s):
@@ -289,6 +293,28 @@ class Factory:
             self.stats['scrapped_good_parts'] += 1
         p['fate'] = 'scrap'
         self.env.process(self._release_wip(p['kind'], 1))
+        if self.reprint and p.get('reprints', 0) < self.max_reprints:
+            self.upstream += 1  # the replacement must pass the line before the buffer is flushed
+            self.stats['reprints'] += 1
+            self.env.process(self._reprint(p))
+
+    def _reprint(self, old):
+        site = self.site[old['site']]
+        pr = self.res[(site.name, 'printer')]
+        n = old.get('reprints', 0) + 1
+        root = old.get('root_id', old['part_id'])
+        yield ('acquire', {self.wip[old['kind']]: 1})
+        yield ('acquire', {pr: 1})
+        t0 = self.env.now
+        delay = self._failure_delay(pr)
+        yield ('timeout', delay + self._svc(f'reprint:{root}:{n}', site.print_setup_s + site.print_per_part_s))
+        yield ('release', {pr: 1})
+        p = draw_part(self.sc, self.seed, old['kind'], 10_000_000 * n + old['idx'], site, t0, f'{site.name}:reprint',
+                      self.design, seq_idx=old['seq_idx'], corrected=True)
+        p.update(part_id=f'{root}-R{n}', root_id=root, reprints=n, reprint_of=old['part_id'], line=old['line'])
+        old['reprinted_as'] = p['part_id']
+        self.parts.append(p)
+        self.env.process(self.part(p, site))
 
     def _release_wip(self, kind, n):
         yield ('release', {self.wip[kind]: n})
@@ -437,7 +463,7 @@ class Factory:
         st = self.stats; n_parts = len(self.parts)
         shipped = [p for p in self.pairs if 'shipped_s' in p]
         leftover = len(self.buffer['slot']) + len(self.buffer['tab'])
-        conserved = 2 * st['shipped'] + st['scrapped_parts'] + leftover == n_parts == 2 * self.sc.n_pairs
+        conserved = 2 * st['shipped'] + st['scrapped_parts'] + leftover == n_parts == 2 * self.sc.n_pairs + st['reprints']
         cyc = sorted(p['cycle_s'] for p in shipped) or [0.0]
         util = {r.name: round(r.busy_time / (end * r.capacity), 5) if end > 0 else 0.0 for r in self.env.resources}
         decided = [p for p in self.pairs]
@@ -457,7 +483,7 @@ class Factory:
             holds_stale_evidence=st['holds_stale_evidence'],
             part_reviews=st['part_reviews'], pair_reviews=st['pair_reviews'], reworks=st['reworks'], rework_ok=st['rework_ok'],
             scrapped_parts=st['scrapped_parts'], scrapped_good_parts=st['scrapped_good_parts'],
-            released_after_review=st['released_after_review'], local_reinspections=st['local_reinspections'],
+            released_after_review=st['released_after_review'], local_reinspections=st['local_reinspections'], reprints=st['reprints'],
             hold_inventory_part_hours=self.hold_part_seconds / 3600, downtime_s=round(self.down_s, 3),
             operator_seconds=sum(r.busy_time for r in self.env.resources if 'operator' in r.name),
             utilization=util,

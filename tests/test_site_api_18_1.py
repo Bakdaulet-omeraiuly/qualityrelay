@@ -25,7 +25,7 @@ def test_run_returns_a_conserving_simulated_trace():
     r = c.post('/sim/run', json=dict(scenario='F02', policy='bayes', pairing='optimized', seed=1, n_pairs=30))
     d = r.json()
     assert r.status_code == 200 and d['source_tier'] == 'SIMULATED' and d['kpis']['conservation_ok']
-    assert len(d['parts']) == 60
+    assert len(d['parts']) == 60 + d['kpis']['reprints']  # website runs reprint confirmed defects
     for p in d['parts']:
         assert [e[1] for e in p['events']] == sorted(e[1] for e in p['events'])
         assert all(e[2] >= e[1] for e in p['events'])

@@ -75,6 +75,7 @@ class RunRequest(BaseModel):
     pairing: str = 'optimized'
     seed: int = Field(0, ge=0, le=10_000)
     n_pairs: int = Field(60, ge=10, le=150)
+    reprint: bool = True  # website default: closed-loop reprint of confirmed defects
 
 
 def _who(key: str):
@@ -95,7 +96,7 @@ def run(req: RunRequest):
     if req.scenario not in BY_ID or req.policy not in POLICIES or req.pairing not in PAIRINGS:
         raise HTTPException(422, 'unknown scenario/policy/pairing')
     sc = replace(BY_ID[req.scenario], n_pairs=req.n_pairs)
-    f = Factory(sc, req.seed, req.policy, req.pairing, model=_model(), keep_log=True)
+    f = Factory(sc, req.seed, req.policy, req.pairing, model=_model(), keep_log=True, reprint=req.reprint)
     summary = f.run()
     tl = {p['part_id']: [] for p in f.parts}
     for start, end, station, key in f.events:
@@ -121,6 +122,7 @@ def run(req: RunRequest):
                           width_mm=round(p['printed_width_mm'], 3), measured_mm=round(p.get('measured_mm', 0.0), 3),
                           caliper_sd=p.get('caliper_sd'), cams={k: (None if v is None else bool(v)) for k, v in raw.items()},
                           surface_posterior=None if ps is None else round(ps, 5), reviewed=bool(p.get('reviewed')),
+                          reprint_of=p.get('reprint_of'), reprinted_as=p.get('reprinted_as'), root_id=p.get('root_id'),
                           events=sorted(tl[p['part_id']], key=lambda e: e[1]),
                           pair=pr.get('pair_id'), decision=pr.get('decision'), escaped=bool(pr.get('escaped'))))
     pairs = []
@@ -146,8 +148,8 @@ def run(req: RunRequest):
     for d in stations.values():
         d['busy_share'] = round(d['busy_s'] / max(1e-9, summary['makespan_s']), 4); d['busy_s'] = round(d['busy_s'], 2)
     keep = ('makespan_s', 'shipped', 'shipped_good', 'escaped', 'good_per_hour', 'mean_cycle_s', 'part_holds', 'pair_holds',
-            'holds_stale_evidence', 'scrapped_parts', 'reworks', 'downtime_s', 'conservation_ok', 'truth_sha256')
-    return dict(source_tier=SOURCE_TIER, model_version=MODEL_VERSION, scenario=req.scenario, title=sc.title,
+            'holds_stale_evidence', 'scrapped_parts', 'reworks', 'downtime_s', 'conservation_ok', 'truth_sha256', 'reprints')
+    return dict(source_tier=SOURCE_TIER, model_version=MODEL_VERSION, scenario=req.scenario, title=sc.title, reprint=req.reprint,
                 policy=req.policy, pairing=req.pairing, seed=req.seed, n_pairs=req.n_pairs,
                 kpis={k: summary[k] for k in keep}, parts=parts, pairs=pairs, stations=stations,
                 model=dict(calibration_id=m.calibration_id, phone_sens=m.phone_sens, phone_spec=m.phone_spec,

@@ -220,3 +220,20 @@ def test_pair_timeout_releases_partial_batches_and_conserves_parts():
     assert fast['conservation_ok'] and slow['conservation_ok']
     assert fast['truth_sha256'] == slow['truth_sha256']
     assert fast['mean_cycle_s'] < slow['mean_cycle_s']
+
+
+def test_reprint_loop_replaces_scrapped_parts_and_reinspects_them():
+    sc = replace(BY_ID['F04'], n_pairs=80)  # crack burst: many scraps
+    f = Factory(sc, 2, 'bayes', 'fifo', model=MODEL, reprint=True); o = f.run()
+    assert o['conservation_ok'] and o['reprints'] > 0
+    reprints = [p for p in f.parts if p.get('root_id')]
+    assert len(reprints) == o['reprints']
+    for p in reprints:
+        assert p['part_id'].startswith(p['root_id'] + '-R') and p['reprints'] <= 2
+        assert 'measured_mm' in p or p.get('fate') == 'scrap'   # went through metrology again
+    for p in f.parts:
+        if p.get('fate') == 'scrap' and p.get('reprints', 0) < 2:
+            assert p.get('reprinted_as'), p['part_id']
+    base = run_factory(sc, 2, 'bayes', 'fifo', model=MODEL, keep_log=False)
+    assert base['truth_sha256'] == o['truth_sha256'] and base['reprints'] == 0
+    assert o['shipped'] >= base['shipped']
