@@ -257,8 +257,13 @@ def vision_capture(req: CaptureRequest):
     counts = {k: len(list((PRINTS / k).glob('*'))) if (PRINTS / k).exists() else 0 for k in ('good', 'defect', 'inbox')}
     ready = counts['good'] >= 30 and counts['defect'] >= 10
     saved = str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
+    from ..vision_measure import measure_part_width
+    try:
+        measurement = measure_part_width(img)
+    except Exception as e:  # noqa: BLE001 -- a failed measurement must not lose the saved photo
+        measurement = dict(status='ERROR', note=str(e)[:200])
     return dict(source_tier='PHYSICAL_CAPTURE', saved=saved, sha256=sha, width=int(img.shape[1]),
-                height=int(img.shape[0]), lane=req.lane, label=req.label, dataset_counts=counts,
+                height=int(img.shape[0]), lane=req.lane, label=req.label, dataset_counts=counts, measurement=measurement,
                 nvidia_anomaly=dict(status='NOT_CONFIGURED',
                                     reason='The STFPM model has only been trained on synthetic CAD renders and MVTec; scoring a real '
                                            'photo with it would be out of domain. Train it on these PHYSICAL_CAPTURE photos first.',

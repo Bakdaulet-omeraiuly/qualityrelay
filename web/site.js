@@ -722,7 +722,10 @@ function bindCameraPanel(k, side) {
       const r = await api('/sim/vision/capture', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lane: k === 'phone_0' ? 'slot' : 'tab', label: $('#camLabel').value, image_b64: photo }) });
       const n = r.nvidia_anomaly, c = r.dataset_counts;
-      $('#camResult').innerHTML = `<div class="kv"><span>saved</span><span>${r.saved.split('/').slice(-2).join('/')}</span><span>size</span><span>${r.width} × ${r.height}</span>
+      const ms = r.measurement || {};
+      const meas = ms.status === 'MEASURED' ? `<span>width from photo</span><span>${ms.kind === 'slot_opening' ? 'slot opening' : 'tab width'} <b>${fmt(ms.width_mm, 3)} mm</b></span><span>photo resolution</span><span>${fmt(ms.photo_px_per_mm, 1)} px/mm${ms.photo_px_per_mm < 15 ? ' (low: move closer)' : ''}</span>`
+        : `<span>width from photo</span><span class="faint">${ms.status || '—'}: put the ArUco sheet next to the part</span>`;
+      $('#camResult').innerHTML = `<div class="kv">${meas}<span>saved</span><span>${r.saved.split('/').slice(-2).join('/')}</span><span>size</span><span>${r.width} × ${r.height}</span>
         <span>tier</span><span>${r.source_tier}</span><span>dataset</span><span>good ${c.good} · defect ${c.defect} · inbox ${c.inbox}</span></div>
         <div class="why"><b>NVIDIA anomaly model: ${n.status}.</b> ${n.reason} ${n.ready_to_train ? '<b>Enough photos to train now:</b>' : `Need ≥ ${n.need.good} good and ≥ ${n.need.defect} defect photos, then:`} <code>${n.train_command}</code></div>`;
     } catch (err) { $('#camResult').textContent = `Save failed: ${err.message}`; }
