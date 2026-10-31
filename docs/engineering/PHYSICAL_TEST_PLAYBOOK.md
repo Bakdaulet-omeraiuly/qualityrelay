@@ -58,10 +58,69 @@ trusting a single live reading as more than a reference wiring demo.
 | Phone Vision | Phone camera, existing web upload path | `PHONE_IMAGE` evidence | existing site/API |
 | Pi Vision | Raspberry Pi 5 + Hailo-8L + ESP32 camera module | `PI_IMAGE` evidence | existing site/API (wire once the model is ready — see `TOMORROW_TASKS.md`) |
 
-**Before either new endpoint will sign anything**, `adilnurgg` has to populate
-`HARDWARE_STATION_KEYS` in `api.py` with real per-station secrets (it's intentionally empty —
-both endpoints currently return `503` by design, confirmed by `tests/test_api.py`). Agree on
-station secrets as a team before the demo, not during it.
+**Before either new endpoint will sign anything**, per-station secrets must be provisioned.
+They are never written into `api.py`: `HARDWARE_STATION_KEYS` is loaded at import time from
+`SLOT_STATION_KEY`, `TAB_STATION_KEY`, `SORTER_STATION_KEY` (and `PHONE_/PI_/CAD_STATION_KEY`
+once those stations are wired), taken from the real environment first and a git-ignored `.env`
+at the repo root second. Generate them on the demo server with
+
+```
+python scripts/provision_station_keys.py            # slot tab sorter; add --rotate to replace
+```
+
+A station with no key answers `503` (the cold state `tests/test_api.py` pins); a key shorter
+than 32 chars is refused at startup rather than used. `GET /health` lists which stations are
+provisioned so you can check from the floor without reading the file.
+
+Every accepted reading is appended to the API's evidence ledger (`api.HARDWARE_LEDGER`) before
+the signed object is returned. The ledger is in-memory by default, so **set
+`HARDWARE_LEDGER_PATH` to a file in `.env` for any session whose readings you want to keep**
+(the repeatability screen, the E12/E13 bin tests). A repeated `event_id` gets `409` and is not
+re-signed: that is the replay guard, so a `409` during a live run means a duplicate POST or a
+rebooted ESP32 re-using `millis()`-based IDs, not a server fault. A `422` means the ingest
+layer refused the reading (e.g. bin-ack with no part detected) and nothing was recorded.
+
+### Sensor fired -> route confirmed (the live loop)
+
+1. Stage the route the software decided on (STAGED_ONLY, nothing moves):
+   `POST /actuation/stage {"action_id":"act-1","specimen_id":"S-7","bin":"PASS","decision":"AUTHORIZED_PASS","operator_id":"<name>","approved":true,"origin":"VERIFIED_PHYSICAL"}`
+2. Drop the part. The bin sensor ESP32 posts `/hardware/bin-ack` with its own `event_id`.
+3. The server persists that ROUTE_ACK, then acknowledges the specimen's pending route with it.
+   The interlock accepts only a *recorded* ROUTE_ACK for the same specimen and bin, so a typed
+   `sensor_event_id` cannot confirm anything. Response: `{"evidence":{...},"interlock":{"status":...}}`.
+4. `GET /actuation/act-1` -> `CONFIRMED` / `FAULTED` / `PENDING`. Read it out loud on stage; it is
+   the proof the ACK path is independent of the command path.
+
+If the sensor fires with nothing staged for that specimen you get `NO_PENDING_ACTION`: the reading
+is kept, but there was no route to confirm — usually a `specimen_id` mismatch between the two sketches.
+
+### Running E12/E13 for real (`scripts/rehearse_e12_e13.py live`)
+
+```
+python scripts/rehearse_e12_e13.py live --server http://<server>:8000 --specimen S-7 --bin PASS
+```
+
+It stages the route, prints what to do physically, polls `/actuation/{id}` until `CONFIRMED` or
+`FAULTED`, and writes a `PHYSICAL_CAPTURE` manifest to `examples/results/rehearsal_e12_e13/`.
+Run it once per case: E12 (drop in the wrong bin -> `FAULTED`), E13 (right bin, jostle ->
+`CONFIRMED` once). Write down how many `ACK POST ->` lines the ESP32 serial monitor printed for
+each drop — that number, next to the server's single confirmation, is the bounce evidence.
+
+The same script with no subcommand is the hardware-free rehearsal (fake sensor with bounce,
+concurrency and `millis()` reset against a real local server). It passed 31 Oct and caught a
+concurrency bug in the interlock; its manifests are `TEST_FIXTURE`, not a physical result.
+
+Known firmware gaps that the live run will hit (owner: HyorinmaruK, `bin_sensor.ino`):
+- `specimen_id` is a local counter (`S-1`, `S-2`, ...). It will never match a staged specimen,
+  so every real ACK is `NO_PENDING_ACTION` until the sketch carries the real specimen id. For the
+  demo, stage with the id the sketch will send next, or hard-code one for the rehearsal part.
+- `event_id` is `millis()`-based with no boot nonce; after a reboot ids repeat and the server
+  answers `409`. Add `esp_random()` (or chip id + boot counter) to the id string.
+- No debounce window: a 50 ms poll with rising-edge detection will post several times per
+  arrival if the LDR hovers at threshold. The server counts once regardless, but add a
+  ~300 ms lockout after a rising edge to keep the serial log readable. Provisioned on
+adilnurgg's machine 31 Oct for `slot`, `tab`, `sorter`; the server that runs the demo needs its
+own run of the script (or the same `.env` copied over out-of-band, never through git).
 
 ## 3. The physical acceptance tests to actually run
 
@@ -72,8 +131,8 @@ not just in code:
 |---|---|---|
 | E02 — Pi offline | Unplug the Pi mid-run, keep sending slot/tab readings | Slot/tab stations keep accepting readings; `safe_mesh.evaluate` returns `HOLD` with `MISSING_CAMERA_EVIDENCE`, not a crash |
 | E07 — blurred image | Deliberately defocus the phone or ESP32-CAM shot | `vision.compare_reference` output is `calibrated:false`; disposition is HOLD/recapture, never a confident pass |
-| E12 — wrong physical bin | Stage a `PASS` route, physically drop the part in the `HOLD` bin instead | `actuation.SorterInterlock.acknowledge` must raise on the bin mismatch — confirm it actually does, live |
-| E13 — duplicate ACK | Trigger the bin sensor twice for one part (e.g., let it settle and jostle) | Second `bin-ack` POST for the same `action_id` must come back `DUPLICATE_ACK_IGNORED`, not double-counted |
+| E12 — wrong physical bin | `POST /actuation/stage` a `PASS` route for the part, physically drop it in the `HOLD` bin instead | `bin-ack` response `interlock.status` is `ROUTE_MISMATCH` (HTTP 200: the sensor reading is real and stays in the ledger); `GET /actuation/{action_id}` shows `FAULTED`; a later drop into `PASS` does **not** recover it — re-stage under a new `action_id` |
+| E13 — duplicate ACK | Trigger the bin sensor twice for one part (e.g., let it settle and jostle) | First trigger: `PHYSICAL_ROUTE_CONFIRMED`. Second trigger (new `event_id`): `NO_PENDING_ACTION`, route still counted once. Exact replay of the same `event_id`: HTTP `409`. Never a second confirmation |
 | New — isolation check | With the ESP32 actuation/status logic intentionally powered off or disconnected, confirm the bin sensor circuit still independently reports a block | This is your concrete proof that the ACK path is actually isolated from the command path, not just documented as isolated |
 
 Run each of these **once well before judges arrive** and again as part of your dry run — a

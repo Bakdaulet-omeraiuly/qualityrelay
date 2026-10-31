@@ -70,6 +70,9 @@ void postAck(bool blocked) {
     "}";
 
   int code = http.POST(body);
+  // 200 body is {"evidence":{...},"interlock":{"status":...}}: PHYSICAL_ROUTE_CONFIRMED,
+  // ROUTE_MISMATCH (wrong bin, route faulted), NO_PENDING_ACTION (nothing staged for this
+  // specimen). 409 = this event_id was already recorded (replay / millis() reuse after reboot).
   Serial.println("ACK POST -> " + String(code) + ": " + http.getString());
   http.end();
 }

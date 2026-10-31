@@ -58,19 +58,44 @@ no safety/actuation code touched).
 
 ## adilnurgg — backend, mesh, security
 
-1. Provision `HARDWARE_STATION_KEYS` in `api.py` with real per-station secrets (currently
-   empty by design — both new endpoints 503 until you do this). Agree on the station ID list
-   with HyorinmaruK first (`slot`, `tab`, `sorter`, plus vision stations once wired).
-2. Review `hardware_ingest.py` for anything that should route through `EvidenceLedger.append`
-   automatically rather than just returning a signed object from the API — right now the two
-   new endpoints sign but don't persist; decide if that's the right boundary or if persistence
-   belongs in this layer.
-3. Wire `bin_ack_evidence`'s returned `event_id` through to
-   `actuation.SorterInterlock.acknowledge(action_id, actual_bin, sensor_event_id)` — that's the
-   one remaining connection between "sensor fired" and "route confirmed."
+1. ~~Provision `HARDWARE_STATION_KEYS` in `api.py` with real per-station secrets~~ **Done 31 Oct**:
+   keys now come from `SLOT_/TAB_/SORTER_STATION_KEY` env vars or a git-ignored `.env`
+   (`python scripts/provision_station_keys.py`), never from source. Remaining: run the script
+   on the actual demo server, and confirm the station ID list with HyorinmaruK (`slot`, `tab`,
+   `sorter` provisioned; `phone`/`pi`/`cad` env names reserved, left blank until wired).
+2. ~~Review `hardware_ingest.py` for anything that should route through `EvidenceLedger.append`~~
+   **Decided + done 31 Oct**: `hardware_ingest.py` stays pure (payload -> signed Evidence, no
+   I/O). Persistence belongs at the API boundary: both `/hardware/*` endpoints now append to
+   `api.HARDWARE_LEDGER` after signing, a replayed `event_id` is a `409` (nothing re-signed),
+   an ingest-layer refusal is a `422` (nothing persisted). Ledger is in-memory unless
+   `HARDWARE_LEDGER_PATH` is set; `EvidenceLedger` is now thread-safe for FastAPI's pool and
+   has `get_event(event_id)` for item 3. Open: firmware `event_id` is `millis()`-based, so it
+   repeats after a reboot and will start colliding with 409s — add a boot nonce (HyorinmaruK).
+3. ~~Wire `bin_ack_evidence`'s returned `event_id` through to `SorterInterlock.acknowledge`~~
+   **Done 31 Oct**: `POST /hardware/bin-ack` persists the ROUTE_ACK, then hands its `event_id`
+   to the process-level `api.SORTER` for the specimen's pending route; response is
+   `{evidence, interlock}`. `SorterInterlock` now takes a `sensor_lookup` (the ledger's
+   `get_event`), so an ack must point at a *recorded* ROUTE_ACK for the same specimen and bin.
+   E12 (wrong bin) -> `ROUTE_MISMATCH`, action latched `FAULTED`, must be re-staged under a new
+   id. E13 (same sensor event reused / bounce) -> refused / `NO_PENDING_ACTION`, exact replay
+   -> `409`. `POST /actuation/stage` and `GET /actuation/{action_id}` added so the live loop can
+   be driven; both are STAGED_ONLY, no hardware command. Caveat: `/actuation/stage` trusts the
+   caller's `approved`/`origin` fields — needs real auth before any sorter is physically attached.
 4. Run E12/E13 from `PHYSICAL_TEST_PLAYBOOK.md` against your actual `SorterInterlock` once
    HyorinmaruK has the bin sensor built — confirm the mismatch/duplicate rejection you already
    coded actually holds under a real sensor's timing and bounce, not just unit-test timing.
+   **Status 31 Oct: physical run NOT done (no sensor yet). Everything hardware-independent is:**
+   `scripts/rehearse_e12_e13.py` drives a real uvicorn server over HTTP with a firmware-faithful
+   fake sensor (one POST per rising edge, `millis()` ids, 1–5-edge bounce bursts, ~40% of them
+   concurrent, a mid-run reboot that reuses ids, a misroute, a stray arrival). Two seeds, 70
+   parts, 190 sensor POSTs: exactly one confirmation per route, replay/reuse `409`, E12
+   `FAULTED` and not recovered — manifests in `examples/results/rehearsal_e12_e13/`
+   (origin `TEST_FIXTURE`). **It found a real timing bug**: `SorterInterlock` had no lock, so two
+   concurrent edges could both pass the "already acked?" check during the ledger lookup; losers
+   then crashed on `pending.pop` (a 500). Fixed with an `RLock` around every transition, pinned by
+   `test_concurrent_bounce_edges_confirm_exactly_once`. On the day: `python scripts/rehearse_e12_e13.py
+   live --server http://<pi-or-laptop>:8000 --specimen S-7 --bin PASS`, drop the part, read the
+   verdict; that writes the `PHYSICAL_CAPTURE` manifest that actually closes this item.
 
 ## HyorinmaruK — mechanical, physical test, presentation
 
@@ -104,7 +129,8 @@ no safety/actuation code touched).
 
 ## End-of-day go/no-go (same spirit as `STATUS_AND_GATES.md`)
 
-- If `HARDWARE_STATION_KEYS` isn't provisioned by early afternoon, the live hardware loop
+- If `HARDWARE_STATION_KEYS` isn't provisioned *on the demo server* by early afternoon
+  (`GET /health` -> `hardware_stations_provisioned` must list `slot`, `tab`, `sorter`), the live hardware loop
   becomes a recorded fallback clip — decide that explicitly, don't discover it on stage.
 - If the Tier-B potentiometer linkage isn't screened and passing by the time you need to
   freeze features, fall back to Tier A. A working dial beats a half-trusted sensor.

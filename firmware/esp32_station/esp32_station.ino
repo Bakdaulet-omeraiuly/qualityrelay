@@ -10,7 +10,8 @@
 
   See docs/engineering/PHYSICAL_TEST_PLAYBOOK.md for the wiring diagram, the
   repeatability screen you must run before trusting any reading this sends, and why
-  the server returns 503 until HARDWARE_STATION_KEYS is actually provisioned.
+  the server returns 503 until the station's signing key is provisioned server-side
+  (python scripts/provision_station_keys.py -> .env; the key never lives on this board).
 
   Wiring (adjust pins to your board; avoid ADC2 pins -- they conflict with WiFi):
     Potentiometer wiper -> GPIO34 (ADC1_CH6, input only, no pull resistor needed)

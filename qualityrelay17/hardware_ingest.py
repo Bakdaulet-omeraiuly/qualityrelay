@@ -8,6 +8,13 @@ Origin is PHYSICAL_CAPTURE by default: promotion to VERIFIED_PHYSICAL still requ
 calibration_id + independent human review that the existing evidence-tier rules call for
 (STATUS_AND_GATES.md: 'No tiers may be silently promoted'). This module does not promote
 anything on its own.
+
+Boundary (decided 31 Oct, TOMORROW_TASKS item 2): this module is a pure transform --
+raw payload in, signed Evidence out, no I/O, no state. It deliberately does NOT append to
+EvidenceLedger. Persistence and replay rejection (409 on a repeated event_id) live in
+api.py's endpoints via HARDWARE_LEDGER, so that (a) these functions stay unit-testable
+without a database, (b) a refused reading (ValueError here) can never leave a row behind,
+and (c) there is exactly one place that decides what counts as "recorded".
 """
 from __future__ import annotations
 import time

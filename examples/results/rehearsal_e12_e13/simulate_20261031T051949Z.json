@@ -1,0 +1,492 @@
+{
+  "origin": "TEST_FIXTURE",
+  "what_this_proves": "server-side single-count / mismatch / replay behaviour under bounce, concurrency and millis() reset, over real HTTP. It does NOT exercise the photoresistor, the 4N35, or WiFi. Task item 4 (physical E12/E13) remains open until a `live` manifest exists.",
+  "git_commit": "2d700e6948dfe453c2cf3eeda6c6ecdbc4d664ca",
+  "timestamp_utc": "2026-10-31T05:19:46Z",
+  "seed": 7,
+  "parts": 40,
+  "total_sensor_posts": 99,
+  "elapsed_s": 3.2,
+  "per_part": [
+    {
+      "specimen": "S-000",
+      "edges": 1,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-001",
+      "edges": 5,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-002",
+      "edges": 5,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-003",
+      "edges": 5,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-004",
+      "edges": 1,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-005",
+      "edges": 1,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-006",
+      "edges": 5,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-007",
+      "edges": 1,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-008",
+      "edges": 1,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-009",
+      "edges": 1,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-010",
+      "edges": 1,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-011",
+      "edges": 1,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-012",
+      "edges": 5,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-013",
+      "edges": 1,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-014",
+      "edges": 3,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-015",
+      "edges": 3,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-016",
+      "edges": 1,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-017",
+      "edges": 1,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-018",
+      "edges": 2,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-019",
+      "edges": 2,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-020",
+      "edges": 1,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-021",
+      "edges": 3,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-022",
+      "edges": 2,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-023",
+      "edges": 2,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-024",
+      "edges": 1,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-025",
+      "edges": 1,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-026",
+      "edges": 2,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-027",
+      "edges": 2,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-028",
+      "edges": 3,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-029",
+      "edges": 5,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-030",
+      "edges": 1,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-031",
+      "edges": 2,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-032",
+      "edges": 1,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-033",
+      "edges": 3,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-034",
+      "edges": 3,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-035",
+      "edges": 5,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-036",
+      "edges": 3,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-037",
+      "edges": 1,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-038",
+      "edges": 1,
+      "concurrent": false,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED"
+      ],
+      "final_state": "CONFIRMED"
+    },
+    {
+      "specimen": "S-039",
+      "edges": 5,
+      "concurrent": true,
+      "confirmed_count": 1,
+      "statuses": [
+        "PHYSICAL_ROUTE_CONFIRMED",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION",
+        "NO_PENDING_ACTION"
+      ],
+      "final_state": "CONFIRMED"
+    }
+  ],
+  "exact_replay_http": 409,
+  "reboot_id_reuse": {
+    "http": 409,
+    "route_state": "PENDING"
+  },
+  "e12": {
+    "wrong_bin_statuses": [
+      "ROUTE_MISMATCH",
+      "NO_PENDING_ACTION",
+      "NO_PENDING_ACTION"
+    ],
+    "state_after_wrong": {
+      "action_id": "act-e12",
+      "state": "FAULTED",
+      "expected_bin": "PASS",
+      "actual_bin": "HOLD",
+      "sensor_event_id": "evt-bin-sorter-14098"
+    },
+    "after_move_statuses": [
+      "NO_PENDING_ACTION",
+      "NO_PENDING_ACTION"
+    ],
+    "state_after_move": "FAULTED"
+  },
+  "stray_arrival": "NO_PENDING_ACTION",
+  "failures": [],
+  "verdict": "PASS"
+}
