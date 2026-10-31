@@ -1,0 +1,1659 @@
+{
+ "calibration_id": "cal-e6c0a199854f",
+ "mean_by_policy": {
+  "collective_fusion": {
+   "hold": 157.9,
+   "inspection_time_s": 18164.942,
+   "max_wip": 12.2,
+   "mean_cycle_time_s": 62.8987,
+   "mean_wip": 6.243,
+   "p95_cycle_time_s": 156.0218,
+   "review_time_s": 7204.1694,
+   "throughput_per_hour": 357.3993,
+   "total_cost": 2280.8,
+   "unsafe_pass": 3.1
+  },
+  "conservative_rules": {
+   "hold": 201.9,
+   "inspection_time_s": 18164.942,
+   "max_wip": 15.4,
+   "mean_cycle_time_s": 82.4115,
+   "mean_wip": 8.0625,
+   "p95_cycle_time_s": 288.4542,
+   "review_time_s": 9208.8432,
+   "throughput_per_hour": 352.1105,
+   "total_cost": 2353.8,
+   "unsafe_pass": 3
+  },
+  "entropy_driven": {
+   "hold": 97.5,
+   "inspection_time_s": 24976.1483,
+   "max_wip": 305.4,
+   "mean_cycle_time_s": 2122.6543,
+   "mean_wip": 160.1471,
+   "p95_cycle_time_s": 3830.7281,
+   "review_time_s": 4449.7488,
+   "throughput_per_hour": 271.6646,
+   "total_cost": 2480.0,
+   "unsafe_pass": 1.9
+  },
+  "metrology_only": {
+   "hold": 24.4,
+   "inspection_time_s": 7085.7553,
+   "max_wip": 7.5,
+   "mean_cycle_time_s": 37.7549,
+   "mean_wip": 3.7661,
+   "p95_cycle_time_s": 61.0317,
+   "review_time_s": 1128.7676,
+   "throughput_per_hour": 359.0961,
+   "total_cost": 10373.8,
+   "unsafe_pass": 65.5
+  },
+  "phone_only": {
+   "hold": 100.9,
+   "inspection_time_s": 5054.4583,
+   "max_wip": 8.8,
+   "mean_cycle_time_s": 40.2123,
+   "mean_wip": 4.0069,
+   "p95_cycle_time_s": 88.4642,
+   "review_time_s": 4595.903,
+   "throughput_per_hour": 358.7154,
+   "total_cost": 3611.8,
+   "unsafe_pass": 19.4
+  },
+  "safe_mesh_reference": {
+   "hold": 201.9,
+   "inspection_time_s": 18548.2369,
+   "max_wip": 15.5,
+   "mean_cycle_time_s": 82.7801,
+   "mean_wip": 8.0973,
+   "p95_cycle_time_s": 290.1645,
+   "review_time_s": 9208.8432,
+   "throughput_per_hour": 352.0485,
+   "total_cost": 2391.8,
+   "unsafe_pass": 3
+  },
+  "structured_request_lite": {
+   "hold": 157.9,
+   "inspection_time_s": 17600.8091,
+   "max_wip": 12.2,
+   "mean_cycle_time_s": 62.2251,
+   "mean_wip": 6.1769,
+   "p95_cycle_time_s": 153.0502,
+   "review_time_s": 7204.1694,
+   "throughput_per_hour": 357.4441,
+   "total_cost": 2230.35,
+   "unsafe_pass": 3.1
+  },
+  "voi_driven": {
+   "hold": 97.5,
+   "inspection_time_s": 24509.2839,
+   "max_wip": 292.9,
+   "mean_cycle_time_s": 1999.9761,
+   "mean_wip": 152.7167,
+   "p95_cycle_time_s": 3659.7562,
+   "review_time_s": 4449.7488,
+   "throughput_per_hour": 274.9646,
+   "total_cost": 2438.0,
+   "unsafe_pass": 1.9
+  }
+ },
+ "paired_vs_rules": {
+  "collective_fusion": {
+   "hold": {
+    "ci95": [
+     -47.8,
+     -39.9
+    ],
+    "mean": -44
+   },
+   "inspection_time_s": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0.0
+   },
+   "max_wip": {
+    "ci95": [
+     -4.7,
+     -1.9
+    ],
+    "mean": -3.2
+   },
+   "mean_cycle_time_s": {
+    "ci95": [
+     -27.07654,
+     -12.94527
+    ],
+    "mean": -19.51278
+   },
+   "mean_wip": {
+    "ci95": [
+     -2.5945,
+     -1.16629
+    ],
+    "mean": -1.81948
+   },
+   "p95_cycle_time_s": {
+    "ci95": [
+     -190.13147,
+     -83.82998
+    ],
+    "mean": -132.43237
+   },
+   "review_time_s": {
+    "ci95": [
+     -2179.84086,
+     -1825.51179
+    ],
+    "mean": -2004.67383
+   },
+   "throughput_per_hour": {
+    "ci95": [
+     3.06933,
+     7.34864
+    ],
+    "mean": 5.28878
+   },
+   "total_cost": {
+    "ci95": [
+     -94.6,
+     -38.0
+    ],
+    "mean": -73.0
+   },
+   "unsafe_pass": {
+    "ci95": [
+     0.0,
+     0.3
+    ],
+    "mean": 0.1
+   }
+  },
+  "conservative_rules": {
+   "hold": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0
+   },
+   "inspection_time_s": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0.0
+   },
+   "max_wip": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0
+   },
+   "mean_cycle_time_s": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0.0
+   },
+   "mean_wip": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0.0
+   },
+   "p95_cycle_time_s": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0.0
+   },
+   "review_time_s": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0.0
+   },
+   "throughput_per_hour": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0.0
+   },
+   "total_cost": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0.0
+   },
+   "unsafe_pass": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0
+   }
+  },
+  "entropy_driven": {
+   "hold": {
+    "ci95": [
+     -109.1,
+     -99.8
+    ],
+    "mean": -104.4
+   },
+   "inspection_time_s": {
+    "ci95": [
+     6787.66993,
+     6833.50367
+    ],
+    "mean": 6811.20635
+   },
+   "max_wip": {
+    "ci95": [
+     283.8,
+     296.1
+    ],
+    "mean": 290
+   },
+   "mean_cycle_time_s": {
+    "ci95": [
+     1986.62126,
+     2089.2717
+    ],
+    "mean": 2040.24283
+   },
+   "mean_wip": {
+    "ci95": [
+     148.46814,
+     155.4148
+    ],
+    "mean": 152.08457
+   },
+   "p95_cycle_time_s": {
+    "ci95": [
+     3425.82038,
+     3653.67114
+    ],
+    "mean": 3542.27394
+   },
+   "review_time_s": {
+    "ci95": [
+     -4963.9421,
+     -4551.29928
+    ],
+    "mean": -4759.0944
+   },
+   "throughput_per_hour": {
+    "ci95": [
+     -83.03115,
+     -77.4831
+    ],
+    "mean": -80.44592
+   },
+   "total_cost": {
+    "ci95": [
+     -42.2,
+     280.0
+    ],
+    "mean": 126.2
+   },
+   "unsafe_pass": {
+    "ci95": [
+     -2.2,
+     -0.1
+    ],
+    "mean": -1.1
+   }
+  },
+  "metrology_only": {
+   "hold": {
+    "ci95": [
+     -183.5,
+     -171.5
+    ],
+    "mean": -177.5
+   },
+   "inspection_time_s": {
+    "ci95": [
+     -11097.76789,
+     -11059.57211
+    ],
+    "mean": -11079.18665
+   },
+   "max_wip": {
+    "ci95": [
+     -9.9,
+     -6.2
+    ],
+    "mean": -7.9
+   },
+   "mean_cycle_time_s": {
+    "ci95": [
+     -54.69507,
+     -35.93341
+    ],
+    "mean": -44.65656
+   },
+   "mean_wip": {
+    "ci95": [
+     -5.29269,
+     -3.4285
+    ],
+    "mean": -4.29646
+   },
+   "p95_cycle_time_s": {
+    "ci95": [
+     -302.27079,
+     -165.57218
+    ],
+    "mean": -227.42248
+   },
+   "review_time_s": {
+    "ci95": [
+     -8336.29754,
+     -7818.42358
+    ],
+    "mean": -8080.07561
+   },
+   "throughput_per_hour": {
+    "ci95": [
+     4.51731,
+     9.61905
+    ],
+    "mean": 6.98556
+   },
+   "total_cost": {
+    "ci95": [
+     7337.2,
+     8666.0
+    ],
+    "mean": 8020.0
+   },
+   "unsafe_pass": {
+    "ci95": [
+     57.9,
+     66.8
+    ],
+    "mean": 62.5
+   }
+  },
+  "phone_only": {
+   "hold": {
+    "ci95": [
+     -106.6,
+     -94.8
+    ],
+    "mean": -101
+   },
+   "inspection_time_s": {
+    "ci95": [
+     -13148.69221,
+     -13076.5351
+    ],
+    "mean": -13110.48367
+   },
+   "max_wip": {
+    "ci95": [
+     -8.8,
+     -4.8
+    ],
+    "mean": -6.6
+   },
+   "mean_cycle_time_s": {
+    "ci95": [
+     -52.21798,
+     -33.70868
+    ],
+    "mean": -42.19914
+   },
+   "mean_wip": {
+    "ci95": [
+     -5.06795,
+     -3.20986
+    ],
+    "mean": -4.05557
+   },
+   "p95_cycle_time_s": {
+    "ci95": [
+     -275.89534,
+     -137.3696
+    ],
+    "mean": -199.99002
+   },
+   "review_time_s": {
+    "ci95": [
+     -4870.17718,
+     -4333.89143
+    ],
+    "mean": -4612.94024
+   },
+   "throughput_per_hour": {
+    "ci95": [
+     4.0166,
+     9.25824
+    ],
+    "mean": 6.60487
+   },
+   "total_cost": {
+    "ci95": [
+     1043.6,
+     1491.0
+    ],
+    "mean": 1258.0
+   },
+   "unsafe_pass": {
+    "ci95": [
+     14.9,
+     18.0
+    ],
+    "mean": 16.4
+   }
+  },
+  "safe_mesh_reference": {
+   "hold": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0
+   },
+   "inspection_time_s": {
+    "ci95": [
+     363.65907,
+     404.47576
+    ],
+    "mean": 383.29491
+   },
+   "max_wip": {
+    "ci95": [
+     0.0,
+     0.3
+    ],
+    "mean": 0.1
+   },
+   "mean_cycle_time_s": {
+    "ci95": [
+     0.28604,
+     0.45452
+    ],
+    "mean": 0.36865
+   },
+   "mean_wip": {
+    "ci95": [
+     0.02714,
+     0.04275
+    ],
+    "mean": 0.0348
+   },
+   "p95_cycle_time_s": {
+    "ci95": [
+     0.83062,
+     2.71262
+    ],
+    "mean": 1.71031
+   },
+   "review_time_s": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0.0
+   },
+   "throughput_per_hour": {
+    "ci95": [
+     -0.11044,
+     -0.01743
+    ],
+    "mean": -0.06197
+   },
+   "total_cost": {
+    "ci95": [
+     35.95,
+     40.2
+    ],
+    "mean": 38.0
+   },
+   "unsafe_pass": {
+    "ci95": [
+     0.0,
+     0.0
+    ],
+    "mean": 0
+   }
+  },
+  "structured_request_lite": {
+   "hold": {
+    "ci95": [
+     -47.8,
+     -39.9
+    ],
+    "mean": -44
+   },
+   "inspection_time_s": {
+    "ci95": [
+     -593.87128,
+     -533.01745
+    ],
+    "mean": -564.13285
+   },
+   "max_wip": {
+    "ci95": [
+     -4.7,
+     -1.9
+    ],
+    "mean": -3.2
+   },
+   "mean_cycle_time_s": {
+    "ci95": [
+     -27.78725,
+     -13.62879
+    ],
+    "mean": -20.18635
+   },
+   "mean_wip": {
+    "ci95": [
+     -2.66356,
+     -1.23099
+    ],
+    "mean": -1.88557
+   },
+   "p95_cycle_time_s": {
+    "ci95": [
+     -192.39449,
+     -87.62381
+    ],
+    "mean": -135.40397
+   },
+   "review_time_s": {
+    "ci95": [
+     -2179.84086,
+     -1825.51179
+    ],
+    "mean": -2004.67383
+   },
+   "throughput_per_hour": {
+    "ci95": [
+     3.09673,
+     7.41127
+    ],
+    "mean": 5.33362
+   },
+   "total_cost": {
+    "ci95": [
+     -144.1,
+     -88.6
+    ],
+    "mean": -123.45
+   },
+   "unsafe_pass": {
+    "ci95": [
+     0.0,
+     0.3
+    ],
+    "mean": 0.1
+   }
+  },
+  "voi_driven": {
+   "hold": {
+    "ci95": [
+     -109.1,
+     -99.8
+    ],
+    "mean": -104.4
+   },
+   "inspection_time_s": {
+    "ci95": [
+     6310.41127,
+     6377.23637
+    ],
+    "mean": 6344.34194
+   },
+   "max_wip": {
+    "ci95": [
+     270.8,
+     283.9
+    ],
+    "mean": 277.5
+   },
+   "mean_cycle_time_s": {
+    "ci95": [
+     1863.60421,
+     1973.73218
+    ],
+    "mean": 1917.56463
+   },
+   "mean_wip": {
+    "ci95": [
+     140.8465,
+     148.50379
+    ],
+    "mean": 144.65421
+   },
+   "p95_cycle_time_s": {
+    "ci95": [
+     3238.67853,
+     3495.43162
+    ],
+    "mean": 3371.30198
+   },
+   "review_time_s": {
+    "ci95": [
+     -4963.9421,
+     -4551.29928
+    ],
+    "mean": -4759.0944
+   },
+   "throughput_per_hour": {
+    "ci95": [
+     -79.78902,
+     -74.05456
+    ],
+    "mean": -77.14596
+   },
+   "total_cost": {
+    "ci95": [
+     -83.55,
+     237.1
+    ],
+    "mean": 84.2
+   },
+   "unsafe_pass": {
+    "ci95": [
+     -2.2,
+     -0.1
+    ],
+    "mean": -1.1
+   }
+  }
+ },
+ "params": {},
+ "per_seed": {
+  "collective_fusion": [
+   {
+    "hold": 182,
+    "inspection_time_s": 18066.7865,
+    "max_wip": 14,
+    "mean_cycle_time_s": 72.2593,
+    "mean_wip": 7.111,
+    "p95_cycle_time_s": 194.5402,
+    "review_time_s": 8237.5906,
+    "throughput_per_hour": 354.2728,
+    "total_cost": 2014.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 170,
+    "inspection_time_s": 18165.1126,
+    "max_wip": 15,
+    "mean_cycle_time_s": 74.1136,
+    "mean_wip": 7.3362,
+    "p95_cycle_time_s": 242.4839,
+    "review_time_s": 7878.3896,
+    "throughput_per_hour": 356.347,
+    "total_cost": 2740.0,
+    "unsafe_pass": 6
+   },
+   {
+    "hold": 155,
+    "inspection_time_s": 18210.6788,
+    "max_wip": 11,
+    "mean_cycle_time_s": 57.4314,
+    "mean_wip": 5.6961,
+    "p95_cycle_time_s": 130.3285,
+    "review_time_s": 7121.0515,
+    "throughput_per_hour": 357.0536,
+    "total_cost": 2110.0,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 146,
+    "inspection_time_s": 18151.2329,
+    "max_wip": 13,
+    "mean_cycle_time_s": 62.8652,
+    "mean_wip": 6.2244,
+    "p95_cycle_time_s": 147.2807,
+    "review_time_s": 6698.1836,
+    "throughput_per_hour": 356.4415,
+    "total_cost": 1942.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 145,
+    "inspection_time_s": 18177.926,
+    "max_wip": 11,
+    "mean_cycle_time_s": 58.3375,
+    "mean_wip": 5.8052,
+    "p95_cycle_time_s": 124.7278,
+    "review_time_s": 6677.0578,
+    "throughput_per_hour": 358.2364,
+    "total_cost": 2390.0,
+    "unsafe_pass": 4
+   },
+   {
+    "hold": 146,
+    "inspection_time_s": 18170.323,
+    "max_wip": 10,
+    "mean_cycle_time_s": 57.5061,
+    "mean_wip": 5.7243,
+    "p95_cycle_time_s": 132.9101,
+    "review_time_s": 6631.6541,
+    "throughput_per_hour": 358.3557,
+    "total_cost": 2692.0,
+    "unsafe_pass": 6
+   },
+   {
+    "hold": 169,
+    "inspection_time_s": 18173.5527,
+    "max_wip": 13,
+    "mean_cycle_time_s": 64.3443,
+    "mean_wip": 6.414,
+    "p95_cycle_time_s": 165.3643,
+    "review_time_s": 7556.5048,
+    "throughput_per_hour": 358.8587,
+    "total_cost": 2138.0,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 159,
+    "inspection_time_s": 18181.8369,
+    "max_wip": 11,
+    "mean_cycle_time_s": 62.008,
+    "mean_wip": 6.1663,
+    "p95_cycle_time_s": 146.6729,
+    "review_time_s": 7210.9776,
+    "throughput_per_hour": 357.9981,
+    "total_cost": 2718.0,
+    "unsafe_pass": 6
+   },
+   {
+    "hold": 149,
+    "inspection_time_s": 18251.3462,
+    "max_wip": 12,
+    "mean_cycle_time_s": 58.9676,
+    "mean_wip": 5.8579,
+    "p95_cycle_time_s": 137.442,
+    "review_time_s": 6751.912,
+    "throughput_per_hour": 357.6288,
+    "total_cost": 1948.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 158,
+    "inspection_time_s": 18100.624,
+    "max_wip": 12,
+    "mean_cycle_time_s": 61.1538,
+    "mean_wip": 6.095,
+    "p95_cycle_time_s": 138.4678,
+    "review_time_s": 7278.3726,
+    "throughput_per_hour": 358.8003,
+    "total_cost": 2116.0,
+    "unsafe_pass": 2
+   }
+  ],
+  "conservative_rules": [
+   {
+    "hold": 219,
+    "inspection_time_s": 18066.7865,
+    "max_wip": 17,
+    "mean_cycle_time_s": 96.3104,
+    "mean_wip": 9.2304,
+    "p95_cycle_time_s": 330.181,
+    "review_time_s": 9992.8083,
+    "throughput_per_hour": 345.0248,
+    "total_cost": 2088.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 212,
+    "inspection_time_s": 18165.1126,
+    "max_wip": 23,
+    "mean_cycle_time_s": 117.8161,
+    "mean_wip": 11.6133,
+    "p95_cycle_time_s": 569.1384,
+    "review_time_s": 9755.6783,
+    "throughput_per_hour": 354.8556,
+    "total_cost": 2674.0,
+    "unsafe_pass": 5
+   },
+   {
+    "hold": 189,
+    "inspection_time_s": 18210.6788,
+    "max_wip": 12,
+    "mean_cycle_time_s": 65.9565,
+    "mean_wip": 6.5121,
+    "p95_cycle_time_s": 186.7016,
+    "review_time_s": 8666.1668,
+    "throughput_per_hour": 355.4392,
+    "total_cost": 2178.0,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 195,
+    "inspection_time_s": 18151.2329,
+    "max_wip": 14,
+    "mean_cycle_time_s": 80.3197,
+    "mean_wip": 7.7605,
+    "p95_cycle_time_s": 300.363,
+    "review_time_s": 9004.3706,
+    "throughput_per_hour": 347.831,
+    "total_cost": 2040.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 198,
+    "inspection_time_s": 18177.926,
+    "max_wip": 13,
+    "mean_cycle_time_s": 73.2075,
+    "mean_wip": 7.2347,
+    "p95_cycle_time_s": 223.5235,
+    "review_time_s": 9028.8544,
+    "throughput_per_hour": 355.7689,
+    "total_cost": 2496.0,
+    "unsafe_pass": 4
+   },
+   {
+    "hold": 196,
+    "inspection_time_s": 18170.323,
+    "max_wip": 12,
+    "mean_cycle_time_s": 69.2571,
+    "mean_wip": 6.8105,
+    "p95_cycle_time_s": 206.4687,
+    "review_time_s": 8933.7537,
+    "throughput_per_hour": 354.0122,
+    "total_cost": 2792.0,
+    "unsafe_pass": 6
+   },
+   {
+    "hold": 217,
+    "inspection_time_s": 18173.5527,
+    "max_wip": 19,
+    "mean_cycle_time_s": 100.9131,
+    "mean_wip": 10.0593,
+    "p95_cycle_time_s": 402.5029,
+    "review_time_s": 9741.3316,
+    "throughput_per_hour": 358.8587,
+    "total_cost": 2234.0,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 203,
+    "inspection_time_s": 18181.8369,
+    "max_wip": 16,
+    "mean_cycle_time_s": 73.9498,
+    "mean_wip": 7.1783,
+    "p95_cycle_time_s": 197.6378,
+    "review_time_s": 9144.2842,
+    "throughput_per_hour": 349.4526,
+    "total_cost": 2806.0,
+    "unsafe_pass": 6
+   },
+   {
+    "hold": 184,
+    "inspection_time_s": 18251.3462,
+    "max_wip": 14,
+    "mean_cycle_time_s": 67.2359,
+    "mean_wip": 6.5519,
+    "p95_cycle_time_s": 190.0534,
+    "review_time_s": 8362.3977,
+    "throughput_per_hour": 350.8068,
+    "total_cost": 2018.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 206,
+    "inspection_time_s": 18100.624,
+    "max_wip": 14,
+    "mean_cycle_time_s": 79.1485,
+    "mean_wip": 7.6742,
+    "p95_cycle_time_s": 277.9716,
+    "review_time_s": 9458.7869,
+    "throughput_per_hour": 349.0553,
+    "total_cost": 2212.0,
+    "unsafe_pass": 2
+   }
+  ],
+  "entropy_driven": [
+   {
+    "hold": 108,
+    "inspection_time_s": 24860.5697,
+    "max_wip": 293,
+    "mean_cycle_time_s": 2043.2686,
+    "mean_wip": 156.118,
+    "p95_cycle_time_s": 3702.5118,
+    "review_time_s": 4885.1625,
+    "throughput_per_hour": 275.0617,
+    "total_cost": 2366.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 108,
+    "inspection_time_s": 24991.7659,
+    "max_wip": 303,
+    "mean_cycle_time_s": 2125.2624,
+    "mean_wip": 160.252,
+    "p95_cycle_time_s": 3829.2926,
+    "review_time_s": 4976.7157,
+    "throughput_per_hour": 271.4522,
+    "total_cost": 2366.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 98,
+    "inspection_time_s": 25068.1686,
+    "max_wip": 313,
+    "mean_cycle_time_s": 2192.7905,
+    "mean_wip": 164.0464,
+    "p95_cycle_time_s": 3941.9281,
+    "review_time_s": 4497.3793,
+    "throughput_per_hour": 269.3221,
+    "total_cost": 2496.0,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 92,
+    "inspection_time_s": 24980.3108,
+    "max_wip": 314,
+    "mean_cycle_time_s": 2180.6342,
+    "mean_wip": 163.7432,
+    "p95_cycle_time_s": 3895.5986,
+    "review_time_s": 4260.1754,
+    "throughput_per_hour": 270.323,
+    "total_cost": 2334.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 84,
+    "inspection_time_s": 24943.7563,
+    "max_wip": 302,
+    "mean_cycle_time_s": 2124.8048,
+    "mean_wip": 160.9083,
+    "p95_cycle_time_s": 3784.9496,
+    "review_time_s": 3849.3203,
+    "throughput_per_hour": 272.6226,
+    "total_cost": 2468.0,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 94,
+    "inspection_time_s": 25010.5716,
+    "max_wip": 312,
+    "mean_cycle_time_s": 2130.6211,
+    "mean_wip": 159.7291,
+    "p95_cycle_time_s": 3887.1884,
+    "review_time_s": 4256.1536,
+    "throughput_per_hour": 269.8861,
+    "total_cost": 2638.0,
+    "unsafe_pass": 3
+   },
+   {
+    "hold": 100,
+    "inspection_time_s": 24916.6853,
+    "max_wip": 294,
+    "mean_cycle_time_s": 1960.9924,
+    "mean_wip": 149.6886,
+    "p95_cycle_time_s": 3637.3891,
+    "review_time_s": 4497.3877,
+    "throughput_per_hour": 274.7991,
+    "total_cost": 2650.0,
+    "unsafe_pass": 3
+   },
+   {
+    "hold": 102,
+    "inspection_time_s": 24966.9789,
+    "max_wip": 305,
+    "mean_cycle_time_s": 2122.2125,
+    "mean_wip": 160.1775,
+    "p95_cycle_time_s": 3839.6006,
+    "review_time_s": 4653.7098,
+    "throughput_per_hour": 271.7159,
+    "total_cost": 2654.0,
+    "unsafe_pass": 3
+   },
+   {
+    "hold": 88,
+    "inspection_time_s": 25058.4699,
+    "max_wip": 316,
+    "mean_cycle_time_s": 2226.03,
+    "mean_wip": 166.9388,
+    "p95_cycle_time_s": 3969.3325,
+    "review_time_s": 3969.1585,
+    "throughput_per_hour": 269.9782,
+    "total_cost": 2476.0,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 101,
+    "inspection_time_s": 24964.2061,
+    "max_wip": 302,
+    "mean_cycle_time_s": 2119.9264,
+    "mean_wip": 159.869,
+    "p95_cycle_time_s": 3819.49,
+    "review_time_s": 4652.3257,
+    "throughput_per_hour": 271.485,
+    "total_cost": 2352.0,
+    "unsafe_pass": 1
+   }
+  ],
+  "metrology_only": [
+   {
+    "hold": 28,
+    "inspection_time_s": 7044.4351,
+    "max_wip": 10,
+    "mean_cycle_time_s": 42.7923,
+    "mean_wip": 4.2718,
+    "p95_cycle_time_s": 82.806,
+    "review_time_s": 1297.5909,
+    "throughput_per_hour": 359.373,
+    "total_cost": 11806.0,
+    "unsafe_pass": 75
+   },
+   {
+    "hold": 34,
+    "inspection_time_s": 7091.7112,
+    "max_wip": 8,
+    "mean_cycle_time_s": 39.1026,
+    "mean_wip": 3.9042,
+    "p95_cycle_time_s": 67.38,
+    "review_time_s": 1556.3007,
+    "throughput_per_hour": 359.4464,
+    "total_cost": 10318.0,
+    "unsafe_pass": 65
+   },
+   {
+    "hold": 22,
+    "inspection_time_s": 7147.8672,
+    "max_wip": 7,
+    "mean_cycle_time_s": 34.7819,
+    "mean_wip": 3.4711,
+    "p95_cycle_time_s": 52.7637,
+    "review_time_s": 1032.6346,
+    "throughput_per_hour": 359.2633,
+    "total_cost": 11494.0,
+    "unsafe_pass": 73
+   },
+   {
+    "hold": 27,
+    "inspection_time_s": 7050.0954,
+    "max_wip": 8,
+    "mean_cycle_time_s": 39.7388,
+    "mean_wip": 3.9659,
+    "p95_cycle_time_s": 61.6744,
+    "review_time_s": 1286.9487,
+    "throughput_per_hour": 359.2761,
+    "total_cost": 8954.0,
+    "unsafe_pass": 56
+   },
+   {
+    "hold": 20,
+    "inspection_time_s": 7046.0052,
+    "max_wip": 7,
+    "mean_cycle_time_s": 37.0266,
+    "mean_wip": 3.6886,
+    "p95_cycle_time_s": 56.0523,
+    "review_time_s": 913.8096,
+    "throughput_per_hour": 358.6347,
+    "total_cost": 8940.0,
+    "unsafe_pass": 56
+   },
+   {
+    "hold": 25,
+    "inspection_time_s": 7089.6027,
+    "max_wip": 6,
+    "mean_cycle_time_s": 35.7784,
+    "mean_wip": 3.5651,
+    "p95_cycle_time_s": 54.3715,
+    "review_time_s": 1131.1389,
+    "throughput_per_hour": 358.7215,
+    "total_cost": 9850.0,
+    "unsafe_pass": 62
+   },
+   {
+    "hold": 22,
+    "inspection_time_s": 7069.6659,
+    "max_wip": 7,
+    "mean_cycle_time_s": 36.27,
+    "mean_wip": 3.62,
+    "p95_cycle_time_s": 56.8688,
+    "review_time_s": 996.675,
+    "throughput_per_hour": 359.3059,
+    "total_cost": 11194.0,
+    "unsafe_pass": 71
+   },
+   {
+    "hold": 26,
+    "inspection_time_s": 7110.1409,
+    "max_wip": 8,
+    "mean_cycle_time_s": 38.4518,
+    "mean_wip": 3.8291,
+    "p95_cycle_time_s": 62.1934,
+    "review_time_s": 1210.6428,
+    "throughput_per_hour": 358.4903,
+    "total_cost": 10902.0,
+    "unsafe_pass": 69
+   },
+   {
+    "hold": 19,
+    "inspection_time_s": 7147.6711,
+    "max_wip": 6,
+    "mean_cycle_time_s": 35.8488,
+    "mean_wip": 3.5773,
+    "p95_cycle_time_s": 54.8133,
+    "review_time_s": 881.8207,
+    "throughput_per_hour": 359.2355,
+    "total_cost": 9088.0,
+    "unsafe_pass": 57
+   },
+   {
+    "hold": 21,
+    "inspection_time_s": 7060.3584,
+    "max_wip": 8,
+    "mean_cycle_time_s": 37.7578,
+    "mean_wip": 3.7675,
+    "p95_cycle_time_s": 61.3937,
+    "review_time_s": 980.1145,
+    "throughput_per_hour": 359.214,
+    "total_cost": 11192.0,
+    "unsafe_pass": 71
+   }
+  ],
+  "phone_only": [
+   {
+    "hold": 119,
+    "inspection_time_s": 5022.8384,
+    "max_wip": 12,
+    "mean_cycle_time_s": 47.3391,
+    "mean_wip": 4.7264,
+    "p95_cycle_time_s": 111.9541,
+    "review_time_s": 5417.3955,
+    "throughput_per_hour": 359.4294,
+    "total_cost": 2988.0,
+    "unsafe_pass": 15
+   },
+   {
+    "hold": 101,
+    "inspection_time_s": 5051.1455,
+    "max_wip": 9,
+    "mean_cycle_time_s": 41.115,
+    "mean_wip": 4.0864,
+    "p95_cycle_time_s": 93.3966,
+    "review_time_s": 4715.9757,
+    "throughput_per_hour": 357.8018,
+    "total_cost": 4452.0,
+    "unsafe_pass": 25
+   },
+   {
+    "hold": 105,
+    "inspection_time_s": 5041.1056,
+    "max_wip": 9,
+    "mean_cycle_time_s": 37.762,
+    "mean_wip": 3.7566,
+    "p95_cycle_time_s": 83.3771,
+    "review_time_s": 4811.0161,
+    "throughput_per_hour": 358.1316,
+    "total_cost": 3110.0,
+    "unsafe_pass": 16
+   },
+   {
+    "hold": 94,
+    "inspection_time_s": 5081.7149,
+    "max_wip": 8,
+    "mean_cycle_time_s": 41.4647,
+    "mean_wip": 4.1194,
+    "p95_cycle_time_s": 91.4916,
+    "review_time_s": 4217.9936,
+    "throughput_per_hour": 357.6507,
+    "total_cost": 3388.0,
+    "unsafe_pass": 18
+   },
+   {
+    "hold": 97,
+    "inspection_time_s": 5095.0887,
+    "max_wip": 7,
+    "mean_cycle_time_s": 39.1019,
+    "mean_wip": 3.8973,
+    "p95_cycle_time_s": 84.632,
+    "review_time_s": 4447.3737,
+    "throughput_per_hour": 358.8118,
+    "total_cost": 3394.0,
+    "unsafe_pass": 18
+   },
+   {
+    "hold": 85,
+    "inspection_time_s": 5045.0807,
+    "max_wip": 7,
+    "mean_cycle_time_s": 36.6941,
+    "mean_wip": 3.6573,
+    "p95_cycle_time_s": 79.3529,
+    "review_time_s": 3821.7003,
+    "throughput_per_hour": 358.8086,
+    "total_cost": 4570.0,
+    "unsafe_pass": 26
+   },
+   {
+    "hold": 105,
+    "inspection_time_s": 5115.5282,
+    "max_wip": 8,
+    "mean_cycle_time_s": 38.9235,
+    "mean_wip": 3.8857,
+    "p95_cycle_time_s": 83.7899,
+    "review_time_s": 4704.3649,
+    "throughput_per_hour": 359.3885,
+    "total_cost": 3860.0,
+    "unsafe_pass": 21
+   },
+   {
+    "hold": 102,
+    "inspection_time_s": 5023.2577,
+    "max_wip": 9,
+    "mean_cycle_time_s": 40.4656,
+    "mean_wip": 4.0304,
+    "p95_cycle_time_s": 85.7399,
+    "review_time_s": 4580.567,
+    "throughput_per_hour": 358.5639,
+    "total_cost": 4154.0,
+    "unsafe_pass": 23
+   },
+   {
+    "hold": 99,
+    "inspection_time_s": 5024.7699,
+    "max_wip": 10,
+    "mean_cycle_time_s": 38.7789,
+    "mean_wip": 3.8701,
+    "p95_cycle_time_s": 84.6136,
+    "review_time_s": 4508.4878,
+    "throughput_per_hour": 359.2758,
+    "total_cost": 2798.0,
+    "unsafe_pass": 14
+   },
+   {
+    "hold": 102,
+    "inspection_time_s": 5044.0533,
+    "max_wip": 9,
+    "mean_cycle_time_s": 40.4784,
+    "mean_wip": 4.0399,
+    "p95_cycle_time_s": 86.294,
+    "review_time_s": 4734.1555,
+    "throughput_per_hour": 359.2917,
+    "total_cost": 3404.0,
+    "unsafe_pass": 18
+   }
+  ],
+  "safe_mesh_reference": [
+   {
+    "hold": 219,
+    "inspection_time_s": 18515.1081,
+    "max_wip": 18,
+    "mean_cycle_time_s": 96.7654,
+    "mean_wip": 9.274,
+    "p95_cycle_time_s": 331.2423,
+    "review_time_s": 9992.8083,
+    "throughput_per_hour": 345.0248,
+    "total_cost": 2132.5,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 212,
+    "inspection_time_s": 18570.9928,
+    "max_wip": 23,
+    "mean_cycle_time_s": 117.9932,
+    "mean_wip": 11.6307,
+    "p95_cycle_time_s": 569.1384,
+    "review_time_s": 9755.6783,
+    "throughput_per_hour": 354.8556,
+    "total_cost": 2714.5,
+    "unsafe_pass": 5
+   },
+   {
+    "hold": 189,
+    "inspection_time_s": 18543.8419,
+    "max_wip": 12,
+    "mean_cycle_time_s": 66.1985,
+    "mean_wip": 6.536,
+    "p95_cycle_time_s": 186.7016,
+    "review_time_s": 8666.1668,
+    "throughput_per_hour": 355.4392,
+    "total_cost": 2210.5,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 195,
+    "inspection_time_s": 18497.9401,
+    "max_wip": 14,
+    "mean_cycle_time_s": 80.5111,
+    "mean_wip": 7.779,
+    "p95_cycle_time_s": 300.363,
+    "review_time_s": 9004.3706,
+    "throughput_per_hour": 347.831,
+    "total_cost": 2074.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 198,
+    "inspection_time_s": 18563.1561,
+    "max_wip": 13,
+    "mean_cycle_time_s": 73.821,
+    "mean_wip": 7.2918,
+    "p95_cycle_time_s": 225.9287,
+    "review_time_s": 9028.8544,
+    "throughput_per_hour": 355.5946,
+    "total_cost": 2535.0,
+    "unsafe_pass": 4
+   },
+   {
+    "hold": 196,
+    "inspection_time_s": 18527.1418,
+    "max_wip": 12,
+    "mean_cycle_time_s": 69.5488,
+    "mean_wip": 6.8392,
+    "p95_cycle_time_s": 208.6809,
+    "review_time_s": 8933.7537,
+    "throughput_per_hour": 354.0122,
+    "total_cost": 2827.5,
+    "unsafe_pass": 6
+   },
+   {
+    "hold": 217,
+    "inspection_time_s": 18590.9439,
+    "max_wip": 19,
+    "mean_cycle_time_s": 101.3638,
+    "mean_wip": 10.1042,
+    "p95_cycle_time_s": 407.8333,
+    "review_time_s": 9741.3316,
+    "throughput_per_hour": 358.8587,
+    "total_cost": 2275.0,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 203,
+    "inspection_time_s": 18571.8511,
+    "max_wip": 16,
+    "mean_cycle_time_s": 74.3994,
+    "mean_wip": 7.2197,
+    "p95_cycle_time_s": 199.3696,
+    "review_time_s": 9144.2842,
+    "throughput_per_hour": 349.3427,
+    "total_cost": 2845.0,
+    "unsafe_pass": 6
+   },
+   {
+    "hold": 184,
+    "inspection_time_s": 18628.6444,
+    "max_wip": 14,
+    "mean_cycle_time_s": 67.5565,
+    "mean_wip": 6.5798,
+    "p95_cycle_time_s": 191.842,
+    "review_time_s": 8362.3977,
+    "throughput_per_hour": 350.6265,
+    "total_cost": 2055.5,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 206,
+    "inspection_time_s": 18472.7485,
+    "max_wip": 14,
+    "mean_cycle_time_s": 79.6434,
+    "mean_wip": 7.7188,
+    "p95_cycle_time_s": 280.5452,
+    "review_time_s": 9458.7869,
+    "throughput_per_hour": 348.9001,
+    "total_cost": 2248.5,
+    "unsafe_pass": 2
+   }
+  ],
+  "structured_request_lite": [
+   {
+    "hold": 182,
+    "inspection_time_s": 17441.4864,
+    "max_wip": 14,
+    "mean_cycle_time_s": 71.4914,
+    "mean_wip": 7.0387,
+    "p95_cycle_time_s": 188.9352,
+    "review_time_s": 8237.5906,
+    "throughput_per_hour": 354.4406,
+    "total_cost": 1954.5,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 170,
+    "inspection_time_s": 17618.5099,
+    "max_wip": 15,
+    "mean_cycle_time_s": 73.4857,
+    "mean_wip": 7.2738,
+    "p95_cycle_time_s": 239.5077,
+    "review_time_s": 7878.3896,
+    "throughput_per_hour": 356.3395,
+    "total_cost": 2689.5,
+    "unsafe_pass": 6
+   },
+   {
+    "hold": 155,
+    "inspection_time_s": 17666.5376,
+    "max_wip": 11,
+    "mean_cycle_time_s": 56.844,
+    "mean_wip": 5.6423,
+    "p95_cycle_time_s": 128.7405,
+    "review_time_s": 7121.0515,
+    "throughput_per_hour": 357.3347,
+    "total_cost": 2057.5,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 146,
+    "inspection_time_s": 17634.7914,
+    "max_wip": 13,
+    "mean_cycle_time_s": 62.2582,
+    "mean_wip": 6.1647,
+    "p95_cycle_time_s": 143.145,
+    "review_time_s": 6698.1836,
+    "throughput_per_hour": 356.4636,
+    "total_cost": 1895.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 145,
+    "inspection_time_s": 17585.1272,
+    "max_wip": 10,
+    "mean_cycle_time_s": 57.6676,
+    "mean_wip": 5.7382,
+    "p95_cycle_time_s": 121.0678,
+    "review_time_s": 6677.0578,
+    "throughput_per_hour": 358.2203,
+    "total_cost": 2341.5,
+    "unsafe_pass": 4
+   },
+   {
+    "hold": 146,
+    "inspection_time_s": 17682.4751,
+    "max_wip": 10,
+    "mean_cycle_time_s": 57.0126,
+    "mean_wip": 5.6744,
+    "p95_cycle_time_s": 132.0703,
+    "review_time_s": 6631.6541,
+    "throughput_per_hour": 358.303,
+    "total_cost": 2649.5,
+    "unsafe_pass": 6
+   },
+   {
+    "hold": 169,
+    "inspection_time_s": 17583.9334,
+    "max_wip": 13,
+    "mean_cycle_time_s": 63.4945,
+    "mean_wip": 6.328,
+    "p95_cycle_time_s": 166.9114,
+    "review_time_s": 7556.5048,
+    "throughput_per_hour": 358.7827,
+    "total_cost": 2085.5,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 159,
+    "inspection_time_s": 17547.9136,
+    "max_wip": 11,
+    "mean_cycle_time_s": 61.1262,
+    "mean_wip": 6.08,
+    "p95_cycle_time_s": 141.2163,
+    "review_time_s": 7210.9776,
+    "throughput_per_hour": 358.0798,
+    "total_cost": 2667.0,
+    "unsafe_pass": 6
+   },
+   {
+    "hold": 149,
+    "inspection_time_s": 17647.5905,
+    "max_wip": 13,
+    "mean_cycle_time_s": 58.2797,
+    "mean_wip": 5.7896,
+    "p95_cycle_time_s": 130.6218,
+    "review_time_s": 6751.912,
+    "throughput_per_hour": 357.6269,
+    "total_cost": 1898.5,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 158,
+    "inspection_time_s": 17599.726,
+    "max_wip": 12,
+    "mean_cycle_time_s": 60.5912,
+    "mean_wip": 6.0398,
+    "p95_cycle_time_s": 138.2862,
+    "review_time_s": 7278.3726,
+    "throughput_per_hour": 358.8502,
+    "total_cost": 2065.0,
+    "unsafe_pass": 2
+   }
+  ],
+  "voi_driven": [
+   {
+    "hold": 108,
+    "inspection_time_s": 24331.7495,
+    "max_wip": 277,
+    "mean_cycle_time_s": 1905.724,
+    "mean_wip": 147.7079,
+    "p95_cycle_time_s": 3491.5704,
+    "review_time_s": 4885.1625,
+    "throughput_per_hour": 279.0271,
+    "total_cost": 2318.0,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 108,
+    "inspection_time_s": 24463.052,
+    "max_wip": 287,
+    "mean_cycle_time_s": 1938.6633,
+    "mean_wip": 148.5865,
+    "p95_cycle_time_s": 3571.3657,
+    "review_time_s": 4976.7157,
+    "throughput_per_hour": 275.9177,
+    "total_cost": 2319.5,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 98,
+    "inspection_time_s": 24561.6546,
+    "max_wip": 301,
+    "mean_cycle_time_s": 2074.3778,
+    "mean_wip": 156.9494,
+    "p95_cycle_time_s": 3793.0411,
+    "review_time_s": 4497.3793,
+    "throughput_per_hour": 272.3794,
+    "total_cost": 2450.5,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 92,
+    "inspection_time_s": 24533.1084,
+    "max_wip": 301,
+    "mean_cycle_time_s": 2049.3821,
+    "mean_wip": 155.8258,
+    "p95_cycle_time_s": 3701.7269,
+    "review_time_s": 4260.1754,
+    "throughput_per_hour": 273.7278,
+    "total_cost": 2293.5,
+    "unsafe_pass": 1
+   },
+   {
+    "hold": 84,
+    "inspection_time_s": 24568.2637,
+    "max_wip": 292,
+    "mean_cycle_time_s": 2035.3055,
+    "mean_wip": 155.4825,
+    "p95_cycle_time_s": 3659.6259,
+    "review_time_s": 3849.3203,
+    "throughput_per_hour": 275.0138,
+    "total_cost": 2434.0,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 94,
+    "inspection_time_s": 24571.6823,
+    "max_wip": 296,
+    "mean_cycle_time_s": 1985.226,
+    "mean_wip": 150.7413,
+    "p95_cycle_time_s": 3706.1097,
+    "review_time_s": 4256.1536,
+    "throughput_per_hour": 273.3536,
+    "total_cost": 2599.5,
+    "unsafe_pass": 3
+   },
+   {
+    "hold": 100,
+    "inspection_time_s": 24439.2878,
+    "max_wip": 285,
+    "mean_cycle_time_s": 1861.9142,
+    "mean_wip": 143.735,
+    "p95_cycle_time_s": 3493.1369,
+    "review_time_s": 4497.3877,
+    "throughput_per_hour": 277.9107,
+    "total_cost": 2606.5,
+    "unsafe_pass": 3
+   },
+   {
+    "hold": 102,
+    "inspection_time_s": 24488.0817,
+    "max_wip": 295,
+    "mean_cycle_time_s": 2000.6448,
+    "mean_wip": 153.0148,
+    "p95_cycle_time_s": 3682.0781,
+    "review_time_s": 4653.7098,
+    "throughput_per_hour": 275.3379,
+    "total_cost": 2611.5,
+    "unsafe_pass": 3
+   },
+   {
+    "hold": 88,
+    "inspection_time_s": 24661.7746,
+    "max_wip": 305,
+    "mean_cycle_time_s": 2131.8546,
+    "mean_wip": 161.2988,
+    "p95_cycle_time_s": 3834.7952,
+    "review_time_s": 3969.1585,
+    "throughput_per_hour": 272.3806,
+    "total_cost": 2438.5,
+    "unsafe_pass": 2
+   },
+   {
+    "hold": 101,
+    "inspection_time_s": 24474.1844,
+    "max_wip": 290,
+    "mean_cycle_time_s": 2016.6686,
+    "mean_wip": 153.8253,
+    "p95_cycle_time_s": 3664.1118,
+    "review_time_s": 4652.3257,
+    "throughput_per_hour": 274.5969,
+    "total_cost": 2308.5,
+    "unsafe_pass": 1
+   }
+  ]
+ },
+ "scenario_id": "baseline"
+}
