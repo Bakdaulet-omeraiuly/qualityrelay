@@ -72,7 +72,7 @@ policy should patch.
 | scenario | B7 vs B0 cost/unit | unsafe-rate diff [95% CI] | released-good diff | all 3 rules |
 |---|---|---|---|---|
 | S11 messages 0.05 | −0.63 [−0.78, −0.46] | −0.0008 [−0.0018, +0.0004] | +0.053 | **yes** |
-| S12 hold 5.0 | −0.33 [−0.47, −0.17] | −0.0007 [−0.0017, +0.0005] | +0.065 | **yes** |
+| S12 hold 5.0 (see note) | −0.33 [−0.47, −0.17] | −0.0007 [−0.0017, +0.0005] | +0.065 | **yes** |
 | S13 hold 5.0 + messages 0.05 | −0.81 [−0.95, −0.66] | −0.0006 [−0.0016, +0.0005] | +0.066 | **yes** |
 
 In those scenarios, decomposed with the registered contrasts:
@@ -92,6 +92,11 @@ In those scenarios, decomposed with the registered contrasts:
   verified mechanistically by tests, not by an effect size.
 - **Cost awareness (B7 vs entropy):** cheaper by 0.1/unit at S11/S12, but −3.6 … −4.4 pp
   throughput. Not a clean win.
+
+> **Note (SIM-04, later 31 Oct):** S12's registered title calls HOLD 5.0 "review labour"; under the
+> SIM-04 assumption modes the direct review cost of a hold is ~0.38 cu, so read S12/S13 as plain
+> HOLD-price sensitivities. The real cost of a hold-heavy policy is lost throughput once review
+> saturates -- `SIM_18_1_RESULTS.md` section 4 (hold-all: -82% good/h).
 
 ### 3.3 Unregistered secondary observations (labelled as such)
 
@@ -124,8 +129,6 @@ agent", or any number without its scenario ID and `SIMULATED`.
 
 - SCI-05 B4 and two ablations: `NOT_CONFIGURED`. They need a live LLM (adilnurgg AGENT-04).
 - SCI-07 "camera disagreement" is covered by S03/S04; "Pi offline" by S06/S07.
-- SIM-01..07: not started in this PR (the level-1 twin is PR #3). Next: hold/lost-throughput
-  cost (SIM-04 fixes §3.1's root cause), scenario manifest (SIM-02), and station scaling
-  (SIM-06).
+- SIM-01..07: done in the follow-up PR, see `SIM_18_1_RESULTS.md`.
 - VISION-01..05: blocked on HyorinmaruK's physical captures (PHY-06). The GPU run status is
   unchanged (`ANOMALY_GPU_RUN_31OCT.md`).
