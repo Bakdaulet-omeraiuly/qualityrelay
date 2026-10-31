@@ -1,0 +1,17 @@
+name: QualityRelay Scientific Reference Tests
+on:
+  push:
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -r requirements-demo.txt
+      - run: python -m pytest -q
+      - run: python -m qualityrelay17.demo > /tmp/qualityrelay-demo.json
+      - run: python -c "import json; assert json.load(open('/tmp/qualityrelay-demo.json'))['source_status']=='SYNTHETIC_DEMO_NOT_REAL_FACTORY_RESULT'"
