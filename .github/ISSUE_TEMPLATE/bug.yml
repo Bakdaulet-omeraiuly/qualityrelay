@@ -1,0 +1,30 @@
+name: Bug
+description: Something behaves differently from what the code, tests or docs claim
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened vs. what was expected
+    validations: {required: true}
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction
+      description: Command, request, seed or fixture. Commit hash (`git rev-parse --short HEAD`).
+      render: shell
+    validations: {required: true}
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options: [backend / API, agents / collective, ledger / verification, actuation / sorter, simulation / digital factory, vision, web, firmware / bench, CI / release]
+    validations: {required: true}
+  - type: dropdown
+    id: tier
+    attributes:
+      label: Evidence tier involved
+      options: [SIMULATED, TEST_FIXTURE, PHYSICAL_CAPTURE, VERIFIED_PHYSICAL, not applicable]
+  - type: markdown
+    attributes:
+      value: "Do not paste API keys, station keys, operator tokens or `.env` contents. If this is an exploitable security hole, use the **Safety / security** form and keep exploit details out of the public issue."

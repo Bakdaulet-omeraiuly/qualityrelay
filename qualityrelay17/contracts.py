@@ -2,7 +2,7 @@
 from __future__ import annotations
 from dataclasses import dataclass, asdict, field
 from typing import Literal
-import hashlib, hmac, json, time
+import hashlib, hmac, json
 
 Origin = Literal['SIMULATED','TEST_FIXTURE','PHYSICAL_CAPTURE','VERIFIED_PHYSICAL']
 Kind = Literal['PHONE_IMAGE','PI_IMAGE','CAD_IMAGE','CALIPER','ASSEMBLY','ROUTE_ACK','PROCESS']

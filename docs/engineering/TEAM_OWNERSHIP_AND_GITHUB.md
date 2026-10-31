@@ -22,7 +22,7 @@ qualityrelay/
 ```
 
 ## Branches and review
-`main` protected, 1 review for ordinary PR, 2 reviews for actuation/auth/safety code changes. Branches `science/vder-calibration`, `backend/evidence-mesh`, `mechanical/dual-camera-cad`, `qa/regression`. CI: Python unit tests, static schema checks, dependency vulnerability scan, and generated manifest diff. A team member cannot merge their own change to release PASS authority alone.
+Implemented by REL-02; see `docs/engineering/CI_AND_REVIEW_POLICY.md` (authoritative for checks, CODEOWNERS and the two-review gate). `main` protected, 1 review for ordinary PR, 2 reviews for actuation/auth/safety code changes. Branches `science/vder-calibration`, `backend/evidence-mesh`, `mechanical/dual-camera-cad`, `qa/regression`. CI: Python unit tests, static schema checks, dependency vulnerability scan, and generated manifest diff. A team member cannot merge their own change to release PASS authority alone.
 
 ## Shared interface checklist
 `event_id`, `specimen_id`, `lot_id`, `station_id`, `source_root`, `observed_at`, `origin`, `calibration_id`, `model_version`, `signature`, `parent_source_roots`, `cad_revision`, `operator_verification`, `uncertainty` standardized across services. UI only shows verified provenance. Every physically confirmed route recorded by separate unique sensor ACK.

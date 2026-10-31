@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Task board (source of truth for scope and ownership)
+    url: https://github.com/Bakdaulet-omeraiuly/qualityrelay/blob/main/QUALITYRELAY_18_1_TEAM_TASKS_EN.md
+    about: Check the task ID and owner here before opening a Task issue.

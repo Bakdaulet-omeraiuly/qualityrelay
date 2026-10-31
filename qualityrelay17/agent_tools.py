@@ -1,7 +1,6 @@
 """Bounded, read-only tools. A tool call request does not grant authority."""
 from .roles import ROLES
 from .vder import action_scores, Inspection
-from .matching import optimize_pairs
 
 ALLOWED={
  'read_evidence':{'roles':set(ROLES),'fn':lambda inp,ctx:{'events':ctx.get('evidence_summaries',[])}},

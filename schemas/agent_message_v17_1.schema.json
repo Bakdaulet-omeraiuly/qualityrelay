@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QualityRelay 17.1 agent message",
+  "description": "One role-signed message on the structured evidence-request bus (qualityrelay17/collective/messages.py). Sender identity is the signature verified by the bus, never the text.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "message_id", "case_id", "kind", "sender_role", "recipient_role", "sent_at", "body", "correlation_id", "signature"],
+  "properties": {
+    "schema_version": {"const": "17.1"},
+    "message_id": {"type": "string", "minLength": 1},
+    "case_id": {"type": "string", "minLength": 1, "description": "specimen_id"},
+    "kind": {"enum": ["FIND_MISSING_EVIDENCE", "REQUEST_EVIDENCE", "EVIDENCE_RESPONSE", "HYPOTHESIS_UPDATE", "PROPOSE_INSPECTION", "DECISION_PROPOSAL"]},
+    "sender_role": {"type": "string", "minLength": 1},
+    "recipient_role": {"type": "string", "minLength": 1},
+    "sent_at": {"type": "number"},
+    "correlation_id": {"type": "string", "description": "message_id of the REQUEST this answers or follows; empty for an originating message"},
+    "signature": {"type": "string", "description": "hex HMAC-SHA256 over the canonical unsigned message with the sender role's key"},
+    "body": {
+      "type": "object",
+      "description": "kind-specific. REQUEST_EVIDENCE: requested_kind, reason_code, hypotheses[], existing_evidence_ids[], existing_source_roots[], max_cost, deadline_ms. EVIDENCE_RESPONSE: outcome, reason, summaries[], cost_charged. HYPOTHESIS_UPDATE: belief_before, belief_after, note, basis_event_ids[], new_source_roots[]. PROPOSE_INSPECTION: chosen, net_voi, candidates[], budget, likelihood_source. DECISION_PROPOSAL: state, reasons[], evidence_ids[], control_state, control_reasons[], decision_changed.",
+      "properties": {
+        "outcome": {"enum": ["GRANTED", "REJECT_REQUEST", "TIMEOUT", "SENSOR_FAILURE", "STALE_EVIDENCE", "DUPLICATE_SOURCE", "BAD_SIGNATURE"]},
+        "summaries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["event_id", "kind", "station_id", "origin", "observed_at", "source_root", "verification_status", "new_source"],
+            "properties": {
+              "event_id": {"type": "string"}, "kind": {"type": "string"}, "station_id": {"type": "string"},
+              "origin": {"enum": ["SIMULATED", "TEST_FIXTURE", "PHYSICAL_CAPTURE", "VERIFIED_PHYSICAL"]},
+              "observed_at": {"type": "number"}, "source_root": {"type": "string"},
+              "parent_source_roots": {"type": "array", "items": {"type": "string"}},
+              "calibration_id": {"type": "string"}, "model_version": {"type": "string"}, "verdict": {"type": "string"},
+              "uncertainty": {"type": ["number", "null"]}, "unit": {"type": ["string", "null"]},
+              "payload": {"type": "object", "description": "admissible fields only; never raw observations"},
+              "verification_status": {"enum": ["VERIFIED", "STALE_EVIDENCE", "BAD_SIGNATURE", "DUPLICATE_SOURCE"]},
+              "new_source": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,4 +1,3 @@
-import pytest
 from qualityrelay17.factory import seeded_scenario, apply_policy, compare_policies
 from qualityrelay17.benchmark import run_benchmark
 

@@ -26,7 +26,7 @@
 
 ## Robust integration workflow
 1. Open the upstream repo and `LICENSE`, model card, and release notes on installation day.
-2. Record commit SHA, package version, Python/CUDA driver, hardware, license, download URL in `third_party.lock.yaml` (template below).
+2. Record commit SHA, package version, Python/CUDA driver, hardware, license, download URL in `THIRD_PARTY_MANIFEST.json` (`upstream_components`, `revision`), and the adapter's evidence-backed status in its `adapters` list. See `DEPENDENCIES_AND_ADAPTERS.md`. The YAML below is the original template; the JSON manifest supersedes it.
 3. Isolate external packages as Docker images/optional extras. Do not let one NVIDIA library constrain the CPU scientific core.
 4. Store third-party license notices with shipped **code**, not automatically copy all licenses for repos that were never bundled.
 5. Compare trained weights on a dataset where part IDs/lots do not appear across train/test.

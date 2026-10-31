@@ -1,8 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "QualityRelay17 research API",
-    "version": "0.1.0"
+    "title": "QualityRelay 18.1 research API",
+    "version": "18.1"
   },
   "paths": {
     "/health": {
@@ -147,6 +147,988 @@
         }
       }
     },
+    "/hardware/caliper-reading": {
+      "post": {
+        "summary": "Hardware Caliper Reading",
+        "description": "Reference ingestion. The sender is authenticated by the per-device envelope BEFORE the\nbody is trusted (BACK-01); body.station_id must equal the proven station. Turns one ESP32\npotentiometer ADC reading into a signed\nPHYSICAL_CAPTURE CALIPER Evidence item, appends it to HARDWARE_LEDGER (409 on a replayed\nevent_id) and returns it. It does not decide anything by itself.",
+        "operationId": "hardware_caliper_reading_hardware_caliper_reading_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaliperReading"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hardware/bin-ack": {
+      "post": {
+        "summary": "Hardware Bin Ack",
+        "description": "Reference ingestion for the photoresistor+4N35 independent bin sensor (H5/E12/E13\nin docs/research/EXPERIMENT_PROTOCOL.md). Signing a false reading is refused below the\nhardware_ingest layer, not just here -- see bin_ack_evidence().\n\nSensor fired -> route confirmed: once the ROUTE_ACK is persisted, its event_id is handed\nto SORTER.acknowledge() for the specimen's pending route. The response carries both the\nevidence and the interlock outcome; E12 (wrong bin) is ROUTE_MISMATCH and latches the action\nas FAULTED, E13 (second trigger for a confirmed part) is DUPLICATE_ACK_IGNORED.",
+        "operationId": "hardware_bin_ack_hardware_bin_ack_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BinAck"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/hardware/sorter/next-command": {
+      "post": {
+        "summary": "Sorter Next Command",
+        "description": "Pull model (BACK-04): the sorter asks; the default answer is HOLD. A ROUTE command is signed\nwith this station's device key (the device already holds it) so the device can check\nauthenticity and expires_at before moving. No firmware consumes this yet; with\nACTUATION_HARDWARE_ENABLED unset it never returns anything but HOLD.",
+        "operationId": "sorter_next_command_hardware_sorter_next_command_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SorterPoll"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/stage": {
+      "post": {
+        "summary": "Actuation Stage",
+        "description": "Human one-step route: propose + approve by the authenticated operator (STAGED_ONLY; nothing\nmoves). The evidence gate reads tiers from the ledger; PASS/REJECT need cited VERIFIED_PHYSICAL.",
+        "operationId": "actuation_stage_actuation_stage_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/propose": {
+      "post": {
+        "summary": "Actuation Propose",
+        "description": "AI/agent recommendation. Records a PROPOSED action; it cannot stage, dispatch or move\nanything and needs POST /actuation/{id}/approve by a human. recommended_by is caller-asserted\nadvisory provenance, restricted to machine sources so it cannot impersonate a human approval.",
+        "operationId": "actuation_propose_actuation_propose_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/estop": {
+      "post": {
+        "summary": "Actuation Estop",
+        "description": "Software E-stop. Deliberately needs NO token: stopping is the fail-safe direction, and anyone\nat the cell must be able to do it. It complements, never replaces, the hard-wired E-stop.",
+        "operationId": "actuation_estop_actuation_estop_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/EstopRequest"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "R"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/estop/reset": {
+      "post": {
+        "summary": "Actuation Estop Reset",
+        "operationId": "actuation_estop_reset_actuation_estop_reset_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/arm": {
+      "post": {
+        "summary": "Actuation Arm",
+        "operationId": "actuation_arm_actuation_arm_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/disarm": {
+      "post": {
+        "summary": "Actuation Disarm",
+        "operationId": "actuation_disarm_actuation_disarm_post",
+        "parameters": [
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/safety": {
+      "get": {
+        "summary": "Actuation Safety",
+        "operationId": "actuation_safety_actuation_safety_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/journal/{action_id}": {
+      "get": {
+        "summary": "Actuation Journal",
+        "description": "Append-only route journal for one action (every transition, with the full binding).",
+        "operationId": "actuation_journal_actuation_journal__action_id__get",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Action Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/{action_id}/approve": {
+      "post": {
+        "summary": "Actuation Approve",
+        "operationId": "actuation_approve_actuation__action_id__approve_post",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Action Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/{action_id}/identity": {
+      "post": {
+        "summary": "Actuation Identity",
+        "description": "Operator reads the label/QR of the part in the bin (BACK-03). Mismatch latches FAULTED.",
+        "operationId": "actuation_identity_actuation__action_id__identity_post",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Action Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/IdentityCheck"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/actuation/{action_id}": {
+      "get": {
+        "summary": "Actuation Status",
+        "operationId": "actuation_status_actuation__action_id__get",
+        "parameters": [
+          {
+            "name": "action_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Action Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/evidence/procedures": {
+      "get": {
+        "summary": "Evidence Procedures",
+        "operationId": "evidence_procedures_evidence_procedures_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/evidence/{event_id}/status": {
+      "get": {
+        "summary": "Evidence Status",
+        "operationId": "evidence_status_evidence__event_id__status_get",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/evidence/{event_id}/verify": {
+      "post": {
+        "summary": "Evidence Verify",
+        "description": "Record one human/instrument ground-truth check (see GROUND_TRUTH_VERIFICATION_PROCEDURE.md).\nDisagreement is recorded as DISPUTED (200) and latches; refused preconditions record nothing.",
+        "operationId": "evidence_verify_evidence__event_id__verify_post",
+        "parameters": [
+          {
+            "name": "event_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Event Id"
+            }
+          },
+          {
+            "name": "authorization",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/physical/status": {
+      "get": {
+        "summary": "Physical Status",
+        "operationId": "physical_status_physical_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/physical/events": {
+      "get": {
+        "summary": "Physical Events",
+        "operationId": "physical_events_physical_events_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 50,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integrations/llm": {
+      "get": {
+        "summary": "Llm Status",
+        "description": "Configuration only; no paid call is made here. CONFIGURED_NOT_VERIFIED until a run succeeds.",
+        "operationId": "llm_status_integrations_llm_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/research/collective/scenarios": {
+      "get": {
+        "summary": "Collective Scenarios",
+        "operationId": "collective_scenarios_research_collective_scenarios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/research/collective/run": {
+      "post": {
+        "summary": "Collective Run",
+        "operationId": "collective_run_research_collective_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CollectiveRunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/research/collective/runs/{run_id}": {
+      "get": {
+        "summary": "Collective Run Get",
+        "operationId": "collective_run_get_research_collective_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/research/collective/runs/{run_id}/traces/{part_id}": {
+      "get": {
+        "summary": "Collective Trace",
+        "operationId": "collective_trace_research_collective_runs__run_id__traces__part_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          },
+          {
+            "name": "part_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Part Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/research/collective/runs/{run_id}/manifest": {
+      "get": {
+        "summary": "Collective Manifest",
+        "operationId": "collective_manifest_research_collective_runs__run_id__manifest_get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/integrations": {
+      "get": {
+        "summary": "Integrations Status",
+        "description": "REL-03: every adapter's evidence-backed status (WORKING / TESTED / NOT_CONFIGURED) from\nTHIRD_PARTY_MANIFEST.json. A record, not a live probe; `scope` says what each status covers.",
+        "operationId": "integrations_status_integrations_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/integrations/nvidia": {
       "get": {
         "summary": "Nvidia Status",
@@ -162,10 +1144,1113 @@
           }
         }
       }
+    },
+    "/sim/scenarios": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Scenarios",
+        "operationId": "scenarios_sim_scenarios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/cad": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Cad",
+        "operationId": "cad_sim_cad_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/stl/{name}": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Stl",
+        "operationId": "stl_sim_stl__name__get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/assets/{name}": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Asset",
+        "operationId": "asset_sim_assets__name__get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/charts/{name}.svg": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Chart",
+        "operationId": "chart_sim_charts__name__svg_get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/run": {
+      "post": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Run",
+        "operationId": "run_sim_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/results": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Results",
+        "operationId": "results_sim_results_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/vision/capture": {
+      "post": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Vision Capture",
+        "description": "Save one real iPhone/webcam photo as PHYSICAL_CAPTURE training data and report the NVIDIA\nanomaly model status. No score is invented: until a model is trained on PHYSICAL_CAPTURE photos\n(VISION-04 on the Brev L4), the status is NOT_CONFIGURED.",
+        "operationId": "vision_capture_sim_vision_capture_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaptureRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/vision/suggest": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Vision Suggest",
+        "description": "Uncertainty sampling for the dimensional model: unlabelled photos whose measured width is\nclosest to the decision boundary (tab ~20.5 mm / slot ~20.5 mm for the 0.5 mm clearance at the\nnominal partner) are the most informative to label first. Unmeasurable photos come last.",
+        "operationId": "vision_suggest_sim_vision_suggest_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/live/event": {
+      "post": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Live Event",
+        "operationId": "live_event_sim_live_event_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiveEvent"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/live/recent": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Live Recent",
+        "operationId": "live_recent_sim_live_recent_get",
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "After"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/live/stream": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Live Stream",
+        "operationId": "live_stream_sim_live_stream_get",
+        "parameters": [
+          {
+            "name": "after",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "After"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation/scenarios": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Simulation Scenarios",
+        "operationId": "simulation_scenarios_simulation_scenarios_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation/runs": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Simulation Runs",
+        "description": "Registered per-seed SIM-07 records (schema: docs/research/sim_api/simulation_response.schema.json).",
+        "operationId": "simulation_runs_simulation_runs_get",
+        "parameters": [
+          {
+            "name": "scenario",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scenario"
+            }
+          },
+          {
+            "name": "policy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Policy"
+            }
+          },
+          {
+            "name": "pairing",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Pairing"
+            }
+          },
+          {
+            "name": "seed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Seed"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 2000,
+              "minimum": 1,
+              "default": 100,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation/runs/{run_id}": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Simulation Run",
+        "operationId": "simulation_run_simulation_runs__run_id__get",
+        "parameters": [
+          {
+            "name": "run_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Run Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation/summary": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Simulation Summary",
+        "description": "Seed-averaged factory KPIs per scenario x configuration, plus the paired contrasts.",
+        "operationId": "simulation_summary_simulation_summary_get",
+        "parameters": [
+          {
+            "name": "scenario",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scenario"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation/scale": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Simulation Scale",
+        "operationId": "simulation_scale_simulation_scale_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/simulation/run": {
+      "post": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Simulation Run Adhoc",
+        "description": "Ad-hoc website run (same engine as /sim/run). Not part of the registered result set.",
+        "operationId": "simulation_run_adhoc_simulation_run_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/benchmark/gate-a": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Benchmark Gate A",
+        "operationId": "benchmark_gate_a_benchmark_gate_a_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/benchmark/gate-a/{sid}": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Benchmark Gate A Scenario",
+        "operationId": "benchmark_gate_a_scenario_benchmark_gate_a__sid__get",
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sid"
+            }
+          },
+          {
+            "name": "per_seed",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Per Seed"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/benchmark/warp": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Benchmark Warp",
+        "operationId": "benchmark_warp_benchmark_warp_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/benchmark/warp/{sid}": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Benchmark Warp Scenario",
+        "operationId": "benchmark_warp_scenario_benchmark_warp__sid__get",
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/economics/assumptions": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Economics Assumptions",
+        "operationId": "economics_assumptions_economics_assumptions_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/economics/roi": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Economics Roi",
+        "operationId": "economics_roi_economics_roi_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/economics/roi/{sid}": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Economics Roi Scenario",
+        "operationId": "economics_roi_scenario_economics_roi__sid__get",
+        "parameters": [
+          {
+            "name": "sid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Sid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/economics/hold-all": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Economics Hold All",
+        "operationId": "economics_hold_all_economics_hold_all_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/economics/capacity-plan": {
+      "get": {
+        "tags": [
+          "results-18.1 (API-01)"
+        ],
+        "summary": "Economics Capacity Plan",
+        "operationId": "economics_capacity_plan_economics_capacity_plan_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "BinAck": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "specimen_id": {
+            "type": "string",
+            "title": "Specimen Id"
+          },
+          "station_id": {
+            "type": "string",
+            "title": "Station Id"
+          },
+          "bin_name": {
+            "type": "string",
+            "title": "Bin Name"
+          },
+          "photoresistor_blocked": {
+            "type": "boolean",
+            "title": "Photoresistor Blocked"
+          },
+          "action_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Action Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "specimen_id",
+          "station_id",
+          "bin_name",
+          "photoresistor_blocked"
+        ],
+        "title": "BinAck"
+      },
+      "CaliperReading": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "title": "Event Id"
+          },
+          "specimen_id": {
+            "type": "string",
+            "title": "Specimen Id"
+          },
+          "station_id": {
+            "type": "string",
+            "title": "Station Id"
+          },
+          "adc_value": {
+            "type": "integer",
+            "maximum": 4095.0,
+            "minimum": 0.0,
+            "title": "Adc Value"
+          },
+          "uncertainty_mm": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Uncertainty Mm"
+          },
+          "calibration_id": {
+            "type": "string",
+            "title": "Calibration Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "specimen_id",
+          "station_id",
+          "adc_value",
+          "uncertainty_mm",
+          "calibration_id"
+        ],
+        "title": "CaliperReading"
+      },
+      "CaptureRequest": {
+        "properties": {
+          "lane": {
+            "type": "string",
+            "pattern": "^(slot|tab)$",
+            "title": "Lane",
+            "default": "slot"
+          },
+          "label": {
+            "type": "string",
+            "pattern": "^(good|defect|inbox)$",
+            "title": "Label",
+            "default": "inbox"
+          },
+          "image_b64": {
+            "type": "string",
+            "maxLength": 12000000,
+            "minLength": 32,
+            "title": "Image B64"
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_b64"
+        ],
+        "title": "CaptureRequest"
+      },
+      "CollectiveRunRequest": {
+        "properties": {
+          "scenario": {
+            "type": "string",
+            "title": "Scenario",
+            "default": "pi_suspect"
+          },
+          "request_cost": {
+            "type": "number",
+            "maximum": 10.0,
+            "minimum": 0.0,
+            "title": "Request Cost",
+            "default": 0.3
+          },
+          "budget": {
+            "type": "number",
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Budget",
+            "default": 1.0
+          },
+          "planner": {
+            "type": "string",
+            "title": "Planner",
+            "description": "'deterministic' or a provider in collective.llm_planner.PROVIDERS",
+            "default": "deterministic"
+          }
+        },
+        "type": "object",
+        "title": "CollectiveRunRequest"
+      },
+      "EstopRequest": {
+        "properties": {
+          "reason": {
+            "type": "string",
+            "maxLength": 200,
+            "title": "Reason",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "title": "EstopRequest"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -178,6 +2263,192 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "IdentityCheck": {
+        "properties": {
+          "observed_specimen_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Observed Specimen Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "observed_specimen_id"
+        ],
+        "title": "IdentityCheck"
+      },
+      "LiveEvent": {
+        "properties": {
+          "event_id": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Event Id"
+          },
+          "specimen_id": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Specimen Id"
+          },
+          "station_id": {
+            "type": "string",
+            "pattern": "^(phone|pi|caliper|assembly|sorter|virtual-station)$",
+            "title": "Station Id"
+          },
+          "source_tier": {
+            "type": "string",
+            "pattern": "^(SIMULATED|PHYSICAL_CAPTURE)$",
+            "title": "Source Tier",
+            "default": "PHYSICAL_CAPTURE"
+          },
+          "observed_at": {
+            "type": "string",
+            "maxLength": 40,
+            "title": "Observed At"
+          },
+          "lane": {
+            "type": "string",
+            "pattern": "^(slot|tab)$",
+            "title": "Lane",
+            "default": "slot"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          }
+        },
+        "type": "object",
+        "required": [
+          "event_id",
+          "specimen_id",
+          "station_id",
+          "observed_at"
+        ],
+        "title": "LiveEvent",
+        "description": "Shared integration-contract fields (QUALITYRELAY_18_1_TEAM_TASKS_EN.md section 4). A\nself-declared station is NOT a verified identity: events are displayed, never acted on, and\nkeep their declared tier (adilnurgg's authenticated ingest replaces this in production)."
+      },
+      "ProposeRequest": {
+        "properties": {
+          "action_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Action Id"
+          },
+          "specimen_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Specimen Id"
+          },
+          "bin": {
+            "type": "string",
+            "title": "Bin"
+          },
+          "decision": {
+            "type": "string",
+            "title": "Decision"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 32,
+            "title": "Evidence Ids"
+          },
+          "recommended_by": {
+            "type": "string",
+            "title": "Recommended By",
+            "description": "machine source: 'safe_mesh', 'llm:<provider>', 'agent:<role>' or 'ai:<name>'"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action_id",
+          "specimen_id",
+          "bin",
+          "decision",
+          "recommended_by"
+        ],
+        "title": "ProposeRequest"
+      },
+      "RunRequest": {
+        "properties": {
+          "scenario": {
+            "type": "string",
+            "title": "Scenario",
+            "default": "F01"
+          },
+          "policy": {
+            "type": "string",
+            "title": "Policy",
+            "default": "bayes"
+          },
+          "pairing": {
+            "type": "string",
+            "title": "Pairing",
+            "default": "optimized"
+          },
+          "seed": {
+            "type": "integer",
+            "maximum": 10000.0,
+            "minimum": 0.0,
+            "title": "Seed",
+            "default": 0
+          },
+          "n_pairs": {
+            "type": "integer",
+            "maximum": 150.0,
+            "minimum": 10.0,
+            "title": "N Pairs",
+            "default": 60
+          },
+          "reprint": {
+            "type": "boolean",
+            "title": "Reprint",
+            "default": true
+          },
+          "phone_only": {
+            "type": "boolean",
+            "title": "Phone Only",
+            "default": true
+          },
+          "two_lanes": {
+            "type": "boolean",
+            "title": "Two Lanes",
+            "default": true
+          }
+        },
+        "type": "object",
+        "title": "RunRequest"
       },
       "SimRequest": {
         "properties": {
@@ -218,6 +2489,75 @@
         "type": "object",
         "title": "SimRequest"
       },
+      "SorterPoll": {
+        "properties": {
+          "station_id": {
+            "type": "string",
+            "title": "Station Id"
+          },
+          "estop_loop_ok": {
+            "type": "boolean",
+            "title": "Estop Loop Ok",
+            "default": false
+          },
+          "guard_closed": {
+            "type": "boolean",
+            "title": "Guard Closed",
+            "default": false
+          },
+          "position": {
+            "type": "string",
+            "title": "Position",
+            "default": "UNKNOWN"
+          }
+        },
+        "type": "object",
+        "required": [
+          "station_id"
+        ],
+        "title": "SorterPoll"
+      },
+      "StageRequest": {
+        "properties": {
+          "action_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Action Id"
+          },
+          "specimen_id": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Specimen Id"
+          },
+          "bin": {
+            "type": "string",
+            "title": "Bin"
+          },
+          "decision": {
+            "type": "string",
+            "title": "Decision"
+          },
+          "evidence_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 32,
+            "title": "Evidence Ids"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "action_id",
+          "specimen_id",
+          "bin",
+          "decision"
+        ],
+        "title": "StageRequest"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -257,6 +2597,87 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VerifyRequest": {
+        "properties": {
+          "procedure_id": {
+            "type": "string",
+            "title": "Procedure Id"
+          },
+          "observed_specimen_id": {
+            "type": "string",
+            "title": "Observed Specimen Id"
+          },
+          "reference_value_mm": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Value Mm"
+          },
+          "reference_uncertainty_mm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Uncertainty Mm"
+          },
+          "reference_instrument_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Instrument Id"
+          },
+          "reference_calibration_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference Calibration Id"
+          },
+          "observed_verdict": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observed Verdict"
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Notes",
+            "default": ""
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "procedure_id",
+          "observed_specimen_id"
+        ],
+        "title": "VerifyRequest"
       }
     }
   }

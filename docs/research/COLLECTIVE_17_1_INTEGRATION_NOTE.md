@@ -49,6 +49,32 @@ cost/value curve a continuous confidence score would give. That upgrade (a real 
 score per camera reading, not just a boolean) is the concrete next step for whoever builds
 `qualityrelay17/collective/belief_state.py` for real.
 
+## Added 31 Oct, evening (adilnurgg): the protocol layer, `qualityrelay17/collective/`
+
+`structured_request_lite` above is one policy inside the simulator. What Bakdaulet's plan
+section 3 actually asks for is the *protocol*: typed, signed messages between roles with
+private information, an ACL, deterministic verification, and a trace that can be audited
+against the five "not theatre" criteria. That now exists as a package, built so the B-ladder
+runner can drive it without touching the simulator:
+
+| Plan file | Built as | Notes |
+|---|---|---|
+| `message_schema.py` | `collective/messages.py` + `schemas/agent_message_v17_1.schema.json` | six kinds, role HMAC signature, admissible summaries |
+| `peer_protocol.py` | `collective/peer_protocol.py` (`PeerBus`) | private stores, entitlement from `roles.py`, ownership map, deadline, request cost charged on issue |
+| `provenance_graph.py` | bus `VERIFY` on top of existing `lineage.py` | DUPLICATE_SOURCE / STALE_EVIDENCE / BAD_SIGNATURE before delivery |
+| `belief_state.py` + `adaptive_voi.py` | `collective/belief.py` (`BeliefModel`, `ReferenceBelief`, `from_likelihoods`) | **the boundary for Bakdaulet**: swap this one object; engine, ACL, trace, API unchanged |
+| `decision_trace.py` | `collective/trace.py` | message-level provenance, belief before/after, decision vs control, narrative for the Evidence Room |
+| `collaboration_engine.py` | `collective/engine.py` | one case end to end + control run + criteria 3.4 evaluated on the trace |
+| API 7.3 | `POST /research/collective/run`, `GET …/runs/{id}`, `…/traces/{part}`, `…/manifest` | origin `TEST_FIXTURE`; `comparison` route waits for the B-ladder runner |
+| Evidence Room 7.4 | web Agent Evidence Room: scenario select + narrative + criteria | single fixture case, no improvement claimed |
+
+What it does **not** do, deliberately: no LLM in the loop (roles are code; AGENT-04 is the
+Nebius smoke test), one process (not a network), illustrative likelihoods unless
+`from_likelihoods(calibration.Likelihoods)` is used, and no benchmark — eight scenarios
+(`collective/scenarios.py`) show each technical outcome once. For B5/B7 the runner should
+build a `PeerBus` per simulated part from the generator's rows, charge `bus.cost_charged`
+into the policy's cost line (SCI-02), and read `CaseResult.criteria` per part.
+
 ## Mapping onto the B0–B7 ladder
 
 | Bakdaulet's ID | What it needs | Status tonight |

@@ -1,11 +1,11 @@
-# QualityRelay 17.0 — SAFE-MESH Research + Engineering Package
+# QualityRelay 18.1 — SAFE-MESH Research + Engineering Package
 
 **Status:** runnable research reference and individually documented target architecture. **Not** a complete 21-live-LLM factory system, real NVIDIA model, industrial certification, Raspberry Pi/Hailo deployment or proven scientific discovery.
 
 ## Start in three commands
 
 ```bash
-cd QualityRelay_17_SAFE_MESH
+cd qualityrelay
 python -m pip install -r requirements-demo.txt
 python -m pytest -q
 python -m qualityrelay17.demo
@@ -19,6 +19,17 @@ uvicorn qualityrelay17.api:app --host 127.0.0.1 --port 8000
 ```
 
 `/` renders a static responsive research dashboard. `Photo / CAD Lab` locally compares two uploaded images using uncalibrated pixel difference. `Simulation Lab` runs the seeded Python backend if available. The supplied CAD projections are generated from the original user's 5.0 STL specimen models. **No uploads are stored or sent by the browser's local comparison.** When deploying HTTPS, configure real authentication, permissions, TLS, rate limiting and secure hardware controls first. The demo API has none of those production assurances.
+
+## Release 18.1 and integrity check
+
+The release label lives in one place, `qualityrelay17/__init__.py` (`__version__`); `pyproject.toml`, the API title/version and `GET /health` (`release`) must match it (`tests/test_release.py`). The Python import name stays `qualityrelay17` for compatibility.
+
+```bash
+python scripts/release_check.py all      # OpenAPI snapshot -> pytest -> RELEASE_VALIDATION.json -> FILE_SHA256_MANIFEST.json -> verify
+python scripts/release_check.py verify   # re-check every packaged file against FILE_SHA256_MANIFEST.json
+```
+
+The manifest covers every git-tracked or untracked-but-not-ignored file except itself. Text files are hashed with CRLF normalised to LF, so the same checkout verifies on Windows (`core.autocrlf=true`) and Linux. Regenerate after the final commit of a release; `RELEASE_VALIDATION.json` records the commit and whether the tree was dirty.
 
 ## Layout
 
@@ -39,7 +50,7 @@ uvicorn qualityrelay17.api:app --host 127.0.0.1 --port 8000
 - **21 specialist role registry**: same role roster as user's 14.2, protected role-to-tool contract.
 - **Phone camera + Raspberry Pi camera**, each separately accountable; phone reference photo, Pi edge capture, CAD projection, caliper confirmed readings. Photograph and CAD inference derived from same image are correlated, not independently counted.
 - V-DER / CAIR, Evidence-Mesh, PACE / safety gate, human-controlled physical sorter, digital factory and cost intelligence.
-- NVIDIA eight integration slots (cuOpt, Isaac/Omniverse, Replicator, PhysicsNeMo, DeepStream, Cosmos, Metropolis VSS, Warp/Newton) with hardware/license caveats.
+- NVIDIA eight integration slots (cuOpt, Isaac/Omniverse, Replicator, PhysicsNeMo, DeepStream, Cosmos, Metropolis VSS, Warp/Newton) with hardware/license caveats. **Only Warp runs** (CPU backend, rare-event Monte Carlo); every other slot is `NOT_CONFIGURED`. Live statuses with evidence: `GET /integrations` and `THIRD_PARTY_MANIFEST.json` (REL-03).
 - Nebius LLM tool-calling is opt-in; no live key or entitlement presumed.
 - **Bakdaulet: no Google Cloud tasks**; adilnurgg and HyorinmaruK handle GCP. HyorinmaruK owns physical validation and pitch.
 
@@ -60,4 +71,4 @@ uvicorn qualityrelay17.api:app --host 127.0.0.1 --port 8000
 
 ## Кысқаша (қазақша)
 
-Бұл ZIP — QualityRelay-дің 17.0 ғылыми-инженерлік негізі. 12 архитектура жеке жазылған, 21 агент рөлі, екі камера, фото↔CAD, виртуалды зауыт, экономикалық есеп, NVIDIA/Nebius интеграция жоспары және тесті бар. Нақты зауыттық валидация мен GPU модельдерін іске қосу әлі жасалмаған. Ғылыми тиімділікті дәлелдеу үшін дайын benchmark пен физикалық сынақ жоспары бар.
+Бұл пакет — QualityRelay-дің 18.1 ғылыми-инженерлік негізі. 12 архитектура жеке жазылған, 21 агент рөлі, екі камера, фото↔CAD, виртуалды зауыт, экономикалық есеп, NVIDIA/Nebius интеграция жоспары және тесті бар. Нақты зауыттық валидация мен GPU модельдерін іске қосу әлі жасалмаған. Ғылыми тиімділікті дәлелдеу үшін дайын benchmark пен физикалық сынақ жоспары бар.

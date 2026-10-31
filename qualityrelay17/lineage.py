@@ -1,7 +1,6 @@
 """Provenance DAG for avoiding double-use of derived observations.
 References are IDs of source evidence, NOT independent confidence votes.
 """
-from collections import defaultdict
 
 def lineage_groups(events:list[dict]):
     """Return connected components among observations sharing an ancestor.

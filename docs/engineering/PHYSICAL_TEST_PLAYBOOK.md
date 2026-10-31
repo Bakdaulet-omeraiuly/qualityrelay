@@ -72,6 +72,24 @@ A station with no key answers `503` (the cold state `tests/test_api.py` pins); a
 than 32 chars is refused at startup rather than used. `GET /health` lists which stations are
 provisioned so you can check from the floor without reading the file.
 
+**Every hardware POST must carry the per-device signed envelope** (task board BACK-01,
+`qualityrelay17/station_auth.py`). Each station has *two* secrets: a `*_DEVICE_KEY` that is
+flashed onto its ESP32 and only proves "this came from station X", and the server-only
+`*_STATION_KEY` that signs the Evidence afterwards. Flash the device key with
+
+```
+python scripts/provision_station_keys.py --show-device-key sorter   # paste into STATION_DEVICE_KEY
+```
+
+The sketches add `X-Station-Id / -Timestamp / -Nonce / -Signature` (HMAC-SHA256 over method, path,
+station, unix time, nonce and the body hash) and refuse to send until NTP has set the clock.
+What the codes mean on the floor: `401` = envelope rejected (wrong device key, clock more than
+60 s off, nonce reused, body altered in flight); `403` = that station is not allowed on that path
+(e.g. the sorter posting a caliper reading) or the body's `station_id` disagrees with the
+authenticated one. Both happen *before* anything is signed or stored. `GET /health` lists
+`device_authenticated_stations` next to `hardware_stations_provisioned`; both lists must contain a
+station for its readings to be accepted.
+
 Every accepted reading is appended to the API's evidence ledger (`api.HARDWARE_LEDGER`) before
 the signed object is returned. The ledger is in-memory by default, so **set
 `HARDWARE_LEDGER_PATH` to a file in `.env` for any session whose readings you want to keep**
@@ -82,14 +100,31 @@ layer refused the reading (e.g. bin-ack with no part detected) and nothing was r
 
 ### Sensor fired -> route confirmed (the live loop)
 
-1. Stage the route the software decided on (STAGED_ONLY, nothing moves):
-   `POST /actuation/stage {"action_id":"act-1","specimen_id":"S-7","bin":"PASS","decision":"AUTHORIZED_PASS","operator_id":"<name>","approved":true,"origin":"VERIFIED_PHYSICAL"}`
-2. Drop the part. The bin sensor ESP32 posts `/hardware/bin-ack` with its own `event_id`.
-3. The server persists that ROUTE_ACK, then acknowledges the specimen's pending route with it.
-   The interlock accepts only a *recorded* ROUTE_ACK for the same specimen and bin, so a typed
-   `sensor_event_id` cannot confirm anything. Response: `{"evidence":{...},"interlock":{"status":...}}`.
-4. `GET /actuation/act-1` -> `CONFIRMED` / `FAULTED` / `PENDING`. Read it out loud on stage; it is
-   the proof the ACK path is independent of the command path.
+0. Have a provisioned operator token (`python scripts/provision_station_keys.py --operators <you>`,
+   then `--show-operator-token <you>`) and export it as `QR_OPERATOR_TOKEN`. Approval and identity come
+   from that token now. The old `operator_id` / `approved` / `origin` body fields are refused with `422` (BACK-04).
+1. For PASS or REJECT, verify the reading you will cite first: take the caliper reading at the station, then
+   follow `GROUND_TRUTH_VERIFICATION_PROCEDURE.md` (GT-CAL-01) so that `GET /evidence/<event_id>/status` shows
+   `effective_origin: VERIFIED_PHYSICAL`. A HOLD route only needs the authenticated reading (BACK-02).
+2. Stage the route (STAGED_ONLY, nothing moves). It expires after `ACTUATION_STAGE_TTL_S`, 600 s by default:
+   `POST /actuation/stage` with header `Authorization: Bearer $QR_OPERATOR_TOKEN` and body
+   `{"action_id":"act-1","specimen_id":"S-7","bin":"PASS","decision":"AUTHORIZED_PASS","evidence_ids":["<event_id>"]}`.
+   `403` means the evidence gate refused: the detail says which record and why.
+3. Drop the part **after** staging. The bin sensor ESP32 posts `/hardware/bin-ack` with its own `event_id`.
+   Its signed envelope timestamp is the sensing time. A detection from before the approval (for example a
+   part already sitting in the bin) cannot confirm the route.
+4. The server persists that ROUTE_ACK and binds it to the single in-flight route for that specimen (or to
+   `action_id` if the sketch sends one). It only accepts a *recorded*, station-authenticated ROUTE_ACK for the
+   same specimen and bin, inside the action's time window. One sensor event can bind at most one action, and
+   that holds across restarts. If two routes are in flight for one specimen, the response is `AMBIGUOUS_ACK`
+   and the server does not guess.
+5. `GET /actuation/act-1` -> `CONFIRMED` / `FAULTED` / `STAGED` / `EXPIRED`, with the full `binding`
+   (action, specimen, sorter station, requested vs actual bin, sensor event, sensed/approved times, approver).
+   Read it out loud on stage; it is the proof the ACK path is independent of the command path.
+6. **Identity:** `specimen_identity` stays `NOT_PROVEN`, because the LDR only proves that *an object* arrived.
+   Pick the part out of the bin, read its label, and
+   `POST /actuation/act-1/identity {"observed_specimen_id":"S-7"}` (same bearer token). A different label
+   latches `FAULTED / IDENTITY_MISMATCH`. `GET /actuation/journal/act-1` shows every transition.
 
 If the sensor fires with nothing staged for that specimen you get `NO_PENDING_ACTION`: the reading
 is kept, but there was no route to confirm — usually a `specimen_id` mismatch between the two sketches.
@@ -144,11 +179,37 @@ test you've only run once isn't a reliable live demo.
   LEDs/buzzer, not for a motor or solenoid. Don't wire a real sorter motor through it.
 - Put a diode across the buzzer leads if it has any internal coil (most small "active"
   buzzers do) — flyback protection, cheap insurance.
-- `actuation.py` currently has *no GPIO path at all* ("No hardware IO" is in its own
-  docstring) — it only stages requests and waits for an ACK. Keep it that way for the demo;
-  do not add a live servo/relay command path under time pressure. A human physically moving
-  the part after seeing the dashboard's recommendation is the correct, already-designed
-  behavior, not a missing feature.
+- `actuation.py` still has *no GPIO path at all*. The server never drives a pin. For the demo, keep the
+  designed behaviour: a human moves the part after seeing the approved route. Do not add a servo/relay under
+  time pressure.
+- **An AI never moves a part.** LLM planners and `safe_mesh` can at most `POST /actuation/propose`, which
+  creates a `PROPOSED` action that has no timer and no command. Only an authenticated operator can approve it
+  (`POST /actuation/{id}/approve`), and the evidence gate runs again at approval. Machine identities
+  (`llm:*`, `agent:*`, `ai:*`, `safe_mesh`) are refused as approvers. `tests/test_actuation_safety.py` also
+  checks statically that no collective/LLM/agent module imports the interlock.
+- **If a powered sorter is ever attached (owner HyorinmaruK, reviewed by adilnurgg), it must meet ALL of
+  these. Software cannot provide any of them:**
+  1. A hard-wired E-stop (latching mushroom button) that cuts **actuator power** directly, not through the ESP32.
+     Its auxiliary contact is read by the ESP32 and reported as `estop_loop_ok`.
+  2. A guard/cover switch in series with actuator power, reported as `guard_closed`.
+  3. Mechanical default to HOLD: spring-return or gravity so that an unpowered gate diverts to HOLD. Power loss
+     or a brown-out then lands parts in HOLD.
+  4. On boot, the firmware drives the gate to HOLD before connecting to WiFi. Any error, lost connection, or
+     invalid or expired command also means HOLD.
+  5. Pull model only. The device polls `POST /hardware/sorter/next-command` with its signed envelope and
+     `{"station_id","estop_loop_ok","guard_closed","position"}`. It moves only for `"command":"ROUTE"`, only
+     if `signature` = HMAC-SHA256(device key, `ROUTE\n<station>\n<action_id>\n<specimen_id>\n<bin>\n<command_nonce>\n<issued_at>\n<expires_at>`)
+     verifies, only if `expires_at` has not passed on its NTP clock, and only if it has not executed that
+     `command_nonce` before.
+  6. The bin-ACK sensor stays a separate circuit. The sorter does not report its own success.
+- **Server-side gates (already enforced):** `ACTUATION_HARDWARE_ENABLED` is off by default, and while it is
+  off every poll answers `HOLD / HARDWARE_DISABLED`. Even with it on, an operator must `POST /actuation/arm`.
+  `POST /actuation/estop` needs **no token** (stopping is the fail-safe direction). It latches, disarms, aborts
+  staged routes and faults any route in motion. A device reporting `estop_loop_ok:false` latches it too.
+  Reset needs a token and does **not** re-arm. Only one route is in motion at a time. A dispatched route with
+  no bin ACK within `ACTUATION_ACK_TIMEOUT_S` (30 s) → `FAULTED / ACK_TIMEOUT` plus disarm. A server restart
+  closes every non-terminal route as `EXPIRED` or `FAULTED / SERVER_RESTART_DURING_MOTION`, so nothing
+  resumes without a new approval.
 - Never power the ESP32 logic pins from anything other than 3.3V; the 74HC595 and LEDs are
   fine at 3.3V logic level but double-check your specific LED forward voltages against the
   resistor values you picked out of the 120-piece pack.

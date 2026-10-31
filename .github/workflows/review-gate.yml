@@ -1,0 +1,35 @@
+# REL-02: two non-author approvals on the head commit for PRs touching .github/safety-paths.txt.
+# Make `safety-review-gate` a required status check on `main`.
+name: Safety review gate
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: review-gate-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  safety-review-gate:
+    runs-on: ubuntu-latest
+    steps:
+      # The path list and the gate script come from the BASE commit, never from the PR,
+      # so a PR cannot weaken the rule that is judging it.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          sparse-checkout: |
+            .github/safety-paths.txt
+            scripts/review_gate.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.11'}
+      - run: python scripts/review_gate.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

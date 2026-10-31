@@ -2,7 +2,7 @@
 Arrival/service times and failure delays are simulated; no PLC, Isaac Sim or SimPy coupling.
 """
 from __future__ import annotations
-from dataclasses import dataclass,asdict
+from dataclasses import dataclass
 from random import Random
 
 @dataclass(frozen=True)

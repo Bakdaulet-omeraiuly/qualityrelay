@@ -7,10 +7,9 @@ PHY-03 caliper data arrives (`cad.calibrate_from_caliper`).
 """
 from __future__ import annotations
 import hashlib, json
-from dataclasses import dataclass, field, asdict, replace
+from dataclasses import dataclass, asdict
 from random import Random
 
-from .cad import nominal_design
 
 
 @dataclass(frozen=True)

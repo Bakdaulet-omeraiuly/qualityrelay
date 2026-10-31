@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QualityRelay third-party dependency, licence and adapter-status manifest (REL-03)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["manifest_version", "release", "reviewed_on", "reviewed_by", "policy", "python_packages",
+               "transitive_license_review", "upstream_components", "adapters"],
+  "properties": {
+    "manifest_version": {"type": "integer", "minimum": 1},
+    "release": {"type": "string"},
+    "reviewed_on": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "reviewed_by": {"type": "string", "minLength": 1},
+    "policy": {"type": "string"},
+    "python_packages": {"type": "array", "items": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "requirement", "pinned", "license", "license_metadata", "upstream", "used_by"],
+      "properties": {
+        "name": {"type": "string"}, "requirement": {"type": "string"},
+        "pinned": {"type": ["string", "null"], "description": "version in requirements-lock.txt; null = optional, not locked"},
+        "license": {"type": "string", "minLength": 1, "description": "reviewed SPDX expression"},
+        "license_metadata": {"type": ["string", "null"], "description": "what the locked wheel's metadata reports; CI fails if it changes"},
+        "upstream": {"type": "string", "format": "uri"}, "used_by": {"type": "string"}}}},
+    "transitive_license_review": {"type": "array", "items": {
+      "type": "object", "additionalProperties": false, "required": ["name", "license", "license_metadata", "note"],
+      "properties": {"name": {"type": "string"}, "license": {"type": "string"},
+                     "license_metadata": {"type": "string"}, "note": {"type": "string"}}}},
+    "upstream_components": {"type": "array", "items": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "name", "kind", "url", "license", "license_review", "revision", "bundled", "notes"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z0-9-]+$"}, "name": {"type": "string"},
+        "kind": {"enum": ["repo", "sdk", "service", "dataset"]}, "url": {"type": "string", "format": "uri"},
+        "license": {"type": "string", "minLength": 1}, "license_review": {"enum": ["reviewed", "to_verify"]},
+        "revision": {"type": ["string", "null"]}, "bundled": {"const": false}, "notes": {"type": "string"}}}},
+    "adapters": {"type": "array", "items": {
+      "type": "object", "additionalProperties": false,
+      "required": ["id", "provider", "capability", "upstream", "status", "scope", "origin", "requires_packages", "evidence"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[a-z]+\\.[a-z0-9_]+$"}, "provider": {"type": "string"},
+        "capability": {"type": "string"}, "upstream": {"type": "string"},
+        "status": {"enum": ["WORKING", "TESTED", "NOT_CONFIGURED"]},
+        "scope": {"type": "string", "minLength": 1},
+        "origin": {"enum": ["SIMULATED", "TEST_FIXTURE", "PHYSICAL_CAPTURE", "VERIFIED_PHYSICAL", "EXTERNAL_SERVICE", "NONE"]},
+        "requires_packages": {"type": "array", "items": {"type": "string"}},
+        "evidence": {"type": "object", "additionalProperties": false, "properties": {
+          "tests": {"type": "array", "items": {"type": "string"}},
+          "artifacts": {"type": "array", "items": {"type": "string"}}}}}}}
+  }
+}

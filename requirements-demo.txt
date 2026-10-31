@@ -6,4 +6,5 @@ numpy>=2,<3
 scipy>=1,<2
 opencv-python-headless>=4.10,<5
 trimesh>=4,<6
+networkx>=3,<4  # trimesh needs it for mesh.section() (sim/cad.py) but does not declare it
 openai>=1,<3

@@ -3,9 +3,41 @@ requires=["setuptools>=68"]
 build-backend="setuptools.build_meta"
 [project]
 name="qualityrelay17-research"
-version="0.1.0"
+version="18.1"
 description="Research reference for decentralized manufacturing evidence and assured review"
 requires-python=">=3.10"
 [tool.pytest.ini_options]
 testpaths=["tests"]
 pythonpath=["."]
+
+# REL-02 CI gates. Ruff is correctness-only (pyflakes + syntax errors); the codebase's compact
+# one-line style is deliberate, so pycodestyle/formatting rules are not enforced.
+[tool.ruff]
+target-version="py310"
+extend-exclude=["legacy"]
+[tool.ruff.lint]
+select=["E9","F"]
+
+# Blocking on every module except the research/simulation/vision ratchet list below.
+# Safety, auth, actuation, ledger and agent-protocol modules are NOT on it and must stay clean.
+# Remove a module from the list once its errors are fixed; never add a safety-critical one.
+[tool.mypy]
+python_version="3.11"
+ignore_missing_imports=true
+warn_unused_ignores=true
+[[tool.mypy.overrides]]
+module=[
+  "qualityrelay17.anomaly",
+  "qualityrelay17.calibration",
+  "qualityrelay17.digital_twin",
+  "qualityrelay17.experiments.conformal",
+  "qualityrelay17.factory",
+  "qualityrelay17.gpu.warp_mc",
+  "qualityrelay17.inspection_visuals",
+  "qualityrelay17.sim.api_routes",
+  "qualityrelay17.sim.cad",
+  "qualityrelay17.sim.des",
+  "qualityrelay17.sim.engine",
+  "qualityrelay17.vision_measure",
+]
+ignore_errors=true

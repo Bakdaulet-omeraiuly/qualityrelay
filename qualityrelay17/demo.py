@@ -1,5 +1,5 @@
 """Run via `python -m qualityrelay17.demo` from project root."""
-import json, time
+import json
 from .contracts import Evidence,sign_evidence
 from .safe_mesh import evaluate
 from .factory import compare_policies

@@ -6,22 +6,24 @@ from qualityrelay17.roles import ROLES,plan_roles
 from qualityrelay17.nebius import NebiusExpert
 from qualityrelay17.vision import compare_reference,silhouette_iou
 
-def req(**kw):return RouteRequest(**{'action_id':'a1','specimen_id':'p1','bin':'HOLD','decision':'HOLD','operator_id':'human','approved':True,'origin':'VERIFIED_PHYSICAL',**kw})
-def test_stage_does_not_actuate():assert SorterInterlock().stage(req())['hardware_command_emitted'] is False
-def test_staged_no_confirmation():assert SorterInterlock().stage(req())['status']=='STAGED_ONLY'
+def req(**kw):return RouteRequest(**{'action_id':'a1','specimen_id':'p1','bin':'HOLD','decision':'HOLD',**kw})
+def test_stage_does_not_actuate():assert SorterInterlock().stage(req(),'human')['hardware_command_emitted'] is False
+def test_staged_no_confirmation():assert SorterInterlock().stage(req(),'human')['status']=='STAGED_ONLY'
 def test_no_operator():
-    with pytest.raises(PermissionError):SorterInterlock().stage(req(approved=False))
-def test_no_synthetic_route():
-    with pytest.raises(PermissionError):SorterInterlock().stage(req(origin='SIMULATED'))
+    with pytest.raises(PermissionError):SorterInterlock().stage(req(),'')
+def test_no_synthetic_route():  # the evidence gate (api.evidence_gate reads ledger tiers) can veto any route
+    with pytest.raises(PermissionError):SorterInterlock(evidence_gate=lambda r:['SIMULATED evidence']).stage(req(),'human')
 def test_no_unapproved_pass():
-    with pytest.raises(PermissionError):SorterInterlock().stage(req(bin='PASS'))
+    with pytest.raises(PermissionError):SorterInterlock(evidence_gate=lambda r:[]).stage(req(bin='PASS'),'human')
 def test_no_unconfirmed_reject():
-    with pytest.raises(PermissionError):SorterInterlock().stage(req(bin='REJECT'))
+    with pytest.raises(PermissionError):SorterInterlock(evidence_gate=lambda r:[]).stage(req(bin='REJECT'),'human')
+def test_pass_refused_without_evidence_gate():
+    with pytest.raises(PermissionError,match='evidence gate'):SorterInterlock().stage(req(bin='PASS',decision='AUTHORIZED_PASS'),'human')
 def test_physical_ack_and_dedup():
-    s=SorterInterlock();s.stage(req());assert s.acknowledge('a1','HOLD','beam-1')['status']=='PHYSICAL_ROUTE_CONFIRMED'
+    s=SorterInterlock();s.stage(req(),'human');assert s.acknowledge('a1','HOLD','beam-1')['status']=='PHYSICAL_ROUTE_CONFIRMED'
     assert s.acknowledge('a1','HOLD','beam-1')['status']=='DUPLICATE_ACK_IGNORED'
 def test_misroute_detected():
-    s=SorterInterlock();s.stage(req())
+    s=SorterInterlock();s.stage(req(),'human')
     with pytest.raises(ValueError):s.acknowledge('a1','PASS','beam')
 def test_21_roles():assert len(ROLES)==21
 def test_role_selection_bounded():assert 1<=len(plan_roles(True,True,7))<=7

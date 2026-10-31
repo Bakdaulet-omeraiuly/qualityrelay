@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-from qualityrelay17.economics import Costs
 from qualityrelay17.sim import charts
 from qualityrelay17.sim.cad import cad_catalogue, nominal_design, calibrate_from_caliper, adapter_status
 from qualityrelay17.sim.des import Env

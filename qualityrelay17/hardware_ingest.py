@@ -4,10 +4,9 @@ Calibration constants below are placeholders for a specific potentiometer/photor
 wiring. Measure your own ADC-to-mm curve and repeatability before trusting these numbers
 -- see docs/engineering/PHYSICAL_TEST_PLAYBOOK.md for the exact procedure.
 
-Origin is PHYSICAL_CAPTURE by default: promotion to VERIFIED_PHYSICAL still requires the
-calibration_id + independent human review that the existing evidence-tier rules call for
-(STATUS_AND_GATES.md: 'No tiers may be silently promoted'). This module does not promote
-anything on its own.
+Origin is always PHYSICAL_CAPTURE: this module never promotes anything. VERIFIED_PHYSICAL is
+derived later, and only for station-authenticated, calibrated readings with an agreeing recorded
+human/instrument check (verification.py, BACK-02; GROUND_TRUTH_VERIFICATION_PROCEDURE.md).
 
 Boundary (decided 31 Oct, TOMORROW_TASKS item 2): this module is a pure transform --
 raw payload in, signed Evidence out, no I/O, no state. It deliberately does NOT append to

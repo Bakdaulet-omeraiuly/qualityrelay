@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """I1/I6: closed-loop printer correction vs none (docs/research/INNOVATIONS_REGISTRATION_31OCT.md)."""
 from __future__ import annotations
-import json, subprocess, sys, time
+import json, subprocess, sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from statistics import mean

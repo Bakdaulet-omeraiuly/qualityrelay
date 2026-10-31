@@ -1,0 +1,712 @@
+{
+  "manifest_version": 1,
+  "release": "18.1",
+  "reviewed_on": "2026-10-31",
+  "reviewed_by": "adilnurgg",
+  "policy": "Nothing third-party is bundled: packages are installed from PyPI, components are separately installed or called services. Licence summaries are not legal advice. Statuses: WORKING = ran on its real backend outside unit tests, with a committed run artifact; TESTED = wired and exercised by CI tests with offline stand-ins, never against the live thing; NOT_CONFIGURED = not wired, not installed, or no credentials/hardware. Verified by scripts/check_dependencies.py; see docs/engineering/DEPENDENCIES_AND_ADAPTERS.md.",
+  "python_packages": [
+    {
+      "name": "fastapi",
+      "requirement": ">=0.115,<1",
+      "pinned": "0.162.0",
+      "license": "MIT",
+      "license_metadata": "MIT",
+      "upstream": "https://github.com/fastapi/fastapi",
+      "used_by": "qualityrelay17/api.py"
+    },
+    {
+      "name": "uvicorn",
+      "requirement": ">=0.30,<1",
+      "pinned": "0.54.0",
+      "license": "BSD-3-Clause",
+      "license_metadata": "BSD-3-Clause",
+      "upstream": "https://github.com/encode/uvicorn",
+      "used_by": "API server"
+    },
+    {
+      "name": "pytest",
+      "requirement": ">=8,<10",
+      "pinned": "9.2.0",
+      "license": "MIT",
+      "license_metadata": "MIT",
+      "upstream": "https://github.com/pytest-dev/pytest",
+      "used_by": "tests/"
+    },
+    {
+      "name": "pydantic",
+      "requirement": ">=2,<3",
+      "pinned": "2.14.2",
+      "license": "MIT",
+      "license_metadata": "MIT",
+      "upstream": "https://github.com/pydantic/pydantic",
+      "used_by": "API request models"
+    },
+    {
+      "name": "numpy",
+      "requirement": ">=2,<3",
+      "pinned": "2.4.6",
+      "license": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "license_metadata": "BSD-3-Clause AND 0BSD AND MIT AND Zlib AND CC0-1.0",
+      "upstream": "https://github.com/numpy/numpy",
+      "used_by": "simulation, vision, Warp MC"
+    },
+    {
+      "name": "scipy",
+      "requirement": ">=1,<2",
+      "pinned": "1.17.1",
+      "license": "BSD-3-Clause",
+      "license_metadata": "BSD",
+      "upstream": "https://github.com/scipy/scipy",
+      "used_by": "statistics, sim/optimization.py"
+    },
+    {
+      "name": "opencv-python-headless",
+      "requirement": ">=4.10,<5",
+      "pinned": "4.14.0.94",
+      "license": "Apache-2.0",
+      "license_metadata": "Apache 2.0",
+      "upstream": "https://github.com/opencv/opencv-python",
+      "used_by": "vision.py, vision_measure.py, inspection_visuals.py"
+    },
+    {
+      "name": "trimesh",
+      "requirement": ">=4,<6",
+      "pinned": "5.2.0",
+      "license": "MIT",
+      "license_metadata": "MIT",
+      "upstream": "https://github.com/mikedh/trimesh",
+      "used_by": "sim/cad.py, digital_twin.py"
+    },
+    {
+      "name": "networkx",
+      "requirement": ">=3,<4",
+      "pinned": "3.6.1",
+      "license": "BSD-3-Clause",
+      "license_metadata": "BSD-3-Clause",
+      "upstream": "https://github.com/networkx/networkx",
+      "used_by": "trimesh mesh.section() in sim/cad.py (undeclared trimesh dependency, found by REL-03 clean-lock install)"
+    },
+    {
+      "name": "openai",
+      "requirement": ">=1,<3",
+      "pinned": "2.54.0",
+      "license": "Apache-2.0",
+      "license_metadata": "Apache-2.0",
+      "upstream": "https://github.com/openai/openai-python",
+      "used_by": "collective/llm_planner.py, llm_entitlement.py, nebius.py (OpenAI-compatible client, also for Nebius)"
+    },
+    {
+      "name": "ruff",
+      "requirement": "==0.17.3",
+      "pinned": "0.17.3",
+      "license": "MIT",
+      "license_metadata": "MIT",
+      "upstream": "https://github.com/astral-sh/ruff",
+      "used_by": "CI lint"
+    },
+    {
+      "name": "mypy",
+      "requirement": "==2.4.1",
+      "pinned": "2.4.1",
+      "license": "MIT",
+      "license_metadata": "MIT",
+      "upstream": "https://github.com/python/mypy",
+      "used_by": "CI types"
+    },
+    {
+      "name": "bandit",
+      "requirement": "==1.9.4",
+      "pinned": "1.9.4",
+      "license": "Apache-2.0",
+      "license_metadata": "Apache-2.0",
+      "upstream": "https://github.com/PyCQA/bandit",
+      "used_by": "CI security"
+    },
+    {
+      "name": "pip-audit",
+      "requirement": "==2.10.1",
+      "pinned": "2.10.1",
+      "license": "Apache-2.0",
+      "license_metadata": "Apache-2.0",
+      "upstream": "https://github.com/pypa/pip-audit",
+      "used_by": "CI security"
+    },
+    {
+      "name": "jsonschema",
+      "requirement": "==4.26.0",
+      "pinned": "4.26.0",
+      "license": "MIT",
+      "license_metadata": "MIT",
+      "upstream": "https://github.com/python-jsonschema/jsonschema",
+      "used_by": "CI schemas, this manifest's schema"
+    },
+    {
+      "name": "packaging",
+      "requirement": ">=24",
+      "pinned": "26.3",
+      "license": "Apache-2.0 OR BSD-2-Clause",
+      "license_metadata": "Apache-2.0 OR BSD-2-Clause",
+      "upstream": "https://github.com/pypa/packaging",
+      "used_by": "scripts/check_dependencies.py"
+    },
+    {
+      "name": "warp-lang",
+      "requirement": ">=1.5,<2",
+      "pinned": "1.18.0",
+      "license": "Apache-2.0",
+      "license_metadata": "Apache-2.0",
+      "upstream": "https://github.com/NVIDIA/warp",
+      "used_by": "gpu/warp_mc.py (CPU in CI; the Linux wheel also carries CUDA)"
+    },
+    {
+      "name": "simpy",
+      "requirement": ">=4,<5",
+      "pinned": null,
+      "license": "MIT",
+      "license_metadata": null,
+      "upstream": "https://gitlab.com/team-simpy/simpy",
+      "used_by": "optional; not imported by the package (sim/des.py is our own engine)"
+    },
+    {
+      "name": "torch",
+      "requirement": ">=2.4,<3",
+      "pinned": null,
+      "license": "BSD-3-Clause",
+      "license_metadata": null,
+      "upstream": "https://github.com/pytorch/pytorch",
+      "used_by": "optional GPU env: anomaly.py / scripts/train_anomaly.py"
+    },
+    {
+      "name": "torchvision",
+      "requirement": ">=0.19,<1",
+      "pinned": null,
+      "license": "BSD-3-Clause",
+      "license_metadata": null,
+      "upstream": "https://github.com/pytorch/vision",
+      "used_by": "optional GPU env: anomaly.py (ImageNet teacher weights have their own terms)"
+    },
+    {
+      "name": "onnx",
+      "requirement": ">=1.16,<2",
+      "pinned": null,
+      "license": "Apache-2.0",
+      "license_metadata": null,
+      "upstream": "https://github.com/onnx/onnx",
+      "used_by": "optional GPU env: export inspection"
+    },
+    {
+      "name": "supervision",
+      "requirement": ">=0.28,<1",
+      "pinned": null,
+      "license": "MIT",
+      "license_metadata": null,
+      "upstream": "https://github.com/roboflow/supervision",
+      "used_by": "optional renderer in inspection_visuals.py"
+    }
+  ],
+  "transitive_license_review": [],
+  "upstream_components": [
+    {
+      "id": "cadquery",
+      "name": "CadQuery",
+      "kind": "repo",
+      "url": "https://github.com/CadQuery/cadquery",
+      "license": "Apache-2.0",
+      "license_review": "reviewed",
+      "revision": null,
+      "bundled": false,
+      "notes": "OCCT dependencies to verify on install"
+    },
+    {
+      "id": "factorysimpy",
+      "name": "FactorySimPy",
+      "kind": "repo",
+      "url": "https://github.com/FactorySimPy/FactorySimPy",
+      "license": "MIT",
+      "license_review": "reviewed",
+      "revision": null,
+      "bundled": false,
+      "notes": "small project; pin a reviewed commit before use"
+    },
+    {
+      "id": "anomalib",
+      "name": "Anomalib",
+      "kind": "repo",
+      "url": "https://github.com/open-edge-platform/anomalib",
+      "license": "Apache-2.0",
+      "license_review": "reviewed",
+      "revision": null,
+      "bundled": false,
+      "notes": "separate environment; weights and datasets have their own terms"
+    },
+    {
+      "id": "ortools",
+      "name": "Google OR-Tools",
+      "kind": "repo",
+      "url": "https://github.com/google/or-tools",
+      "license": "Apache-2.0 (verify pinned build)",
+      "license_review": "to_verify",
+      "revision": null,
+      "bundled": false,
+      "notes": "CPU matching/scheduling baseline"
+    },
+    {
+      "id": "hailo-model-zoo",
+      "name": "Hailo Model Zoo",
+      "kind": "repo",
+      "url": "https://github.com/hailo-ai/hailo_model_zoo",
+      "license": "verify source, models and toolchain separately",
+      "license_review": "to_verify",
+      "revision": null,
+      "bundled": false,
+      "notes": "Raspberry Pi + Hailo-8L local vision; compatible HEF only"
+    },
+    {
+      "id": "nebius-token-factory",
+      "name": "Nebius AI Studio / Token Factory API",
+      "kind": "service",
+      "url": "https://api.tokenfactory.nebius.com/docs",
+      "license": "service terms of use; per-model licences in the Nebius catalogue",
+      "license_review": "to_verify",
+      "revision": null,
+      "bundled": false,
+      "notes": "OpenAI-compatible endpoint; credits and an API key required"
+    },
+    {
+      "id": "openai-api",
+      "name": "OpenAI API",
+      "kind": "service",
+      "url": "https://platform.openai.com/docs",
+      "license": "service terms of use",
+      "license_review": "to_verify",
+      "revision": null,
+      "bundled": false,
+      "notes": "paid API key required"
+    },
+    {
+      "id": "nvidia-tao",
+      "name": "NVIDIA TAO Toolkit",
+      "kind": "sdk",
+      "url": "https://github.com/NVIDIA-TAO",
+      "license": "Apache-2.0 source; NGC pretrained weights under separate terms",
+      "license_review": "reviewed",
+      "revision": null,
+      "bundled": false,
+      "notes": ""
+    },
+    {
+      "id": "nvidia-cuopt",
+      "name": "NVIDIA cuOpt",
+      "kind": "repo",
+      "url": "https://github.com/NVIDIA/cuopt",
+      "license": "Apache-2.0",
+      "license_review": "reviewed",
+      "revision": null,
+      "bundled": false,
+      "notes": "supported CUDA GPU required"
+    },
+    {
+      "id": "isaac-sim",
+      "name": "NVIDIA Isaac Sim",
+      "kind": "sdk",
+      "url": "https://github.com/isaac-sim/IsaacSim",
+      "license": "Apache-2.0 source; Omniverse Kit and assets under separate terms",
+      "license_review": "reviewed",
+      "revision": null,
+      "bundled": false,
+      "notes": "needs an RTX (RT-core) GPU, not H100; redistribution caveats"
+    },
+    {
+      "id": "replicator",
+      "name": "NVIDIA Omniverse Replicator",
+      "kind": "sdk",
+      "url": "https://developer.nvidia.com/isaac/sim",
+      "license": "Isaac / Omniverse terms",
+      "license_review": "to_verify",
+      "revision": null,
+      "bundled": false,
+      "notes": ""
+    },
+    {
+      "id": "newton",
+      "name": "Newton Physics",
+      "kind": "repo",
+      "url": "https://github.com/newton-physics/newton",
+      "license": "verify pinned repo and assets",
+      "license_review": "to_verify",
+      "revision": null,
+      "bundled": false,
+      "notes": ""
+    },
+    {
+      "id": "physicsnemo",
+      "name": "NVIDIA PhysicsNeMo",
+      "kind": "repo",
+      "url": "https://github.com/NVIDIA/physicsnemo",
+      "license": "Apache-2.0",
+      "license_review": "reviewed",
+      "revision": null,
+      "bundled": false,
+      "notes": "requires validated FE ground truth"
+    },
+    {
+      "id": "deepstream",
+      "name": "NVIDIA DeepStream",
+      "kind": "sdk",
+      "url": "https://github.com/NVIDIA/DeepStream",
+      "license": "Apache-2.0 source; docs CC-BY-4.0; binaries under the DeepStream SDK EULA",
+      "license_review": "reviewed",
+      "revision": null,
+      "bundled": false,
+      "notes": "Pi/Hailo is not a DeepStream host"
+    },
+    {
+      "id": "cosmos",
+      "name": "NVIDIA Cosmos",
+      "kind": "repo",
+      "url": "https://github.com/NVIDIA/cosmos",
+      "license": "OpenMDW-1.1 (special source/weight terms)",
+      "license_review": "to_verify",
+      "revision": null,
+      "bundled": false,
+      "notes": "never measurement truth"
+    },
+    {
+      "id": "metropolis-vss",
+      "name": "NVIDIA VSS Blueprint",
+      "kind": "repo",
+      "url": "https://github.com/NVIDIA-AI-Blueprints/video-search-and-summarization",
+      "license": "Apache-2.0 with third-party and asset exceptions",
+      "license_review": "to_verify",
+      "revision": null,
+      "bundled": false,
+      "notes": "large GPU/messaging footprint"
+    },
+    {
+      "id": "arduino-esp32",
+      "name": "Arduino core for ESP32 (WiFi, HTTPClient; mbedTLS from ESP-IDF)",
+      "kind": "sdk",
+      "url": "https://github.com/espressif/arduino-esp32",
+      "license": "LGPL-2.1 core; ESP-IDF / mbedTLS Apache-2.0 (verify against the pinned core release)",
+      "license_review": "to_verify",
+      "revision": null,
+      "bundled": false,
+      "notes": "firmware/esp32_station/*.ino is compiled against it; the core is not in this repo"
+    },
+    {
+      "id": "google-cloud",
+      "name": "Google Cloud",
+      "kind": "service",
+      "url": "https://cloud.google.com/terms",
+      "license": "service terms of use",
+      "license_review": "to_verify",
+      "revision": null,
+      "bundled": false,
+      "notes": "CLOUD-01 deployment target"
+    },
+    {
+      "id": "mvtec-ad",
+      "name": "MVTec AD dataset",
+      "kind": "dataset",
+      "url": "https://www.mvtec.com/research-teaching/datasets/mvtec-ad",
+      "license": "CC-BY-NC-SA-4.0 (non-commercial)",
+      "license_review": "reviewed",
+      "revision": null,
+      "bundled": false,
+      "notes": "academic comparison only; never in a commercial product or training set"
+    }
+  ],
+  "adapters": [
+    {
+      "id": "nvidia.warp",
+      "provider": "NVIDIA",
+      "capability": "Warp kernels for rare-event Monte Carlo of the paired policy comparison",
+      "upstream": "warp-lang",
+      "status": "WORKING",
+      "scope": "CPU backend only (warp 1.18.0, macOS arm64, 31 Oct). Never run on a CUDA GPU. Results are SIMULATED.",
+      "origin": "SIMULATED",
+      "requires_packages": [
+        "warp-lang"
+      ],
+      "evidence": {
+        "tests": [
+          "tests/test_warp_mc.py"
+        ],
+        "artifacts": [
+          "examples/results/warp_mc/cpu/manifest.json"
+        ]
+      }
+    },
+    {
+      "id": "nvidia.newton",
+      "provider": "NVIDIA",
+      "capability": "Newton physics contact model for the sorter (plan slot 'Warp/Newton')",
+      "upstream": "newton",
+      "status": "NOT_CONFIGURED",
+      "scope": "Not integrated. Warp is used only for Monte Carlo, not physics.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "nvidia.cuopt",
+      "provider": "NVIDIA",
+      "capability": "GPU decision optimisation",
+      "upstream": "nvidia-cuopt",
+      "status": "NOT_CONFIGURED",
+      "scope": "sim/optimization.py reports whether it is installed; no code path calls it.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "nvidia.isaac_sim",
+      "provider": "NVIDIA",
+      "capability": "3D sorter/camera scene",
+      "upstream": "isaac-sim",
+      "status": "NOT_CONFIGURED",
+      "scope": "Not integrated.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "nvidia.replicator",
+      "provider": "NVIDIA",
+      "capability": "Synthetic labelled defect/lighting images",
+      "upstream": "replicator",
+      "status": "NOT_CONFIGURED",
+      "scope": "Not integrated.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "nvidia.physicsnemo",
+      "provider": "NVIDIA",
+      "capability": "Physics-ML surrogate",
+      "upstream": "physicsnemo",
+      "status": "NOT_CONFIGURED",
+      "scope": "Not integrated.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "nvidia.deepstream",
+      "provider": "NVIDIA",
+      "capability": "Multi-stream GPU video tracking",
+      "upstream": "deepstream",
+      "status": "NOT_CONFIGURED",
+      "scope": "Not integrated.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "nvidia.cosmos",
+      "provider": "NVIDIA",
+      "capability": "Robustness image/video generation",
+      "upstream": "cosmos",
+      "status": "NOT_CONFIGURED",
+      "scope": "Not integrated.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "nvidia.metropolis_vss",
+      "provider": "NVIDIA",
+      "capability": "Video search and incident summarisation",
+      "upstream": "metropolis-vss",
+      "status": "NOT_CONFIGURED",
+      "scope": "Not integrated.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "llm.openai_planner",
+      "provider": "OpenAI",
+      "capability": "LLM evidence-request planner on the signed peer bus",
+      "upstream": "openai-api",
+      "status": "TESTED",
+      "scope": "Planner logic, schema validation and spend guards tested with a fake client. The live smoke test is opt-in (RUN_LIVE_LLM=1) and no live run is recorded.",
+      "origin": "TEST_FIXTURE",
+      "requires_packages": [
+        "openai"
+      ],
+      "evidence": {
+        "tests": [
+          "tests/test_collective_llm_planner.py",
+          "tests/test_llm_gate_b.py"
+        ]
+      }
+    },
+    {
+      "id": "llm.nebius_planner",
+      "provider": "Nebius",
+      "capability": "Same planner via the Nebius OpenAI-compatible endpoint",
+      "upstream": "nebius-token-factory",
+      "status": "TESTED",
+      "scope": "Shares the fake-client-tested planner; the Nebius factory is tested for NOT_CONFIGURED behaviour and key redaction. No live call has been made (LLM-01 pending a key).",
+      "origin": "TEST_FIXTURE",
+      "requires_packages": [
+        "openai"
+      ],
+      "evidence": {
+        "tests": [
+          "tests/test_llm_gate_b.py",
+          "tests/test_collective_llm_planner.py"
+        ]
+      }
+    },
+    {
+      "id": "llm.nebius_entitlement",
+      "provider": "Nebius",
+      "capability": "LLM-01 key/model entitlement probe",
+      "upstream": "nebius-token-factory",
+      "status": "TESTED",
+      "scope": "Probe logic tested with a fake client; never run against the live API.",
+      "origin": "TEST_FIXTURE",
+      "requires_packages": [
+        "openai"
+      ],
+      "evidence": {
+        "tests": [
+          "tests/test_llm_entitlement.py"
+        ]
+      }
+    },
+    {
+      "id": "hardware.esp32_station",
+      "provider": "Espressif",
+      "capability": "Signed station evidence ingest (per-device HMAC keys)",
+      "upstream": "arduino-esp32",
+      "status": "TESTED",
+      "scope": "Server-side verification tested with fixture requests. The E12/E13 rehearsal artifacts are simulate-mode TEST_FIXTURE. The firmware has not been run against a live server.",
+      "origin": "TEST_FIXTURE",
+      "requires_packages": [],
+      "evidence": {
+        "tests": [
+          "tests/test_station_auth.py",
+          "tests/test_hardware_ingest.py"
+        ],
+        "artifacts": []
+      }
+    },
+    {
+      "id": "hardware.esp32_sorter",
+      "provider": "Espressif",
+      "capability": "Staged sorter dispatch with bin-sensor ACK binding",
+      "upstream": "arduino-esp32",
+      "status": "TESTED",
+      "scope": "Interlock, binding and fault latching tested in software. No physical sorter exists yet (PHY-04).",
+      "origin": "TEST_FIXTURE",
+      "requires_packages": [],
+      "evidence": {
+        "tests": [
+          "tests/test_actuation_safety.py",
+          "tests/test_actuation_sensor_wiring.py"
+        ]
+      }
+    },
+    {
+      "id": "camera.pi_hailo",
+      "provider": "Hailo",
+      "capability": "Independent Raspberry Pi + Hailo-8L capture/inference",
+      "upstream": "hailo-model-zoo",
+      "status": "NOT_CONFIGURED",
+      "scope": "No Pi capture or Hailo inference code is wired.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "vision.anomaly_stfpm",
+      "provider": "PyTorch",
+      "capability": "STFPM anomaly detector (anomaly.py / scripts/train_anomaly.py)",
+      "upstream": "torch",
+      "status": "NOT_CONFIGURED",
+      "scope": "The training test needs torch, which CI does not install, so it is skipped there. docs/engineering/ANOMALY_MODEL_HANDOFF.md reports L4 runs on 31 Oct, but the run manifests it cites (docs/research/runs/) are not in the repo. Upgrade to WORKING when they are committed.",
+      "origin": "NONE",
+      "requires_packages": [
+        "torch",
+        "torchvision"
+      ],
+      "evidence": {
+        "tests": [
+          "tests/test_anomaly_pipeline.py"
+        ]
+      }
+    },
+    {
+      "id": "vision.tao",
+      "provider": "NVIDIA",
+      "capability": "TAO-trained comparison/anomaly models",
+      "upstream": "nvidia-tao",
+      "status": "NOT_CONFIGURED",
+      "scope": "Not integrated.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "vision.anomalib",
+      "provider": "Intel / open-edge-platform",
+      "capability": "PatchCore / EfficientAD baselines",
+      "upstream": "anomalib",
+      "status": "NOT_CONFIGURED",
+      "scope": "Not integrated; anomaly maps can be imported as .npy via scripts/inspect_visual.py.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "vision.supervision_renderer",
+      "provider": "Roboflow",
+      "capability": "Optional bounding-box renderer",
+      "upstream": "supervision",
+      "status": "NOT_CONFIGURED",
+      "scope": "Code path exists in inspection_visuals.py but no test exercises it and CI does not install it.",
+      "origin": "NONE",
+      "requires_packages": [
+        "supervision"
+      ],
+      "evidence": {}
+    },
+    {
+      "id": "optimization.ortools",
+      "provider": "Google",
+      "capability": "CPU matching/scheduling baseline",
+      "upstream": "ortools",
+      "status": "NOT_CONFIGURED",
+      "scope": "SciPy is the wired baseline; OR-Tools is only detected.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "sim.factorysimpy",
+      "provider": "FactorySimPy",
+      "capability": "Machines/buffers/conveyors DES library",
+      "upstream": "factorysimpy",
+      "status": "NOT_CONFIGURED",
+      "scope": "The factory simulator uses its own DES (sim/des.py); SimPy/FactorySimPy are only detected.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    },
+    {
+      "id": "cloud.gcp",
+      "provider": "Google",
+      "capability": "Hosted API/web deployment",
+      "upstream": "google-cloud",
+      "status": "NOT_CONFIGURED",
+      "scope": "CLOUD-01 open; nothing is deployed.",
+      "origin": "NONE",
+      "requires_packages": [],
+      "evidence": {}
+    }
+  ]
+}

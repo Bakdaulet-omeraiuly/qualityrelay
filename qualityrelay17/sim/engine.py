@@ -223,7 +223,7 @@ class Factory:
                 self.env.process(self.part(p, site))
 
     def part(self, p, site):
-        sc, m = self.sc, self.model
+        sc = self.sc
         yield ('timeout', self._svc(f'tr:{p["part_id"]}', sc.transport_s))
         line = p['line']
         obs = {}

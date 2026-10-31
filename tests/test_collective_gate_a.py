@@ -2,14 +2,12 @@
 import json
 from dataclasses import replace
 
-import pytest
 
 from qualityrelay17.economics import Costs
 from qualityrelay17.factory import seeded_scenario, apply_policy
-from qualityrelay17.experiments.belief import (calibrate_belief_model, belief_from, lookahead_value, p_unsafe,
-                                               hold_threshold)
+from qualityrelay17.experiments.belief import (calibrate_belief_model, belief_from, lookahead_value)
 from qualityrelay17.experiments.collective_env import CollectiveScenario, CollectiveEnv, make_cases
-from qualityrelay17.experiments.collective_baselines import POLICIES, gate_reasons, B5_structured_fixed, B7_safe_mesh_voi
+from qualityrelay17.experiments.collective_baselines import POLICIES, gate_reasons
 from qualityrelay17.experiments.collective_eval import run_seed
 
 MODEL = calibrate_belief_model(n=300)

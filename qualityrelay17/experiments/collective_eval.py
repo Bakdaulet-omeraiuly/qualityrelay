@@ -28,10 +28,11 @@ SAFETY_MARGIN = 0.001       # unsafe-pass rate, absolute
 THROUGHPUT_MARGIN = -0.01   # released-good rate, absolute
 
 
-def run_seed(sc: CollectiveScenario, seed: int, n: int, model: BeliefModel, *, keep_traces=0):
+def run_seed(sc: CollectiveScenario, seed: int, n: int, model: BeliefModel, *, keep_traces=0, policies=None):
+    """`policies` defaults to the registered POLICIES; Gate B passes extra (LLM) policies here."""
     cases = make_cases(n, seed, sc)
     out = {}
-    for name, policy in POLICIES.items():
+    for name, policy in (POLICIES if policies is None else policies).items():
         recs, traces = [], []
         for i, case in enumerate(cases):
             env = CollectiveEnv(case, run_id=f'{sc.sid}/s{seed}/{name}')
@@ -67,7 +68,7 @@ def run_seed(sc: CollectiveScenario, seed: int, n: int, model: BeliefModel, *, k
     return out
 
 
-def summarise(sc: CollectiveScenario, per_seed: dict, n: int):
+def summarise(sc: CollectiveScenario, per_seed: dict, n: int, *, contrasts=CONTRASTS):
     summary = {}
     for name, recs in per_seed.items():
         tot = len(recs) * n
@@ -101,33 +102,35 @@ def summarise(sc: CollectiveScenario, per_seed: dict, n: int):
             duplicate_evidence_received_per_part=sum(r['duplicates_received'] for r in recs) / tot,
             hard_gate_triggered_rate=sum(r['hard_gate_triggered'] for r in recs) / tot,
         )
-    contrasts = []
-    for a, b, q in CONTRASTS:
+    contrast_rows = []
+    for a, b, q in contrasts:
         pairs = list(zip(per_seed[a], per_seed[b]))
         cost_d = [(x['cost'] - y['cost']) / n for x, y in pairs]
         unsafe_d = [(x['unsafe_pass'] - y['unsafe_pass']) / n for x, y in pairs]
         good_d = [(x['released_good'] - y['released_good']) / n for x, y in pairs]
         uc, cc, gc = (paired_cluster_bootstrap_ci(d) for d in (unsafe_d, cost_d, good_d))
-        contrasts.append(dict(
+        contrast_rows.append(dict(
             a=a, b=b, question=q,
             cost_per_unit_diff=mean(cost_d), cost_per_unit_diff_ci95=cc,
             unsafe_pass_rate_diff=mean(unsafe_d), unsafe_pass_rate_diff_ci95=uc,
             released_good_rate_diff=mean(good_d), released_good_rate_diff_ci95=gc,
             verdict=dict(non_inferior_on_safety=uc[1] <= SAFETY_MARGIN, cheaper=cc[1] < 0,
                          throughput_preserved=gc[0] >= THROUGHPUT_MARGIN)))
-    return summary, contrasts
+    return summary, contrast_rows
 
 
-def run_scenario(sc: CollectiveScenario, model: BeliefModel, *, seeds=range(30), n=1000, keep_traces=0):
-    per_seed = {name: [] for name in POLICIES}
+def run_scenario(sc: CollectiveScenario, model: BeliefModel, *, seeds=range(30), n=1000, keep_traces=0,
+                 policies=None, contrasts=CONTRASTS):
+    policies = POLICIES if policies is None else policies
+    per_seed: dict[str, list] = {name: [] for name in policies}
     traces = {}
     for seed in seeds:
-        res = run_seed(sc, int(seed), n, model, keep_traces=keep_traces if seed == min(seeds) else 0)
+        res = run_seed(sc, int(seed), n, model, keep_traces=keep_traces if seed == min(seeds) else 0, policies=policies)
         for name, (m, tr) in res.items():
             per_seed[name].append(m)
             if tr:
                 traces[name] = tr
-    summary, contrasts = summarise(sc, per_seed, n)
+    summary, contrasts = summarise(sc, per_seed, n, contrasts=contrasts)
     return dict(origin='SIMULATED', scenario=sc.as_dict(), seeds=[int(s) for s in seeds], n_per_seed=n,
                 belief_model=model.as_dict(), not_configured=NOT_CONFIGURED,
                 summary=summary, contrasts=contrasts, per_seed=per_seed), traces

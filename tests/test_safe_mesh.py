@@ -1,4 +1,3 @@
-import pytest
 from dataclasses import replace
 from qualityrelay17.demo import example_evidence
 from qualityrelay17.contracts import sign_evidence

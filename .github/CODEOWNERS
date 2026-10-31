@@ -1,0 +1,68 @@
+# REL-02 ownership (QUALITYRELAY_18_1_TEAM_TASKS_EN.md §0 and §7). Last matching rule wins.
+# Ownership does not move when modules meet; a code-owner review is required on every PR.
+# Safety-critical paths (bottom block) list every owner, so a non-author owner can review; the
+# `safety-review-gate` check additionally requires TWO non-author approvals on them.
+
+*                                   @adilnurgg
+
+# Bakdaulet: research, vision, ALL simulation / digital factory, benchmarks, ROI
+/qualityrelay17/sim/                @Bakdaulet-omeraiuly
+/qualityrelay17/experiments/        @Bakdaulet-omeraiuly
+/qualityrelay17/gpu/                @Bakdaulet-omeraiuly
+/qualityrelay17/digital_twin.py     @Bakdaulet-omeraiuly
+/qualityrelay17/digital_line.py     @Bakdaulet-omeraiuly
+/qualityrelay17/factory.py          @Bakdaulet-omeraiuly
+/qualityrelay17/benchmark.py        @Bakdaulet-omeraiuly
+/qualityrelay17/economics.py        @Bakdaulet-omeraiuly
+/qualityrelay17/vder.py             @Bakdaulet-omeraiuly
+/qualityrelay17/anomaly.py          @Bakdaulet-omeraiuly
+/qualityrelay17/vision_measure.py   @Bakdaulet-omeraiuly
+/qualityrelay17/inspection_visuals.py @Bakdaulet-omeraiuly
+/qualityrelay17/calibration.py      @Bakdaulet-omeraiuly
+/docs/research/                     @Bakdaulet-omeraiuly
+/examples/results/                  @Bakdaulet-omeraiuly
+
+# HyorinmaruK: physical bench, CAD/STL, firmware, slides
+/examples/cad/                      @HyorinmaruK
+/examples/physical/                 @HyorinmaruK
+/slides/                            @HyorinmaruK
+
+# adilnurgg: backend, agents, security, web, cloud, CI (also the default above)
+/qualityrelay17/collective/         @adilnurgg
+/web/                               @adilnurgg
+/schemas/                           @adilnurgg
+/docs/engineering/                  @adilnurgg
+
+# ---- safety-critical: keep in sync with .github/safety-paths.txt (tests/test_ci_policy.py) ----
+/qualityrelay17/actuation.py        @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/hardware_ingest.py  @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/firmware/                          @HyorinmaruK @adilnurgg @Bakdaulet-omeraiuly
+/qualityrelay17/station_auth.py     @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/operator_auth.py    @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/contracts.py        @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/roles.py            @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/llm_entitlement.py  @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/scripts/provision_station_keys.py  @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/ledger.py           @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/verification.py     @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/safe_mesh.py        @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/collective/peer_protocol.py @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/collective/messages.py @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/qualityrelay17/api.py              @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/schemas/evidence_event.schema.json @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/schemas/agent_message_v17_1.schema.json @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_actuation_safety.py     @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_actuation_sensor_wiring.py @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_actuation_agents_vision.py @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_station_auth.py         @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_operator_auth.py        @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_contracts.py            @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_collective_acl.py       @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_collective_messages.py  @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_verified_evidence_ledger.py @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_safe_mesh.py            @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/tests/test_ci_policy.py            @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/.github/                           @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/pyproject.toml                     @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/requirements-dev.txt               @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly
+/requirements-lock.txt              @adilnurgg @HyorinmaruK @Bakdaulet-omeraiuly

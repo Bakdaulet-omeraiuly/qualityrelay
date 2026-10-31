@@ -12,7 +12,7 @@ Message and evidence records use the shared integration-contract field names
 a physical device -- the authenticated transport is adilnurgg's AGENT-01/BACK-01.
 """
 from __future__ import annotations
-from dataclasses import dataclass, field, asdict, replace
+from dataclasses import dataclass, field, asdict
 from random import Random
 
 from ..economics import Costs

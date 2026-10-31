@@ -42,7 +42,8 @@ def evaluate(specimen_id: str, records:list[Evidence], keys:dict[str,str], *, no
     else:
         x=met[0]
         if not x.payload.get('validated') or x.payload.get('unit')!='mm': reasons.append('UNVERIFIED_METROLOGY')
-        if not isinstance(x.payload.get('measurement_mm'),(int,float)) or not isinstance(x.payload.get('uncertainty_mm'),(int,float)) or x.payload.get('uncertainty_mm')<0:
+        u=x.payload.get('uncertainty_mm')
+        if not isinstance(x.payload.get('measurement_mm'),(int,float)) or not isinstance(u,(int,float)) or u<0:
             reasons.append('INVALID_METROLOGY')
     assembly=[x for x in trusted if x.kind=='ASSEMBLY']
     if require_assembly and len(assembly)!=1:reasons.append('MISSING_ASSEMBLY')

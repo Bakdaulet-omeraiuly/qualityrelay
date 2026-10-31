@@ -28,6 +28,8 @@ def test_reference_not_superior_when_identical_decisions():
 def test_wilson():
     lo,hi=wilson_interval(0,100);assert lo==0 and hi>0
 
-def test_eight_nvidia_stubs_not_misrepresented():
-    assert len(NVIDIA_ADAPTERS)==8
-    assert all(x.health().state=='NOT_CONFIGURED' for x in NVIDIA_ADAPTERS.values())
+def test_nvidia_slots_not_misrepresented():
+    # the eight plan slots, with 'Warp/Newton' split because only Warp is used (REL-03)
+    assert set(NVIDIA_ADAPTERS)=={'warp','newton','cuopt','isaac_sim','replicator','physicsnemo','deepstream','cosmos','metropolis_vss'}
+    live={k:x.health() for k,x in NVIDIA_ADAPTERS.items() if x.health().state!='NOT_CONFIGURED'}
+    assert set(live)=={'warp'} and 'CPU backend only' in live['warp'].scope and 'Never run on a CUDA GPU' in live['warp'].scope

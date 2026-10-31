@@ -8,7 +8,7 @@ see tests/test_scientific_engine.py). Rationale and registered protocol:
 docs/research/PROTOCOL_REGISTRATION_31OCT.md.
 """
 from __future__ import annotations
-import random, math
+import random
 from functools import lru_cache
 from .calibration import Likelihoods, estimate_likelihoods
 from .economics import Costs

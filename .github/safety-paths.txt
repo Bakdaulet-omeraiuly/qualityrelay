@@ -1,0 +1,58 @@
+# REL-02: safety / auth / actuation paths. A PR touching any of these needs TWO approvals from
+# people other than the author, on the PR's latest commit (enforced by the `safety-review-gate`
+# check, .github/workflows/review-gate.yml). Task board release policy: no single person may
+# self-merge safety-critical changes.
+#
+# One entry per line: an exact repo-relative file, or a directory prefix ending in `/`.
+# Every entry must also appear in .github/CODEOWNERS (tests/test_ci_policy.py checks this).
+# This file is itself safety-critical: weakening the list needs the same two reviews.
+
+# physical actuation and the hardware boundary
+qualityrelay17/actuation.py
+qualityrelay17/hardware_ingest.py
+firmware/
+
+# authentication, keys, signatures, ACL
+qualityrelay17/station_auth.py
+qualityrelay17/operator_auth.py
+qualityrelay17/contracts.py
+qualityrelay17/roles.py
+qualityrelay17/llm_entitlement.py
+scripts/provision_station_keys.py
+
+# evidence integrity and the safety decision
+qualityrelay17/ledger.py
+qualityrelay17/verification.py
+qualityrelay17/safe_mesh.py
+
+# signed agent-message bus
+qualityrelay17/collective/peer_protocol.py
+qualityrelay17/collective/messages.py
+
+# HTTP surface that wires auth to actuation
+qualityrelay17/api.py
+
+# contracts
+schemas/evidence_event.schema.json
+schemas/agent_message_v17_1.schema.json
+
+# the tests that pin the above (weakening a test is a safety change)
+tests/test_actuation_safety.py
+tests/test_actuation_sensor_wiring.py
+tests/test_actuation_agents_vision.py
+tests/test_station_auth.py
+tests/test_operator_auth.py
+tests/test_contracts.py
+tests/test_collective_acl.py
+tests/test_collective_messages.py
+tests/test_verified_evidence_ledger.py
+tests/test_safe_mesh.py
+tests/test_ci_policy.py
+
+# CI and review rules themselves (otherwise the gate can be switched off in one PR)
+.github/
+pyproject.toml
+requirements-dev.txt
+
+# supply chain: what CI and deployments actually install (REL-03)
+requirements-lock.txt

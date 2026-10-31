@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from qualityrelay17.vder import (Inspection, action_scores, combined_defect_probability,
-                                 two_axis_action_scores, risk, entropy)
+                                 two_axis_action_scores, risk)
 from qualityrelay17.calibration import estimate_likelihoods, Likelihoods
 from qualityrelay17.factory import (seeded_scenario, apply_policy, compare_policies,
                                     LIKELIHOODS_PLACEHOLDER_17_0, POLICIES)

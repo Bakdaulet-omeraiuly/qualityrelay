@@ -20,18 +20,52 @@
 </head>
 <body>
 <header class="appbar">
-  <a class="brand" href="#lab" aria-label="QualityRelay Studio">
+  <a class="brand" href="#physical" aria-label="QualityRelay Studio">
     <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true"><path d="M16 2 29 9.5v13L16 30 3 22.5v-13z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 16.5l4 4 8-9" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     QualityRelay <span>Studio</span>
   </a>
   <nav class="tabs" role="tablist">
-    <a href="#lab" data-view="lab">3D Lab</a><a href="#parts" data-view="parts">Parts</a>
-    <a href="#results" data-view="results">Results</a><a href="#science" data-view="science">Science</a><a href="#claims" data-view="claims">Claims</a>
+    <a href="#physical" data-family="physical">Live Physical Inspection</a>
+    <a href="#sim" data-family="sim">Digital Factory Simulation</a>
+    <a href="#agents" data-family="agents">Agent Collaboration &amp; Benchmark</a>
+    <a href="#claims" data-family="claims" class="minor">Claims</a>
   </nav>
   <div class="context" id="context">—</div>
-  <span class="tier" title="Every number in this studio comes from simulation, not from a factory">SIMULATED</span>
+  <span class="tier" id="tier">—</span>
   <button class="iconbtn" id="toggleInspector" title="Show / hide inspector (I)" aria-label="Toggle inspector">⟩</button>
 </header>
+<!-- Sub-navigation per family; WEB-01: each family keeps its own source tier, never mixed. -->
+<nav class="subnav" id="subnav-sim" hidden>
+  <a href="#sim" data-view="lab">3D Lab</a><a href="#sim/parts" data-view="parts">Parts (CAD)</a><a href="#sim/results" data-view="results">Results: 15 scenarios</a>
+  <span class="subnote"><b>SIMULATED</b> · synthetic parts, sensor noise and failures. Not a factory measurement.</span>
+</nav>
+<nav class="subnav" id="subnav-agents" hidden>
+  <a href="#agents" data-view="agents">Collaboration trace</a><a href="#agents/benchmark" data-view="science">Benchmark (Gate A · Warp)</a>
+  <span class="subnote"><b>TEST_FIXTURE</b> trace · <b>SIMULATED</b> benchmark lots. Roles are code unless a configured LLM planner is chosen.</span>
+</nav>
+
+<!-- ================= LIVE PHYSICAL INSPECTION ================= -->
+<section class="view page" id="view-physical" hidden>
+  <div class="pagehead"><h1>Live Physical Inspection</h1>
+    <p>Only records from the station-authenticated hardware ledger appear here. No simulator, fixture or agent output is ever listed in this view.
+      A record becomes <b>VERIFIED_PHYSICAL</b> only after a ground-truth check is recorded for it; until then it stays <b>PHYSICAL_CAPTURE</b>.</p></div>
+  <div class="kpis" id="physKpis"></div>
+  <div class="card tablewrap">
+    <div class="cardhead"><h3>Evidence ledger</h3><span class="faint small" id="physUpdated">—</span><button class="ghost" id="physRefresh">Refresh</button></div>
+    <table id="physTable"><thead><tr><th>Observed</th><th>Event</th><th>Specimen</th><th>Station</th><th>Kind</th><th class="num">Value</th>
+      <th>Tier</th><th>Ground truth</th><th>Station auth</th></tr></thead><tbody></tbody></table>
+    <p class="empty" id="physEmpty" hidden>No physical record yet. This view stays empty rather than showing simulated data. Stations post signed readings to
+      <code>/hardware/caliper-reading</code> and <code>/hardware/bin-ack</code> (see docs/engineering/PHYSICAL_TEST_PLAYBOOK.md).</p>
+  </div>
+  <div class="two" style="margin-top:12px">
+    <div class="card tablewrap"><h3>Sorter route journal</h3>
+      <table id="routeTable"><thead><tr><th>Action</th><th>Transition</th><th>Specimen</th><th>Bin</th><th>Sensor event</th></tr></thead><tbody></tbody></table>
+      <p class="empty" id="routeEmpty" hidden>No route actions. The sorter's default position is HOLD.</p></div>
+    <div class="card"><div class="cardhead"><h3>Unauthenticated station feed</h3><span class="tier small unverified">UNVERIFIED</span><span class="faint small" id="liveState">waiting</span></div>
+      <p class="faint small">Self-declared events from <code>/sim/live/event</code>. Display only: not signed, not in the ledger, never acted on.</p>
+      <div id="liveFeed" class="livefeed faint small">No events yet.</div></div>
+  </div>
+</section>
 
 <!-- ================= 3D LAB ================= -->
 <section class="view" id="view-lab">
@@ -55,8 +89,6 @@
         <p id="storyText" class="story">Take the guided tour of the line. The camera moves to each station.</p>
         <div class="row2"><button class="ghost" id="storyPrev">◀ Back</button><button class="ghost" id="storyNext">Start tour ▶</button></div>
       </div>
-      <div class="phead"><span>Live station events</span><span class="faint" id="liveState">waiting</span></div>
-      <div class="pbody"><div id="liveFeed" class="livefeed faint small">No physical events yet. Stations POST to <code>/sim/live/event</code>; events are shown, never acted on.</div></div>
       <div class="phead"><span>Layers</span></div>
       <div class="pbody">
         <label class="check"><input id="labels" type="checkbox" checked/> Station labels <kbd>L</kbd></label>
@@ -123,6 +155,39 @@
   <div class="charts">
     <figure class="card chart" data-chart="good_per_hour"></figure><figure class="card chart" data-chart="delta_profit_interval"></figure>
     <figure class="card chart" data-chart="hold_all_throughput"></figure><figure class="card chart" data-chart="scale"></figure>
+  </div>
+</section>
+
+<!-- ================= AGENT COLLABORATION ================= -->
+<section class="view page" id="view-agents" hidden>
+  <div class="pagehead"><h1>Agent collaboration: one case, traced</h1>
+    <p>The Quality Inspector starts with phone and CAD evidence only. It asks peers for evidence it cannot see, every reply is checked (signature, source_root, freshness) before use,
+      and SAFE-MESH makes the decision. Evidence is <b>TEST_FIXTURE</b>; likelihoods are illustrative, not calibrated. A control run with requests disabled is shown beside it.</p></div>
+  <div class="agentsgrid">
+    <aside class="dock boxed">
+      <div class="phead"><span>Run a case</span></div>
+      <div class="pbody">
+        <label>Scenario<select id="colScenario"></select></label>
+        <p class="hint" id="colScenarioHint"></p>
+        <div class="row2"><label>Request cost ($)<input id="colCost" type="number" min="0" max="10" step="0.1" value="0.3"/></label>
+          <label>Budget ($)<input id="colBudget" type="number" min="0" max="100" step="0.1" value="1.0"/></label></div>
+        <label>Planner<select id="colPlanner"><option value="deterministic">Deterministic (code, no LLM)</option></select></label>
+        <button class="primary" id="colRun">Run case</button>
+        <div class="status" id="colStatus" role="status"></div>
+      </div>
+      <div class="phead"><span>LLM planners</span></div>
+      <div class="pbody" id="llmStatus"><span class="faint small">—</span></div>
+    </aside>
+    <div class="colmain">
+      <div class="kpis" id="colKpis"></div>
+      <div class="two">
+        <div class="card"><h3>Belief path</h3><ol class="steps" id="colBelief"></ol></div>
+        <div class="card"><h3>Collaboration criteria</h3><div class="caughtlist" id="colCriteria"></div>
+          <h3 style="margin-top:14px">Next inspection (NetVOI)</h3><div id="colProposal" class="small"></div></div>
+      </div>
+      <div class="card" style="margin-top:12px"><div class="cardhead"><h3>Message sequence</h3><span class="faint small" id="colRunId"></span></div>
+        <ol class="steps seq" id="colTrace"><li class="faint">Run a case to see the trace.</li></ol></div>
+    </div>
   </div>
 </section>
 

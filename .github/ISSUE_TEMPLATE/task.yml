@@ -1,0 +1,42 @@
+name: Task
+description: A task from the 18.1 task board (one owner, one acceptance gate)
+labels: [task]
+body:
+  - type: input
+    id: task_id
+    attributes:
+      label: Task ID
+      description: As written in QUALITYRELAY_18_1_TEAM_TASKS_EN.md (e.g. BACK-03, SIM-02, PHY-04, REL-02)
+    validations: {required: true}
+  - type: dropdown
+    id: owner
+    attributes:
+      label: Owner (ownership does not move when modules meet)
+      options:
+        - Bakdaulet-omeraiuly (research / vision / simulation)
+        - adilnurgg (backend / agents / security / web / cloud / CI)
+        - HyorinmaruK (physical / firmware / presentation)
+    validations: {required: true}
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options: [P0, P1, P2]
+    validations: {required: true}
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance gate
+      description: The observable result that closes this task. Say what evidence tier counts (SIMULATED, TEST_FIXTURE, PHYSICAL_CAPTURE, VERIFIED_PHYSICAL).
+    validations: {required: true}
+  - type: textarea
+    id: depends
+    attributes:
+      label: Hand-offs / dependencies
+      description: What you need from another owner, and what you hand off.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety-critical
+      options:
+        - label: Touches actuation, auth/keys, ledger/verification, SAFE-MESH, the agent bus, firmware or CI (two-review rule applies)

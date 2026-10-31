@@ -1,0 +1,12 @@
+# CI quality gates (REL-02). Pinned exactly so a tool release cannot turn CI red on its own;
+# bump deliberately in a PR that also fixes whatever the new version reports.
+-r requirements-demo.txt
+ruff==0.17.3
+mypy==2.4.1
+bandit==1.9.4
+pip-audit==2.10.1
+jsonschema==4.26.0
+packaging>=24
+# Not a tool: installed so tests/test_warp_mc.py runs in CI instead of skipping (REL-03: an adapter
+# is only TESTED if its tests actually run). CPU backend; same range as requirements-optional.txt.
+warp-lang>=1.5,<2

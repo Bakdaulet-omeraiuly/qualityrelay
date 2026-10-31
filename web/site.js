@@ -1,4 +1,8 @@
-// QualityRelay Studio (18.1). Everything shown is SIMULATED.
+// QualityRelay Studio (18.1). WEB-01: three separated views, each with its own source tier.
+//   #physical  Live Physical Inspection         hardware ledger only (PHYSICAL_CAPTURE / VERIFIED_PHYSICAL)
+//   #sim/...   Digital Factory Simulation       SIMULATED
+//   #agents/.. Agent Collaboration & Benchmark  TEST_FIXTURE trace + SIMULATED benchmark
+// Nothing from one family is drawn inside another: physical events never animate the simulated line.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/OrbitControls.js';
 import { STLLoader } from 'three/addons/STLLoader.js';
@@ -20,6 +24,8 @@ const sign = (x, d = 1) => (x > 0 ? '+' : '') + fmt(x, d);
 const pct = (x, d = 2) => x === null || x === undefined ? '—' : `${(100 * x).toFixed(d)}%`;
 const mmss = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 const api = async (url, opts) => { const r = await fetch(url, opts); if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); return r.json(); };
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+const ctx = { physical: 'hardware ledger', sim: '—', agents: '—', claims: '' };  // app-bar context line, per family
 const hash = (s) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) / 4294967295; };
 // Conveyor speed in scene units per SIMULATED second (1 unit ≈ 0.25 m in this layout -> ~0.15 m/s).
 const BELT_SPEED = 0.6;
@@ -358,11 +364,6 @@ class FactoryView {
       this.robot.elbow.rotation.z = busy ? 1.1 + Math.cos(ph * 2) * 0.3 : 1.4;
     }
     const busyAt = (st) => st.intervals.some(([a, b]) => t >= a && t <= b);
-    const lf = lab.liveFlash;
-    if (lf && performance.now() < lf.until && this.stations[lf.key]) {   // physical event: flash the station
-      const st = this.stations[lf.key]; st.lamp.material.color.copy(C.caught); st.lamp.material.emissive.copy(C.caught); st.lamp.material.emissiveIntensity = 3;
-      const r = this.readouts[lf.key]; if (r) { r.visible = true; r.element.textContent = lf.text; r.element.style.background = css('--caught'); }
-    }
     const opBusy = [busyAt(this.stations.caliper_0) || busyAt(this.stations.caliper_1), busyAt(this.stations.review), busyAt(this.stations.rework)];
     this.operators.forEach((o, i) => { o.position.y = opBusy[i] ? Math.abs(Math.sin(now * 4 + i)) * 0.03 : 0; o.rotation.x = opBusy[i] ? 0.12 : 0; });
     for (const line of [0, 1]) {
@@ -475,7 +476,6 @@ async function initLab() {
     else if (e.key === 'ArrowRight') story(lab.story + 1);
     else if (e.key === 'ArrowLeft') story(lab.story - 1);
   });
-  startLive();
   let last = performance.now();
   const loop = (now) => {
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
@@ -518,10 +518,8 @@ function startLive() {
   es.onmessage = (m) => {
     const e = JSON.parse(m.data), feed = $('#liveFeed');
     if (feed.classList.contains('faint')) { feed.classList.remove('faint'); feed.innerHTML = ''; }
-    feed.insertAdjacentHTML('afterbegin', `<div><b>LIVE</b><span>${e.station_id} · ${e.lane} · ${e.specimen_id} · ${e.value ?? ''} · ${e.source_tier}${e.verified ? '' : ' · unverified'}</span></div>`);
-    while (feed.children.length > 6) feed.lastChild.remove();
-    const key = e.station_id === 'phone' || e.station_id === 'caliper' ? `${e.station_id}_${e.lane === 'tab' ? 1 : 0}` : e.station_id === 'assembly' ? 'assembly' : null;
-    if (key) lab.liveFlash = { key, until: performance.now() + 2500, text: `LIVE ${e.value ?? ''}` };
+    feed.insertAdjacentHTML('afterbegin', `<div><b>UNVERIFIED</b><span>${esc(e.station_id)} · ${esc(e.lane)} · ${esc(e.specimen_id)} · ${esc(e.value ?? '')} · declared ${esc(e.source_tier)}</span></div>`);
+    while (feed.children.length > 12) feed.lastChild.remove();
     $('#liveState').textContent = `${e.seq} events`;
   };
 }
@@ -591,7 +589,7 @@ async function run() {
       $(i ? '#provB' : '#provA').textContent = `SIMULATED · ${r.scenario} · seed ${r.seed} · ${r.n_pairs} pairs · conservation ${r.kpis.conservation_ok ? '✔' : '✖'}`;
     });
     const r = lab.runs[lab.runs.length - 1];
-    $('#context').textContent = `${r.scenario} · ${r.title} · seed ${r.seed} · ${r.n_pairs} pairs${lab.mode === 'compare' ? ' · compare' : ` · ${r.policy}+${r.pairing}`}`;
+    ctx.sim = `${r.scenario} · ${r.title} · seed ${r.seed} · ${r.n_pairs} pairs${lab.mode === 'compare' ? ' · compare' : ` · ${r.policy}+${r.pairing}`}`; setContext('sim');
     $('#runStatus').textContent = `${lab.runs.length} run${lab.runs.length > 1 ? 's' : ''} computed in ${fmt(performance.now() - t0, 0)} ms`;
     renderMetrics(); select(null);
   } catch (e) { $('#runStatus').textContent = `Simulation API unavailable: ${e.message}`; }
@@ -681,7 +679,7 @@ function cameraSection(k) {
 function passportURL(id) {
   const r = lab.runs.at(-1); const q = new URLSearchParams({ scenario: r.scenario, seed: r.seed, pairs: r.n_pairs, policy: r.policy, pairing: r.pairing, part: id });
   if (lab.mode === 'compare') q.set('mode', 'compare');
-  return `${location.origin}/?${q}#lab`;
+  return `${location.origin}/?${q}#sim`;
 }
 function passportQR(id) {
   if (typeof qrcode !== 'function') return '<span class="faint">QR library missing</span>';
@@ -860,16 +858,135 @@ async function initResults() {
     <td class="num">${sign((w.b1_minus_b0_ci[0] + w.b1_minus_b0_ci[1]) / 2, 2)} [${fmt(w.b1_minus_b0_ci[0], 2)}, ${fmt(w.b1_minus_b0_ci[1], 2)}]</td></tr>`).join('');
 }
 
+// ---------------------------------------------------------------- live physical inspection (hardware ledger only)
+const ago = (t) => { if (!t) return '—'; const d = Date.now() / 1000 - t; return d < 90 ? `${Math.round(d)} s ago` : d < 5400 ? `${Math.round(d / 60)} min ago` : new Date(t * 1000).toLocaleString(); };
+const tierChip = (t) => t === 'VERIFIED_PHYSICAL' ? '<span class="chip ok">VERIFIED_PHYSICAL</span>' : t === 'PHYSICAL_CAPTURE' ? '<span class="chip phys">PHYSICAL_CAPTURE</span>' : `<span class="chip no">${esc(t)}</span>`;
+const GT_CLASS = { CONFIRMED: 'ok', DISPUTED: 'no', AWAITING_GROUND_TRUTH: 'hold' };
+const gtChip = (s) => `<span class="chip ${GT_CLASS[s] || 'mute'}">${esc(s)}</span>`;
+const physValue = (v) => v.measurement_mm !== undefined ? `${fmt(v.measurement_mm, 3)} ± ${fmt(v.uncertainty_mm, 3)} ${esc(v.unit || 'mm')}`
+  : v.bin !== undefined ? `bin ${esc(v.bin)}` : v.temperature_c !== undefined ? `${fmt(v.temperature_c, 1)} °C` : '—';
+async function refreshPhysical() {
+  const [st, ev] = await Promise.all([api('/physical/status'), api('/physical/events?limit=100')]);
+  const a = st.actuation, verified = ev.tiers.VERIFIED_PHYSICAL || 0;
+  const act = a.estop ? ['warn', 'E-STOP', 'software E-stop latched'] : !a.hardware_enabled ? ['', 'OFF', 'actuator hardware disabled · default HOLD']
+    : a.armed ? ['warn', 'ARMED', `armed by ${esc(a.armed_by)} · ${a.in_flight.length} in flight`] : ['', 'DISARMED', 'hardware enabled, not armed · default HOLD'];
+  $('#physKpis').innerHTML = [['', `${st.ledger_events}`, `records in the hardware ledger (${st.hardware_ledger})`],
+    [verified ? 'good' : '', `${verified}`, `of the ${ev.count} shown are VERIFIED_PHYSICAL (ground truth recorded)`],
+    ['', `${st.hardware_stations_provisioned.length}`, `stations provisioned: ${esc(st.hardware_stations_provisioned.join(', ') || 'none')}`],
+    [act[0], act[1], `sorter: ${act[2]}`]].map(([c, x, y]) => `<div class="kpi ${c}"><strong>${x}</strong><span>${y}</span></div>`).join('');
+  $('#physTable tbody').innerHTML = ev.events.map((e) => `<tr><td class="faint">${ago(e.observed_at)}</td><td class="num">${esc(e.event_id)}</td><td>${esc(e.specimen_id)}</td>
+    <td>${esc(e.station_id)}</td><td>${esc(e.kind)}</td><td class="num">${physValue(e.values)}</td><td>${tierChip(e.source_tier)}</td>
+    <td>${gtChip(e.verification_status)}</td><td>${e.station_authenticated ? '<span class="chip ok">✔ envelope</span>' : `<span class="chip no" title="${esc(e.candidate_problems.join('; '))}">✖ none</span>`}</td></tr>`).join('');
+  $('#physEmpty').hidden = ev.events.length > 0;
+  $('#routeTable tbody').innerHTML = ev.routes.map((r) => `<tr><td class="num">${esc(r.action_id)}</td><td>${esc(r.kind)}</td><td>${esc(r.specimen_id ?? '')}</td>
+    <td>${esc(r.bin ?? r.actual_bin ?? '')}</td><td class="num">${esc(r.sensor_event_id ?? '')}</td></tr>`).join('');
+  $('#routeEmpty').hidden = ev.routes.length > 0;
+  $('#physUpdated').textContent = `updated ${new Date().toLocaleTimeString()}`;
+  ctx.physical = `hardware ledger · ${st.ledger_events} records · ${verified} verified`; setContext('physical');
+}
+function initPhysical() {
+  const tick = () => { if (!$('#view-physical').hidden) refreshPhysical().catch((e) => ($('#physUpdated').textContent = e.message)); };
+  $('#physRefresh').onclick = tick; setInterval(tick, 5000);
+  startLive();
+}
+
+// ---------------------------------------------------------------- agent collaboration (TEST_FIXTURE trace)
+const ROLE = { quality_inspector: 'Quality', metrology_engineer: 'Metrology', additive_manufacturing_expert: 'Pi / AM', design_geometry: 'CAD',
+  assembly_engineer: 'Assembly', safety_governance: 'Safety', inspection_planner: 'Planner' };
+const role = (r) => ROLE[r] || r || '';
+const stateChip = (s) => `<span class="chip ${s === 'PASS_REVIEW' ? 'ok' : s === 'HOLD' ? 'hold' : 'no'}">${esc(s)}</span>`;
+function traceRow(e) {
+  const b = e.body || {}, who = e.type === 'MESSAGE' ? `${role(e.sender_role)}${e.recipient_role && e.recipient_role !== e.sender_role ? ` → ${role(e.recipient_role)}` : ''}` : e.type;
+  let what = '', right = '', bad = false;
+  if (e.type === 'MESSAGE') {
+    if (!e.signature_valid) { what = `${e.kind} rejected: bad sender signature`; bad = true; }
+    else if (e.kind === 'FIND_MISSING_EVIDENCE') what = `missing ${(b.missing || []).join(', ') || 'nothing'}`;
+    else if (e.kind === 'REQUEST_EVIDENCE') { what = `REQUEST ${b.requested_kind} · ${b.reason_code}`; right = `max $${b.max_cost}`; }
+    else if (e.kind === 'EVIDENCE_RESPONSE') { what = `${b.outcome} ${(b.summaries || []).map((x) => `${x.event_id} (source_root ${x.source_root})`).join(', ') || b.reason || ''}`; right = `$${b.cost_charged}`; bad = b.outcome !== 'GRANTED'; }
+    else if (e.kind === 'HYPOTHESIS_UPDATE') { what = `belief ${fmt(b.belief_before, 3)} → ${fmt(b.belief_after, 3)}`; right = String(b.note || '').slice(0, 60); }
+    else if (e.kind === 'PROPOSE_INSPECTION') { what = `next: ${b.chosen}`; right = `NetVOI ${sign(b.net_voi, 3)}`; }
+    else if (e.kind === 'DECISION_PROPOSAL') { what = `${b.state} ${(b.reasons || []).join(', ')} · without requests: ${b.control_state}`; right = b.decision_changed ? 'changed' : 'unchanged'; }
+    else what = e.kind;
+  } else if (e.type === 'VERIFY') { what = `${e.event_id}: ${e.outcome}${e.note ? ` (${e.note})` : ''}`; bad = e.outcome !== 'VERIFIED'; }
+  else if (e.type === 'LLM_CALL') { what = `${e.provider}:${e.model} round ${e.round}`; right = `${e.prompt_tokens}+${e.completion_tokens} tok · ${e.cost_usd == null ? 'unpriced' : '$' + fmt(e.cost_usd, 5)}`; }
+  else { what = e.reason || e.detail || ''; bad = e.type === 'ERROR' || e.type === 'PROPOSAL_REJECTED'; }
+  return `<li class="${bad ? 'bad' : ''}"><span>${e.seq}</span><span>${esc(who)}</span><span>${esc(what)}</span><span>${esc(right)}</span></li>`;
+}
+async function runCollective() {
+  const btn = $('#colRun'); btn.disabled = true; $('#colStatus').textContent = 'running…';
+  try {
+    const r = await api('/research/collective/run', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ scenario: $('#colScenario').value, request_cost: +$('#colCost').value, budget: +$('#colBudget').value, planner: $('#colPlanner').value }) });
+    const c = await api(`/research/collective/runs/${encodeURIComponent(r.run_id)}/traces/${encodeURIComponent(r.case_id)}`);
+    const reasons = (d) => esc((d.reasons || []).join(', ') || 'no reasons');
+    $('#colKpis').innerHTML = [[stateChip(c.decision.state), `with peer requests · ${reasons(c.decision)}`],
+      [stateChip(c.control_decision.state), `control, requests disabled · ${reasons(c.control_decision)}`],
+      [`${c.independent_sources_before} → ${c.independent_sources_after}`, 'independent source_roots held by the requester'],
+      [`$${fmt(c.cost_charged, 2)}`, `charged for ${c.requests} request(s): ${esc(Object.entries(c.request_outcomes).map(([k, v]) => `${k} ${v}`).join(', ') || 'none')}`]]
+      .map(([a, b]) => `<div class="kpi"><strong>${a}</strong><span>${b}</span></div>`).join('');
+    $('#colBelief').innerHTML = c.belief_path.map((s) => `<li><span>${esc(s.step)}</span><span class="small muted">${esc(s.note || '')}</span><span>${fmt(s.belief, 3)}</span>
+      <div class="bar"><i style="width:${Math.min(100, 100 * s.belief)}%"></i></div></li>`).join('');
+    $('#colCriteria').innerHTML = Object.entries(c.criteria).map(([k, v]) => chip(v, k.replaceAll('_', ' '), k.replaceAll('_', ' '))).join('');
+    const p = c.proposal;
+    $('#colProposal').innerHTML = `<p><b>${esc(p.chosen)}</b> · NetVOI ${sign(p.net_voi, 3)} · <span class="faint">${esc(p.likelihood_source)}</span></p>
+      <table><thead><tr><th>Candidate</th><th class="num">Exp. loss</th><th class="num">Cost</th><th class="num">NetVOI</th></tr></thead><tbody>${(p.candidates || []).map((x) =>
+      `<tr><td>${esc(x.name)}</td><td class="num">${fmt(x.expected_loss, 3)}</td><td class="num">${fmt(x.inspection_cost, 2)}</td><td class="num">${sign(x.net_voi, 3)}</td></tr>`).join('')}</tbody></table>`;
+    $('#colTrace').innerHTML = c.trace.entries.map(traceRow).join('');
+    const url = `/research/collective/runs/${encodeURIComponent(r.run_id)}/traces/${encodeURIComponent(r.case_id)}`;
+    $('#colRunId').innerHTML = `${esc(r.run_id)} · ${esc(c.origin)} · planner ${esc(r.planner?.planner || r.planner?.provider || $('#colPlanner').value)} · <a href="${url}" target="_blank">JSON trace</a>`;
+    ctx.agents = `${c.origin} · ${$('#colScenario').value} · ${c.decision.state}`; setContext('agents');
+    const stateChanged = c.decision.state !== c.control_decision.state;  // decision_changed also counts a change of reasons alone
+    $('#colStatus').textContent = !c.decision_changed ? 'Same decision and reasons as the control run.'
+      : stateChanged ? `Peer evidence changed the decision: ${c.control_decision.state} → ${c.decision.state}.` : `Same state (${c.decision.state}) as the control run, but for different reasons.`;
+  } catch (e) { $('#colStatus').textContent = e.message; }
+  btn.disabled = false;
+}
+async function initAgents() {
+  const [sc, llm] = await Promise.all([api('/research/collective/scenarios'), api('/integrations/llm')]);
+  $('#colScenario').innerHTML = Object.keys(sc.scenarios).map((k) => `<option value="${esc(k)}"${k === 'pi_suspect' ? ' selected' : ''}>${esc(k)}</option>`).join('');
+  const hint = () => ($('#colScenarioHint').textContent = sc.scenarios[$('#colScenario').value]);
+  $('#colScenario').onchange = hint; hint();
+  for (const [name, st] of Object.entries(llm.providers))  // unconfigured providers stay visible but unselectable: no fake AI output
+    $('#colPlanner').insertAdjacentHTML('beforeend', `<option value="${esc(name)}"${['NOT_CONFIGURED', 'ERROR'].includes(st.state) ? ' disabled' : ''}>LLM: ${esc(name)} (${esc(st.state)})</option>`);
+  $('#llmStatus').innerHTML = Object.entries(llm.providers).map(([n, st]) => `<div class="kv"><span>${esc(n)}</span><span>${esc(st.state)}${st.entitlement ? ` · entitlement ${esc(st.entitlement.state)}` : ''}</span></div>`).join('')
+    + `<p class="faint small" style="margin:8px 0 0">${esc(llm.decision_authority)}</p>`;
+  $('#colRun').onclick = runCollective;
+  await runCollective();
+}
+
 // ---------------------------------------------------------------- router + boot
+// family -> sub-views and the one tier badge shown for the whole screen. Families never share a screen.
+const FAMILY = {
+  physical: { views: { '': 'physical' }, tier: 'PHYSICAL', title: 'Hardware ledger only. Each row carries its own tier: PHYSICAL_CAPTURE until a recorded ground-truth check makes it VERIFIED_PHYSICAL.' },
+  sim: { views: { '': 'lab', parts: 'parts', results: 'results' }, tier: 'SIMULATED', title: 'Every number here comes from simulation, not from a factory.' },
+  agents: { views: { '': 'agents', benchmark: 'science' }, tier: 'TEST_FIXTURE · SIMULATED', title: 'Collaboration runs on fixture evidence; the benchmark runs on simulated lots. Neither is a physical measurement.' },
+  claims: { views: { '': 'claims' }, tier: 'CLAIMS', title: 'What the evidence does and does not support.' },
+};
+const LEGACY = { lab: 'sim', parts: 'sim/parts', results: 'sim/results', science: 'agents/benchmark' };  // pre-WEB-01 links keep working
+function setContext(fam) { if (document.body.dataset.family === fam) $('#context').textContent = ctx[fam]; }
 const inited = {};
 function route() {
-  const v = (location.hash || '#lab').slice(1);
-  const view = ['lab', 'parts', 'results', 'science', 'claims'].includes(v) ? v : 'lab';
+  let h = (location.hash || '#physical').slice(1);
+  if (LEGACY[h]) { h = LEGACY[h]; history.replaceState(null, '', `${location.pathname}${location.search}#${h}`); }
+  let [fam, sub = ''] = h.split('/');
+  if (!FAMILY[fam]) [fam, sub] = ['physical', ''];
+  const F = FAMILY[fam], view = F.views[sub] || F.views[''];
+  document.body.dataset.family = fam;
+  document.body.classList.toggle('hassub', !!$(`#subnav-${fam}`));
+  $$('.subnav').forEach((n) => (n.hidden = n.id !== `subnav-${fam}`));
+  $$('.subnav a').forEach((a) => a.classList.toggle('on', a.dataset.view === view));
   $$('.view').forEach((s) => (s.hidden = s.id !== `view-${view}`));
-  $$('.tabs a').forEach((a) => a.classList.toggle('on', a.dataset.view === view));
+  $$('.tabs a').forEach((a) => a.classList.toggle('on', a.dataset.family === fam));
+  Object.assign($('#tier'), { textContent: F.tier, title: F.title });
+  $('#toggleInspector').hidden = view !== 'lab';
+  setContext(fam);
+  if (view === 'physical') { if (!inited.physical) { inited.physical = true; initPhysical(); } refreshPhysical().catch((e) => ($('#physUpdated').textContent = e.message)); }
+  if (view === 'agents' && !inited.agents) { inited.agents = true; initAgents().catch((e) => ($('#colStatus').textContent = e.message)); }
   if (view === 'parts' && !inited.parts) { inited.parts = true; initParts().catch((e) => ($('#partLabel').textContent = e.message)); }
   if ((view === 'results' || view === 'science') && !inited.results) { inited.results = true; initResults().catch((e) => ($('#kpis').textContent = e.message)); }
+  if (view === 'lab' && !inited.lab) {  // lazy: the 3D stage must be visible to size and frame its cameras
+    inited.lab = true; initLab().catch((e) => { $('#runStatus').textContent = `Lab failed to start: ${e.message}`; console.error(e); });
+  }
 }
 window.addEventListener('hashchange', route);
 route();
-initLab().catch((e) => { $('#runStatus').textContent = `Lab failed to start: ${e.message}`; console.error(e); });

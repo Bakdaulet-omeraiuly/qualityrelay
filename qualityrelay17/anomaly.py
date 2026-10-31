@@ -18,7 +18,7 @@ keeps working without them.
 """
 from __future__ import annotations
 import hashlib, json, platform, random, subprocess, sys, time
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, asdict
 from pathlib import Path
 import numpy as np
 

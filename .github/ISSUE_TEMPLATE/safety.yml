@@ -1,0 +1,32 @@
+name: Safety / security
+description: A way the system could move hardware, accept evidence, or grant access when it should not
+labels: [safety-critical]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Physical motion and evidence trust are the two things this project must never get wrong.
+        Describe the failure mode; keep working exploit steps, keys and tokens out of this public issue
+        and send them to the owner directly instead.
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind
+      options:
+        - unsafe actuation (motion without approval / ACK binding / interlock)
+        - authentication or key handling
+        - evidence integrity (forged, replayed, wrongly upgraded tier)
+        - agent bus ACL / signature
+        - data or privacy exposure
+        - other
+    validations: {required: true}
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Failure scenario
+      description: Preconditions → action → what goes wrong. Which module/endpoint.
+    validations: {required: true}
+  - type: textarea
+    id: pin
+    attributes:
+      label: Proposed test that would pin the fix

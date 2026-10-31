@@ -1,12 +1,27 @@
 {
+  "release": "18.1",
+  "generated_at_utc": "2026-10-31T20:27:25Z",
+  "git_commit": "66d7e5248c1d4320295b127b2023ff64890b915c",
+  "working_tree_dirty": true,
+  "uncommitted_paths": 60,
+  "python": "3.13.14",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "pytest_exit_code": 0,
+  "pytest_passed": true,
+  "pytest_result": "468 passed, 3 skipped, 2 warnings in 57.87s",
+  "pytest_counts": {
+    "passed": 468,
+    "skipped": 3,
+    "warnings": 2
+  },
+  "total_manifest_files": 326,
+  "manifest_hashing": "sha256 over canonical bytes (text: CRLF->LF; binary: raw); excludes FILE_SHA256_MANIFEST.json",
   "status": "reference_implementation_only",
-  "pytest_result": "........................................................................ [ 81%]\n................                                                         [100%]\n88 passed in 2.31s",
   "original_baseline_5_files": 33,
   "external_repos_bundled": false,
   "live_nebius_run": false,
   "trained_nvidia_weights": false,
   "physical_validation": false,
   "simulation_only": true,
-  "total_manifest_files": 89,
   "scientific_superiority_proven": false
 }
