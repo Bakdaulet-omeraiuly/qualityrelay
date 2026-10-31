@@ -51,7 +51,7 @@ VENDOR = ROOT / 'web' / 'vendor'
 ASSETS = {'three.module.js', 'OrbitControls.js', 'STLLoader.js', 'CSS2DRenderer.js', 'RoomEnvironment.js',
           'EffectComposer.js', 'RenderPass.js', 'UnrealBloomPass.js', 'OutputPass.js', 'ShaderPass.js', 'MaskPass.js',
           'Pass.js', 'CopyShader.js', 'LuminosityHighPassShader.js', 'OutputShader.js', 'GTAOPass.js', 'GTAOShader.js', 'PoissonDenoiseShader.js', 'SimplexNoise.js',
-          'SMAAPass.js', 'SMAAShader.js', 'RGBELoader.js', 'qrcode.js', 'site.js', 'site.css'}
+          'SMAAPass.js', 'SMAAShader.js', 'RGBELoader.js', 'three-mesh-bvh.module.js', 'three-gpu-pathtracer.module.js', 'qrcode.js', 'site.js', 'site.css'}
 
 
 @router.get('/assets/{name}')

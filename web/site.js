@@ -11,6 +11,7 @@ import { OutputPass } from 'three/addons/OutputPass.js';
 import { GTAOPass } from 'three/addons/GTAOPass.js';
 import { SMAAPass } from 'three/addons/SMAAPass.js';
 import { RGBELoader } from 'three/addons/RGBELoader.js';
+let ptModule = null;  // three-gpu-pathtracer, loaded on first Photo mode
 
 // ---------------------------------------------------------------- utils
 const $ = (s, r = document) => r.querySelector(s);
@@ -62,6 +63,38 @@ const QUALITY = (() => { const q = new URLSearchParams(location.search).get('qua
 let hdrPromise = null;
 const loadHDR = () => (hdrPromise ??= new Promise((res) => new RGBELoader().load('/sim/hdri/warehouse.hdr', res, undefined, () => res(null))));
 
+// Photo mode traces a flattened copy of what is visible: one mesh per material group and per instance,
+// plain PBR materials (colour, map, roughness, metalness, emission). The path tracer mis-assigns
+// materials on multi-material and instanced meshes, so it never sees those directly.
+function flattenForTrace(src) {
+  const out = new THREE.Scene(); src.updateMatrixWorld(true);
+  const simple = new Map();
+  const toStd = (m) => {
+    if (!simple.has(m)) simple.set(m, new THREE.MeshStandardMaterial({
+      color: m.color?.clone() ?? new THREE.Color(0xffffff), map: m.map ?? null,
+      roughness: m.roughness ?? 0.8, metalness: m.metalness ?? 0, roughnessMap: m.roughnessMap ?? null,
+      emissive: m.isMeshBasicMaterial ? m.color.clone().multiplyScalar(0.15) : (m.emissive?.clone() ?? new THREE.Color(0)),
+      emissiveIntensity: m.emissiveIntensity ?? 1, transparent: m.transparent, opacity: m.opacity, side: m.side }));
+    return simple.get(m);
+  };
+  src.traverseVisible((o) => {
+    if (o.isLight && (o.isDirectionalLight || o.isPointLight || o.isSpotLight)) { const l = o.clone(); l.matrixAutoUpdate = false; l.matrix.copy(o.matrixWorld); if (o.target) { l.target = o.target.clone(); out.add(l.target); l.target.position.setFromMatrixPosition(o.target.matrixWorld); } out.add(l); return; }
+    if (!o.isMesh || o.isCSS2DObject) return;
+    const base = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    const groups = Array.isArray(o.material) && o.geometry.groups.length ? o.geometry.groups : [{ start: 0, count: Infinity, materialIndex: 0 }];
+    const mtx = o.isInstancedMesh ? Array.from({ length: o.count }, (_, i) => { const m = new THREE.Matrix4(); o.getMatrixAt(i, m); return m.premultiply(o.matrixWorld); }) : [o.matrixWorld];
+    for (const g of groups) {
+      const mat = mats[g.materialIndex]; if (!mat || mat.visible === false) continue;
+      const geo = new THREE.BufferGeometry(); const n = base.attributes.position.count, a = g.start, b = Math.min(n, a + g.count);
+      for (const [k, at] of Object.entries(base.attributes)) geo.setAttribute(k, new THREE.BufferAttribute(at.array.slice(a * at.itemSize, b * at.itemSize), at.itemSize, at.normalized));
+      if (!geo.attributes.normal) geo.computeVertexNormals();
+      for (const m of mtx) { const mesh = new THREE.Mesh(geo, toStd(mat)); mesh.matrixAutoUpdate = false; mesh.matrix.copy(m); mesh.matrixWorld.copy(m); out.add(mesh); }
+    }
+  });
+  return out;
+}
+
 // ---------------------------------------------------------------- renderer stage (env light + AO + bloom + labels)
 function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true, labels = true } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -74,7 +107,8 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
   scene.fog = new THREE.Fog(0x07090c, 38, 80);
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(renderer), 0.04).texture;
-  if (QUALITY === 'high') loadHDR().then((hdr) => { if (hdr) { scene.environment = pmrem.fromEquirectangular(hdr).texture; scene.environmentIntensity = 0.8; } });
+  let hdrEquirect = null;
+  if (QUALITY === 'high') loadHDR().then((hdr) => { if (hdr) { hdr.mapping = THREE.EquirectangularReflectionMapping; hdrEquirect = hdr; scene.environment = pmrem.fromEquirectangular(hdr).texture; scene.environmentIntensity = 0.8; } });
   const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 400);
   camera.position.set(...camPos);
   const controls = new OrbitControls(camera, renderer.domElement);
@@ -109,9 +143,34 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
     camera.aspect = w / h; camera.updateProjectionMatrix();
   };
   new ResizeObserver(resize).observe(el); resize();
-  let tween = null;
+  let tween = null, tracer = null;
   return {
     el, renderer, scene, camera, controls, labelRenderer,
+    get tracer() { return tracer; },
+    // Photo mode: progressive path tracing of the same scene (three-gpu-pathtracer). Fog is dropped
+    // (unsupported); the environment is the raw warehouse HDRI so light bounces come from a real room.
+    async photo(on) {
+      if (on && !tracer) {
+        // r160 scenes lack background/environmentRotation (added in r162); the path tracer reads them.
+        for (const k of ['backgroundRotation', 'environmentRotation']) if (!(k in THREE.Scene.prototype)) Object.defineProperty(THREE.Scene.prototype, k, { get() { return (this[`_${k}`] ??= new THREE.Euler()); }, configurable: true });
+        ptModule ??= await import('three-gpu-pathtracer');
+        const hdr = hdrEquirect || await loadHDR();
+        if (hdr) hdr.mapping = THREE.EquirectangularReflectionMapping;
+        const flat = flattenForTrace(scene);
+        flat.background = scene.background; flat.environment = hdr || scene.environment; flat.environmentIntensity = 1.1;
+        tracer = new ptModule.WebGLPathTracer(renderer);
+        Object.assign(tracer, { minSamples: 1, renderDelay: 0, fadeDuration: 0, filterGlossyFactor: 0.5, dynamicLowRes: true });
+        tracer.bounces = 6; tracer.tiles.set(2, 2);
+        tracer.setScene(flat, camera);
+        this._onCam = () => tracer?.updateCamera(); controls.addEventListener('change', this._onCam);
+        if (labelRenderer) labelRenderer.domElement.style.visibility = 'hidden';
+      } else if (!on && tracer) {
+        controls.removeEventListener('change', this._onCam); const t = tracer; tracer = null;
+        try { t.dispose(); } catch (e) { /* r160 lacks some internals the tracer frees; nothing else to release */ }
+        if (labelRenderer) labelRenderer.domElement.style.visibility = '';
+      }
+    },
+    snapshot() { if (tracer) tracer.renderSample(); else if (composer) composer.render(); else renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); },
     flyTo(pos, tgt, dur = 1.3) {
       tween = { t0: performance.now(), dur: dur * 1000, p0: camera.position.clone(), q0: controls.target.clone(),
         p1: new THREE.Vector3(...pos), q1: new THREE.Vector3(...tgt) };
@@ -123,6 +182,7 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
         if (u >= 1) tween = null;
       }
       controls.update();
+      if (tracer) { tracer.renderSample(); return; }
       if (composer) composer.render(); else renderer.render(scene, camera);
       labelRenderer?.render(scene, camera);
     },
@@ -547,6 +607,7 @@ async function initLab() {
   lab.views.forEach((v) => v.s.flyTo(fitCam(v, STORY[0][2], STORY[0][3]), STORY[0][3], 2.6));
   if (q.get('select')?.startsWith('phone_') || q.get('select')?.startsWith('caliper_')) select({ type: 'station', id: q.get('select'), side: 0 });
   if (q.get('part')) select({ type: 'part', id: q.get('part'), side: lab.runs.length - 1 });
+  if (q.get('photo') === '1') setTimeout(() => $('#photoBtn')?.click(), 1500);  // URL preset: open in Photo mode
   if (q.get('select') === 'caught') { const id = [...lab.caught][0] || lab.runs.at(-1)?.parts.find((p) => p.pair)?.id; if (id) select({ type: 'part', id, side: lab.runs.length - 1 }); }
 }
 
@@ -956,6 +1017,17 @@ async function initPhysical() {
     : '<tr><td colspan="6" class="faint">No photos with a matching specimen ID yet.</td></tr>';
 }
 
+{ const btn = $('#photoBtn'), save = $('#photoSave'), st = $('#photoStatus'); let on = false, tick = null;
+  if (btn) btn.onclick = async () => {
+    const v = lab.views[0]; if (!v) return;
+    on = !on; btn.textContent = on ? 'Exit photo mode' : 'Photo mode'; save.disabled = !on;
+    if (on) { lab.playing = false; $('#playBtn').textContent = '▶'; st.textContent = 'Building the path-tracing scene…';
+      try { await v.s.photo(true); } catch (e) { st.textContent = `Photo mode unavailable: ${e.message}`; console.error("PHOTO", e.stack); on = false; btn.textContent = 'Photo mode'; save.disabled = true; return; }
+      tick = setInterval(() => { const t = v.s.tracer; if (t) st.textContent = `${t.samples.toFixed(0)} samples · path traced, SIMULATED scene (left view). Drag to re-frame.`; }, 500);
+    } else { clearInterval(tick); await v.s.photo(false); st.textContent = ''; }
+  };
+  if (save) save.onclick = () => { const a = document.createElement('a'); a.href = lab.views[0].s.snapshot(); a.download = 'qualityrelay_photo_SIMULATED.png'; a.click(); };
+}
 { const hq = $('#hq'); if (hq) { hq.checked = QUALITY === 'high';
   hq.addEventListener('change', () => { localStorage.setItem('qr_quality', hq.checked ? 'high' : 'low'); const u = new URL(location.href); u.searchParams.delete('quality'); location.href = u.href; }); } }
 

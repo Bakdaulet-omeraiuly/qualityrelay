@@ -18,7 +18,10 @@
  "three/addons/OutputPass.js":"/sim/assets/OutputPass.js",
  "three/addons/GTAOPass.js":"/sim/assets/GTAOPass.js",
  "three/addons/SMAAPass.js":"/sim/assets/SMAAPass.js",
- "three/addons/RGBELoader.js":"/sim/assets/RGBELoader.js"}}
+ "three/addons/RGBELoader.js":"/sim/assets/RGBELoader.js",
+ "three/examples/jsm/postprocessing/Pass.js":"/sim/assets/Pass.js",
+ "three-mesh-bvh":"/sim/assets/three-mesh-bvh.module.js",
+ "three-gpu-pathtracer":"/sim/assets/three-gpu-pathtracer.module.js"}}
 </script>
 </head>
 <body>
@@ -65,6 +68,8 @@
         <label class="check"><input id="labels" type="checkbox" checked/> Station labels <kbd>L</kbd></label>
         <label class="check"><input id="truth" type="checkbox" checked/> Ground truth (evaluator only) <kbd>T</kbd></label>
         <label class="check" title="Ambient occlusion, warehouse HDRI lighting, 4K shadows, SMAA. Turn off on slow laptops (reloads)."><input id="hq" type="checkbox"/> High-quality graphics</label>
+        <div class="row2" style="margin-top:8px"><button id="photoBtn" class="btn" title="Pauses the line and path-traces the current view (real light bounces). Same scene, same simulated state.">Photo mode</button><button id="photoSave" class="btn" disabled>Save PNG</button></div>
+        <div id="photoStatus" class="small faint"></div>
         <div class="legend">
           <span><i class="sw slot"></i>Slot</span><span><i class="sw tab"></i>Tab</span>
           <span><i class="sw review"></i>HOLD → review</span><span><i class="sw scrap"></i>Scrapped</span>
