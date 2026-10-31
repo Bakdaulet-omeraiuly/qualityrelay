@@ -49,12 +49,14 @@ plan before this goes on a slide as a result rather than "the wiring now works."
 3. **Decided — not ported.** Recorded with reasons in
    `docs/architectures/04_SCIENTIFIC_ENGINE_VDER_CAIR.md` (the 5.0 archive has EWMA design
    text only, no code; the generator has no drift; no live time series yet).
-4. **Pipeline ready, GPU run pending.** `qualityrelay17/anomaly.py` + `scripts/train_anomaly.py`
-   (STFPM ResNet-18, exports teacher/student ONNX for Hailo, Resource-ledger manifest per run),
-   smoke-tested on the Mac (MPS, `SIMULATED` silhouettes: image AUROC 0.84 — says the code
-   works, nothing more). Brev $150 credit confirmed in the user's account; the L4/A100 run and
-   the Hailo handoff steps are in `docs/engineering/ANOMALY_MODEL_HANDOFF.md`. No NVIDIA GPU run
-   has happened yet; the other seven NVIDIA adapters stay `NOT_CONFIGURED`.
+4. **Done on the GPU, minus our own prints.** `qualityrelay17/anomaly.py` +
+   `scripts/train_anomaly.py` (STFPM ResNet-18, teacher/student ONNX for Hailo, Resource-ledger
+   manifest per run) ran on a Brev **NVIDIA L4** ($0.85/h, ~$0.3 total): synthetic-cad
+   `SIMULATED` image AUROC 0.880; MVTec `screw` 0.948 and `bottle` 1.000 (`EXTERNAL_DATASET`,
+   CC BY-NC-SA). Manifests `docs/research/runs/`, write-up and caveats
+   `docs/research/ANOMALY_GPU_RUN_31OCT.md`. **Still missing: a `PHYSICAL_CAPTURE` run** — needs
+   HyorinmaruK's Pi images (`data/prints/good|defect/`); one command, see the write-up. Hailo
+   compile not attempted (adilnurgg). The other seven NVIDIA adapters stay `NOT_CONFIGURED`.
 
 Reviewer for this branch: adilnurgg or HyorinmaruK (one review per `TEAM_OWNERSHIP_AND_GITHUB.md`;
 no safety/actuation code touched).

@@ -1,8 +1,10 @@
 # Anomaly model: GPU run and Hailo-8L handoff (Bakdaulet → adilnurgg / HyorinmaruK)
 
-**Status 31 Oct:** pipeline written and smoke-tested locally (Mac, Apple MPS, `SIMULATED` data).
-**No NVIDIA GPU run has happened yet.** Nothing below is a result until a `run_manifest.json`
-with `GPU_model` ≠ `NONE` and the stated `source_origin` exists.
+**Status 31 Oct (updated):** pipeline written, smoke-tested on the Mac, and **run on an NVIDIA L4
+via Brev** — three runs (synthetic-cad `SIMULATED`; MVTec `screw` and `bottle`
+`EXTERNAL_DATASET`), manifests in `docs/research/runs/`, summary and caveats in
+`docs/research/ANOMALY_GPU_RUN_31OCT.md`. **No run on our own printed parts yet** — that needs
+HyorinmaruK's captures. Hailo compile not attempted.
 
 ## What exists
 - `qualityrelay17/anomaly.py` — STFPM (student–teacher feature pyramid matching, ResNet-18,
@@ -19,6 +21,9 @@ with `GPU_model` ≠ `NONE` and the stated `source_origin` exists.
 - Local smoke result (for the record, **not a claim**): synthetic-cad, 96 px, 96 train / 48 test,
   8 epochs on MPS → image AUROC 0.84, pixel AUROC 0.91. Synthetic defects on synthetic
   silhouettes; says the code runs, nothing about PLA parts.
+- **L4 results (31 Oct, Brev):** synthetic-cad 256 px/50 ep → image AUROC 0.880; MVTec screw
+  → 0.948; MVTec bottle → 1.000. ONNX export ok in all three. Details and limits in
+  `docs/research/ANOMALY_GPU_RUN_31OCT.md`.
 
 ## GPU run (Brev, L4 or A100 is enough — H100 not needed)
 ```bash
