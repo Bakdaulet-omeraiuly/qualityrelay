@@ -485,3 +485,28 @@ def vision_inspect(req: InspectRequest):
     out.update(report=rep, heatmap=_jpeg_b64(overlay_heatmap(rect, diff, mask=mask)), boxes=_jpeg_b64(draw_candidate_boxes(rect, rep)),
                reference_saved_at=meta.get('saved'))
     return out
+
+
+# ---- physical data (HyorinmaruK's measurement logger) and the physical demo pages -------------------
+MEASUREMENTS = ROOT / 'data' / 'measurements'   # put exported measurement_logger CSVs here (git-ignored)
+PHYSICAL_PAGES = {'manual_track_visualizer', 'measurement_logger', 'physical_build_guide', 'tabletop_demo'}
+
+
+@router.get('/physical/summary')
+def physical_summary():
+    """Caliper calibration from data/measurements/*.csv and the photo-vs-caliper check. Runs with the
+    fitted values stay SIMULATED (physically calibrated); the caliper is authoritative."""
+    from .physical_data import load_measurements, calibrate, photo_vs_caliper
+    files = sorted(MEASUREMENTS.glob('*.csv')) if MEASUREMENTS.exists() else []
+    if not files:
+        return dict(status='NOT_AVAILABLE', files=[], hint='Export the CSV from web/measurement_logger.html into data/measurements/')
+    rows = load_measurements(files)
+    return dict(files=[f.name for f in files], rows=len(rows), calibration=calibrate(rows),
+                photo_vs_caliper=photo_vs_caliper(rows, PRINTS / 'capture_log.csv'))
+
+
+@router.get('/physical/page/{name}')
+def physical_page(name: str):
+    if name not in PHYSICAL_PAGES:
+        raise HTTPException(404, 'unknown page')
+    return FileResponse(ROOT / 'web' / f'{name}.html', media_type='text/html')

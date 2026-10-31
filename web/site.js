@@ -676,7 +676,8 @@ function cameraSection(k) {
     <video id="camVideo" class="camimg" playsinline muted hidden></video><img id="camPhoto" class="camimg" alt="captured photo" hidden>
     <div class="row2" style="margin-top:8px">
       <label>Purpose<select id="camPurpose"><option value="training">training photo (model)</option><option value="measurement">measurement / reference</option></select></label>
-      <label>Specimen ID<input id="camSpec" type="text" placeholder="e.g. P07" maxlength="40" style="display:block;width:100%;margin-top:4px;background:var(--panel2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:6px 8px"></label></div>
+      <label>Specimen ID<input id="camSpec" type="text" list="specIds" placeholder="e.g. S-GOOD-01" maxlength="40" style="display:block;width:100%;margin-top:4px;background:var(--panel2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:6px 8px"></label></div>
+    <datalist id="specIds">${['S-GOOD', 'S-NOM', 'S-RISK', 'S-DEF', 'T-GOOD', 'T-NOM', 'T-RISK', 'T-DEF'].map((x) => `<option value="${x}-01">`).join('')}</datalist>
     <div class="row2">
       <label>Label<select id="camLabel"><option value="inbox">label later</option><option value="good">good part</option><option value="defect">defective part</option></select></label>
       <label>Defect type<select id="camDefect" disabled><option value="">—</option>${['warp', 'stringing', 'chip', 'hole', 'crack', 'layer_shift', 'under_extrusion', 'wrong_size', 'other'].map((d) => `<option>${d}</option>`).join('')}</select></label></div>
@@ -900,14 +901,30 @@ async function initResults() {
     <td class="num">${sign((w.b1_minus_b0_ci[0] + w.b1_minus_b0_ci[1]) / 2, 2)} [${fmt(w.b1_minus_b0_ci[0], 2)}, ${fmt(w.b1_minus_b0_ci[1], 2)}]</td></tr>`).join('');
 }
 
+async function initPhysical() {
+  const d = await api('/sim/physical/summary');
+  if (d.status === 'NOT_AVAILABLE') { $('#physCal').innerHTML = `No measurements yet. ${d.hint}.`; return; }
+  const c = d.calibration, f = c.fits;
+  $('#physCal').innerHTML = `<div class="kv"><span>files</span><span>${d.files.join(', ')}</span><span>status</span><span>${c.status}</span>
+    <span>caliper repeatability σ</span><span>${c.caliper_repeatability_sd_mm ?? '—'} mm</span>
+    ${Object.entries(f).map(([k, v]) => `<span>${k} bias / scatter</span><span>${sign(v.bias_mm, 3)} / ${fmt(v.width_sd_mm, 3)} mm (${v.n_specimens} parts)</span>`).join('')}</div>
+    <p class="faint small">${c.note}</p>`;
+  $('#physSpec tbody').innerHTML = c.specimens.map((s) => `<tr><td class="num">${s.specimen_id}</td><td>${s.manual_id || '—'}</td><td class="num">${s.n}</td><td class="num">${fmt(s.mean_mm, 3)}</td>
+    <td class="num">${s.nominal_mm ?? '—'}</td><td class="num">${s.deviation_mm === null ? '—' : sign(s.deviation_mm, 3)}</td><td class="num">${fmt(s.spread_mm, 3)}</td></tr>`).join('');
+  $('#physPhoto tbody').innerHTML = d.photo_vs_caliper.length ? d.photo_vs_caliper.map((r) => `<tr><td class="num">${r.specimen_id}</td><td>${r.file}</td><td class="num">${fmt(r.photo_mm, 3)}</td>
+    <td class="num">${fmt(r.caliper_mm, 3)}</td><td class="num">${sign(r.photo_minus_caliper_mm, 3)}</td><td class="num">${fmt(r.photo_px_per_mm, 1)}</td></tr>`).join('')
+    : '<tr><td colspan="6" class="faint">No photos with a matching specimen ID yet.</td></tr>';
+}
+
 // ---------------------------------------------------------------- router + boot
 const inited = {};
 function route() {
   const v = (location.hash || '#lab').slice(1);
-  const view = ['lab', 'parts', 'results', 'science', 'claims'].includes(v) ? v : 'lab';
+  const view = ['lab', 'parts', 'physical', 'results', 'science', 'claims'].includes(v) ? v : 'lab';
   $$('.view').forEach((s) => (s.hidden = s.id !== `view-${view}`));
   $$('.tabs a').forEach((a) => a.classList.toggle('on', a.dataset.view === view));
   if (view === 'parts' && !inited.parts) { inited.parts = true; initParts().catch((e) => ($('#partLabel').textContent = e.message)); }
+  if (view === 'physical' && !inited.physical) { inited.physical = true; initPhysical().catch((e) => ($('#physCal').textContent = e.message)); }
   if ((view === 'results' || view === 'science') && !inited.results) { inited.results = true; initResults().catch((e) => ($('#kpis').textContent = e.message)); }
 }
 window.addEventListener('hashchange', route);

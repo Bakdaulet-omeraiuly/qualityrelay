@@ -13,7 +13,7 @@ from pathlib import Path
 from statistics import mean, stdev
 
 STL_DIR = Path(__file__).resolve().parents[2] / 'examples' / 'cad' / 'stl'
-PHYSICAL_TIERS = {'PHYSICAL_CAPTURE', 'VERIFIED_PHYSICAL'}
+PHYSICAL_TIERS = {'PHYSICAL_CAPTURE', 'OPERATOR_CONFIRMED', 'VERIFIED_PHYSICAL'}  # OPERATOR_CONFIRMED: typed caliper reading (AGENTS.md)
 
 
 def _material_intervals(mesh):

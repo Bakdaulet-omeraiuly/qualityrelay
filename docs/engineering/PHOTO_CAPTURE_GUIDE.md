@@ -44,13 +44,18 @@ There are two kinds of photo with different rules, and one Studio camera panel t
   ≥ 15, ideally ~25.
 - **Caliper:** measure the same part and type the reading into **Caliper reading**. The panel then
   shows *photo − caliper*. This is how the synthetic accuracy (0.07 mm at 15 px/mm) gets checked
-  on real parts.
+  on real parts. **The caliper is authoritative** (AGENTS.md): the photo width stays `UNVALIDATED`
+  and is only compared with it, never used in its place.
+- **Full caliper record:** log every reading in `web/measurement_logger.html` (see
+  `docs/engineering/MEASUREMENT_LOGGING.md`), export the CSV into `data/measurements/`, and the
+  Studio **Physical** tab fits the simulator's bias, scatter and caliper sigma from it.
 - **Reference comparison:** save one GOOD part as the reference (**★ Set as GOOD reference**),
   then photograph the part to inspect in the same pose and click **⇄ Compare**. Results are
   candidates for human review, never a pass or reject.
 
 ## Bookkeeping (required for honest results)
-- **Specimen ID:** enter one for every photo (e.g. `P07`), the same ID you write on the part.
+- **Specimen ID:** enter one for every photo, the same physical label used in the measurement logger
+  (e.g. `S-GOOD-01`, `T-DEF-02`; the panel suggests them). This is what joins photo and caliper.
 - **Capture log:** every save is appended to `data/prints/capture_log.csv` with file, purpose,
   label, defect type, specimen ID, caliper reading and photo-measured width.
 - **Label check:** a **second person** checks every good/defect label and writes their name in the
