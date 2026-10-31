@@ -6,6 +6,25 @@
 
 > **IMPORTANT: This document is a TASK BOARD and definition of acceptance, not a report of completed work.** The October 31 audit reported **111/111 Python tests passing**, but this does **not** establish that live GPU training, two physical cameras, LLM integration, the servo mechanism, or factory trials are complete. Two cost-accounting errors were found in previous benchmarks. Although the archive is labeled 18, multiple internal package labels still say 17.0.
 
+## CAPE research addendum — 31 October 2026
+
+**New proposed research method:** **CAPE — Capacity-Aware Provenance-Constrained Evidence Acquisition**. Detailed mathematical design, scientific baselines, negative-result policy and acceptance gates: [CAPE research specification](docs/research/CAPE_CAPACITY_AWARE_EVIDENCE_ACQUISITION.md).
+
+**Novelty is a hypothesis, not a proven discovery.** CAPE explores whether source-root-aware, permissioned decentralized evidence acquisition combined with *marginal factory queue/capacity costs* can outperform standard VOI and conservative rules under comparable safety conditions. Keep SAFE-MESH as the independent physical-action safety gate. CAPE extends V-DER/CAIR; it is not a replacement or a claim that Bayesian VOI, queueing theory or distributed agents were invented here.
+
+### Additional priority tasks (not yet done)
+
+- [ ] **CAPE-01 — Bakdaulet:** Fix P0 sensor and peer-request cost-accounting errors; add regression tests preventing double charges or free inspected evidence.
+- [ ] **CAPE-02 — Bakdaulet:** Implement deterministic capacity-aware NetVOI with a discrete-event factory queue model; run low/high utilization switching tests and scientifically fair B0–B8 baselines/ablations.
+- [ ] **CAPE-03 — Bakdaulet:** Evaluate actual throughput, p95 cycle time, unsafe PASS, hold, total factory cost and confidence intervals; report *negative* as well as positive results. Keep synthetic and physical results labeled separately.
+- [ ] **CAPE-04 — adilnurgg:** Supply authenticated, scoped peer-request/reply traces, source-root DAG, per-call communication and LLM costs, and real queue telemetry to the CAPE scientific tool. Expose its output through API and web; LLMs cannot compute or override safety decisions.
+- [ ] **CAPE-05 — adilnurgg:** Compare compatible OpenAI/Claude/Nebius provider adapters separately from the collaboration protocol and maintain the independent SAFE-MESH approval/ACK boundary.
+- [ ] **CAPE-06 — HyorinmaruK:** Physical specimens, camera/caliper calibration, empirical service-time measurements, supervised sorter ACK tests and presentation; **no simulation, Digital Twin coding, cloud or backend assignment**.
+
+**Acceptance:** demonstrate a case where an authorized new source changes the inspection plan; duplicate source evidence does not count twice; increasing queue congestion changes the admissible optimal inspection when appropriate; in an uncongested limit CAPE reduces to standard NetVOI; combined benchmark and physical test reports never overstate demonstrated savings.
+
+---
+
 ## 0. Ownership — final, mandatory allocation
 
 | Person / GitHub | Owns | Strict scope boundary |
