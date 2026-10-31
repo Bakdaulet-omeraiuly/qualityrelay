@@ -178,6 +178,22 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
       }
     },
     snapshot() { if (tracer) tracer.renderSample(); else if (composer) composer.render(); else renderer.render(scene, camera); return renderer.domElement.toDataURL('image/png'); },
+    pan(dxPx, dyPx) {  // move over the floor by a screen distance (pixels), scaled with zoom
+      const dist = camera.position.distanceTo(controls.target), k = dist * 0.0016;
+      const fwd = new THREE.Vector3(); camera.getWorldDirection(fwd); fwd.y = 0; fwd.normalize();
+      const right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
+      const move = right.multiplyScalar(dxPx * k).add(fwd.multiplyScalar(-dyPx * k));
+      camera.position.add(move); controls.target.add(move); controls.update();
+    },
+    zoomBy(f) {  // f < 1: closer; animated, within the controls' distance limits
+      const d = camera.position.clone().sub(controls.target), len = THREE.MathUtils.clamp(d.length() * f, controls.minDistance, controls.maxDistance);
+      this.flyTo(controls.target.clone().add(d.setLength(len)).toArray(), controls.target.toArray(), 0.35);
+    },
+    focus(point, dist = 4.5) {  // keep the viewing direction, move in on a point
+      const d = camera.position.clone().sub(controls.target).setLength(dist);
+      if (d.y < dist * 0.45) d.y = dist * 0.45;
+      this.flyTo(point.clone().add(d).toArray(), point.toArray(), 0.7);
+    },
     flyTo(pos, tgt, dur = 1.3) {
       tween = { t0: performance.now(), dur: dur * 1000, p0: camera.position.clone(), q0: controls.target.clone(),
         p1: new THREE.Vector3(...pos), q1: new THREE.Vector3(...tgt) };
@@ -231,7 +247,21 @@ class FactoryView {
   constructor(el, partGeo) {
     this.el = el; this.partGeo = partGeo;
     this.s = makeStage(el, { camPos: [-2, 30, 34], target: [-1.2, 0, -1.2] });
-    this.s.controls.maxPolarAngle = Math.PI / 2.1; this.s.controls.minDistance = 6; this.s.controls.maxDistance = 70;
+    Object.assign(this.s.controls, { maxPolarAngle: Math.PI / 2.1, minDistance: 2.2, maxDistance: 60,
+      zoomToCursor: true, zoomSpeed: 1.15, rotateSpeed: 0.7, panSpeed: 1.0, screenSpacePanning: false,  // pan slides over the floor
+      // map-style: left-drag moves the hall, right-drag turns it; one finger moves, two fingers zoom/turn
+      mouseButtons: { LEFT: THREE.MOUSE.PAN, MIDDLE: THREE.MOUSE.DOLLY, RIGHT: THREE.MOUSE.ROTATE },
+      touches: { ONE: THREE.TOUCH.PAN, TWO: THREE.TOUCH.DOLLY_ROTATE } });
+    // Trackpad: two-finger scroll moves, pinch (ctrlKey wheel) zooms. A mouse wheel (whole steps, no
+    // sideways delta) keeps zooming to the cursor via OrbitControls.
+    this.el.addEventListener('wheel', (e) => {
+      const trackpadScroll = !e.ctrlKey && (e.deltaX !== 0 || (e.deltaMode === 0 && Math.abs(e.deltaY) < 40 && !Number.isInteger(e.deltaY * 2)));
+      if (!trackpadScroll) return;
+      e.preventDefault(); e.stopPropagation(); this.s.pan(e.deltaX, e.deltaY);
+    }, { capture: true, passive: false });
+    // never lose the line: the orbit centre stays inside the hall
+    this.s.controls.addEventListener('change', () => { const t = this.s.controls.target;
+      t.set(THREE.MathUtils.clamp(t.x, -20, 15), THREE.MathUtils.clamp(t.y, 0, 3), THREE.MathUtils.clamp(t.z, -11, 9)); });
     this.parts = []; this.stations = {}; this.labels = []; this.readouts = {}; this.selected = null; this.data = null;
     this.build();
   }
@@ -636,13 +666,28 @@ async function initLab() {
   $('#truth').onchange = () => renderInspector();
   $('#storyNext').onclick = () => story(lab.story + 1); $('#storyPrev').onclick = () => story(lab.story - 1);
   $('#toggleInspector').onclick = () => $('#studio').classList.toggle('noinsp');
-  lab.views.forEach((v, i) => bindPicking(v, i));
+  lab.views.forEach((v, i) => { bindPicking(v, i); viewControls(v); });
+  // Compare mode: both cameras move together so the two lines stay comparable
+  let syncing = false;
+  lab.views.forEach((v, i) => v.s.controls.addEventListener('change', () => {
+    if (syncing || lab.mode !== 'compare') return; syncing = true;
+    const o = lab.views[1 - i].s; o.camera.position.copy(v.s.camera.position); o.controls.target.copy(v.s.controls.target); o.controls.update();
+    syncing = false;
+  }));
   window.addEventListener('keydown', (e) => {
     if (['INPUT', 'SELECT'].includes(document.activeElement?.tagName) || $('#view-lab').hidden) return;
     if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
     else if (e.key === 'l' || e.key === 'L') { $('#labels').checked = !$('#labels').checked; $('#labels').onchange(); }
     else if (e.key === 't' || e.key === 'T') { $('#truth').checked = !$('#truth').checked; renderInspector(); }
     else if (e.key === 'i' || e.key === 'I') $('#studio').classList.toggle('noinsp');
+    else if ('wasdWASD'.includes(e.key) && e.key.length === 1) {  // WASD: move over the floor
+      const k = { w: [0, -60], s: [0, 60], a: [-60, 0], d: [60, 0] }[e.key.toLowerCase()];
+      lab.views.forEach((v) => v.s.pan(...k));
+    }
+    else if (e.key === '+' || e.key === '=') lab.views.forEach((v) => v.s.zoomBy(0.7));
+    else if (e.key === '-' || e.key === '_') lab.views.forEach((v) => v.s.zoomBy(1.4));
+    else if (e.key === '0') lab.views.forEach(resetView);
+    else if ((e.key === 'f' || e.key === 'F') && lab.sel) lab.views.forEach((v) => focusOn(v, lab.sel));
     else if (e.key === 'ArrowRight') story(lab.story + 1);
     else if (e.key === 'ArrowLeft') story(lab.story - 1);
   });
@@ -715,6 +760,30 @@ function bindPicking(v, side) {
     else tip.hidden = true;
   });
   el.addEventListener('pointerleave', () => (tip.hidden = true));
+  el.addEventListener('dblclick', (e) => {  // double-click: fly to the part/station; on empty floor: back to the overview
+    const hit = v.pick(e);
+    if (hit) { select({ ...hit, side }); focusOn(v, hit); } else resetView(v);
+  });
+}
+function objPoint(v, sel) {
+  if (sel?.type === 'part') { const x = v.parts.find((q) => q.p.id === sel.id); return x?.m.visible ? x.m.position.clone() : null; }
+  if (sel?.type === 'station') { const st = v.stations[sel.id]; return st ? st.mesh.getWorldPosition(new THREE.Vector3()) : null; }
+  return null;
+}
+function focusOn(v, sel) { const pt = objPoint(v, sel); if (pt) v.s.focus(pt, sel.type === 'part' ? 2.6 : 5); }
+function resetView(v) { v.s.flyTo(fitCam(v, STORY[0][2], STORY[0][3]), STORY[0][3], 0.9); }
+function viewControls(v) {
+  const box = document.createElement('div'); box.className = 'viewctl';
+  box.innerHTML = `<button data-a="in" title="Zoom in (+)">+</button><button data-a="out" title="Zoom out (−)">−</button>
+    <button data-a="focus" title="Fly to the selected part or station (F)">◎</button><button data-a="reset" title="Whole line (0 or double-click empty floor)">⤢</button>`;
+  box.onclick = (e) => { const a = e.target.dataset.a; if (!a) return;
+    if (a === 'in') v.s.zoomBy(0.7); else if (a === 'out') v.s.zoomBy(1.4); else if (a === 'reset') resetView(v);
+    else if (a === 'focus' && lab.sel) focusOn(v, lab.sel); };
+  const hint = document.createElement('div'); hint.className = 'viewhint';
+  hint.innerHTML = 'drag: move · right-drag: turn<br>trackpad: 2 fingers move, pinch zoom<br>mouse wheel: zoom to cursor<br>WASD: move · double-click: fly to';
+  v.s.el.append(box, hint);
+  setTimeout(() => hint.classList.add('gone'), 9000);  // shown once at start, then out of the way
+  box.onmouseenter = () => hint.classList.remove('gone'); box.onmouseleave = () => hint.classList.add('gone');
 }
 
 // Narrow viewports (compare mode) need the camera further back to show the whole line.
@@ -914,7 +983,7 @@ function summaryCard() {
   html += `<section><h4>How to read this</h4><ul class="tl">
     <li><span>click a part</span><span class="faint">evidence chain behind its decision</span><span></span></li>
     <li><span>click a station</span><span class="faint">its load in this run</span><span></span></li>
-    <li><span>keys</span><span class="faint"><kbd>space</kbd> play · <kbd>L</kbd> labels · <kbd>T</kbd> truth · <kbd>←</kbd><kbd>→</kbd> tour</span><span></span></li></ul></section>
+    <li><span>keys</span><span class="faint"><kbd>space</kbd> play · <kbd>L</kbd> labels · <kbd>T</kbd> truth · <kbd>←</kbd><kbd>→</kbd> tour · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move · <kbd>+</kbd><kbd>−</kbd> zoom · <kbd>F</kbd> fly to selection · <kbd>0</kbd> whole line</span><span></span></li></ul></section>
     <section><h4>Provenance</h4><p class="faint small">SIMULATED. Toy part generator, illustrative station timings, held-out calibration ${r.model.calibration_id}. Not a factory measurement.
       This 3D Lab runs two lanes with one iPhone camera each (cameras: ${(r.cameras || []).join(', ')}) and reprints confirmed defects. The pre-registered results in the Results tab used phone + Pi cameras without reprint.</p></section>`;
   return html;
