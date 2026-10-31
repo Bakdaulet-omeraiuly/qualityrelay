@@ -107,7 +107,8 @@ class Factory:
     def __init__(self, sc: FactoryScenario, seed: int, policy: str, pairing: str = 'fifo', *, costs: Costs | None = None,
                  model: PartModel | None = None, batch_k: int = 8, keep_log: bool = True,
                  pair_timeout_s: float | None = None, reprint: bool = False, max_reprints: int = 2,
-                 lane_by_kind: bool = False, feedback: str = 'none', ewma_lambda: float = 0.1, deadband_mm: float = 0.05):
+                 lane_by_kind: bool = False, feedback: str = 'none', ewma_lambda: float = 0.1, deadband_mm: float = 0.05,
+                 agents: bool = False):
         if policy not in POLICIES or pairing not in PAIRINGS:
             raise ValueError('unknown policy/pairing')
         if sc.evidence_sharing not in ('full', 'summary', 'none'):
@@ -133,6 +134,13 @@ class Factory:
         self.offset, self.bias_est, self.cusum = {}, {}, {}
         self.corrections, self.alarms = [], []
         self.design = nominal_design()
+        # agents=True: the six QualityRelay agents (sim/agents.py) make the part and pair decisions through
+        # messages; results must equal agents=False (checked by tests and by /sim/run).
+        if agents:
+            from .agents import AgentTeam
+            self.agents = AgentTeam(self)
+        else:
+            self.agents = None
         self.env = env = Env()
         self.site = {s.name: s for s in sc.sites}
         if sc.assembly_site not in self.site and len(sc.sites) > 1:
@@ -240,6 +248,8 @@ class Factory:
         p['measured_mm'] = p['caliper'][0]
         p['caliper_sd'] = site.caliper_sd_mm
         self._monitor(p, site)
+        if self.agents:
+            self.agents.on_inspected(p, site, obs)
         p['evidence_at'] = self.env.now + sc.evidence_latency_s
         # supplier-side part gate
         if self._part_hold(p, ('phone', 'pi')):
@@ -261,6 +271,8 @@ class Factory:
                 p['measured_mm'] = p['caliper'][1]
                 p['caliper_sd'] = self.site[a].caliper_sd_mm if a in self.site else 0.05
                 p['evidence_at'] = self.env.now
+                if self.agents:
+                    self.agents.on_inspected(p, self.site[a] if a in self.site else site, p['obs'], local=True)
                 if self._part_hold(p, ('phone_local',)):
                     self.stats['part_holds'] += 1
                     ok = yield from self._review_part(p)
@@ -302,6 +314,8 @@ class Factory:
             self._try_pair(flush=True)
 
     def _part_hold(self, p, cams):
+        if self.agents:
+            return self.agents.part_gate(p, cams, self._threshold())
         vals = {c: p['obs'][c][0] for c in cams if c in p['obs']}
         if self.policy == 'hold_all':
             return not p.get('expert_cleared')
@@ -316,7 +330,11 @@ class Factory:
         yield from self._work([self.res[(a, 'review')], self.res[(a, 'operator')]], f'rv:{p["part_id"]}', STATION_S['review'], 'review')
         self.hold_part_seconds += self.env.now - t0
         if p['expert_crack_seen'] or abs(p['expert_width_mm'] - (self.design['slot_opening_mm'] if p['kind'] == 'slot' else self.design['tab_width_mm'])) > 0.6:
+            if self.agents:
+                self.agents.on_review(p['part_id'], 'scrapped', flagged_parts=[p['part_id']], confirmed_parts=[p['part_id']])
             self._scrap(p); return False
+        if self.agents:
+            self.agents.on_review(p['part_id'], 'cleared', flagged_parts=[p['part_id']])
         p['reviewed'] = True
         p['obs'] = {}  # expert cleared the surface; fused below as 'cleared'
         p['expert_cleared'] = True
@@ -401,7 +419,13 @@ class Factory:
         yield ('timeout', min(max(0.0, ready - self.env.now), sc.evidence_deadline_s))
         true_clear = s['true_width_mm'] - t['true_width_mm']
         safe = true_clear >= TOL and not s['crack'] and not t['crack']
-        if stale:
+        if self.agents:  # the agents decide; ground truth (true_clear, safe) is never passed to them
+            hold, reason, p = self.agents.pair_decision(s, t, stale=stale, threshold=self._threshold(), pair_id=pid)
+            if stale:
+                self.stats['holds_stale_evidence'] += 1
+            elif self.policy == 'bayes':
+                rec['p_unsafe'] = round(p, 6)
+        elif stale:
             hold, reason = True, 'STALE_OR_MISSING_EVIDENCE'
             self.stats['holds_stale_evidence'] += 1
         elif self.policy == 'rules':
@@ -429,6 +453,9 @@ class Factory:
         yield from self._work([self.res[(a, 'review')], self.res[(a, 'operator')]], f'rvp:{rec["pair_id"]}', STATION_S['review'], 'review')
         self.hold_part_seconds += 2 * (self.env.now - t0)
         bad = [p for p in (s, t) if p['expert_crack_seen']]
+        if self.agents:
+            out = 'split_scrap' if bad else ('released' if s['expert_width_mm'] - t['expert_width_mm'] >= TOL else 'rework')
+            self.agents.on_review(rec['pair_id'], out)
         for p in bad:
             self._scrap(p)
         if bad:
@@ -472,6 +499,8 @@ class Factory:
                                            and self.env.now >= self.sc.cost_shock_at_s else 1.0),
                    cycle_s=round(self.env.now - min(s['t_print_s'], t['t_print_s']), 3))
         s['fate'] = t['fate'] = 'shipped'
+        if self.agents:
+            self.agents.on_shipped(rec)
         yield ('release', {self.wip['slot']: 1, self.wip['tab']: 1})
 
     # ---- run -------------------------------------------------------------------------

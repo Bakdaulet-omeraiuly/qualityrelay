@@ -84,6 +84,7 @@ class RunRequest(BaseModel):
     reprint: bool = True  # website default: closed-loop reprint of confirmed defects
     phone_only: bool = True  # website default: one iPhone camera per lane (registered results use phone + Pi)
     two_lanes: bool = True   # website default: separate slot and tab conveyor lanes
+    agents: bool = True      # decisions made by the six agents (sim/agents.py); a reference run checks they match
 
 
 def _who(key: str):
@@ -109,8 +110,20 @@ def run(req: RunRequest):
     if req.two_lanes:
         sc = replace(sc, sites=tuple(replace(s, inspection_lines=max(2, s.inspection_lines)) if s.makes == 'both' else s for s in sc.sites))
     f = Factory(sc, req.seed, req.policy, req.pairing, model=_model(), keep_log=True, reprint=req.reprint,
-                lane_by_kind=req.two_lanes)
+                lane_by_kind=req.two_lanes, agents=req.agents)
     summary = f.run()
+    agents_out = None
+    if req.agents:
+        # reference line without agents, same seed: every agent decision must equal the built-in computation
+        ref = Factory(sc, req.seed, req.policy, req.pairing, model=_model(), keep_log=True, reprint=req.reprint, lane_by_kind=req.two_lanes)
+        ref.run()
+        key = lambda p: (p['pair_id'], p['decision'], p.get('p_unsafe'), p.get('fate'))  # noqa: E731
+        a_, r_ = [key(p) for p in f.pairs], [key(p) for p in ref.pairs]
+        agents_out = f.agents.export()
+        agents_out['check'] = dict(pairs=len(a_), equal=sum(x == y for x, y in zip(a_, r_)) if len(a_) == len(r_) else 0,
+                                   identical=a_ == r_, note='agent decisions vs the line\'s built-in computation, same seed')
+        agents_out['policy_inside'] = {'bayes': 'Bayes expected-cost threshold', 'rules': 'fixed rule (today\'s practice)',
+                                       'hold_all': 'hold everything for review'}[req.policy]
     tl = {p['part_id']: [] for p in f.parts}
     for start, end, station, key in f.events:
         kind, ids = _who(key)
@@ -169,7 +182,8 @@ def run(req: RunRequest):
     return dict(source_tier=SOURCE_TIER, model_version=MODEL_VERSION, scenario=req.scenario, title=sc.title, reprint=req.reprint,
                 cameras=list(sc.cameras), two_lanes=req.two_lanes,
                 policy=req.policy, pairing=req.pairing, seed=req.seed, n_pairs=req.n_pairs,
-                kpis={k: summary[k] for k in keep}, parts=parts, pairs=pairs, stations=stations,
+                kpis={k: summary[k] for k in keep}, parts=parts, pairs=pairs, stations=stations, agents=agents_out,
+                costs=dict(hold=f.costs.hold, escaped_defect=f.costs.escaped_defect),
                 model=dict(calibration_id=m.calibration_id, phone_sens=m.phone_sens, phone_spec=m.phone_spec,
                            pi_sens=m.pi_sens, pi_spec=m.pi_spec, crack_prior=m.crack_prior))
 

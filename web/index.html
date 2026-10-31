@@ -138,8 +138,11 @@
     </div>
 
     <aside class="dock right" id="inspector">
-      <div class="phead"><span>Inspector</span><span class="faint" id="inspHint">click a part or a station</span></div>
-      <div class="pbody insp" id="inspBody"></div>
+      <div class="rtabs" role="tablist">
+        <button class="on" data-rtab="agents" role="tab">Agents · live</button><button data-rtab="insp" role="tab">Inspector <span class="faint" id="inspHint"></span></button>
+      </div>
+      <div class="pbody agentsPanel" id="agentsBody"><p class="faint">Run a simulation.</p></div>
+      <div class="pbody insp" id="inspBody" hidden></div>
     </aside>
   </div>
 </section>
