@@ -98,3 +98,16 @@ scenario ID and `SIMULATED`, or that the agents run on separate devices (until P
   part shows its agent conversation.
 - Still true: in this simulation the agents compute what the built-in policy computes, so they do
   not change any result by themselves. What would: P1 (D1-D3) and a real transport (P4).
+
+## 6. LLM planner with a record-once / replay cache (31 Oct, late)
+
+- `qualityrelay17/sim/llm_cache.py::CachingPlanner` wraps adilnurgg's OpenAI planner (his code
+  unchanged). Key = model + prompt/tool version + the Assembly agent's situation (missing kinds,
+  visible verdicts and VERIFY status, request outcomes, affordable requests, belief to 0.001); part
+  ids, event ids and times are excluded, so repeated situations across parts hit the cache.
+- `replay` (website, `/sim/run planner=llm_cached`): never calls the API; a miss falls back to the
+  fixed order and is counted. `record` (`scripts/record_llm_cache.py --confirm-spend`, SpendGuard caps):
+  a miss calls the LLM once and appends to `examples/llm_cache/planner_cache.jsonl`.
+- A planner that skips the caliper can only make decisions safer (no verified metrology -> HOLD), tested.
+- Honest label: the cache fixes one sampled LLM answer per situation; the UI shows hits, fallbacks,
+  API calls and dollars. Cache is empty until someone with the key records it.

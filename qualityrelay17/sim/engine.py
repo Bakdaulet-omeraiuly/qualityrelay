@@ -109,7 +109,7 @@ class Factory:
                  pair_timeout_s: float | None = None, reprint: bool = False, max_reprints: int = 2,
                  lane_by_kind: bool = False, feedback: str = 'none', ewma_lambda: float = 0.1, deadband_mm: float = 0.05,
                  agents: bool = False, architecture: str = 'local', uplink_mbps: float = 100.0,
-                 image_bytes: int = 2_000_000, central_outages: tuple = ()):
+                 image_bytes: int = 2_000_000, central_outages: tuple = (), planner=None):
         if policy not in POLICIES or pairing not in PAIRINGS:
             raise ValueError('unknown policy/pairing')
         if sc.evidence_sharing not in ('full', 'summary', 'none'):
@@ -148,7 +148,7 @@ class Factory:
         # messages; results must equal agents=False (checked by tests and by /sim/run).
         if agents:
             from .agents import AgentTeam
-            self.agents = AgentTeam(self)
+            self.agents = AgentTeam(self, planner=planner)
         else:
             self.agents = None
         self.env = env = Env()

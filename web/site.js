@@ -805,7 +805,7 @@ async function run() {
   if (lab.views[0]?.s.tracer) await exitPhoto();
   const btn = $('#runBtn'); btn.disabled = true; $('#runStatus').textContent = 'Running the discrete-event engine…';
   const base = { scenario: $('#scenario').value || 'F01', seed: +$('#seed').value, n_pairs: +$('#npairs').value };
-  const right = { ...base, policy: $('#policy').value, pairing: $('#pairing').value };
+  const right = { ...base, policy: $('#policy').value, pairing: $('#pairing').value, planner: $('#planner')?.value || 'fixed' };
   const cfgs = lab.mode === 'compare' ? [{ ...base, policy: 'rules', pairing: 'fifo' }, right] : [right];
   try {
     const t0 = performance.now();
@@ -1150,8 +1150,8 @@ function renderAgents(force) {
       ${ok ? 'Consistent with the camera calibration.' : '<b style="color:#f0c64a">Outside the interval: Learning proposes recalibration (proposal only).</b>'}</div>`;
   }
   el.innerHTML = `${side}
-    <div class="ag-head"><h2>Agents deciding this run</h2><span class="chk ${ck.identical ? 'ok' : 'bad'}" title="${ck.note}">${ck.identical ? '✓' : '✗'} ${ck.equal}/${ck.pairs} decisions = reference</span></div>
-    <div class="faint small" style="margin:-4px 0 10px">Cost agent: ${A.policy_inside}. Code, not LLMs. SIMULATED.</div>
+    <div class="ag-head"><h2>Agents deciding this run</h2><span class="chk ${ck.identical ? 'ok' : A.planner ? '' : 'bad'}" title="${ck.note}">${ck.identical ? '✓' : A.planner ? 'Δ' : '✗'} ${ck.equal}/${ck.pairs} ${A.planner ? 'same as fixed order' : 'decisions = reference'}</span></div>
+    <div class="faint small" style="margin:-4px 0 10px">Cost agent: ${A.policy_inside}. ${A.planner ? `Assembly's requests: <b>LLM planner, cached</b> (${A.planner.model}) · ${A.planner.hits} hits · ${A.planner.fallbacks} fallbacks to fixed order · ${A.planner.llm_calls} API calls · $${A.planner.usd.toFixed(4)}.` : 'Every agent is code, not an LLM.'} SIMULATED.</div>
     <div class="ag-kpis">
       <div class="ag-kpi"><b>${s.decided}</b><span>pairs decided</span></div>
       <div class="ag-kpi"><b>${s.decided ? Math.round(100 * s.mix.pass / tot) : 0}%</b><span>first-pass release</span></div>
