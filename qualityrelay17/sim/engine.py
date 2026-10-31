@@ -108,7 +108,8 @@ class Factory:
                  model: PartModel | None = None, batch_k: int = 8, keep_log: bool = True,
                  pair_timeout_s: float | None = None, reprint: bool = False, max_reprints: int = 2,
                  lane_by_kind: bool = False, feedback: str = 'none', ewma_lambda: float = 0.1, deadband_mm: float = 0.05,
-                 agents: bool = False):
+                 agents: bool = False, architecture: str = 'local', uplink_mbps: float = 100.0,
+                 image_bytes: int = 2_000_000, central_outages: tuple = ()):
         if policy not in POLICIES or pairing not in PAIRINGS:
             raise ValueError('unknown policy/pairing')
         if sc.evidence_sharing not in ('full', 'summary', 'none'):
@@ -133,6 +134,15 @@ class Factory:
         self.feedback, self.ewma_lambda, self.deadband = feedback, ewma_lambda, deadband_mm
         self.offset, self.bias_est, self.cusum = {}, {}, {}
         self.corrections, self.alarms = [], []
+        # P1 (docs/research/P1_DECENTRALISATION_REGISTRATION.md): architecture='central' ships every camera
+        # frame and caliper reading over one shared uplink to a central decision server; 'local' (default,
+        # registered behaviour) decides at the line. central_outages: (start, end) windows with the
+        # server/uplink down. The line LAN is assumed up throughout.
+        if architecture not in ('local', 'central'):
+            raise ValueError('architecture must be local|central')
+        self.architecture, self.uplink_bps, self.image_bytes = architecture, uplink_mbps * 1e6, image_bytes
+        self.central_outages = tuple(sorted(central_outages))
+        self.uplink_free_at, self.net_bytes, self.evidence_latency = 0.0, 0, []
         self.design = nominal_design()
         # agents=True: the six QualityRelay agents (sim/agents.py) make the part and pair decisions through
         # messages; results must equal agents=False (checked by tests and by /sim/run).
@@ -173,7 +183,7 @@ class Factory:
         self.hold_part_seconds = 0.0
         self.stats = dict(part_reviews=0, pair_reviews=0, reworks=0, rework_ok=0, scrapped_parts=0, scrapped_good_parts=0,
                           shipped=0, escaped=0, shipped_good=0, holds_stale_evidence=0, part_holds=0, pair_holds=0,
-                          local_reinspections=0, released_after_review=0, reprints=0)
+                          local_reinspections=0, released_after_review=0, reprints=0, holds_missing_central=0)
 
     # ---- helpers -------------------------------------------------------------------
     def _svc(self, key, mean_s):
@@ -251,6 +261,13 @@ class Factory:
         if self.agents:
             self.agents.on_inspected(p, site, obs)
         p['evidence_at'] = self.env.now + sc.evidence_latency_s
+        if self.architecture == 'central':
+            ok = yield from self._central_upload(p, obs)
+            if not ok:  # evidence did not reach the server in time: HOLD for missing evidence -> expert review
+                self.stats['part_holds'] += 1; self.stats['holds_missing_central'] += 1
+                ok = yield from self._review_part(p)
+                if not ok:
+                    self._upstream_exit(); return
         # supplier-side part gate
         if self._part_hold(p, ('phone', 'pi')):
             self.stats['part_holds'] += 1
@@ -306,6 +323,43 @@ class Factory:
         if abs(new - self.offset.get(key, 0.0)) > 0.02:
             self.offset[key] = new
             self.corrections.append(dict(t=round(self.env.now, 1), site=site.name, kind=p['kind'], estimate_mm=round(est, 4), offset_mm=round(new, 4)))
+
+    # ---- P1 central architecture -----------------------------------------------------------
+    def _advance(self, t, d):
+        """Finish time of d seconds of uplink transfer starting at t; nothing moves during an outage."""
+        for a, b in self.central_outages:
+            if t >= b:
+                continue
+            if t >= a:
+                t = b; continue
+            if t + d <= a:
+                return t + d
+            d -= a - t; t = b
+        return t + d
+
+    def _central_up_at(self, t):
+        for a, b in self.central_outages:
+            if a <= t < b:
+                return b
+        return t
+
+    def _central_upload(self, p, obs):
+        now = self.env.now
+        frames = sum(1 for v, _t in obs.values() if v is not None)
+        nbytes = frames * self.image_bytes + 200          # raw frames + the caliper reading
+        self.net_bytes += nbytes + 200                    # + the decision sent back
+        start = max(self.uplink_free_at, now)
+        done = self._advance(start, nbytes * 8 / self.uplink_bps)
+        self.uplink_free_at = done
+        decide_at = self._central_up_at(done)
+        self.evidence_latency.append(decide_at - now)
+        p['evidence_at'] = max(p['evidence_at'], decide_at)
+        wait = decide_at - now
+        if wait <= self.sc.evidence_deadline_s:
+            yield ('timeout', wait)
+            return True
+        yield ('timeout', self.sc.evidence_deadline_s)
+        return False
 
     def _upstream_exit(self):
         self.upstream -= 1
@@ -415,6 +469,9 @@ class Factory:
         rec = dict(pair_id=pid, slot_id=s['part_id'], tab_id=t['part_id'], slot_lot=s['lot_id'], tab_lot=t['lot_id'],
                    slot_site=s['site'], tab_site=t['site'], formed_s=round(self.env.now, 3))
         ready = max(s['evidence_at'], t['evidence_at'])
+        if self.architecture == 'central':  # the pair decision is made on the server: it must be up
+            self.net_bytes += 200
+            ready = max(ready, self._central_up_at(self.env.now))
         stale = ready - self.env.now > sc.evidence_deadline_s
         yield ('timeout', min(max(0.0, ready - self.env.now), sc.evidence_deadline_s))
         true_clear = s['true_width_mm'] - t['true_width_mm']
@@ -555,6 +612,9 @@ class Factory:
             escape_cost_units=sum(p['escape_cost_multiplier'] for p in shipped if p['escaped']),
             feedback=self.feedback, corrections=len(self.corrections), final_offsets={f'{a}:{b}': round(v, 4) for (a, b), v in self.offset.items()},
             cusum_alarms=len(self.alarms), first_alarm_s=self.alarms[0]['t'] if self.alarms else None,
+            architecture=self.architecture, holds_missing_central=st['holds_missing_central'],
+            net_bytes=self.net_bytes + (sum(m[6] for m in self.agents.messages) if self.agents else 0),
+            mean_evidence_latency_s=(sum(self.evidence_latency) / len(self.evidence_latency)) if self.evidence_latency else 0.0,
             correction_log=self.corrections[:200], alarm_log=self.alarms[:100],
             genealogy=shipped[:50] if self.keep_log else [],
         )
