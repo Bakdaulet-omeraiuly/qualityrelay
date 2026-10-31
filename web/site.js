@@ -674,8 +674,15 @@ function cameraSection(k) {
     <div class="row2" style="margin-top:8px"><button class="ghost" id="camDevice">📷 Open device camera</button>
       <label class="ghost filebtn">⬆ Upload photo<input type="file" accept="image/*" capture="environment" id="camFile" hidden></label></div>
     <video id="camVideo" class="camimg" playsinline muted hidden></video><img id="camPhoto" class="camimg" alt="captured photo" hidden>
-    <div class="row2" style="margin-top:8px"><select id="camLabel" aria-label="Label"><option value="inbox">label later</option><option value="good">good part</option><option value="defect">defective part</option></select>
-      <button class="primary" id="camSave" disabled>Save + NVIDIA check</button></div>
+    <div class="row2" style="margin-top:8px">
+      <label>Purpose<select id="camPurpose"><option value="training">training photo (model)</option><option value="measurement">measurement / reference</option></select></label>
+      <label>Specimen ID<input id="camSpec" type="text" placeholder="e.g. P07" maxlength="40" style="display:block;width:100%;margin-top:4px;background:var(--panel2);color:var(--text);border:1px solid var(--border2);border-radius:6px;padding:6px 8px"></label></div>
+    <div class="row2">
+      <label>Label<select id="camLabel"><option value="inbox">label later</option><option value="good">good part</option><option value="defect">defective part</option></select></label>
+      <label>Defect type<select id="camDefect" disabled><option value="">—</option>${['warp', 'stringing', 'chip', 'hole', 'crack', 'layer_shift', 'under_extrusion', 'wrong_size', 'other'].map((d) => `<option>${d}</option>`).join('')}</select></label></div>
+    <div class="row2"><label>Caliper reading, mm (optional)<input id="camCal" type="number" step="0.01" min="0" max="99"></label>
+      <button class="primary" id="camSave" disabled style="align-self:end;margin-bottom:10px">Save + NVIDIA check</button></div>
+    <p class="faint small">Training photos: marker in the same corner every time, turn good parts a little between shots, mix part types. Measurement photos: part placed the same way against the marker; add the caliper reading. See PHOTO_CAPTURE_GUIDE.md.</p>
     <div id="camResult" class="faint small" style="margin-top:8px">The photo is saved as PHYSICAL_CAPTURE training data (data/prints/…). The NVIDIA anomaly model scores it once it has been trained on real photos.</div></section>
     <section><h4>Visual inspection <span class="badge mute">candidates · review required</span></h4>
       <p class="faint small">Uses the open-source inspection pack: image-quality gate, photo-vs-reference difference after ArUco registration, heatmap, candidate boxes, and Roboflow prediction boxes. Results are UNVERIFIED_VISUAL_CANDIDATE and never pass or reject a part.</p>
@@ -796,23 +803,27 @@ function bindCameraPanel(k, side) {
       $('#camDevice').textContent = '⏺ Capture photo';
     } catch (err) { $('#camResult').textContent = `Camera unavailable: ${err.message}. Use "Upload photo" instead.`; }
   };
+  $('#camLabel').onchange = () => { $('#camDefect').disabled = $('#camLabel').value !== 'defect'; if ($('#camDefect').disabled) $('#camDefect').value = ''; };
   $('#camSave').onclick = async () => {
     $('#camSave').disabled = true; $('#camResult').textContent = 'Saving…';
     try {
       const r = await api('/sim/vision/capture', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lane: k === 'phone_0' ? 'slot' : 'tab', label: $('#camLabel').value, image_b64: photo }) });
+        body: JSON.stringify({ lane: k === 'phone_0' ? 'slot' : 'tab', label: $('#camLabel').value, image_b64: photo, purpose: $('#camPurpose').value,
+          specimen_id: $('#camSpec').value.trim() || null, defect_type: $('#camDefect').value || null,
+          caliper_mm: $('#camCal').value ? +$('#camCal').value : null }) });
       const n = r.nvidia_anomaly, c = r.dataset_counts;
       const ms = r.measurement || {};
       const meas = ms.status === 'MEASURED' ? `<span>width from photo</span><span>${ms.kind === 'slot_opening' ? 'slot opening' : 'tab width'} <b>${fmt(ms.width_mm, 3)} mm</b></span><span>photo resolution</span><span>${fmt(ms.photo_px_per_mm, 1)} px/mm${ms.photo_px_per_mm < 15 ? ' (low: move closer)' : ''}</span>`
         : `<span>width from photo</span><span class="faint">${ms.status || '—'}: put the ArUco sheet next to the part</span>`;
-      $('#camResult').innerHTML = `<div class="kv">${meas}<span>saved</span><span>${r.saved.split('/').slice(-2).join('/')}</span><span>size</span><span>${r.width} × ${r.height}</span>
+      const cal = r.photo_minus_caliper_mm !== null && r.photo_minus_caliper_mm !== undefined ? `<span>photo − caliper</span><span><b>${sign(r.photo_minus_caliper_mm, 3)} mm</b></span>` : '';
+      $('#camResult').innerHTML = `<div class="kv">${meas}${cal}<span>saved</span><span>${r.saved.split('/').slice(-2).join('/')}</span><span>size</span><span>${r.width} × ${r.height}</span>
         <span>tier</span><span>${r.source_tier}</span><span>dataset</span><span>good ${c.good} · defect ${c.defect} · inbox ${c.inbox}</span></div>
         <div class="why"><b>NVIDIA anomaly model: ${n.status}.</b> ${n.reason} ${n.ready_to_train ? '<b>Enough photos to train now:</b>' : `Need ≥ ${n.need.good} good and ≥ ${n.need.defect} defect photos, then:`} <code>${n.train_command}</code></div>`;
       try {
         const sg = await api('/sim/vision/suggest?limit=3');
         if (sg.suggestions.length) $('#camResult').insertAdjacentHTML('beforeend', `<div class="why"><b>Label next (most informative first):</b><br>${sg.suggestions.map((x) => `${x.file}: ${x.reason}`).join('<br>')}</div>`);
       } catch { /* suggestions are optional */ }
-    } catch (err) { $('#camResult').textContent = `Save failed: ${err.message}`; }
+    } catch (err) { $('#camResult').textContent = err.message.includes('422') ? 'Not saved: a defective training photo needs a defect type; specimen ID may use letters, digits, - and _ only.' : `Save failed: ${err.message}`; }
     $('#camSave').disabled = false;
   };
 }

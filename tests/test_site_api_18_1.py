@@ -102,3 +102,21 @@ def test_visual_inspection_registered_reference_finds_a_scratch(tmp_path, monkey
     assert len(r2['report']['regions']) == 1 and r2['report']['regions'][0]['model_class_unverified'] == 'crack'
     nomarker = enc(np.full((200, 300, 3), 180, np.uint8))
     assert c.post('/sim/vision/inspect', json=dict(lane='tab', action='compare', image_b64=nomarker)).status_code == 422
+
+
+def test_capture_protocol_fields_names_and_log(tmp_path, monkeypatch):
+    import base64, csv, cv2, numpy as np
+    from qualityrelay17.sim import api_routes
+    from qualityrelay17.vision_measure import render_synthetic
+    monkeypatch.setattr(api_routes, 'PRINTS', tmp_path / 'prints')
+    img = render_synthetic('tab', 20.2, np.random.default_rng(2), 25)
+    b64 = 'data:image/jpeg;base64,' + base64.b64encode(cv2.imencode('.jpg', img, [cv2.IMWRITE_JPEG_QUALITY, 95])[1].tobytes()).decode()
+    assert c.post('/sim/vision/capture', json=dict(lane='tab', label='defect', image_b64=b64)).status_code == 422  # defect needs a type
+    assert c.post('/sim/vision/capture', json=dict(lane='tab', label='good', image_b64=b64, specimen_id='bad id!')).status_code == 422
+    r = c.post('/sim/vision/capture', json=dict(lane='tab', label='defect', defect_type='warp', specimen_id='P07', image_b64=b64)).json()
+    name = r['saved'].split('/')[-1]
+    assert '_warp_P07_tab_' in name and name[6] == '_' and (tmp_path / 'prints' / 'defect').exists()
+    r2 = c.post('/sim/vision/capture', json=dict(lane='tab', label='good', purpose='measurement', specimen_id='P08', caliper_mm=20.2, image_b64=b64)).json()
+    assert '/measure/' in r2['saved'] and abs(r2['photo_minus_caliper_mm']) < 0.2
+    rows = list(csv.DictReader(open(tmp_path / 'prints' / 'capture_log.csv')))
+    assert [x['specimen_id'] for x in rows] == ['P07', 'P08'] and rows[0]['label_checked_by'] == '' and rows[1]['caliper_mm'] == '20.2'

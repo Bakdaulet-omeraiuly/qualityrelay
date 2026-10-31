@@ -221,13 +221,49 @@ def results():
 
 
 # ---- camera captures (real photos) -> training folders for VISION-04 -------------------------
+DEFECT_TYPES = ('warp', 'stringing', 'chip', 'hole', 'crack', 'layer_shift', 'under_extrusion', 'wrong_size', 'other')
+
+
 class CaptureRequest(BaseModel):
     lane: str = Field('slot', pattern='^(slot|tab)$')
     label: str = Field('inbox', pattern='^(good|defect|inbox)$')
     image_b64: str = Field(..., min_length=32, max_length=12_000_000)
+    # PHOTO_CAPTURE_GUIDE.md: purpose decides the folder; specimen ID and defect type are required
+    # bookkeeping for honest results; caliper_mm (optional) validates the photo measurement.
+    purpose: str = Field('training', pattern='^(training|measurement)$')
+    specimen_id: str | None = Field(None, pattern='^[A-Za-z0-9_-]{1,40}$')
+    defect_type: str | None = Field(None, pattern='^(' + '|'.join(DEFECT_TYPES) + ')$')
+    caliper_mm: float | None = Field(None, gt=0, lt=100)
 
 
 PRINTS = ROOT / 'data' / 'prints'   # data/ is git-ignored; the anomaly pipeline reads data/prints/good|defect
+
+
+CAPTURE_LOG_FIELDS = ('saved_at', 'file', 'purpose', 'label', 'defect_type', 'specimen_id', 'lane', 'caliper_mm',
+                      'photo_width_mm', 'photo_kind', 'photo_px_per_mm', 'sha256', 'label_checked_by')
+
+
+def _log_capture(path, req, sha, img):
+    """Append one row to data/prints/capture_log.csv. label_checked_by stays empty until a second person
+    checks the label (required before reporting PHYSICAL_CAPTURE results)."""
+    import csv as _csv, time
+    from ..vision_measure import measure_part_width
+    try:
+        m = measure_part_width(img)
+    except Exception:  # noqa: BLE001
+        m = {}
+    log = PRINTS / 'capture_log.csv'
+    new = not log.exists()
+    log.parent.mkdir(parents=True, exist_ok=True)
+    with open(log, 'a', newline='') as fh:
+        w = _csv.DictWriter(fh, fieldnames=CAPTURE_LOG_FIELDS)
+        if new:
+            w.writeheader()
+        w.writerow(dict(saved_at=time.strftime('%Y-%m-%dT%H:%M:%S'), file=path.name, purpose=req.purpose, label=req.label,
+                        defect_type=req.defect_type or '', specimen_id=req.specimen_id or '', lane=req.lane,
+                        caliper_mm='' if req.caliper_mm is None else req.caliper_mm,
+                        photo_width_mm=m.get('width_mm', ''), photo_kind=m.get('kind', ''), photo_px_per_mm=m.get('photo_px_per_mm', ''),
+                        sha256=sha, label_checked_by=''))
 
 
 @router.post('/vision/capture')
@@ -250,13 +286,21 @@ def vision_capture(req: CaptureRequest):
         raise HTTPException(422, 'not a decodable image')
     sha = hashlib.sha256(data).hexdigest()
     ext = '.png' if data[:8] == b'\x89PNG\r\n\x1a\n' else '.jpg'
-    folder = PRINTS / req.label
+    if req.label == 'defect' and req.purpose == 'training' and not req.defect_type:
+        raise HTTPException(422, 'a defect photo for training needs defect_type (see PHOTO_CAPTURE_GUIDE.md)')
+    # training photos -> data/prints/{good,defect,inbox}; measurement / reference photos -> data/measure/
+    folder = (PRINTS / req.label) if req.purpose == 'training' else (PRINTS.parent / 'measure')
     folder.mkdir(parents=True, exist_ok=True)
-    path = folder / f"{time.strftime('%Y%m%dT%H%M%S')}_{req.lane}_{sha[:10]}{ext}"
+    tag = req.defect_type if req.label == 'defect' and req.defect_type else req.label
+    # hash prefix first: the trainer takes the first 70% of good/ by filename, so names must not sort by
+    # time or by part type (avoids a biased train/test split); the defect type stays readable in the name
+    path = folder / f"{sha[:6]}_{tag}_{req.specimen_id or 'noid'}_{req.lane}_{time.strftime('%Y%m%dT%H%M%S')}{ext}"
     path.write_bytes(data)
-    counts = {k: len(list((PRINTS / k).glob('*'))) if (PRINTS / k).exists() else 0 for k in ('good', 'defect', 'inbox')}
+    counts = {k: len([f for f in (PRINTS / k).glob('*') if f.suffix.lower() in ('.png', '.jpg', '.jpeg', '.bmp')]) if (PRINTS / k).exists() else 0
+              for k in ('good', 'defect', 'inbox')}
     ready = counts['good'] >= 30 and counts['defect'] >= 10
     saved = str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
+    _log_capture(path, req, sha, img)
     from ..vision_measure import measure_part_width
     try:
         measurement = measure_part_width(img)
@@ -264,10 +308,12 @@ def vision_capture(req: CaptureRequest):
         measurement = dict(status='ERROR', note=str(e)[:200])
     return dict(source_tier='PHYSICAL_CAPTURE', saved=saved, sha256=sha, width=int(img.shape[1]),
                 height=int(img.shape[0]), lane=req.lane, label=req.label, dataset_counts=counts, measurement=measurement,
+                purpose=req.purpose, specimen_id=req.specimen_id, defect_type=req.defect_type, caliper_mm=req.caliper_mm,
+                photo_minus_caliper_mm=(round(measurement['width_mm'] - req.caliper_mm, 3) if req.caliper_mm and measurement.get('status') == 'MEASURED' else None),
                 nvidia_anomaly=dict(status='NOT_CONFIGURED',
                                     reason='The STFPM model has only been trained on synthetic CAD renders and MVTec; scoring a real '
                                            'photo with it would be out of domain. Train it on these PHYSICAL_CAPTURE photos first.',
-                                    ready_to_train=ready, need=dict(good=30, defect=10),
+                                    ready_to_train=ready, need=dict(good=30, defect=10), recommended=dict(good=50, defect=20),
                                     train_command='python scripts/train_anomaly.py --data captured --root data/prints --epochs 100 --size 256  (Brev L4)'))
 
 
