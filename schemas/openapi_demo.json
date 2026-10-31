@@ -1263,6 +1263,25 @@
         }
       }
     },
+    "/sim/hdri/warehouse.hdr": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Hdri",
+        "operationId": "hdri_sim_hdri_warehouse_hdr_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/sim/charts/{name}.svg": {
       "get": {
         "tags": [
@@ -1539,6 +1558,106 @@
               "type": "integer",
               "default": 0,
               "title": "After"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/vision/inspect": {
+      "post": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Vision Inspect",
+        "description": "Quality gate, registered reference comparison (heatmap + candidate boxes) and Roboflow-JSON box\nrendering, using qualityrelay17.inspection_visuals (PR #8). Every result is an\nUNVERIFIED_VISUAL_CANDIDATE that requires review; nothing here passes or rejects a part.",
+        "operationId": "vision_inspect_sim_vision_inspect_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InspectRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/physical/summary": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Physical Summary",
+        "description": "Caliper calibration from data/measurements/*.csv and the photo-vs-caliper check. Runs with the\nfitted values stay SIMULATED (physically calibrated); the caliper is authoritative.",
+        "operationId": "physical_summary_sim_physical_summary_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sim/physical/page/{name}": {
+      "get": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Physical Page",
+        "operationId": "physical_page_sim_physical_page__name__get",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Name"
             }
           }
         ],
@@ -2200,6 +2319,49 @@
             "maxLength": 12000000,
             "minLength": 32,
             "title": "Image B64"
+          },
+          "purpose": {
+            "type": "string",
+            "pattern": "^(training|measurement)$",
+            "title": "Purpose",
+            "default": "training"
+          },
+          "specimen_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_-]{1,40}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Specimen Id"
+          },
+          "defect_type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^(warp|stringing|chip|hole|crack|layer_shift|under_extrusion|wrong_size|other)$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Defect Type"
+          },
+          "caliper_mm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMaximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Caliper Mm"
           }
         },
         "type": "object",
@@ -2278,6 +2440,65 @@
           "observed_specimen_id"
         ],
         "title": "IdentityCheck"
+      },
+      "InspectRequest": {
+        "properties": {
+          "lane": {
+            "type": "string",
+            "pattern": "^(slot|tab)$",
+            "title": "Lane",
+            "default": "slot"
+          },
+          "action": {
+            "type": "string",
+            "pattern": "^(quality|set_reference|compare|roboflow)$",
+            "title": "Action",
+            "default": "quality"
+          },
+          "image_b64": {
+            "type": "string",
+            "maxLength": 12000000,
+            "minLength": 32,
+            "title": "Image B64"
+          },
+          "roboflow_json": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Roboflow Json"
+          },
+          "model_id": {
+            "type": "string",
+            "maxLength": 160,
+            "title": "Model Id",
+            "default": "roboflow-unspecified"
+          },
+          "threshold": {
+            "type": "integer",
+            "maximum": 255.0,
+            "minimum": 1.0,
+            "title": "Threshold",
+            "default": 40
+          },
+          "edge_band_px": {
+            "type": "integer",
+            "maximum": 8.0,
+            "minimum": 0.0,
+            "title": "Edge Band Px",
+            "default": 2
+          }
+        },
+        "type": "object",
+        "required": [
+          "image_b64"
+        ],
+        "title": "InspectRequest"
       },
       "LiveEvent": {
         "properties": {

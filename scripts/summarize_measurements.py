@@ -104,7 +104,6 @@ def summarize(rows: list[dict], tol: float, spread_limit: float) -> dict:
 def print_report(summary: dict) -> None:
     print(f"{'specimen':14}{'feature':18}{'n':>3}{'mean':>9}{'spread':>9}{'nominal':>9}{'dev':>8}  flag")
     print("-" * 80)
-    crit_flagged = {f.split(":")[0] + ":" + f.split(":")[1].split()[0] for f in summary["flags"]}
     for spec in summary["specimens"]:
         head = f"{spec['specimen_id']:14}"
         for i, fr in enumerate(spec["features"]):

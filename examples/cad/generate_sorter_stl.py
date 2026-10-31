@@ -202,7 +202,7 @@ def geometry_check() -> list[tuple[str, bool, str]]:
     worst = 1e9
     for a in ROUTE_ANGLES.values():          # wall start must stay out of the entry lane
         psi = math.radians(a - 90)
-        u, v = (math.cos(psi), math.sin(psi)), (-math.sin(psi), math.cos(psi))
+        v = (-math.sin(psi), math.cos(psi))  # wall direction; only its normal is used below
         for side in (1, -1):
             wy = side * INNER_HALF_WIDTH
             x = PIVOT_FROM_BOARD_END + wy * v[0]

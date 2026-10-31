@@ -181,7 +181,7 @@ def openai_planner_from_env(env: Mapping[str, str] | None = None, *, client=None
         from openai import OpenAI
         base_url = (env.get('OPENAI_BASE_URL') or '').strip() or None
         client = OpenAI(api_key=key, base_url=base_url, timeout=20, max_retries=1)
-    extra = {'parallel_tool_calls': False}
+    extra: dict[str, bool | str] = {'parallel_tool_calls': False}
     # GPT-5.x reasoning models reject function tools on /v1/chat/completions unless reasoning_effort='none'.
     # Blank = not sent, so models that do not know the parameter are unaffected.
     effort = (env.get('OPENAI_REASONING_EFFORT') or '').strip()
