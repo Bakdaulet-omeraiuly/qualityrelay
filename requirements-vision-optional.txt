@@ -1,0 +1,10 @@
+# OPT-IN only: model-agnostic Roboflow-style bounding-box rendering.
+# qualityrelay17/inspection_visuals.py works with the existing requirements-demo.txt.
+# Neither package supplies verified QualityRelay weights, factory data or model licenses.
+supervision>=0.28,<1
+
+# Anomalib PatchCore / EfficientAD / STFPM are an INDEPENDENT optional training environment.
+# Do NOT install Anomalib into the core or Brev STFPM env without reviewing its pinned
+# torch/torchvision compatibility. Follow https://github.com/open-edge-platform/anomalib
+# For now, export an HxW anomaly map from your validated model as .npy and consume it
+# with scripts/inspect_visual.py --mode anomaly-map.
