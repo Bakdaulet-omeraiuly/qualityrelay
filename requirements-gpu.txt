@@ -1,0 +1,6 @@
+# Only for scripts/train_anomaly.py (qualityrelay17/anomaly.py). Everything else in the
+# package runs without these. On Brev/Nebius pick the CUDA wheel matching the image's driver:
+#   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu124
+torch>=2.4,<3
+torchvision>=0.19,<1
+onnx>=1.16,<2          # optional: lets you inspect/validate the exported teacher/student graphs

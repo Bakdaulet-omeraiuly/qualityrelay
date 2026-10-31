@@ -5,3 +5,5 @@ __pycache__/
 .env
 .DS_Store
 examples/results/runs/*/raw_rows.csv
+runs/
+data/
