@@ -6,7 +6,8 @@ def test_health_discloses_limits():
     r=c.get('/health');assert r.status_code==200 and not r.json()['factory_connected']
 
 def test_website():
-    r=c.get('/');assert r.status_code==200 and 'QualityRelay 17' in r.text
+    r=c.get('/');assert r.status_code==200 and 'QualityRelay' in r.text and 'SIMULATED' in r.text
+    r=c.get('/legacy');assert r.status_code==200 and 'QualityRelay 17' in r.text  # 17.0 page kept at /legacy
 
 def test_simulation_api():
     r=c.post('/simulation/compare',json={'n':30,'seed':42});assert r.status_code==200 and r.json()['origin']=='SIMULATED'
