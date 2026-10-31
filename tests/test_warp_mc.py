@@ -60,3 +60,15 @@ def test_counts_are_conserved_and_paired_differences_consistent():
         d = w['policies'][name]['unsafe_pass_rate'] - w['policies']['B0_rules']['unsafe_pass_rate']
         assert pr['unsafe_pass_rate']['diff'] == pytest.approx(d, abs=1e-12)
     assert 0.25 < w['duplicate_rate'] < 0.35
+
+
+def test_importance_sampling_is_unbiased_and_common_mode_fit_recovers_c():
+    from qualityrelay17.gpu.warp_mc import run_is, fit_common_mode
+    sc = WarpScenario('T', 'shared', shared_noise=0.15)
+    cm = fit_common_mode(sc, seeds=range(4000, 4004))
+    assert abs(cm['c'] - 0.15) <= 0.03
+    a = run_is(sc, 400_000, device='cpu', common=cm)
+    b = run_is(sc, 400_000, q_surface=0.3, q_noise=0.25, device='cpu', common=cm, seed=5)
+    for k in a['policies']:
+        x, y = a['policies'][k], b['policies'][k]
+        assert abs(x['unsafe_pass_rate'] - y['unsafe_pass_rate']) < 4 * (x['se'] ** 2 + y['se'] ** 2) ** 0.5
