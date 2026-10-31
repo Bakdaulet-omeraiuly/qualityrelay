@@ -35,6 +35,9 @@ The arithmetic says "measure twice" for nearly every part, so the policy degener
 double-measurement rule on that axis rather than a targeted one. The obvious fix is a continuous
 caliper likelihood (how *close* to tolerance the reading was), which would concentrate retakes
 on near-tolerance parts. That is **not** in this run; it is the first exploratory item below.
+**Update, later on 31 Oct:** the Level-1 digital twin (`DIGITAL_TWIN_RUN_31OCT.md`) shows what this
+costs in time — the retakes drive the Caliper station to 99.8 % utilisation and cycle time to 24×
+the rule's. Cost-neutral on paper, infeasible on a one-caliper line.
 
 ## 2. All scenarios — `voi_driven` vs `conservative_rules` (descriptive, same rules applied)
 

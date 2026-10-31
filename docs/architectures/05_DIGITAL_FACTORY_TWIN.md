@@ -8,7 +8,7 @@ Workcell, machine, operator, supplier, lot, specimen, geometry revision, product
 
 ## Three simulation fidelities
 **Level 0 (implemented):** seeded specimen stream and multiple inspection policies in `factory.py`. Includes distribution shifts, two imperfect camera observations, partial network availability, and physical-safe true outcomes. Fast CPU benchmark. No conveyor physics or real visual imagery.
-**Level 1 (integration recipe):** SimPy/FactorySimPy discrete event simulation of buffers, machines, queue length, cycle times, blocked/starved stations, WIP, scrapping and inspection routing. Each simulation event has virtual timestamp and origin SIMULATED.
+**Level 1 (implemented 31 Oct, Bakdaulet — `qualityrelay17/digital_twin.py`):** own event-driven DES (no SimPy dependency) coupling the Level-0 inspection policies to a 7-station line with FIFO queues, capacities, WIP, cycle time, throughput and a quarantine/Review station; purchased VOI evidence becomes station revisits. Common random numbers across policies, conservation/determinism tests, 6 fault scenarios. Results and the finding that cost-optimal VOI saturates the caliper station: `docs/research/DIGITAL_TWIN_RUN_31OCT.md`. Service times are illustrative assumptions until measured. Blocked/starved-station modelling and finite buffers remain future work.
 **Level 2 (NVIDIA plugin):** Isaac Sim/Omniverse 3D workcells, photoreal sensors, mechanical chute geometry, and Replicator domain randomization. Needs an RTX GPU with RT cores; Nebius H100 alone cannot render Isaac Sim. Scene artifacts in USD and source CAD tracked by revision.
 
 ## Multi-factory extension

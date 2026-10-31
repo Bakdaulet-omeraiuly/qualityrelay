@@ -11,6 +11,9 @@
 | Evidence lineage and HMAC validated | Reference unit test | HMAC station envelope + lineage DAG, security limitations |
 | Decentralized real deployment | **NOT DEPLOYED** | research contracts and original 15.0 separate SQLite services |
 | Full virtual factory 3D NVIDIA scene | **NOT DEPLOYED** | small seeded six-stage discrete event reference |
+| Level-1 digital twin (queues, WIP, cycle time, policies coupled) | **Implemented, SIMULATED, timings are assumptions** | `qualityrelay17/digital_twin.py`, `docs/research/DIGITAL_TWIN_RUN_31OCT.md`, 18 V&V tests |
+| Cost-optimal VOI is operationally feasible on the demo line | **NO at current cost table** — 85 % caliper retakes saturate the Caliper station (99.8 %), cycle time 24× the rule's; at `Costs.inspection=5.0` VOI buys nothing | same |
+| Calibrated fusion shortens the line vs the OR-rule at matched inspection load | Observed in simulation: −19.5 s cycle [−27.1, −12.9] per part, 24 % faster, +0.1 escapes/1000 | same |
 | NVIDIA 8 technologies actively integrated | **NOT CONFIGURED** | 8 explicit stubs, license/resource docs |
 | Anomaly detector trained on an NVIDIA GPU | **Done, reference-level** — STFPM on Brev L4; MVTec screw 0.948 / bottle 1.000 image AUROC (`EXTERNAL_DATASET`), own-STL synthetic 0.880 (`SIMULATED`) | `docs/research/ANOMALY_GPU_RUN_31OCT.md`, manifests in `docs/research/runs/` |
 | Anomaly detector validated on our printed parts | **NOT RUN** — no `PHYSICAL_CAPTURE` images exist yet | pipeline ready: `scripts/train_anomaly.py --data captured` |

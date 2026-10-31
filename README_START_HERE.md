@@ -47,6 +47,8 @@ uvicorn qualityrelay17.api:app --host 127.0.0.1 --port 8000
 
 `examples/results/BENCHMARK_30x1000_SYNTHETIC.json`: 30 seeds x 1000 simulated specimens per seed. The present SAFE-MESH reference has same conservative rule decisions as conservative-rules, but incurs more inspection cost: **it is not better**. This honest negative result identifies the research work required: implement and calibrate adaptive active inspection, then evaluate on held-out physical lots.
 
+**31 Oct — Level-1 digital twin (Bakdaulet).** `python scripts/run_digital_twin.py` couples the inspection policies to an event-driven line (queues, WIP, cycle time, Review station) under common random numbers; `docs/research/DIGITAL_TWIN_RUN_31OCT.md`. Headline: the cost-optimal VOI's caliper retakes saturate the Caliper station — cost-neutral on paper, 24× cycle time on the line. Timings are assumptions.
+
 **31 Oct — pre-registered VOI protocol (Bakdaulet).** `scripts/run_protocol.py` runs 13 declared scenarios × 30 seeds × 1000 with held-out-calibrated likelihoods and decision rules fixed in advance (`docs/research/PROTOCOL_REGISTRATION_31OCT.md`). Verdicts per scenario, including the negative ones, are in `docs/research/PROTOCOL_RUN_31OCT_RESULTS.md` and `examples/results/protocol_31oct/manifest.json`. Still `SIMULATED`; still not a factory claim.
 
 ## Important restrictions
