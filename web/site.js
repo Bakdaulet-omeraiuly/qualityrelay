@@ -28,6 +28,10 @@ const hash = (s) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c
 // Conveyor speed in scene units per SIMULATED second (1 unit ≈ 0.25 m in this layout -> ~0.15 m/s).
 const BELT_SPEED = 0.6;
 const BELT_Y = 0.62;  // conveyor surface height
+const Y_AXIS = new THREE.Vector3(0, 1, 0);
+const QUEUE_GAP = 1.3;  // centre spacing of queued parts: an assembled pair is 72 mm = 1.15 units, plus a visible gap
+// Tab centre relative to slot centre when assembled: +12 mm along the part (0.016 scene units per mm).
+const ASSEMBLED_TAB_OFFSET = new THREE.Vector3(12.3 * 0.016, -0.002, 0);  // 0.3 mm air gap + tiny drop: no coincident faces (z-fighting)
 const LANE_STATIONS = new Set(['phone', 'pi', 'caliper']);
 const laneKey = (st, line) => (LANE_STATIONS.has(st) ? `${st}_${line || 0}` : st);
 const ease = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
@@ -384,18 +388,28 @@ class FactoryView {
 
   load(data, caughtIds = new Set()) {
     const sc = this.s.scene; this.parts.forEach((x) => sc.remove(x.m)); this.parts = []; this.data = data;
-    const bins = { shipped: 0, scrap: 0 };
+    // bin places are given in order of arrival, so piles fill bottom-up (a pair = one place)
+    const arrival = new Map();
+    for (const p of data.parts) if (p.fate === 'shipped' || p.fate === 'scrap') {
+      const key = p.fate === 'shipped' ? `s:${p.pair || p.id}` : `x:${p.id}`, tEnd = pathFor(p, 0).at(-1)[0];
+      arrival.set(key, Math.min(arrival.get(key) ?? Infinity, tEnd));
+    }
+    const rank = (prefix) => new Map([...arrival].filter(([k]) => k.startsWith(prefix)).sort((a, b) => a[1] - b[1]).map(([k], i) => [k, i]));
+    const shipRank = rank('s:'), scrapRank = rank('x:');
     for (const st of Object.values(this.stations)) st.intervals = [];
     for (const p of data.parts) {
-      const kf = pathFor(p, p.fate === 'shipped' ? bins.shipped++ : p.fate === 'scrap' ? bins.scrap++ : 0);
+      const bi = p.fate === 'shipped' ? shipRank.get(`s:${p.pair || p.id}`) : p.fate === 'scrap' ? scrapRank.get(`x:${p.id}`) : 0;
+      const kf = pathFor(p, bi);
       const mat = plaMat(p.kind === 'slot' ? C.slot : C.tab);
       const m = new THREE.Mesh(this.partGeo[p.kind], mat); m.castShadow = true; m.visible = false; m.userData = { part: p.id }; sc.add(m);
       const review = p.events.filter((e) => e[0] === 'review').map((e) => [e[1], e[2]]);
       for (const [stn, a, b] of p.events) this.stations[laneKey(stn, p.line)]?.intervals.push([a, b, p]);
       const endT = kf[kf.length - 1][0];
       this.parts.push({ p, kf, m, review, endT, shipT: p.fate === 'shipped' ? endT : null, scrapT: p.fate === 'scrap' ? endT : null,
-        caught: caughtIds.has(p.id), yaw: (hash(p.id) - 0.5) * 0.5 });
+        caught: caughtIds.has(p.id), yaw: (hash(p.id) - 0.5) * 0.12, bin: bi,
+        asmT: p.events.find((e) => e[0] === 'assembly')?.[1] ?? null });
     }
+    this.slotByPair = new Map(this.parts.filter((x) => x.p.kind === 'slot' && x.p.pair).map((x) => [x.p.pair, x]));  // p.pair is the pair id
     for (const x of this.parts) {  // print jobs: from job start to the moment the part leaves the printer
       const k = x.p.kind === 'slot' ? 'printer_slot' : 'printer_tab';
       this.stations[k].intervals.push([x.p.print_t, x.kf[0][0], x.p]);
@@ -411,11 +425,59 @@ class FactoryView {
     // belt texture: 12 repeats over 23 units -> 1 texture unit = 1.92 scene units
     if (playing) for (const tx of this.beltTexes) tx.offset.x -= (dtReal * lab.speed * BELT_SPEED) / 1.92;
     let ship = 0, hold = 0, scrap = 0, esc = 0; const shipped = new Set(); let selVisible = false;
+    // pass 1: where the event log puts each part
+    let live = [];
     for (const x of this.parts) {
-      const xy = at(x.kf, t); x.m.visible = !!xy; if (!xy) continue;
+      x.xy = at(x.kf, t); x.m.visible = !!x.xy; if (!x.xy) continue;
+      x.inBin = (x.shipT && t >= x.shipT) || (x.scrapT && t >= x.scrapT); x.stack = 0;
+    }
+    for (const x of this.parts) {  // after every part has its xy for this frame
+      if (!x.xy) continue;
+      x.riding = x.p.kind === 'tab' && x.asmT !== null && t >= x.asmT && !x.inBin && !!this.slotByPair.get(x.p.pair)?.xy;  // assembled: tab sits in its slot
+      if (!x.inBin && !x.riding) live.push(x);
+    }
+    // pass 2: parts are solid. Anything that would overlap a part ahead of it on the line waits behind it
+    // (queue), ordered by position along the flow (+x). Display only: event times are untouched.
+    const placed = [], bx = P.buffer[0];
+    const resting = live.filter((x) => Math.abs(x.xy[0] - bx) < 0.85 && Math.abs(x.xy[1]) < 1.75 && !x.xy[2]).sort((a, b) => a.kf[0][0] - b.kf[0][0]);
+    let rackN = 0;
+    // rack sits on the upstream half of the buffer table so the assembly belt (from x = 1.3) stays clear
+    const rack = (x) => { const i = rackN++; x.xy = [bx - 0.3, -1.5 + (i % 6) * 0.6, 0]; x.stack = Math.floor(i / 6); x.w = x.p.kind === 'slot' ? 0.6 : 0.4; placed.push(x); };
+    resting.forEach(rack);
+    live = live.filter((x) => !resting.includes(x));
+    live.sort((a, b) => b.xy[0] - a.xy[0] || a.p.print_t - b.p.print_t);
+    for (const x of live) {
+      const w = x.p.kind === 'slot' ? 0.6 : 0.4;  // footprint width + margin for the small yaw
+      // queue up to 3 places back; a longer queue (e.g. a full buffer) is piled up in place instead,
+      // so parts never get pushed through printers or walls
+      x.stack = 0; let pushes = 0, racked = false;
+      for (let k = 0; k < 40; k++) {
+        // 1e-6 slack: a part just pushed to exactly GAP behind another must not count as touching it again
+        const hit = placed.find((o) => o.stack === x.stack && Math.abs(o.xy[0] - x.xy[0]) < QUEUE_GAP - 1e-6 && Math.abs(o.xy[1] - x.xy[1]) < (w + o.w) / 2);
+        if (!hit) break;
+        const back = hit.xy[0] - QUEUE_GAP;
+        // only queue backwards while staying on the same surface (belt / table); never drop a part onto the floor
+        if (pushes < 3 && Math.abs(heightAt(back, x.xy[1]) - heightAt(x.xy[0], x.xy[1])) < 0.01) { x.xy = [back, x.xy[1], 0]; pushes++; }
+        else if (x.xy[0] > bx && x.xy[0] < P.assembly[0] && Math.abs(x.xy[1]) < 0.7) { rack(x); racked = true; break; }  // the assembly queue backs up into the buffer rack
+        else { x.xy = [hit.xy[0], hit.xy[1], 0]; x.stack = hit.stack + 1; }
+      }
+      if (!racked) { x.w = w; placed.push(x); }
+    }
+    // all slots first, so an assembled tab always follows its slot's position from this frame
+    for (const x of [...this.parts.filter((q) => q.p.kind !== 'tab'), ...this.parts.filter((q) => q.p.kind === 'tab')]) {
+      if (!x.xy) continue;
+      const xy = x.xy;
       const inReview = x.review.some(([a, b]) => t >= a && t <= b);
-      const stacked = x.p.kind === 'tab' && x.shipT && t >= x.shipT;
-      x.m.position.set(xy[0], heightAt(xy[0], xy[1]) + (stacked ? 0.11 : 0) + xy[2], xy[1]); x.m.rotation.y = x.yaw;
+      const toBin = (x.shipT || x.scrapT) && t >= x.kf[x.kf.length - 2][0];  // final move into the bin: aim at its layer
+      const layer = toBin ? Math.floor(x.bin / 8) * 0.1 : 0;
+      const slotOf = x.p.kind === 'tab' && x.p.pair && (x.riding || (x.shipT && t >= x.shipT)) ? this.slotByPair.get(x.p.pair) : null;
+      if (slotOf && slotOf.m.visible) {
+        // assembled: the tab sits in the slot channel, pushed to the closed base (CAD: tab x 12..72 mm in a 0..60 mm slot)
+        x.m.rotation.y = slotOf.m.rotation.y;
+        x.m.position.copy(ASSEMBLED_TAB_OFFSET).applyAxisAngle(Y_AXIS, slotOf.m.rotation.y).add(slotOf.m.position);
+      } else {
+        x.m.position.set(xy[0], heightAt(xy[0], xy[1]) + layer + (x.stack || 0) * 0.1 + xy[2], xy[1]); x.m.rotation.y = x.inBin ? 0 : x.yaw;
+      }
       const mat = x.m.material; let col = x.p.kind === 'slot' ? C.slot : C.tab, em = BLACK, ei = 0;
       if (inReview) { col = C.review; em = C.review; ei = 0.35; }
       if (x.scrapT && t >= x.scrapT) col = C.scrap;
@@ -526,10 +588,12 @@ function pathFor(p, binIndex) {
     prevEnd = end; prevKey = station;
   }
   const last = kf[kf.length - 1][0];
-  const binPos = (k) => { const [x, z] = P[k]; const i = binIndex; return [x - 1.05 + (i % 6) * 0.42, z - 1.05 + (Math.floor(i / 6) % 6) * 0.42]; };
+  // bins hold a 2 x 4 grid per layer; parts are 0.96 x 0.53 (slot) / 0.32 (tab) scene units, so cells never overlap
+  const binPos = (k) => { const [x, z] = P[k]; const c = binIndex % 8; return [x - 0.7 + (c % 2) * 1.25, z - 0.9 + Math.floor(c / 2) * 0.6]; };
   const [lx, lz] = pos(prevKey), toBin = (k) => Math.hypot(P[k][0] - lx, P[k][1] - lz) / BELT_SPEED;
-  if (p.fate === 'shipped') kf.push([last + toBin('ship'), ...binPos('ship')]);
-  else if (p.fate === 'scrap') kf.push([last + toBin('scrap'), ...binPos('scrap')]);
+  // the 4th value is the arc height of that move: parts are lifted over the pile, never through it
+  if (p.fate === 'shipped') kf.push([last + toBin('ship'), ...binPos('ship'), 1.4]);
+  else if (p.fate === 'scrap') kf.push([last + toBin('scrap'), ...binPos('scrap'), 1.0]);
   else kf.push([last + 4, ...pos('buffer', (j - 0.5) * 1.2, jz)]);
   return kf;
 }
@@ -538,7 +602,7 @@ function at(kf, t) {
   for (let i = 1; i < kf.length; i++) if (t <= kf[i][0]) {
     const [t0, x0, z0] = kf[i - 1], [t1, x1, z1] = kf[i]; const u = t1 > t0 ? (t - t0) / (t1 - t0) : 1;
     const moving = Math.hypot(x1 - x0, z1 - z0) > 0.5;
-    return [x0 + (x1 - x0) * u, z0 + (z1 - z0) * u, moving ? Math.sin(Math.PI * u) * 0.15 : 0];
+    return [x0 + (x1 - x0) * u, z0 + (z1 - z0) * u, moving ? Math.sin(Math.PI * u) * (kf[i][3] ?? 0.15) : 0];
   }
   const l = kf[kf.length - 1]; return [l[1], l[2], 0];
 }
@@ -615,6 +679,7 @@ async function initLab() {
   lab.views.forEach((v) => v.s.flyTo(fitCam(v, STORY[0][2], STORY[0][3]), STORY[0][3], 2.6));
   if (q.get('select')?.startsWith('phone_') || q.get('select')?.startsWith('caliper_')) select({ type: 'station', id: q.get('select'), side: 0 });
   if (q.get('part')) select({ type: 'part', id: q.get('part'), side: lab.runs.length - 1 });
+  if (q.get('debug') === '1') window.__qrLab = lab;  // test hook (overlap check)
   if (q.get('photo') === '1') setTimeout(() => $('#photoBtn')?.click(), 3200);  // URL preset: open in Photo mode
   if (q.get('select') === 'caught') { const id = [...lab.caught][0] || lab.runs.at(-1)?.parts.find((p) => p.pair)?.id; if (id) select({ type: 'part', id, side: lab.runs.length - 1 }); }
 }
