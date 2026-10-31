@@ -54,9 +54,10 @@
   ],
   "simulated_comparison": {
     "origin": "SIMULATED",
-    "generator": "seeded_scenario_v1",
+    "generator": "seeded_scenario_v2_fresh_stream",
     "seed": 2026,
     "n": 1000,
+    "calibration_id": "cal-e6c0a199854f",
     "policies": {
       "phone_only": {
         "unsafe_pass": 20,
@@ -113,6 +114,62 @@
           "escaped_defect": 2
         },
         "inspections": 3104
+      },
+      "collective_fusion": {
+        "unsafe_pass": 3,
+        "hold": 165,
+        "total_cost": 2280.0,
+        "cost_per_unit": 2.28,
+        "counts": {
+          "pass": 832,
+          "hold": 165,
+          "scrap": 0,
+          "rework": 0,
+          "escaped_defect": 3
+        },
+        "inspections": 3000
+      },
+      "structured_request_lite": {
+        "unsafe_pass": 3,
+        "hold": 165,
+        "total_cost": 2237.0,
+        "cost_per_unit": 2.237,
+        "counts": {
+          "pass": 832,
+          "hold": 165,
+          "scrap": 0,
+          "rework": 0,
+          "escaped_defect": 3
+        },
+        "inspections": 2914
+      },
+      "voi_driven": {
+        "unsafe_pass": 1,
+        "hold": 80,
+        "total_cost": 2278.0,
+        "cost_per_unit": 2.278,
+        "counts": {
+          "pass": 919,
+          "hold": 80,
+          "scrap": 0,
+          "rework": 0,
+          "escaped_defect": 1
+        },
+        "inspections": 3936
+      },
+      "entropy_driven": {
+        "unsafe_pass": 1,
+        "hold": 80,
+        "total_cost": 2310.0,
+        "cost_per_unit": 2.31,
+        "counts": {
+          "pass": 919,
+          "hold": 80,
+          "scrap": 0,
+          "rework": 0,
+          "escaped_defect": 1
+        },
+        "inspections": 4000
       }
     }
   }

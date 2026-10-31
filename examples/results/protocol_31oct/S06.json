@@ -1,0 +1,2779 @@
+{
+ "calibration": {
+  "calibration_id": "cal-32894277794e",
+  "caliper_retake_sens": 0.8125,
+  "caliper_retake_spec": 0.9912772903,
+  "caliper_sens": 0.7875,
+  "caliper_spec": 0.9931136503,
+  "counts": {
+   "caliper": {
+    "fn": 42,
+    "fp": 67,
+    "tn": 9734,
+    "tp": 157
+   },
+   "caliper_retake": {
+    "fn": 37,
+    "fp": 85,
+    "tn": 9716,
+    "tp": 162
+   },
+   "dimensional_defects": 199,
+   "phone": {
+    "fn": 48,
+    "fp": 777,
+    "tn": 8574,
+    "tp": 601
+   },
+   "phone_recapture": {
+    "fn": 62,
+    "fp": 788,
+    "tn": 8563,
+    "tp": 587
+   },
+   "pi": {
+    "fn": 69,
+    "fp": 805,
+    "tn": 8546,
+    "tp": 580
+   },
+   "pi_recapture": {
+    "fn": 52,
+    "fp": 771,
+    "tn": 8580,
+    "tp": 597
+   },
+   "surface_defects": 649,
+   "total": 10000
+  },
+  "dimensional_prior": 0.0199480052,
+  "intervals": {
+   "caliper_retake_sens": [
+    0.754253,
+    0.861991
+   ],
+   "caliper_retake_spec": [
+    0.98929,
+    0.99298
+   ],
+   "caliper_sens": [
+    0.727051,
+    0.839894
+   ],
+   "caliper_spec": [
+    0.991328,
+    0.994613
+   ],
+   "dimensional_prior": [
+    0.017341,
+    0.022827
+   ],
+   "phone_recapture_sens": [
+    0.879415,
+    0.924762
+   ],
+   "phone_recapture_spec": [
+    0.909928,
+    0.921192
+   ],
+   "phone_sens": [
+    0.903302,
+    0.943764
+   ],
+   "phone_spec": [
+    0.91114,
+    0.922332
+   ],
+   "pi_recapture_sens": [
+    0.896435,
+    0.938377
+   ],
+   "pi_recapture_spec": [
+    0.911801,
+    0.922954
+   ],
+   "pi_sens": [
+    0.867608,
+    0.915124
+   ],
+   "pi_spec": [
+    0.908056,
+    0.919429
+   ],
+   "surface_prior": [
+    0.060237,
+    0.069897
+   ]
+  },
+  "phone_recapture_sens": 0.9038461538,
+  "phone_recapture_spec": 0.9156864842,
+  "phone_sens": 0.9253846154,
+  "phone_spec": 0.9168627032,
+  "pi_recapture_sens": 0.9192307692,
+  "pi_recapture_spec": 0.9175042772,
+  "pi_sens": 0.8930769231,
+  "pi_spec": 0.9138686912,
+  "source": "HELD_OUT_SYNTHETIC_CALIBRATION",
+  "surface_prior": 0.0649435056
+ },
+ "costs": {
+  "escaped_defect": 150.0,
+  "hold": 2.0,
+  "inspection": 0.5,
+  "platform": 0.0,
+  "rework": 8.0,
+  "scrap": 20.0
+ },
+ "elapsed_s": 1.35,
+ "mean_pi_request_rate_structured_request_lite": 0.8653333333333333,
+ "method": "identical_seed_paired_policy_comparison_cluster_bootstrap_over_seed",
+ "n_per_seed": 1000,
+ "origin": "SIMULATED",
+ "paired_cost_difference_cluster_bootstrap_95": [
+  36.433333,
+  39.366667
+ ],
+ "paired_cost_difference_entropy_minus_rules": 105.46666666666667,
+ "paired_cost_difference_entropy_minus_rules_cluster_bootstrap_95": [
+  7.933333,
+  201.333333
+ ],
+ "paired_cost_difference_fusion_minus_rules": -34.93333333333333,
+ "paired_cost_difference_fusion_minus_rules_cluster_bootstrap_95": [
+  -64.4,
+  -1.066667
+ ],
+ "paired_cost_difference_request_minus_fusion": -67.33333333333333,
+ "paired_cost_difference_request_minus_fusion_cluster_bootstrap_95": [
+  -69.15,
+  -65.466667
+ ],
+ "paired_cost_difference_request_minus_rules": -102.26666666666667,
+ "paired_cost_difference_request_minus_rules_cluster_bootstrap_95": [
+  -131.533333,
+  -68.0
+ ],
+ "paired_cost_difference_safe_mesh_minus_rules": 37.93333333333333,
+ "paired_cost_difference_safe_mesh_minus_rules_cluster_bootstrap_95": [
+  36.433333,
+  39.366667
+ ],
+ "paired_cost_difference_voi_minus_entropy": -73.5,
+ "paired_cost_difference_voi_minus_entropy_cluster_bootstrap_95": [
+  -105.933333,
+  -41.033333
+ ],
+ "paired_cost_difference_voi_minus_fusion": 66.9,
+ "paired_cost_difference_voi_minus_fusion_cluster_bootstrap_95": [
+  -34.95,
+  163.833333
+ ],
+ "paired_cost_difference_voi_minus_rules": 31.966666666666665,
+ "paired_cost_difference_voi_minus_rules_cluster_bootstrap_95": [
+  -60.533333,
+  119.433333
+ ],
+ "paired_released_good_rate_cluster_bootstrap_95": [
+  0.0,
+  0.0
+ ],
+ "paired_released_good_rate_difference": 0.0,
+ "paired_released_good_rate_difference_entropy_minus_rules": 0.0986,
+ "paired_released_good_rate_difference_fusion_minus_rules": 0.03966666666666667,
+ "paired_released_good_rate_difference_request_minus_fusion": 0.0,
+ "paired_released_good_rate_difference_request_minus_rules": 0.03966666666666667,
+ "paired_released_good_rate_difference_safe_mesh_minus_rules": 0.0,
+ "paired_released_good_rate_difference_voi_minus_entropy": -0.06336666666666667,
+ "paired_released_good_rate_difference_voi_minus_fusion": -0.004433333333333333,
+ "paired_released_good_rate_difference_voi_minus_rules": 0.03523333333333333,
+ "paired_released_good_rate_entropy_minus_rules_cluster_bootstrap_95": [
+  0.0956,
+  0.1016
+ ],
+ "paired_released_good_rate_fusion_minus_rules_cluster_bootstrap_95": [
+  0.037167,
+  0.042133
+ ],
+ "paired_released_good_rate_request_minus_fusion_cluster_bootstrap_95": [
+  0.0,
+  0.0
+ ],
+ "paired_released_good_rate_request_minus_rules_cluster_bootstrap_95": [
+  0.037167,
+  0.042133
+ ],
+ "paired_released_good_rate_safe_mesh_minus_rules_cluster_bootstrap_95": [
+  0.0,
+  0.0
+ ],
+ "paired_released_good_rate_voi_minus_entropy_cluster_bootstrap_95": [
+  -0.0662,
+  -0.060567
+ ],
+ "paired_released_good_rate_voi_minus_fusion_cluster_bootstrap_95": [
+  -0.005,
+  -0.003867
+ ],
+ "paired_released_good_rate_voi_minus_rules_cluster_bootstrap_95": [
+  0.032933,
+  0.037667
+ ],
+ "paired_unsafe_pass_rate_cluster_bootstrap_95": [
+  0.0,
+  0.0
+ ],
+ "paired_unsafe_pass_rate_difference": 0.0,
+ "paired_unsafe_pass_rate_difference_entropy_minus_rules": -0.0013333333333333333,
+ "paired_unsafe_pass_rate_difference_fusion_minus_rules": 0.00030000000000000003,
+ "paired_unsafe_pass_rate_difference_request_minus_fusion": 0.0,
+ "paired_unsafe_pass_rate_difference_request_minus_rules": 0.00030000000000000003,
+ "paired_unsafe_pass_rate_difference_safe_mesh_minus_rules": 0.0,
+ "paired_unsafe_pass_rate_difference_voi_minus_entropy": -0.0007,
+ "paired_unsafe_pass_rate_difference_voi_minus_fusion": -0.0023333333333333335,
+ "paired_unsafe_pass_rate_difference_voi_minus_rules": -0.002033333333333333,
+ "paired_unsafe_pass_rate_entropy_minus_rules_cluster_bootstrap_95": [
+  -0.002,
+  -0.0007
+ ],
+ "paired_unsafe_pass_rate_fusion_minus_rules_cluster_bootstrap_95": [
+  0.0001,
+  0.000533
+ ],
+ "paired_unsafe_pass_rate_request_minus_fusion_cluster_bootstrap_95": [
+  0.0,
+  0.0
+ ],
+ "paired_unsafe_pass_rate_request_minus_rules_cluster_bootstrap_95": [
+  0.0001,
+  0.000533
+ ],
+ "paired_unsafe_pass_rate_safe_mesh_minus_rules_cluster_bootstrap_95": [
+  0.0,
+  0.0
+ ],
+ "paired_unsafe_pass_rate_voi_minus_entropy_cluster_bootstrap_95": [
+  -0.000933,
+  -0.0005
+ ],
+ "paired_unsafe_pass_rate_voi_minus_fusion_cluster_bootstrap_95": [
+  -0.003,
+  -0.001667
+ ],
+ "paired_unsafe_pass_rate_voi_minus_rules_cluster_bootstrap_95": [
+  -0.002667,
+  -0.001433
+ ],
+ "per_seed": {
+  "collective_fusion": [
+   {
+    "brier": 0.046769700457242,
+    "cost": 2528.0,
+    "hold": 214,
+    "inspections": 3000,
+    "released_good": 782,
+    "seed": 0,
+    "unsafe_pass": 4
+   },
+   {
+    "brier": 0.049189436893328,
+    "cost": 3402.0,
+    "hold": 201,
+    "inspections": 3000,
+    "released_good": 789,
+    "seed": 1,
+    "unsafe_pass": 10
+   },
+   {
+    "brier": 0.052785543492437,
+    "cost": 2796.0,
+    "hold": 198,
+    "inspections": 3000,
+    "released_good": 796,
+    "seed": 2,
+    "unsafe_pass": 6
+   },
+   {
+    "brier": 0.043042628832606,
+    "cost": 2160.0,
+    "hold": 180,
+    "inspections": 3000,
+    "released_good": 818,
+    "seed": 3,
+    "unsafe_pass": 2
+   },
+   {
+    "brier": 0.046667687269281,
+    "cost": 2910.0,
+    "hold": 180,
+    "inspections": 3000,
+    "released_good": 813,
+    "seed": 4,
+    "unsafe_pass": 7
+   },
+   {
+    "brier": 0.052580674773739,
+    "cost": 3078.0,
+    "hold": 189,
+    "inspections": 3000,
+    "released_good": 803,
+    "seed": 5,
+    "unsafe_pass": 8
+   },
+   {
+    "brier": 0.047860762101327,
+    "cost": 2220.0,
+    "hold": 210,
+    "inspections": 3000,
+    "released_good": 788,
+    "seed": 6,
+    "unsafe_pass": 2
+   },
+   {
+    "brier": 0.053468465445944,
+    "cost": 2952.0,
+    "hold": 201,
+    "inspections": 3000,
+    "released_good": 792,
+    "seed": 7,
+    "unsafe_pass": 7
+   },
+   {
+    "brier": 0.043631210436013,
+    "cost": 2176.0,
+    "hold": 188,
+    "inspections": 3000,
+    "released_good": 810,
+    "seed": 8,
+    "unsafe_pass": 2
+   },
+   {
+    "brier": 0.051755872481858,
+    "cost": 3526.0,
+    "hold": 188,
+    "inspections": 3000,
+    "released_good": 801,
+    "seed": 9,
+    "unsafe_pass": 11
+   },
+   {
+    "brier": 0.043881980330615,
+    "cost": 2908.0,
+    "hold": 179,
+    "inspections": 3000,
+    "released_good": 814,
+    "seed": 10,
+    "unsafe_pass": 7
+   },
+   {
+    "brier": 0.044952140426065997,
+    "cost": 2502.0,
+    "hold": 201,
+    "inspections": 3000,
+    "released_good": 795,
+    "seed": 11,
+    "unsafe_pass": 4
+   },
+   {
+    "brier": 0.041456897614753,
+    "cost": 2896.0,
+    "hold": 173,
+    "inspections": 3000,
+    "released_good": 820,
+    "seed": 12,
+    "unsafe_pass": 7
+   },
+   {
+    "brier": 0.037387151912249,
+    "cost": 2356.0,
+    "hold": 203,
+    "inspections": 3000,
+    "released_good": 794,
+    "seed": 13,
+    "unsafe_pass": 3
+   },
+   {
+    "brier": 0.057638573958033,
+    "cost": 2496.0,
+    "hold": 198,
+    "inspections": 3000,
+    "released_good": 798,
+    "seed": 14,
+    "unsafe_pass": 4
+   },
+   {
+    "brier": 0.049353181651625,
+    "cost": 2610.0,
+    "hold": 180,
+    "inspections": 3000,
+    "released_good": 815,
+    "seed": 15,
+    "unsafe_pass": 5
+   },
+   {
+    "brier": 0.057277015969491,
+    "cost": 2488.0,
+    "hold": 194,
+    "inspections": 3000,
+    "released_good": 802,
+    "seed": 16,
+    "unsafe_pass": 4
+   },
+   {
+    "brier": 0.059576241110921,
+    "cost": 3362.0,
+    "hold": 181,
+    "inspections": 3000,
+    "released_good": 809,
+    "seed": 17,
+    "unsafe_pass": 10
+   },
+   {
+    "brier": 0.054848328454129,
+    "cost": 2962.0,
+    "hold": 206,
+    "inspections": 3000,
+    "released_good": 787,
+    "seed": 18,
+    "unsafe_pass": 7
+   },
+   {
+    "brier": 0.045292955088582,
+    "cost": 2622.0,
+    "hold": 186,
+    "inspections": 3000,
+    "released_good": 809,
+    "seed": 19,
+    "unsafe_pass": 5
+   },
+   {
+    "brier": 0.063999435892326,
+    "cost": 3398.0,
+    "hold": 199,
+    "inspections": 3000,
+    "released_good": 791,
+    "seed": 20,
+    "unsafe_pass": 10
+   },
+   {
+    "brier": 0.057829525941002,
+    "cost": 3134.0,
+    "hold": 217,
+    "inspections": 3000,
+    "released_good": 775,
+    "seed": 21,
+    "unsafe_pass": 8
+   },
+   {
+    "brier": 0.048249160937340996,
+    "cost": 2654.0,
+    "hold": 202,
+    "inspections": 3000,
+    "released_good": 793,
+    "seed": 22,
+    "unsafe_pass": 5
+   },
+   {
+    "brier": 0.042202429392804,
+    "cost": 2456.0,
+    "hold": 178,
+    "inspections": 3000,
+    "released_good": 818,
+    "seed": 23,
+    "unsafe_pass": 4
+   },
+   {
+    "brier": 0.054379030812474,
+    "cost": 3398.0,
+    "hold": 199,
+    "inspections": 3000,
+    "released_good": 791,
+    "seed": 24,
+    "unsafe_pass": 10
+   },
+   {
+    "brier": 0.055453092993597,
+    "cost": 3244.0,
+    "hold": 197,
+    "inspections": 3000,
+    "released_good": 794,
+    "seed": 25,
+    "unsafe_pass": 9
+   },
+   {
+    "brier": 0.045018836683696,
+    "cost": 2614.0,
+    "hold": 182,
+    "inspections": 3000,
+    "released_good": 813,
+    "seed": 26,
+    "unsafe_pass": 5
+   },
+   {
+    "brier": 0.03605626472046,
+    "cost": 2014.0,
+    "hold": 182,
+    "inspections": 3000,
+    "released_good": 817,
+    "seed": 27,
+    "unsafe_pass": 1
+   },
+   {
+    "brier": 0.052558845583218,
+    "cost": 3226.0,
+    "hold": 188,
+    "inspections": 3000,
+    "released_good": 803,
+    "seed": 28,
+    "unsafe_pass": 9
+   },
+   {
+    "brier": 0.049422093521686,
+    "cost": 2508.0,
+    "hold": 204,
+    "inspections": 3000,
+    "released_good": 792,
+    "seed": 29,
+    "unsafe_pass": 4
+   }
+  ],
+  "conservative_rules": [
+   {
+    "cost": 2594.0,
+    "hold": 247,
+    "inspections": 3000,
+    "released_good": 749,
+    "seed": 0,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 3334.0,
+    "hold": 242,
+    "inspections": 3000,
+    "released_good": 749,
+    "seed": 1,
+    "unsafe_pass": 9
+   },
+   {
+    "cost": 2864.0,
+    "hold": 232,
+    "inspections": 3000,
+    "released_good": 762,
+    "seed": 2,
+    "unsafe_pass": 6
+   },
+   {
+    "cost": 2254.0,
+    "hold": 227,
+    "inspections": 3000,
+    "released_good": 771,
+    "seed": 3,
+    "unsafe_pass": 2
+   },
+   {
+    "cost": 3008.0,
+    "hold": 229,
+    "inspections": 3000,
+    "released_good": 764,
+    "seed": 4,
+    "unsafe_pass": 7
+   },
+   {
+    "cost": 3168.0,
+    "hold": 234,
+    "inspections": 3000,
+    "released_good": 758,
+    "seed": 5,
+    "unsafe_pass": 8
+   },
+   {
+    "cost": 2306.0,
+    "hold": 253,
+    "inspections": 3000,
+    "released_good": 745,
+    "seed": 6,
+    "unsafe_pass": 2
+   },
+   {
+    "cost": 3040.0,
+    "hold": 245,
+    "inspections": 3000,
+    "released_good": 748,
+    "seed": 7,
+    "unsafe_pass": 7
+   },
+   {
+    "cost": 2240.0,
+    "hold": 220,
+    "inspections": 3000,
+    "released_good": 778,
+    "seed": 8,
+    "unsafe_pass": 2
+   },
+   {
+    "cost": 3620.0,
+    "hold": 235,
+    "inspections": 3000,
+    "released_good": 754,
+    "seed": 9,
+    "unsafe_pass": 11
+   },
+   {
+    "cost": 2990.0,
+    "hold": 220,
+    "inspections": 3000,
+    "released_good": 773,
+    "seed": 10,
+    "unsafe_pass": 7
+   },
+   {
+    "cost": 2582.0,
+    "hold": 241,
+    "inspections": 3000,
+    "released_good": 755,
+    "seed": 11,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 2982.0,
+    "hold": 216,
+    "inspections": 3000,
+    "released_good": 777,
+    "seed": 12,
+    "unsafe_pass": 7
+   },
+   {
+    "cost": 2428.0,
+    "hold": 239,
+    "inspections": 3000,
+    "released_good": 758,
+    "seed": 13,
+    "unsafe_pass": 3
+   },
+   {
+    "cost": 2548.0,
+    "hold": 224,
+    "inspections": 3000,
+    "released_good": 772,
+    "seed": 14,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 2544.0,
+    "hold": 222,
+    "inspections": 3000,
+    "released_good": 774,
+    "seed": 15,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 2578.0,
+    "hold": 239,
+    "inspections": 3000,
+    "released_good": 757,
+    "seed": 16,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 3136.0,
+    "hold": 218,
+    "inspections": 3000,
+    "released_good": 774,
+    "seed": 17,
+    "unsafe_pass": 8
+   },
+   {
+    "cost": 2716.0,
+    "hold": 233,
+    "inspections": 3000,
+    "released_good": 762,
+    "seed": 18,
+    "unsafe_pass": 5
+   },
+   {
+    "cost": 2692.0,
+    "hold": 221,
+    "inspections": 3000,
+    "released_good": 774,
+    "seed": 19,
+    "unsafe_pass": 5
+   },
+   {
+    "cost": 3354.0,
+    "hold": 252,
+    "inspections": 3000,
+    "released_good": 739,
+    "seed": 20,
+    "unsafe_pass": 9
+   },
+   {
+    "cost": 3066.0,
+    "hold": 258,
+    "inspections": 3000,
+    "released_good": 735,
+    "seed": 21,
+    "unsafe_pass": 7
+   },
+   {
+    "cost": 2736.0,
+    "hold": 243,
+    "inspections": 3000,
+    "released_good": 752,
+    "seed": 22,
+    "unsafe_pass": 5
+   },
+   {
+    "cost": 2550.0,
+    "hold": 225,
+    "inspections": 3000,
+    "released_good": 771,
+    "seed": 23,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 3460.0,
+    "hold": 230,
+    "inspections": 3000,
+    "released_good": 760,
+    "seed": 24,
+    "unsafe_pass": 10
+   },
+   {
+    "cost": 3324.0,
+    "hold": 237,
+    "inspections": 3000,
+    "released_good": 754,
+    "seed": 25,
+    "unsafe_pass": 9
+   },
+   {
+    "cost": 2684.0,
+    "hold": 217,
+    "inspections": 3000,
+    "released_good": 778,
+    "seed": 26,
+    "unsafe_pass": 5
+   },
+   {
+    "cost": 2108.0,
+    "hold": 229,
+    "inspections": 3000,
+    "released_good": 770,
+    "seed": 27,
+    "unsafe_pass": 1
+   },
+   {
+    "cost": 3172.0,
+    "hold": 236,
+    "inspections": 3000,
+    "released_good": 756,
+    "seed": 28,
+    "unsafe_pass": 8
+   },
+   {
+    "cost": 2566.0,
+    "hold": 233,
+    "inspections": 3000,
+    "released_good": 763,
+    "seed": 29,
+    "unsafe_pass": 4
+   }
+  ],
+  "entropy_driven": [
+   {
+    "actions": {
+     "caliper_retake": 809,
+     "pi_recapture": 191
+    },
+    "brier": 0.050412982616024,
+    "cost": 2894.0,
+    "flips": 81,
+    "hold": 147,
+    "inspections": 4000,
+    "released_good": 849,
+    "seed": 0,
+    "unsafe_pass": 4
+   },
+   {
+    "actions": {
+     "caliper_retake": 830,
+     "pi_recapture": 170
+    },
+    "brier": 0.051038840108779,
+    "cost": 3044.0,
+    "flips": 74,
+    "hold": 147,
+    "inspections": 4000,
+    "released_good": 848,
+    "seed": 1,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "caliper_retake": 824,
+     "pi_recapture": 176
+    },
+    "brier": 0.055969973834192,
+    "cost": 3182.0,
+    "flips": 65,
+    "hold": 141,
+    "inspections": 4000,
+    "released_good": 853,
+    "seed": 2,
+    "unsafe_pass": 6
+   },
+   {
+    "actions": {
+     "caliper_retake": 844,
+     "pi_recapture": 156
+    },
+    "brier": 0.04136215516623,
+    "cost": 2558.0,
+    "flips": 63,
+    "hold": 129,
+    "inspections": 4000,
+    "released_good": 869,
+    "seed": 3,
+    "unsafe_pass": 2
+   },
+   {
+    "actions": {
+     "caliper_retake": 837,
+     "pi_recapture": 163
+    },
+    "brier": 0.048773536851106,
+    "cost": 2996.0,
+    "flips": 77,
+    "hold": 123,
+    "inspections": 4000,
+    "released_good": 872,
+    "seed": 4,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "caliper_retake": 835,
+     "pi_recapture": 165
+    },
+    "brier": 0.056515078808363,
+    "cost": 3032.0,
+    "flips": 64,
+    "hold": 141,
+    "inspections": 4000,
+    "released_good": 854,
+    "seed": 5,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "caliper_retake": 811,
+     "pi_recapture": 189
+    },
+    "brier": 0.050741979142961,
+    "cost": 2736.0,
+    "flips": 77,
+    "hold": 143,
+    "inspections": 4000,
+    "released_good": 854,
+    "seed": 6,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "caliper_retake": 825,
+     "pi_recapture": 175
+    },
+    "brier": 0.055265327579989997,
+    "cost": 2890.0,
+    "flips": 78,
+    "hold": 145,
+    "inspections": 4000,
+    "released_good": 851,
+    "seed": 7,
+    "unsafe_pass": 4
+   },
+   {
+    "actions": {
+     "caliper_retake": 828,
+     "pi_recapture": 172
+    },
+    "brier": 0.05033905491324,
+    "cost": 2704.0,
+    "flips": 75,
+    "hold": 127,
+    "inspections": 4000,
+    "released_good": 870,
+    "seed": 8,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "caliper_retake": 833,
+     "pi_recapture": 167
+    },
+    "brier": 0.056732227145631996,
+    "cost": 3768.0,
+    "flips": 64,
+    "hold": 134,
+    "inspections": 4000,
+    "released_good": 856,
+    "seed": 9,
+    "unsafe_pass": 10
+   },
+   {
+    "actions": {
+     "caliper_retake": 841,
+     "pi_recapture": 159
+    },
+    "brier": 0.047715795967045,
+    "cost": 2998.0,
+    "flips": 61,
+    "hold": 124,
+    "inspections": 4000,
+    "released_good": 871,
+    "seed": 10,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "caliper_retake": 821,
+     "pi_recapture": 179
+    },
+    "brier": 0.045465281508129,
+    "cost": 2886.0,
+    "flips": 72,
+    "hold": 143,
+    "inspections": 4000,
+    "released_good": 853,
+    "seed": 11,
+    "unsafe_pass": 4
+   },
+   {
+    "actions": {
+     "caliper_retake": 844,
+     "pi_recapture": 156
+    },
+    "brier": 0.043525063803949,
+    "cost": 2708.0,
+    "flips": 56,
+    "hold": 129,
+    "inspections": 4000,
+    "released_good": 868,
+    "seed": 12,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "caliper_retake": 815,
+     "pi_recapture": 185
+    },
+    "brier": 0.037114846879102,
+    "cost": 2548.0,
+    "flips": 87,
+    "hold": 124,
+    "inspections": 4000,
+    "released_good": 874,
+    "seed": 13,
+    "unsafe_pass": 2
+   },
+   {
+    "actions": {
+     "caliper_retake": 825,
+     "pi_recapture": 175
+    },
+    "brier": 0.056205939241544996,
+    "cost": 2586.0,
+    "flips": 67,
+    "hold": 143,
+    "inspections": 4000,
+    "released_good": 855,
+    "seed": 14,
+    "unsafe_pass": 2
+   },
+   {
+    "actions": {
+     "caliper_retake": 845,
+     "pi_recapture": 155
+    },
+    "brier": 0.051278942461072,
+    "cost": 2856.0,
+    "flips": 66,
+    "hold": 128,
+    "inspections": 4000,
+    "released_good": 868,
+    "seed": 15,
+    "unsafe_pass": 4
+   },
+   {
+    "actions": {
+     "caliper_retake": 828,
+     "pi_recapture": 172
+    },
+    "brier": 0.055396175670021995,
+    "cost": 3022.0,
+    "flips": 70,
+    "hold": 136,
+    "inspections": 4000,
+    "released_good": 859,
+    "seed": 16,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "caliper_retake": 843,
+     "pi_recapture": 157
+    },
+    "brier": 0.063178247376347,
+    "cost": 3468.0,
+    "flips": 59,
+    "hold": 134,
+    "inspections": 4000,
+    "released_good": 858,
+    "seed": 17,
+    "unsafe_pass": 8
+   },
+   {
+    "actions": {
+     "caliper_retake": 824,
+     "pi_recapture": 176
+    },
+    "brier": 0.055088907817008995,
+    "cost": 2740.0,
+    "flips": 81,
+    "hold": 145,
+    "inspections": 4000,
+    "released_good": 852,
+    "seed": 18,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "caliper_retake": 842,
+     "pi_recapture": 158
+    },
+    "brier": 0.043311355531784,
+    "cost": 3018.0,
+    "flips": 62,
+    "hold": 134,
+    "inspections": 4000,
+    "released_good": 861,
+    "seed": 19,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "caliper_retake": 826,
+     "pi_recapture": 174
+    },
+    "brier": 0.066377167122329,
+    "cost": 2762.0,
+    "flips": 65,
+    "hold": 156,
+    "inspections": 4000,
+    "released_good": 841,
+    "seed": 20,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "caliper_retake": 813,
+     "pi_recapture": 187
+    },
+    "brier": 0.065539145808623,
+    "cost": 3340.0,
+    "flips": 78,
+    "hold": 145,
+    "inspections": 4000,
+    "released_good": 848,
+    "seed": 21,
+    "unsafe_pass": 7
+   },
+   {
+    "actions": {
+     "caliper_retake": 815,
+     "pi_recapture": 185
+    },
+    "brier": 0.052621913033687,
+    "cost": 2734.0,
+    "flips": 72,
+    "hold": 142,
+    "inspections": 4000,
+    "released_good": 855,
+    "seed": 22,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "caliper_retake": 846,
+     "pi_recapture": 154
+    },
+    "brier": 0.043953215112515,
+    "cost": 2706.0,
+    "flips": 66,
+    "hold": 128,
+    "inspections": 4000,
+    "released_good": 869,
+    "seed": 23,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "caliper_retake": 823,
+     "pi_recapture": 177
+    },
+    "brier": 0.055838651325386,
+    "cost": 3332.0,
+    "flips": 76,
+    "hold": 141,
+    "inspections": 4000,
+    "released_good": 852,
+    "seed": 24,
+    "unsafe_pass": 7
+   },
+   {
+    "actions": {
+     "caliper_retake": 819,
+     "pi_recapture": 181
+    },
+    "brier": 0.054537214003903996,
+    "cost": 2872.0,
+    "flips": 79,
+    "hold": 136,
+    "inspections": 4000,
+    "released_good": 860,
+    "seed": 25,
+    "unsafe_pass": 4
+   },
+   {
+    "actions": {
+     "caliper_retake": 841,
+     "pi_recapture": 159
+    },
+    "brier": 0.045644494224948,
+    "cost": 3012.0,
+    "flips": 63,
+    "hold": 131,
+    "inspections": 4000,
+    "released_good": 864,
+    "seed": 26,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "caliper_retake": 844,
+     "pi_recapture": 156
+    },
+    "brier": 0.035293199813238,
+    "cost": 2544.0,
+    "flips": 72,
+    "hold": 122,
+    "inspections": 4000,
+    "released_good": 876,
+    "seed": 27,
+    "unsafe_pass": 2
+   },
+   {
+    "actions": {
+     "caliper_retake": 828,
+     "pi_recapture": 172
+    },
+    "brier": 0.056204601783288996,
+    "cost": 3018.0,
+    "flips": 72,
+    "hold": 134,
+    "inspections": 4000,
+    "released_good": 861,
+    "seed": 28,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "caliper_retake": 818,
+     "pi_recapture": 182
+    },
+    "brier": 0.052534541660293,
+    "cost": 2854.0,
+    "flips": 83,
+    "hold": 127,
+    "inspections": 4000,
+    "released_good": 869,
+    "seed": 29,
+    "unsafe_pass": 4
+   }
+  ],
+  "metrology_only": [
+   {
+    "cost": 11806.0,
+    "hold": 28,
+    "inspections": 1000,
+    "released_good": 897,
+    "seed": 0,
+    "unsafe_pass": 75
+   },
+   {
+    "cost": 10318.0,
+    "hold": 34,
+    "inspections": 1000,
+    "released_good": 901,
+    "seed": 1,
+    "unsafe_pass": 65
+   },
+   {
+    "cost": 11494.0,
+    "hold": 22,
+    "inspections": 1000,
+    "released_good": 905,
+    "seed": 2,
+    "unsafe_pass": 73
+   },
+   {
+    "cost": 8954.0,
+    "hold": 27,
+    "inspections": 1000,
+    "released_good": 917,
+    "seed": 3,
+    "unsafe_pass": 56
+   },
+   {
+    "cost": 8940.0,
+    "hold": 20,
+    "inspections": 1000,
+    "released_good": 924,
+    "seed": 4,
+    "unsafe_pass": 56
+   },
+   {
+    "cost": 9850.0,
+    "hold": 25,
+    "inspections": 1000,
+    "released_good": 913,
+    "seed": 5,
+    "unsafe_pass": 62
+   },
+   {
+    "cost": 11194.0,
+    "hold": 22,
+    "inspections": 1000,
+    "released_good": 907,
+    "seed": 6,
+    "unsafe_pass": 71
+   },
+   {
+    "cost": 10902.0,
+    "hold": 26,
+    "inspections": 1000,
+    "released_good": 905,
+    "seed": 7,
+    "unsafe_pass": 69
+   },
+   {
+    "cost": 9088.0,
+    "hold": 19,
+    "inspections": 1000,
+    "released_good": 924,
+    "seed": 8,
+    "unsafe_pass": 57
+   },
+   {
+    "cost": 11192.0,
+    "hold": 21,
+    "inspections": 1000,
+    "released_good": 908,
+    "seed": 9,
+    "unsafe_pass": 71
+   },
+   {
+    "cost": 9990.0,
+    "hold": 20,
+    "inspections": 1000,
+    "released_good": 917,
+    "seed": 10,
+    "unsafe_pass": 63
+   },
+   {
+    "cost": 11502.0,
+    "hold": 26,
+    "inspections": 1000,
+    "released_good": 901,
+    "seed": 11,
+    "unsafe_pass": 73
+   },
+   {
+    "cost": 11044.0,
+    "hold": 22,
+    "inspections": 1000,
+    "released_good": 908,
+    "seed": 12,
+    "unsafe_pass": 70
+   },
+   {
+    "cost": 11188.0,
+    "hold": 19,
+    "inspections": 1000,
+    "released_good": 910,
+    "seed": 13,
+    "unsafe_pass": 71
+   },
+   {
+    "cost": 10148.0,
+    "hold": 24,
+    "inspections": 1000,
+    "released_good": 912,
+    "seed": 14,
+    "unsafe_pass": 64
+   },
+   {
+    "cost": 9850.0,
+    "hold": 25,
+    "inspections": 1000,
+    "released_good": 913,
+    "seed": 15,
+    "unsafe_pass": 62
+   },
+   {
+    "cost": 9546.0,
+    "hold": 23,
+    "inspections": 1000,
+    "released_good": 917,
+    "seed": 16,
+    "unsafe_pass": 60
+   },
+   {
+    "cost": 9100.0,
+    "hold": 25,
+    "inspections": 1000,
+    "released_good": 918,
+    "seed": 17,
+    "unsafe_pass": 57
+   },
+   {
+    "cost": 9862.0,
+    "hold": 31,
+    "inspections": 1000,
+    "released_good": 907,
+    "seed": 18,
+    "unsafe_pass": 62
+   },
+   {
+    "cost": 10310.0,
+    "hold": 30,
+    "inspections": 1000,
+    "released_good": 905,
+    "seed": 19,
+    "unsafe_pass": 65
+   },
+   {
+    "cost": 10906.0,
+    "hold": 28,
+    "inspections": 1000,
+    "released_good": 903,
+    "seed": 20,
+    "unsafe_pass": 69
+   },
+   {
+    "cost": 9416.0,
+    "hold": 33,
+    "inspections": 1000,
+    "released_good": 908,
+    "seed": 21,
+    "unsafe_pass": 59
+   },
+   {
+    "cost": 10886.0,
+    "hold": 18,
+    "inspections": 1000,
+    "released_good": 913,
+    "seed": 22,
+    "unsafe_pass": 69
+   },
+   {
+    "cost": 9552.0,
+    "hold": 26,
+    "inspections": 1000,
+    "released_good": 914,
+    "seed": 23,
+    "unsafe_pass": 60
+   },
+   {
+    "cost": 10450.0,
+    "hold": 25,
+    "inspections": 1000,
+    "released_good": 909,
+    "seed": 24,
+    "unsafe_pass": 66
+   },
+   {
+    "cost": 10136.0,
+    "hold": 18,
+    "inspections": 1000,
+    "released_good": 918,
+    "seed": 25,
+    "unsafe_pass": 64
+   },
+   {
+    "cost": 10750.0,
+    "hold": 25,
+    "inspections": 1000,
+    "released_good": 907,
+    "seed": 26,
+    "unsafe_pass": 68
+   },
+   {
+    "cost": 8804.0,
+    "hold": 27,
+    "inspections": 1000,
+    "released_good": 918,
+    "seed": 27,
+    "unsafe_pass": 55
+   },
+   {
+    "cost": 10584.0,
+    "hold": 17,
+    "inspections": 1000,
+    "released_good": 916,
+    "seed": 28,
+    "unsafe_pass": 67
+   },
+   {
+    "cost": 8950.0,
+    "hold": 25,
+    "inspections": 1000,
+    "released_good": 919,
+    "seed": 29,
+    "unsafe_pass": 56
+   }
+  ],
+  "phone_only": [
+   {
+    "cost": 3206.0,
+    "hold": 153,
+    "inspections": 1000,
+    "released_good": 831,
+    "seed": 0,
+    "unsafe_pass": 16
+   },
+   {
+    "cost": 5110.0,
+    "hold": 130,
+    "inspections": 1000,
+    "released_good": 841,
+    "seed": 1,
+    "unsafe_pass": 29
+   },
+   {
+    "cost": 3794.0,
+    "hold": 147,
+    "inspections": 1000,
+    "released_good": 833,
+    "seed": 2,
+    "unsafe_pass": 20
+   },
+   {
+    "cost": 3304.0,
+    "hold": 127,
+    "inspections": 1000,
+    "released_good": 856,
+    "seed": 3,
+    "unsafe_pass": 17
+   },
+   {
+    "cost": 4062.0,
+    "hold": 131,
+    "inspections": 1000,
+    "released_good": 847,
+    "seed": 4,
+    "unsafe_pass": 22
+   },
+   {
+    "cost": 4958.0,
+    "hold": 129,
+    "inspections": 1000,
+    "released_good": 843,
+    "seed": 5,
+    "unsafe_pass": 28
+   },
+   {
+    "cost": 3942.0,
+    "hold": 146,
+    "inspections": 1000,
+    "released_good": 833,
+    "seed": 6,
+    "unsafe_pass": 21
+   },
+   {
+    "cost": 4384.0,
+    "hold": 142,
+    "inspections": 1000,
+    "released_good": 834,
+    "seed": 7,
+    "unsafe_pass": 24
+   },
+   {
+    "cost": 3026.0,
+    "hold": 138,
+    "inspections": 1000,
+    "released_good": 847,
+    "seed": 8,
+    "unsafe_pass": 15
+   },
+   {
+    "cost": 4812.0,
+    "hold": 131,
+    "inspections": 1000,
+    "released_good": 842,
+    "seed": 9,
+    "unsafe_pass": 27
+   },
+   {
+    "cost": 3450.0,
+    "hold": 125,
+    "inspections": 1000,
+    "released_good": 857,
+    "seed": 10,
+    "unsafe_pass": 18
+   },
+   {
+    "cost": 4384.0,
+    "hold": 142,
+    "inspections": 1000,
+    "released_good": 834,
+    "seed": 11,
+    "unsafe_pass": 24
+   },
+   {
+    "cost": 3306.0,
+    "hold": 128,
+    "inspections": 1000,
+    "released_good": 855,
+    "seed": 12,
+    "unsafe_pass": 17
+   },
+   {
+    "cost": 3050.0,
+    "hold": 150,
+    "inspections": 1000,
+    "released_good": 835,
+    "seed": 13,
+    "unsafe_pass": 15
+   },
+   {
+    "cost": 4222.0,
+    "hold": 136,
+    "inspections": 1000,
+    "released_good": 841,
+    "seed": 14,
+    "unsafe_pass": 23
+   },
+   {
+    "cost": 3592.0,
+    "hold": 121,
+    "inspections": 1000,
+    "released_good": 860,
+    "seed": 15,
+    "unsafe_pass": 19
+   },
+   {
+    "cost": 4796.0,
+    "hold": 123,
+    "inspections": 1000,
+    "released_good": 850,
+    "seed": 16,
+    "unsafe_pass": 27
+   },
+   {
+    "cost": 4500.0,
+    "hold": 125,
+    "inspections": 1000,
+    "released_good": 850,
+    "seed": 17,
+    "unsafe_pass": 25
+   },
+   {
+    "cost": 4068.0,
+    "hold": 134,
+    "inspections": 1000,
+    "released_good": 844,
+    "seed": 18,
+    "unsafe_pass": 22
+   },
+   {
+    "cost": 4206.0,
+    "hold": 128,
+    "inspections": 1000,
+    "released_good": 849,
+    "seed": 19,
+    "unsafe_pass": 23
+   },
+   {
+    "cost": 5142.0,
+    "hold": 146,
+    "inspections": 1000,
+    "released_good": 825,
+    "seed": 20,
+    "unsafe_pass": 29
+   },
+   {
+    "cost": 4998.0,
+    "hold": 149,
+    "inspections": 1000,
+    "released_good": 823,
+    "seed": 21,
+    "unsafe_pass": 28
+   },
+   {
+    "cost": 4094.0,
+    "hold": 147,
+    "inspections": 1000,
+    "released_good": 831,
+    "seed": 22,
+    "unsafe_pass": 22
+   },
+   {
+    "cost": 4638.0,
+    "hold": 119,
+    "inspections": 1000,
+    "released_good": 855,
+    "seed": 23,
+    "unsafe_pass": 26
+   },
+   {
+    "cost": 4512.0,
+    "hold": 131,
+    "inspections": 1000,
+    "released_good": 844,
+    "seed": 24,
+    "unsafe_pass": 25
+   },
+   {
+    "cost": 4382.0,
+    "hold": 141,
+    "inspections": 1000,
+    "released_good": 835,
+    "seed": 25,
+    "unsafe_pass": 24
+   },
+   {
+    "cost": 4052.0,
+    "hold": 126,
+    "inspections": 1000,
+    "released_good": 852,
+    "seed": 26,
+    "unsafe_pass": 22
+   },
+   {
+    "cost": 4326.0,
+    "hold": 113,
+    "inspections": 1000,
+    "released_good": 863,
+    "seed": 27,
+    "unsafe_pass": 24
+   },
+   {
+    "cost": 4232.0,
+    "hold": 141,
+    "inspections": 1000,
+    "released_good": 836,
+    "seed": 28,
+    "unsafe_pass": 23
+   },
+   {
+    "cost": 4232.0,
+    "hold": 141,
+    "inspections": 1000,
+    "released_good": 836,
+    "seed": 29,
+    "unsafe_pass": 23
+   }
+  ],
+  "safe_mesh_reference": [
+   {
+    "cost": 2638.5,
+    "hold": 247,
+    "inspections": 3089,
+    "released_good": 749,
+    "seed": 0,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 3374.5,
+    "hold": 242,
+    "inspections": 3081,
+    "released_good": 749,
+    "seed": 1,
+    "unsafe_pass": 9
+   },
+   {
+    "cost": 2896.5,
+    "hold": 232,
+    "inspections": 3065,
+    "released_good": 762,
+    "seed": 2,
+    "unsafe_pass": 6
+   },
+   {
+    "cost": 2288.0,
+    "hold": 227,
+    "inspections": 3068,
+    "released_good": 771,
+    "seed": 3,
+    "unsafe_pass": 2
+   },
+   {
+    "cost": 3047.0,
+    "hold": 229,
+    "inspections": 3078,
+    "released_good": 764,
+    "seed": 4,
+    "unsafe_pass": 7
+   },
+   {
+    "cost": 3203.5,
+    "hold": 234,
+    "inspections": 3071,
+    "released_good": 758,
+    "seed": 5,
+    "unsafe_pass": 8
+   },
+   {
+    "cost": 2347.0,
+    "hold": 253,
+    "inspections": 3082,
+    "released_good": 745,
+    "seed": 6,
+    "unsafe_pass": 2
+   },
+   {
+    "cost": 3079.0,
+    "hold": 245,
+    "inspections": 3078,
+    "released_good": 748,
+    "seed": 7,
+    "unsafe_pass": 7
+   },
+   {
+    "cost": 2277.5,
+    "hold": 220,
+    "inspections": 3075,
+    "released_good": 778,
+    "seed": 8,
+    "unsafe_pass": 2
+   },
+   {
+    "cost": 3656.5,
+    "hold": 235,
+    "inspections": 3073,
+    "released_good": 754,
+    "seed": 9,
+    "unsafe_pass": 11
+   },
+   {
+    "cost": 3024.5,
+    "hold": 220,
+    "inspections": 3069,
+    "released_good": 773,
+    "seed": 10,
+    "unsafe_pass": 7
+   },
+   {
+    "cost": 2621.0,
+    "hold": 241,
+    "inspections": 3078,
+    "released_good": 755,
+    "seed": 11,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 3012.0,
+    "hold": 216,
+    "inspections": 3060,
+    "released_good": 777,
+    "seed": 12,
+    "unsafe_pass": 7
+   },
+   {
+    "cost": 2472.5,
+    "hold": 239,
+    "inspections": 3089,
+    "released_good": 758,
+    "seed": 13,
+    "unsafe_pass": 3
+   },
+   {
+    "cost": 2588.0,
+    "hold": 224,
+    "inspections": 3080,
+    "released_good": 772,
+    "seed": 14,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 2577.0,
+    "hold": 222,
+    "inspections": 3066,
+    "released_good": 774,
+    "seed": 15,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 2619.5,
+    "hold": 239,
+    "inspections": 3083,
+    "released_good": 757,
+    "seed": 16,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 3169.5,
+    "hold": 218,
+    "inspections": 3067,
+    "released_good": 774,
+    "seed": 17,
+    "unsafe_pass": 8
+   },
+   {
+    "cost": 2756.5,
+    "hold": 233,
+    "inspections": 3081,
+    "released_good": 762,
+    "seed": 18,
+    "unsafe_pass": 5
+   },
+   {
+    "cost": 2725.0,
+    "hold": 221,
+    "inspections": 3066,
+    "released_good": 774,
+    "seed": 19,
+    "unsafe_pass": 5
+   },
+   {
+    "cost": 3387.5,
+    "hold": 252,
+    "inspections": 3067,
+    "released_good": 739,
+    "seed": 20,
+    "unsafe_pass": 9
+   },
+   {
+    "cost": 3110.0,
+    "hold": 258,
+    "inspections": 3088,
+    "released_good": 735,
+    "seed": 21,
+    "unsafe_pass": 7
+   },
+   {
+    "cost": 2774.0,
+    "hold": 243,
+    "inspections": 3076,
+    "released_good": 752,
+    "seed": 22,
+    "unsafe_pass": 5
+   },
+   {
+    "cost": 2585.0,
+    "hold": 225,
+    "inspections": 3070,
+    "released_good": 771,
+    "seed": 23,
+    "unsafe_pass": 4
+   },
+   {
+    "cost": 3500.0,
+    "hold": 230,
+    "inspections": 3080,
+    "released_good": 760,
+    "seed": 24,
+    "unsafe_pass": 10
+   },
+   {
+    "cost": 3365.5,
+    "hold": 237,
+    "inspections": 3083,
+    "released_good": 754,
+    "seed": 25,
+    "unsafe_pass": 9
+   },
+   {
+    "cost": 2718.5,
+    "hold": 217,
+    "inspections": 3069,
+    "released_good": 778,
+    "seed": 26,
+    "unsafe_pass": 5
+   },
+   {
+    "cost": 2146.0,
+    "hold": 229,
+    "inspections": 3076,
+    "released_good": 770,
+    "seed": 27,
+    "unsafe_pass": 1
+   },
+   {
+    "cost": 3209.0,
+    "hold": 236,
+    "inspections": 3074,
+    "released_good": 756,
+    "seed": 28,
+    "unsafe_pass": 8
+   },
+   {
+    "cost": 2613.0,
+    "hold": 233,
+    "inspections": 3094,
+    "released_good": 763,
+    "seed": 29,
+    "unsafe_pass": 4
+   }
+  ],
+  "structured_request_lite": [
+   {
+    "brier": 0.052107484635941996,
+    "cost": 2451.5,
+    "hold": 214,
+    "inspections": 2847,
+    "released_good": 782,
+    "seed": 0,
+    "unsafe_pass": 4
+   },
+   {
+    "brier": 0.049310093630097994,
+    "cost": 3337.0,
+    "hold": 201,
+    "inspections": 2870,
+    "released_good": 789,
+    "seed": 1,
+    "unsafe_pass": 10
+   },
+   {
+    "brier": 0.048256254487364994,
+    "cost": 2722.5,
+    "hold": 198,
+    "inspections": 2853,
+    "released_good": 796,
+    "seed": 2,
+    "unsafe_pass": 6
+   },
+   {
+    "brier": 0.040740001290638,
+    "cost": 2096.5,
+    "hold": 180,
+    "inspections": 2873,
+    "released_good": 818,
+    "seed": 3,
+    "unsafe_pass": 2
+   },
+   {
+    "brier": 0.044100193616567994,
+    "cost": 2844.5,
+    "hold": 180,
+    "inspections": 2869,
+    "released_good": 813,
+    "seed": 4,
+    "unsafe_pass": 7
+   },
+   {
+    "brier": 0.045946312853413995,
+    "cost": 3013.5,
+    "hold": 189,
+    "inspections": 2871,
+    "released_good": 803,
+    "seed": 5,
+    "unsafe_pass": 8
+   },
+   {
+    "brier": 0.04471369026476099,
+    "cost": 2147.0,
+    "hold": 210,
+    "inspections": 2854,
+    "released_good": 788,
+    "seed": 6,
+    "unsafe_pass": 2
+   },
+   {
+    "brier": 0.05008976772891299,
+    "cost": 2881.0,
+    "hold": 201,
+    "inspections": 2858,
+    "released_good": 792,
+    "seed": 7,
+    "unsafe_pass": 7
+   },
+   {
+    "brier": 0.039896728050328,
+    "cost": 2107.0,
+    "hold": 188,
+    "inspections": 2862,
+    "released_good": 810,
+    "seed": 8,
+    "unsafe_pass": 2
+   },
+   {
+    "brier": 0.049826074973081995,
+    "cost": 3460.5,
+    "hold": 188,
+    "inspections": 2869,
+    "released_good": 801,
+    "seed": 9,
+    "unsafe_pass": 11
+   },
+   {
+    "brier": 0.042744596181632,
+    "cost": 2845.5,
+    "hold": 179,
+    "inspections": 2875,
+    "released_good": 814,
+    "seed": 10,
+    "unsafe_pass": 7
+   },
+   {
+    "brier": 0.04731405713084599,
+    "cost": 2431.0,
+    "hold": 201,
+    "inspections": 2858,
+    "released_good": 795,
+    "seed": 11,
+    "unsafe_pass": 4
+   },
+   {
+    "brier": 0.044599325602569996,
+    "cost": 2832.0,
+    "hold": 173,
+    "inspections": 2872,
+    "released_good": 820,
+    "seed": 12,
+    "unsafe_pass": 7
+   },
+   {
+    "brier": 0.045324048528592994,
+    "cost": 2281.0,
+    "hold": 203,
+    "inspections": 2850,
+    "released_good": 794,
+    "seed": 13,
+    "unsafe_pass": 3
+   },
+   {
+    "brier": 0.04629392525250799,
+    "cost": 2428.0,
+    "hold": 198,
+    "inspections": 2864,
+    "released_good": 798,
+    "seed": 14,
+    "unsafe_pass": 4
+   },
+   {
+    "brier": 0.044342206710235,
+    "cost": 2549.5,
+    "hold": 180,
+    "inspections": 2879,
+    "released_good": 815,
+    "seed": 15,
+    "unsafe_pass": 5
+   },
+   {
+    "brier": 0.04590761588122799,
+    "cost": 2426.5,
+    "hold": 194,
+    "inspections": 2877,
+    "released_good": 802,
+    "seed": 16,
+    "unsafe_pass": 4
+   },
+   {
+    "brier": 0.04774971321865099,
+    "cost": 3299.5,
+    "hold": 181,
+    "inspections": 2875,
+    "released_good": 809,
+    "seed": 17,
+    "unsafe_pass": 10
+   },
+   {
+    "brier": 0.048671241265341995,
+    "cost": 2895.0,
+    "hold": 206,
+    "inspections": 2866,
+    "released_good": 787,
+    "seed": 18,
+    "unsafe_pass": 7
+   },
+   {
+    "brier": 0.04561033119857,
+    "cost": 2558.0,
+    "hold": 186,
+    "inspections": 2872,
+    "released_good": 809,
+    "seed": 19,
+    "unsafe_pass": 5
+   },
+   {
+    "brier": 0.053632742425530996,
+    "cost": 3325.0,
+    "hold": 199,
+    "inspections": 2854,
+    "released_good": 791,
+    "seed": 20,
+    "unsafe_pass": 10
+   },
+   {
+    "brier": 0.049735647562523994,
+    "cost": 3059.5,
+    "hold": 217,
+    "inspections": 2851,
+    "released_good": 775,
+    "seed": 21,
+    "unsafe_pass": 8
+   },
+   {
+    "brier": 0.044926190506712996,
+    "cost": 2580.5,
+    "hold": 202,
+    "inspections": 2853,
+    "released_good": 793,
+    "seed": 22,
+    "unsafe_pass": 5
+   },
+   {
+    "brier": 0.042948694829771,
+    "cost": 2396.5,
+    "hold": 178,
+    "inspections": 2881,
+    "released_good": 818,
+    "seed": 23,
+    "unsafe_pass": 4
+   },
+   {
+    "brier": 0.048137220894257995,
+    "cost": 3332.5,
+    "hold": 199,
+    "inspections": 2869,
+    "released_good": 791,
+    "seed": 24,
+    "unsafe_pass": 10
+   },
+   {
+    "brier": 0.048586604743129994,
+    "cost": 3173.5,
+    "hold": 197,
+    "inspections": 2859,
+    "released_good": 794,
+    "seed": 25,
+    "unsafe_pass": 9
+   },
+   {
+    "brier": 0.045851031951345995,
+    "cost": 2551.0,
+    "hold": 182,
+    "inspections": 2874,
+    "released_good": 813,
+    "seed": 26,
+    "unsafe_pass": 5
+   },
+   {
+    "brier": 0.0375531765837,
+    "cost": 1957.5,
+    "hold": 182,
+    "inspections": 2887,
+    "released_good": 817,
+    "seed": 27,
+    "unsafe_pass": 1
+   },
+   {
+    "brier": 0.048884174758306996,
+    "cost": 3155.5,
+    "hold": 188,
+    "inspections": 2859,
+    "released_good": 803,
+    "seed": 28,
+    "unsafe_pass": 9
+   },
+   {
+    "brier": 0.043787851619317995,
+    "cost": 2437.5,
+    "hold": 204,
+    "inspections": 2859,
+    "released_good": 792,
+    "seed": 29,
+    "unsafe_pass": 4
+   }
+  ],
+  "voi_driven": [
+   {
+    "actions": {
+     "NO_ACTION": 214,
+     "caliper_retake": 786
+    },
+    "brier": 0.046789655089377,
+    "cost": 2785.0,
+    "flips": 7,
+    "hold": 221,
+    "inspections": 3786,
+    "released_good": 776,
+    "seed": 0,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "NO_ACTION": 201,
+     "caliper_retake": 799
+    },
+    "brier": 0.046626035692585,
+    "cost": 2921.5,
+    "flips": 10,
+    "hold": 211,
+    "inspections": 3799,
+    "released_good": 785,
+    "seed": 1,
+    "unsafe_pass": 4
+   },
+   {
+    "actions": {
+     "NO_ACTION": 198,
+     "caliper_retake": 802
+    },
+    "brier": 0.052568500475787,
+    "cost": 3055.0,
+    "flips": 4,
+    "hold": 202,
+    "inspections": 3802,
+    "released_good": 793,
+    "seed": 2,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "NO_ACTION": 180,
+     "caliper_retake": 820
+    },
+    "brier": 0.043539381013732,
+    "cost": 2582.0,
+    "flips": 6,
+    "hold": 186,
+    "inspections": 3820,
+    "released_good": 812,
+    "seed": 3,
+    "unsafe_pass": 2
+   },
+   {
+    "actions": {
+     "NO_ACTION": 180,
+     "caliper_retake": 820
+    },
+    "brier": 0.045233090512851,
+    "cost": 2740.0,
+    "flips": 10,
+    "hold": 190,
+    "inspections": 3820,
+    "released_good": 807,
+    "seed": 4,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "NO_ACTION": 189,
+     "caliper_retake": 811
+    },
+    "brier": 0.05156136015281,
+    "cost": 3049.5,
+    "flips": 8,
+    "hold": 197,
+    "inspections": 3811,
+    "released_good": 798,
+    "seed": 5,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "NO_ACTION": 210,
+     "caliper_retake": 790
+    },
+    "brier": 0.048274637239252,
+    "cost": 2625.0,
+    "flips": 5,
+    "hold": 215,
+    "inspections": 3790,
+    "released_good": 783,
+    "seed": 6,
+    "unsafe_pass": 2
+   },
+   {
+    "actions": {
+     "NO_ACTION": 201,
+     "caliper_retake": 799
+    },
+    "brier": 0.052693079510812,
+    "cost": 2923.5,
+    "flips": 11,
+    "hold": 212,
+    "inspections": 3799,
+    "released_good": 784,
+    "seed": 7,
+    "unsafe_pass": 4
+   },
+   {
+    "actions": {
+     "NO_ACTION": 188,
+     "caliper_retake": 812
+    },
+    "brier": 0.043636529808725996,
+    "cost": 2446.0,
+    "flips": 7,
+    "hold": 195,
+    "inspections": 3812,
+    "released_good": 804,
+    "seed": 8,
+    "unsafe_pass": 1
+   },
+   {
+    "actions": {
+     "NO_ACTION": 188,
+     "caliper_retake": 812
+    },
+    "brier": 0.051657271323349,
+    "cost": 3792.0,
+    "flips": 5,
+    "hold": 193,
+    "inspections": 3812,
+    "released_good": 797,
+    "seed": 9,
+    "unsafe_pass": 10
+   },
+   {
+    "actions": {
+     "NO_ACTION": 179,
+     "caliper_retake": 821
+    },
+    "brier": 0.043012793974161,
+    "cost": 3024.5,
+    "flips": 3,
+    "hold": 182,
+    "inspections": 3821,
+    "released_good": 813,
+    "seed": 10,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "NO_ACTION": 201,
+     "caliper_retake": 799
+    },
+    "brier": 0.04497179942849,
+    "cost": 2765.5,
+    "flips": 7,
+    "hold": 208,
+    "inspections": 3799,
+    "released_good": 789,
+    "seed": 11,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "NO_ACTION": 173,
+     "caliper_retake": 827
+    },
+    "brier": 0.03968790461065,
+    "cost": 2721.5,
+    "flips": 6,
+    "hold": 179,
+    "inspections": 3827,
+    "released_good": 818,
+    "seed": 12,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "NO_ACTION": 203,
+     "caliper_retake": 797
+    },
+    "brier": 0.037149156599334,
+    "cost": 2612.5,
+    "flips": 4,
+    "hold": 207,
+    "inspections": 3797,
+    "released_good": 791,
+    "seed": 13,
+    "unsafe_pass": 2
+   },
+   {
+    "actions": {
+     "NO_ACTION": 198,
+     "caliper_retake": 802
+    },
+    "brier": 0.056424257472605,
+    "cost": 2459.0,
+    "flips": 6,
+    "hold": 204,
+    "inspections": 3802,
+    "released_good": 795,
+    "seed": 14,
+    "unsafe_pass": 1
+   },
+   {
+    "actions": {
+     "NO_ACTION": 180,
+     "caliper_retake": 820
+    },
+    "brier": 0.048229037098362,
+    "cost": 2584.0,
+    "flips": 7,
+    "hold": 187,
+    "inspections": 3820,
+    "released_good": 811,
+    "seed": 15,
+    "unsafe_pass": 2
+   },
+   {
+    "actions": {
+     "NO_ACTION": 194,
+     "caliper_retake": 806
+    },
+    "brier": 0.057788130521074996,
+    "cost": 2903.0,
+    "flips": 6,
+    "hold": 200,
+    "inspections": 3806,
+    "released_good": 796,
+    "seed": 16,
+    "unsafe_pass": 4
+   },
+   {
+    "actions": {
+     "NO_ACTION": 181,
+     "caliper_retake": 819
+    },
+    "brier": 0.058978844032794,
+    "cost": 3483.5,
+    "flips": 6,
+    "hold": 187,
+    "inspections": 3819,
+    "released_good": 805,
+    "seed": 17,
+    "unsafe_pass": 8
+   },
+   {
+    "actions": {
+     "NO_ACTION": 206,
+     "caliper_retake": 794
+    },
+    "brier": 0.052839148957121,
+    "cost": 2629.0,
+    "flips": 10,
+    "hold": 216,
+    "inspections": 3794,
+    "released_good": 782,
+    "seed": 18,
+    "unsafe_pass": 2
+   },
+   {
+    "actions": {
+     "NO_ACTION": 186,
+     "caliper_retake": 814
+    },
+    "brier": 0.045152176448579,
+    "cost": 2889.0,
+    "flips": 5,
+    "hold": 191,
+    "inspections": 3814,
+    "released_good": 805,
+    "seed": 19,
+    "unsafe_pass": 4
+   },
+   {
+    "actions": {
+     "NO_ACTION": 199,
+     "caliper_retake": 801
+    },
+    "brier": 0.0609443744757,
+    "cost": 2770.5,
+    "flips": 11,
+    "hold": 210,
+    "inspections": 3801,
+    "released_good": 787,
+    "seed": 20,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "NO_ACTION": 217,
+     "caliper_retake": 783
+    },
+    "brier": 0.056968225732934,
+    "cost": 3231.5,
+    "flips": 3,
+    "hold": 220,
+    "inspections": 3783,
+    "released_good": 774,
+    "seed": 21,
+    "unsafe_pass": 6
+   },
+   {
+    "actions": {
+     "NO_ACTION": 202,
+     "caliper_retake": 798
+    },
+    "brier": 0.047617131414901,
+    "cost": 2765.0,
+    "flips": 6,
+    "hold": 208,
+    "inspections": 3798,
+    "released_good": 789,
+    "seed": 22,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "NO_ACTION": 178,
+     "caliper_retake": 822
+    },
+    "brier": 0.041729950623658,
+    "cost": 2583.0,
+    "flips": 8,
+    "hold": 186,
+    "inspections": 3822,
+    "released_good": 812,
+    "seed": 23,
+    "unsafe_pass": 2
+   },
+   {
+    "actions": {
+     "NO_ACTION": 199,
+     "caliper_retake": 801
+    },
+    "brier": 0.053457546864626,
+    "cost": 3366.5,
+    "flips": 9,
+    "hold": 208,
+    "inspections": 3801,
+    "released_good": 785,
+    "seed": 24,
+    "unsafe_pass": 7
+   },
+   {
+    "actions": {
+     "NO_ACTION": 197,
+     "caliper_retake": 803
+    },
+    "brier": 0.052799019564255,
+    "cost": 2763.5,
+    "flips": 9,
+    "hold": 206,
+    "inspections": 3803,
+    "released_good": 791,
+    "seed": 25,
+    "unsafe_pass": 3
+   },
+   {
+    "actions": {
+     "NO_ACTION": 182,
+     "caliper_retake": 818
+    },
+    "brier": 0.044961526346316,
+    "cost": 2885.0,
+    "flips": 6,
+    "hold": 188,
+    "inspections": 3818,
+    "released_good": 808,
+    "seed": 26,
+    "unsafe_pass": 4
+   },
+   {
+    "actions": {
+     "NO_ACTION": 182,
+     "caliper_retake": 818
+    },
+    "brier": 0.03654604038308,
+    "cost": 2435.0,
+    "flips": 6,
+    "hold": 188,
+    "inspections": 3818,
+    "released_good": 811,
+    "seed": 27,
+    "unsafe_pass": 1
+   },
+   {
+    "actions": {
+     "NO_ACTION": 188,
+     "caliper_retake": 812
+    },
+    "brier": 0.051054915487153,
+    "cost": 3050.0,
+    "flips": 9,
+    "hold": 197,
+    "inspections": 3812,
+    "released_good": 798,
+    "seed": 28,
+    "unsafe_pass": 5
+   },
+   {
+    "actions": {
+     "NO_ACTION": 204,
+     "caliper_retake": 796
+    },
+    "brier": 0.049107583683907,
+    "cost": 2762.0,
+    "flips": 3,
+    "hold": 207,
+    "inspections": 3796,
+    "released_good": 790,
+    "seed": 29,
+    "unsafe_pass": 3
+   }
+  ]
+ },
+ "pre_registered_claim": "NO SUPERIORITY EXPECTED; compare conservative rule reference honestly",
+ "scenario": {
+  "camera_noise": 0.04,
+  "network_outage": 0.05,
+  "process_shift_mm": 0.1,
+  "shared_camera_noise": 0.05
+ },
+ "scenario_id": "S06",
+ "scenario_label": "correlated cameras",
+ "seed_values": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29
+ ],
+ "seeds": 30,
+ "summary": {
+  "collective_fusion": {
+   "brier_p_unsafe": 0.0494861721726281,
+   "mean_cost": 2786.5333333333333,
+   "mean_holds": 193.26666666666668,
+   "mean_inspections": 3000,
+   "released_good_rate": 0.8007333333333333,
+   "unsafe_pass_count": 180,
+   "unsafe_pass_rate": 0.006,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0.005187128902998928,
+    0.006939366943204623
+   ]
+  },
+  "conservative_rules": {
+   "mean_cost": 2821.4666666666667,
+   "mean_holds": 233.23333333333332,
+   "mean_inspections": 3000,
+   "released_good_rate": 0.7610666666666667,
+   "unsafe_pass_count": 171,
+   "unsafe_pass_rate": 0.0057,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0.004909103026470893,
+    0.006617469639072459
+   ]
+  },
+  "entropy_driven": {
+   "action_distribution": {
+    "caliper_retake": 0.8292333333333334,
+    "pi_recapture": 0.17076666666666668
+   },
+   "brier_p_unsafe": 0.051465861877024434,
+   "fresh_evidence_flip_rate": 0.07083333333333333,
+   "mean_cost": 2926.9333333333334,
+   "mean_holds": 135.96666666666667,
+   "mean_inspections": 4000,
+   "released_good_rate": 0.8596666666666667,
+   "unsafe_pass_count": 131,
+   "unsafe_pass_rate": 0.004366666666666666,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0.00368135165420654,
+    0.005178895763958142
+   ]
+  },
+  "metrology_only": {
+   "mean_cost": 10223.733333333334,
+   "mean_holds": 24.366666666666667,
+   "mean_inspections": 1000,
+   "released_good_rate": 0.9111333333333334,
+   "unsafe_pass_count": 1935,
+   "unsafe_pass_rate": 0.0645,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0.0617757325178264,
+    0.06733578355711621
+   ]
+  },
+  "phone_only": {
+   "mean_cost": 4159.333333333333,
+   "mean_holds": 134.66666666666666,
+   "mean_inspections": 1000,
+   "released_good_rate": 0.8427333333333333,
+   "unsafe_pass_count": 678,
+   "unsafe_pass_rate": 0.0226,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0.020978306289910258,
+    0.024343938886157712
+   ]
+  },
+  "safe_mesh_reference": {
+   "mean_cost": 2859.4,
+   "mean_holds": 233.23333333333332,
+   "mean_inspections": 3075.866666666667,
+   "released_good_rate": 0.7610666666666667,
+   "unsafe_pass_count": 171,
+   "unsafe_pass_rate": 0.0057,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0.004909103026470893,
+    0.006617469639072459
+   ]
+  },
+  "structured_request_lite": {
+   "brier_p_unsafe": 0.04625289994586273,
+   "mean_cost": 2719.2,
+   "mean_holds": 193.26666666666668,
+   "mean_inspections": 2865.3333333333335,
+   "released_good_rate": 0.8007333333333333,
+   "unsafe_pass_count": 180,
+   "unsafe_pass_rate": 0.006,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0.005187128902998928,
+    0.006939366943204623
+   ]
+  },
+  "voi_driven": {
+   "action_distribution": {
+    "NO_ACTION": 0.19326666666666667,
+    "caliper_retake": 0.8067333333333333
+   },
+   "brier_p_unsafe": 0.048733303484632735,
+   "fresh_evidence_flip_rate": 0.0067666666666666665,
+   "mean_cost": 2853.4333333333334,
+   "mean_holds": 200.03333333333333,
+   "mean_inspections": 3806.733333333333,
+   "released_good_rate": 0.7963,
+   "unsafe_pass_count": 110,
+   "unsafe_pass_rate": 0.0036666666666666666,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0.003043359360713777,
+    0.004417067302577105
+   ]
+  }
+ },
+ "warning": "Toy generated data and assumed costs; no real-world improvement or scientific novelty established. Likelihoods are a held-out SYNTHETIC calibration unless calibration.source says otherwise; results under shared_camera_noise > 0 test the independence assumption the posterior policies rely on -- report those alongside, never the baseline alone."
+}

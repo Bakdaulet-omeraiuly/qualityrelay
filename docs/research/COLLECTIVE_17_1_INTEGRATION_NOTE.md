@@ -59,7 +59,7 @@ score per camera reading, not just a boolean) is the concrete next step for whoe
 | **B3 (independent voting, no requests)** | Same evidence, no peer requests | **`collective_fusion` is a stronger-than-naive-voting instance of this** |
 | B4 (free-form chat) | — | Not built; needs live LLM (Gate B) |
 | **B5 (structured requests, fixed inspection order)** | Real peer exchange on partial evidence | **`structured_request_lite` is a minimal, deterministic instance of this** |
-| B6 (single agent + adaptive VOI) | — | `voi_driven` (added earlier tonight) is adjacent but single-source, not request-based |
+| B6 (single agent + adaptive VOI) | — | **`voi_driven` rebuilt 31 Oct (Bakdaulet):** calibrated two-axis posterior + one-step NetVOI that buys a genuinely fresh recapture/retake on the benchmark's own cost scale; `entropy_driven` is its B7−cost_awareness ablation; `collective_fusion` is its B7−adaptive_step ablation. Single-agent, not request-based — still B6, now a real one. Pre-registered run: `PROTOCOL_RUN_31OCT_RESULTS.md` |
 | B7 (full structured + adaptive VOI) | Synergy of B5 and B6 | Not built — correctly, this needs B1–B6 to exist first as controls |
 
 ## What this does NOT claim
