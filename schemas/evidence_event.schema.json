@@ -1,0 +1,17 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "title":"QualityRelay17 Evidence Envelope",
+  "type":"object","additionalProperties":false,
+  "required":["event_id","specimen_id","station_id","kind","origin","source_root","observed_at","verdict","model_version","signature"],
+  "properties":{
+    "event_id":{"type":"string","minLength":1},"specimen_id":{"type":"string","minLength":1},
+    "lot_id":{"type":"string"},"station_id":{"type":"string","minLength":1},
+    "kind":{"enum":["PHONE_IMAGE","PI_IMAGE","CAD_IMAGE","CALIPER","ASSEMBLY","ROUTE_ACK","PROCESS"]},
+    "origin":{"enum":["SIMULATED","TEST_FIXTURE","PHYSICAL_CAPTURE","VERIFIED_PHYSICAL"]},
+    "source_root":{"type":"string","minLength":1},
+    "parent_source_roots":{"type":"array","items":{"type":"string"},"uniqueItems":true},
+    "observed_at":{"type":"number"},"verdict":{"type":"string"},
+    "model_version":{"type":"string"},"calibration_id":{"type":"string"},"cad_revision":{"type":"string"},
+    "payload":{"type":"object"},"signature":{"type":"string"}
+  }
+}

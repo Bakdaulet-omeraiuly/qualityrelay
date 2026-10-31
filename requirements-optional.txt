@@ -1,0 +1,6 @@
+# Install independently after evaluating host and compatibility.
+simpy>=4,<5
+# pip install git+https://github.com/FactorySimPy/FactorySimPy.git at reviewed commit
+# pip install anomalib (separate environment, CUDA/torch compatibility)
+# pip install ortools (CPU optimization baseline)
+# NVIDIA Isaac Sim, cuOpt, DeepStream, Cosmos etc must follow their separate docs and GPU requirements.

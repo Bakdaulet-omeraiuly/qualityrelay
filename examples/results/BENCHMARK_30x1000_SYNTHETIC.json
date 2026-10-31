@@ -1,0 +1,69 @@
+{
+  "origin": "SIMULATED",
+  "seeds": 30,
+  "n_per_seed": 1000,
+  "method": "identical_seed_paired_policy_comparison_cluster_bootstrap_over_seed",
+  "pre_registered_claim": "NO SUPERIORITY EXPECTED; compare conservative rule reference honestly",
+  "summary": {
+    "phone_only": {
+      "unsafe_pass_count": 625,
+      "unsafe_pass_rate": 0.020833333333333332,
+      "unsafe_pass_wilson_95_descriptive_only": [
+        0.0192774213675112,
+        0.022511942855780034
+      ],
+      "released_good_rate": 0.8829333333333333,
+      "mean_holds": 96.23333333333333,
+      "mean_cost": 3817.4666666666667
+    },
+    "metrology_only": {
+      "unsafe_pass_count": 1935,
+      "unsafe_pass_rate": 0.0645,
+      "unsafe_pass_wilson_95_descriptive_only": [
+        0.0617757325178264,
+        0.06733578355711621
+      ],
+      "released_good_rate": 0.9111333333333334,
+      "mean_holds": 24.366666666666667,
+      "mean_cost": 10223.733333333334
+    },
+    "conservative_rules": {
+      "unsafe_pass_count": 106,
+      "unsafe_pass_rate": 0.003533333333333333,
+      "unsafe_pass_wilson_95_descriptive_only": [
+        0.0029224917802807403,
+        0.004271302358272275
+      ],
+      "released_good_rate": 0.799,
+      "mean_holds": 197.46666666666667,
+      "mean_cost": 2424.9333333333334
+    },
+    "safe_mesh_reference": {
+      "unsafe_pass_count": 106,
+      "unsafe_pass_rate": 0.003533333333333333,
+      "unsafe_pass_wilson_95_descriptive_only": [
+        0.0029224917802807403,
+        0.004271302358272275
+      ],
+      "released_good_rate": 0.799,
+      "mean_holds": 197.46666666666667,
+      "mean_cost": 2462.866666666667
+    }
+  },
+  "paired_cost_difference_safe_mesh_minus_rules": 37.93333333333333,
+  "paired_cost_difference_cluster_bootstrap_95": [
+    36.433333,
+    39.366667
+  ],
+  "paired_unsafe_pass_rate_difference": 0.0,
+  "paired_unsafe_pass_rate_cluster_bootstrap_95": [
+    0.0,
+    0.0
+  ],
+  "paired_released_good_rate_difference": 0.0,
+  "paired_released_good_rate_cluster_bootstrap_95": [
+    0.0,
+    0.0
+  ],
+  "warning": "Toy generated data and assumed costs; no real-world improvement or scientific novelty established."
+}

@@ -1,0 +1,12 @@
+{
+  "status": "reference_implementation_only",
+  "pytest_result": "........................................................................ [ 81%]\n................                                                         [100%]\n88 passed in 2.31s",
+  "original_baseline_5_files": 33,
+  "external_repos_bundled": false,
+  "live_nebius_run": false,
+  "trained_nvidia_weights": false,
+  "physical_validation": false,
+  "simulation_only": true,
+  "total_manifest_files": 89,
+  "scientific_superiority_proven": false
+}

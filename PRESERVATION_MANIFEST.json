@@ -1,0 +1,64 @@
+{
+  "created_at_utc": "2026-10-30",
+  "baseline_5_original_files": 33,
+  "legacy_items": [
+    {
+      "path": "legacy/ORIGINAL_5_0_33_FILES.zip",
+      "size_bytes": 65749,
+      "sha256": "9071c1faff163f81fde63634d5372cb06babb8ebd16a491d3a7867dd8668fadc"
+    },
+    {
+      "path": "legacy/PREVIOUS_7_1_MASTER.md",
+      "size_bytes": 167727,
+      "sha256": "459a1a628844b72e1d2dac881b48a8ae0fbc9b588651be56ded898c9aa863aa5"
+    },
+    {
+      "path": "legacy/PREVIOUS_8_0_COMPLETE.zip",
+      "size_bytes": 317304,
+      "sha256": "35b487e1f75668696927b6e167b1a044b9b517e0a4efa2b53a698d56dcfd3145"
+    },
+    {
+      "path": "legacy/PREVIOUS_9_0_10000_RESEARCH.zip",
+      "size_bytes": 592073,
+      "sha256": "2bb61447640d09323dde17e84781360bb9d41e4d3d2edec0bd592e92f8d10ee8"
+    },
+    {
+      "path": "legacy/PREVIOUS_10_0_COMPLETE.zip",
+      "size_bytes": 904319,
+      "sha256": "fef0ef0c41f315591367c7153fc576fc5c32dd89c779ebd665c300de502b91e6"
+    },
+    {
+      "path": "legacy/PREVIOUS_12_0_COMPLETE.zip",
+      "size_bytes": 1041885,
+      "sha256": "2389b87b560ca1ed9ca733f24625b4c1c52f23952fbb835dc030b213bba7b983"
+    },
+    {
+      "path": "legacy/PREVIOUS_13_0_COMPLETE.zip",
+      "size_bytes": 1090541,
+      "sha256": "66d98b74cba39cfba88facb62bb64c2a42e348e1687398954e513558cf3a031b"
+    },
+    {
+      "path": "legacy/PREVIOUS_13_1_CAMERA.zip",
+      "size_bytes": 1159732,
+      "sha256": "49aaa5ed2d051bfa5094cd349897fbf4dc00e77641864442903cacdc19b590fa"
+    },
+    {
+      "path": "legacy/PREVIOUS_14_0_NVIDIA_NEBIUS.zip",
+      "size_bytes": 4116771,
+      "sha256": "0e3af5096facf179c8da00210a9e8917e94227aea4b542115b7aa560f2bf42c3"
+    },
+    {
+      "path": "legacy/PREVIOUS_14_2_AGENTS.zip",
+      "size_bytes": 4193407,
+      "sha256": "1e7658bd9670cfbcf764968cc3a442880429fb9951dda97defc21decc9bcb2d8"
+    },
+    {
+      "path": "legacy/PREVIOUS_15_0_DUAL_CAMERA.zip",
+      "size_bytes": 4338120,
+      "sha256": "cb65a5563d2a4629f9d42fb07eb55fe2c8876943ffe63a843d378f0d050e7347"
+    }
+  ],
+  "benchmark": "examples/results/BENCHMARK_30x1000_SYNTHETIC.json",
+  "test_command": "python -m pytest -q",
+  "project": "QualityRelay 17 SAFE-MESH"
+}

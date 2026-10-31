@@ -1,0 +1,642 @@
+{
+  "generator": "flow_shop_reference_v1",
+  "origin": "SIMULATED",
+  "seed": 42,
+  "completed": 120,
+  "lines": 2,
+  "makespan_s": 1195.658,
+  "throughput_per_hour": 361.3073,
+  "mean_cycle_s": 149.69381,
+  "station_summary": {
+    "0:3D_Print": {
+      "utilization": 0.92916,
+      "busy_time_s": 1110.9613
+    },
+    "0:Phone_Vision": {
+      "utilization": 0.24425,
+      "busy_time_s": 292.0348
+    },
+    "0:Pi_Vision": {
+      "utilization": 0.3078,
+      "busy_time_s": 368.0209
+    },
+    "0:Metrology": {
+      "utilization": 0.36062,
+      "busy_time_s": 431.1741
+    },
+    "0:Assembly": {
+      "utilization": 0.47101,
+      "busy_time_s": 563.1662
+    },
+    "0:Sorting": {
+      "utilization": 0.15657,
+      "busy_time_s": 187.2032
+    },
+    "1:3D_Print": {
+      "utilization": 0.94822,
+      "busy_time_s": 1133.7469
+    },
+    "1:Phone_Vision": {
+      "utilization": 0.25504,
+      "busy_time_s": 304.9432
+    },
+    "1:Pi_Vision": {
+      "utilization": 0.31355,
+      "busy_time_s": 374.8933
+    },
+    "1:Metrology": {
+      "utilization": 0.36233,
+      "busy_time_s": 433.2233
+    },
+    "1:Assembly": {
+      "utilization": 0.43335,
+      "busy_time_s": 518.1342
+    },
+    "1:Sorting": {
+      "utilization": 0.15517,
+      "busy_time_s": 185.5287
+    }
+  },
+  "sample_routes": [
+    {
+      "specimen_id": "V-00000",
+      "line_id": 0,
+      "arrival": 0.0,
+      "finish": 48.61098,
+      "cycle_time_s": 48.61098,
+      "station_trace": [
+        {
+          "station": "3D_Print",
+          "arrival": 0.0,
+          "start": 0.0,
+          "end": 18.72059,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Phone_Vision",
+          "arrival": 18.72059,
+          "start": 18.72059,
+          "end": 22.46829,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Pi_Vision",
+          "arrival": 22.46829,
+          "start": 22.46829,
+          "end": 28.3372,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Metrology",
+          "arrival": 28.3372,
+          "start": 28.3372,
+          "end": 35.34778,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Assembly",
+          "arrival": 35.34778,
+          "start": 35.34778,
+          "end": 45.19937,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Sorting",
+          "arrival": 45.19937,
+          "start": 45.19937,
+          "end": 48.61098,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        }
+      ],
+      "origin": "SIMULATED"
+    },
+    {
+      "specimen_id": "V-00001",
+      "line_id": 1,
+      "arrival": 8.0,
+      "finish": 64.332,
+      "cycle_time_s": 56.332,
+      "station_trace": [
+        {
+          "station": "3D_Print",
+          "arrival": 8.0,
+          "start": 8.0,
+          "end": 31.77075,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Phone_Vision",
+          "arrival": 31.77075,
+          "start": 31.77075,
+          "end": 36.52957,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Pi_Vision",
+          "arrival": 36.52957,
+          "start": 36.52957,
+          "end": 44.16238,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Metrology",
+          "arrival": 44.16238,
+          "start": 44.16238,
+          "end": 52.18189,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Assembly",
+          "arrival": 52.18189,
+          "start": 52.18189,
+          "end": 60.53637,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Sorting",
+          "arrival": 60.53637,
+          "start": 60.53637,
+          "end": 64.332,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        }
+      ],
+      "origin": "SIMULATED"
+    },
+    {
+      "specimen_id": "V-00002",
+      "line_id": 0,
+      "arrival": 16.0,
+      "finish": 67.48251,
+      "cycle_time_s": 51.48251,
+      "station_trace": [
+        {
+          "station": "3D_Print",
+          "arrival": 16.0,
+          "start": 18.72059,
+          "end": 37.81165,
+          "queue_wait_s": 2.72059,
+          "downtime": false
+        },
+        {
+          "station": "Phone_Vision",
+          "arrival": 37.81165,
+          "start": 37.81165,
+          "end": 42.5072,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Pi_Vision",
+          "arrival": 42.5072,
+          "start": 42.5072,
+          "end": 47.66277,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Metrology",
+          "arrival": 47.66277,
+          "start": 47.66277,
+          "end": 54.26232,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Assembly",
+          "arrival": 54.26232,
+          "start": 54.26232,
+          "end": 64.24829,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Sorting",
+          "arrival": 64.24829,
+          "start": 64.24829,
+          "end": 67.48251,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        }
+      ],
+      "origin": "SIMULATED"
+    },
+    {
+      "specimen_id": "V-00003",
+      "line_id": 1,
+      "arrival": 24.0,
+      "finish": 81.5061,
+      "cycle_time_s": 57.5061,
+      "station_trace": [
+        {
+          "station": "3D_Print",
+          "arrival": 24.0,
+          "start": 31.77075,
+          "end": 50.68538,
+          "queue_wait_s": 7.77075,
+          "downtime": false
+        },
+        {
+          "station": "Phone_Vision",
+          "arrival": 50.68538,
+          "start": 50.68538,
+          "end": 56.20166,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Pi_Vision",
+          "arrival": 56.20166,
+          "start": 56.20166,
+          "end": 61.80063,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Metrology",
+          "arrival": 61.80063,
+          "start": 61.80063,
+          "end": 67.83987,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Assembly",
+          "arrival": 67.83987,
+          "start": 67.83987,
+          "end": 78.94597,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Sorting",
+          "arrival": 78.94597,
+          "start": 78.94597,
+          "end": 81.5061,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        }
+      ],
+      "origin": "SIMULATED"
+    },
+    {
+      "specimen_id": "V-00004",
+      "line_id": 0,
+      "arrival": 32.0,
+      "finish": 89.91778,
+      "cycle_time_s": 57.91778,
+      "station_trace": [
+        {
+          "station": "3D_Print",
+          "arrival": 32.0,
+          "start": 37.81165,
+          "end": 60.40375,
+          "queue_wait_s": 5.81165,
+          "downtime": false
+        },
+        {
+          "station": "Phone_Vision",
+          "arrival": 60.40375,
+          "start": 60.40375,
+          "end": 65.41815,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Pi_Vision",
+          "arrival": 65.41815,
+          "start": 65.41815,
+          "end": 69.91853,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Metrology",
+          "arrival": 69.91853,
+          "start": 69.91853,
+          "end": 76.76064,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Assembly",
+          "arrival": 76.76064,
+          "start": 76.76064,
+          "end": 86.78424,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Sorting",
+          "arrival": 86.78424,
+          "start": 86.78424,
+          "end": 89.91778,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        }
+      ],
+      "origin": "SIMULATED"
+    },
+    {
+      "specimen_id": "V-00005",
+      "line_id": 1,
+      "arrival": 40.0,
+      "finish": 92.74216,
+      "cycle_time_s": 52.74216,
+      "station_trace": [
+        {
+          "station": "3D_Print",
+          "arrival": 40.0,
+          "start": 50.68538,
+          "end": 64.35724,
+          "queue_wait_s": 10.68538,
+          "downtime": false
+        },
+        {
+          "station": "Phone_Vision",
+          "arrival": 64.35724,
+          "start": 64.35724,
+          "end": 68.74752,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Pi_Vision",
+          "arrival": 68.74752,
+          "start": 68.74752,
+          "end": 73.89511,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Metrology",
+          "arrival": 73.89511,
+          "start": 73.89511,
+          "end": 81.24538,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Assembly",
+          "arrival": 81.24538,
+          "start": 81.24538,
+          "end": 89.75453,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Sorting",
+          "arrival": 89.75453,
+          "start": 89.75453,
+          "end": 92.74216,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        }
+      ],
+      "origin": "SIMULATED"
+    },
+    {
+      "specimen_id": "V-00006",
+      "line_id": 0,
+      "arrival": 48.0,
+      "finish": 109.85125,
+      "cycle_time_s": 61.85125,
+      "station_trace": [
+        {
+          "station": "3D_Print",
+          "arrival": 48.0,
+          "start": 60.40375,
+          "end": 79.9755,
+          "queue_wait_s": 12.40375,
+          "downtime": false
+        },
+        {
+          "station": "Phone_Vision",
+          "arrival": 79.9755,
+          "start": 79.9755,
+          "end": 85.06938,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Pi_Vision",
+          "arrival": 85.06938,
+          "start": 85.06938,
+          "end": 90.91091,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Metrology",
+          "arrival": 90.91091,
+          "start": 90.91091,
+          "end": 98.48637,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Assembly",
+          "arrival": 98.48637,
+          "start": 98.48637,
+          "end": 107.17492,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Sorting",
+          "arrival": 107.17492,
+          "start": 107.17492,
+          "end": 109.85125,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        }
+      ],
+      "origin": "SIMULATED"
+    },
+    {
+      "specimen_id": "V-00007",
+      "line_id": 1,
+      "arrival": 56.0,
+      "finish": 110.94897,
+      "cycle_time_s": 54.94897,
+      "station_trace": [
+        {
+          "station": "3D_Print",
+          "arrival": 56.0,
+          "start": 64.35724,
+          "end": 80.72595,
+          "queue_wait_s": 8.35724,
+          "downtime": false
+        },
+        {
+          "station": "Phone_Vision",
+          "arrival": 80.72595,
+          "start": 80.72595,
+          "end": 85.96483,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Pi_Vision",
+          "arrival": 85.96483,
+          "start": 85.96483,
+          "end": 90.79322,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Metrology",
+          "arrival": 90.79322,
+          "start": 90.79322,
+          "end": 98.05692,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Assembly",
+          "arrival": 98.05692,
+          "start": 98.05692,
+          "end": 108.04586,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Sorting",
+          "arrival": 108.04586,
+          "start": 108.04586,
+          "end": 110.94897,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        }
+      ],
+      "origin": "SIMULATED"
+    },
+    {
+      "specimen_id": "V-00008",
+      "line_id": 0,
+      "arrival": 64.0,
+      "finish": 130.1852,
+      "cycle_time_s": 66.1852,
+      "station_trace": [
+        {
+          "station": "3D_Print",
+          "arrival": 64.0,
+          "start": 79.9755,
+          "end": 101.79651,
+          "queue_wait_s": 15.9755,
+          "downtime": false
+        },
+        {
+          "station": "Phone_Vision",
+          "arrival": 101.79651,
+          "start": 101.79651,
+          "end": 105.95403,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Pi_Vision",
+          "arrival": 105.95403,
+          "start": 105.95403,
+          "end": 112.80155,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Metrology",
+          "arrival": 112.80155,
+          "start": 112.80155,
+          "end": 119.63284,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Assembly",
+          "arrival": 119.63284,
+          "start": 119.63284,
+          "end": 127.67455,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Sorting",
+          "arrival": 127.67455,
+          "start": 127.67455,
+          "end": 130.1852,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        }
+      ],
+      "origin": "SIMULATED"
+    },
+    {
+      "specimen_id": "V-00009",
+      "line_id": 1,
+      "arrival": 72.0,
+      "finish": 127.74268,
+      "cycle_time_s": 55.74268,
+      "station_trace": [
+        {
+          "station": "3D_Print",
+          "arrival": 72.0,
+          "start": 80.72595,
+          "end": 98.21399,
+          "queue_wait_s": 8.72595,
+          "downtime": false
+        },
+        {
+          "station": "Phone_Vision",
+          "arrival": 98.21399,
+          "start": 98.21399,
+          "end": 103.98305,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Pi_Vision",
+          "arrival": 103.98305,
+          "start": 103.98305,
+          "end": 110.31824,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Metrology",
+          "arrival": 110.31824,
+          "start": 110.31824,
+          "end": 117.65857,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Assembly",
+          "arrival": 117.65857,
+          "start": 117.65857,
+          "end": 124.37737,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        },
+        {
+          "station": "Sorting",
+          "arrival": 124.37737,
+          "start": 124.37737,
+          "end": 127.74268,
+          "queue_wait_s": 0.0,
+          "downtime": false
+        }
+      ],
+      "origin": "SIMULATED"
+    }
+  ]
+}
