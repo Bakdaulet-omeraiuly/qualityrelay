@@ -204,6 +204,16 @@ def website():
     from pathlib import Path
     return FileResponse(Path(__file__).resolve().parent.parent/'web'/'index.html')
 
+@app.get('/legacy',include_in_schema=False)
+def website_legacy():
+    from fastapi.responses import FileResponse
+    from pathlib import Path
+    return FileResponse(Path(__file__).resolve().parent.parent/'web'/'legacy_17.html')
+
+# 18.1 science/simulation read-only routes (Bakdaulet; proposal for adilnurgg's API-01)
+from .sim.api_routes import router as _sim_router  # noqa: E402
+app.include_router(_sim_router)
+
 @app.get('/examples/cad/{filename}',include_in_schema=False)
 def cad_example(filename:str):
     from fastapi.responses import FileResponse

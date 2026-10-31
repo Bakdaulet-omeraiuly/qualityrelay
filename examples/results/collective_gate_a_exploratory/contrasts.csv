@@ -1,0 +1,28 @@
+scenario,a,b,question,cost_diff,cost_ci,unsafe_diff,unsafe_ci,good_diff,good_ci,non_inferior_on_safety,cheaper,throughput_preserved
+X01,B7_safe_mesh_voi,B0_rules,does the full method beat the fixed rule?,-0.757747,"[-0.881278, -0.61364]",-0.001867,"[-0.0027, -0.0009]",0.036567,"[0.033167, 0.040067]",True,True,True
+X01,B7_safe_mesh_voi,B5_structured_fixed,contribution of adaptive VOI (= ablation B7-adaptive_VOI),-0.142328,"[-0.151878, -0.128385]",3.3e-05,"[0.0, 0.0001]",-0.0048,"[-0.005767, -0.003867]",True,True,True
+X01,B7_safe_mesh_voi,B6_single_agent_voi,price of decentralised ownership (messages) vs one central agent,0.096353,"[0.095672, 0.097058]",0.0,"[0.0, 0.0]",-0.000533,"[-0.000933, -0.000167]",True,False,True
+X01,B5_structured_fixed,B3_majority_vote,communication + fusion vs independent voting,-2.860352,"[-3.050068, -2.667113]",-0.0182,"[-0.019467, -0.016867]",-0.042367,"[-0.044433, -0.0403]",True,True,False
+X01,B6_single_agent_voi,B1_single_agent_fixed,"adaptive vs fixed inspection, single agent",-0.370633,"[-0.435917, -0.2871]",0.0013,"[0.000867, 0.001833]",0.0297,"[0.027433, 0.032]",False,True,True
+X01,B7_safe_mesh_voi,B7-provenance,contribution of lineage dedupe,0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",True,False,True
+X01,B7_safe_mesh_voi,B7-cost_awareness,expected-loss vs entropy selection,-0.128405,"[-0.138907, -0.120607]",-3.3e-05,"[-0.0001, 0.0]",-0.0428,"[-0.045333, -0.040333]",True,True,False
+X01,B7_safe_mesh_voi,B7-hard_gate,what the hard gate costs / buys,0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",True,False,True
+X01,B7_safe_mesh_voi,B7-peer_exchange,contribution of peer exchange,-0.228463,"[-0.31731, -0.112533]",0.002767,"[0.002167, 0.003567]",0.8523,"[0.849, 0.856]",False,True,True
+X02,B7_safe_mesh_voi,B0_rules,does the full method beat the fixed rule?,-1.115108,"[-1.229222, -0.9865]",0.0004,"[-0.000367, 0.001267]",0.161433,"[0.157333, 0.165567]",False,True,True
+X02,B7_safe_mesh_voi,B5_structured_fixed,contribution of adaptive VOI (= ablation B7-adaptive_VOI),-0.158927,"[-0.181062, -0.136435]",3.3e-05,"[-0.0001, 0.000167]",0.000567,"[-0.000267, 0.001433]",True,True,True
+X02,B7_safe_mesh_voi,B6_single_agent_voi,price of decentralised ownership (messages) vs one central agent,0.094075,"[0.093155, 0.094995]",0.0,"[0.0, 0.0]",-0.000267,"[-0.000433, -0.0001]",True,False,True
+X02,B5_structured_fixed,B3_majority_vote,communication + fusion vs independent voting,-2.208682,"[-2.384635, -2.023007]",-0.014833,"[-0.016067, -0.0135]",-0.029433,"[-0.031167, -0.027633]",True,True,False
+X02,B6_single_agent_voi,B1_single_agent_fixed,"adaptive vs fixed inspection, single agent",-0.448183,"[-0.512817, -0.371633]",0.000967,"[0.000567, 0.0015]",0.025933,"[0.024167, 0.027867]",False,True,True
+X02,B7_safe_mesh_voi,B7-provenance,contribution of lineage dedupe,0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",True,False,True
+X02,B7_safe_mesh_voi,B7-cost_awareness,expected-loss vs entropy selection,-0.151632,"[-0.177093, -0.129628]",-0.0002,"[-0.000367, -6.7e-05]",-0.0314,"[-0.033433, -0.0295]",True,True,False
+X02,B7_safe_mesh_voi,B7-hard_gate,what the hard gate costs / buys,0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",True,False,True
+X02,B7_safe_mesh_voi,B7-peer_exchange,contribution of peer exchange,-1.717058,"[-1.859715, -1.557832]",0.007967,"[0.006967, 0.009067]",0.7813,"[0.776833, 0.7864]",False,True,True
+X03,B7_safe_mesh_voi,B0_rules,does the full method beat the fixed rule?,-0.927613,"[-1.04703, -0.807537]",-0.003233,"[-0.004033, -0.002433]",0.020367,"[0.017133, 0.023567]",True,True,True
+X03,B7_safe_mesh_voi,B5_structured_fixed,contribution of adaptive VOI (= ablation B7-adaptive_VOI),-0.14944,"[-0.155212, -0.143832]",0.0,"[0.0, 0.0]",-0.004233,"[-0.0053, -0.003267]",True,True,True
+X03,B7_safe_mesh_voi,B6_single_agent_voi,price of decentralised ownership (messages) vs one central agent,0.096353,"[0.095672, 0.097058]",0.0,"[0.0, 0.0]",-0.000533,"[-0.000933, -0.000167]",True,False,True
+X03,B5_structured_fixed,B3_majority_vote,communication + fusion vs independent voting,-2.768573,"[-2.973905, -2.569015]",-0.017367,"[-0.018767, -0.016]",-0.026067,"[-0.0279, -0.024333]",True,True,False
+X03,B6_single_agent_voi,B1_single_agent_fixed,"adaptive vs fixed inspection, single agent",-0.5291,"[-0.536333, -0.517983]",3.3e-05,"[0.0, 0.0001]",0.0152,"[0.013467, 0.0169]",True,True,True
+X03,B7_safe_mesh_voi,B7-provenance,contribution of lineage dedupe,0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",True,False,True
+X03,B7_safe_mesh_voi,B7-cost_awareness,expected-loss vs entropy selection,-0.141172,"[-0.15184, -0.13302]",-3.3e-05,"[-0.0001, 0.0]",-0.041,"[-0.043733, -0.038467]",True,True,False
+X03,B7_safe_mesh_voi,B7-hard_gate,what the hard gate costs / buys,0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",0.0,"[0.0, 0.0]",True,False,True
+X03,B7_safe_mesh_voi,B7-peer_exchange,contribution of peer exchange,-0.228463,"[-0.31731, -0.112533]",0.002767,"[0.002167, 0.003567]",0.8523,"[0.849, 0.856]",False,True,True

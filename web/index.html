@@ -1,73 +1,164 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>QualityRelay 17 — Scientific Factory</title>
-<style>
-:root{--bg:#0b1017;--panel:#151d29;--panel2:#1b2635;--muted:#9aadc5;--line:#344154;--ink:#e9f0fb;--accent:#77c7d7;--positive:#5ccc91;--warning:#efba71;--bad:#ee8e97}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}header{border-bottom:1px solid var(--line);padding:18px max(18px,calc((100vw - 1240px)/2));display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.logo{font-weight:750;font-size:21px;letter-spacing:-.6px}.tag{display:inline-block;font-size:11px;color:#a0e8f5;background:#183541;padding:5px 10px;border-radius:10px;font-weight:700;letter-spacing:.6px}.container{max-width:1240px;margin:auto;padding:26px 20px}.hero{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;margin-bottom:20px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:23px;min-width:0}.eyebrow{text-transform:uppercase;color:var(--accent);font-size:11px;letter-spacing:2px;font-weight:800}.hero h1{line-height:1.12;font-size:clamp(27px,4vw,46px);letter-spacing:-1.5px;margin:10px 0}.hero p{max-width:680px;color:var(--muted);margin:8px 0}h2{font-size:20px;letter-spacing:-.4px;margin:0 0 13px}h3{font-size:15px;margin:0 0 8px}.statline{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.stat{background:var(--panel2);padding:13px;border-radius:11px}.stat small{display:block;color:var(--muted)}.stat strong{font-size:21px}.notice{padding:11px 12px;border-radius:10px;background:#332b21;color:#ffdda7;font-size:12px;margin-top:12px}.tabs{display:flex;overflow:auto;gap:7px;margin:24px 0 15px}.tabs button{white-space:nowrap;border:1px solid var(--line);background:#121925;color:var(--muted);border-radius:10px;padding:10px 13px;font:inherit;cursor:pointer}.tabs button.active{border-color:var(--accent);color:var(--accent);background:#15313b}.view{display:none}.view.active{display:block}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.cols2{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}.label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}input[type=file],input[type=number],select{max-width:100%;width:100%;border:1px solid var(--line);background:var(--panel2);color:var(--ink);padding:10px;border-radius:9px}input[type=range]{width:100%}button.primary{background:var(--accent);color:#07151e;border:0;padding:11px 18px;border-radius:10px;font-weight:800;cursor:pointer}button.primary:disabled{background:#496c74;color:#c2ccd7;cursor:not-allowed}.muted{color:var(--muted)}.tiny{font-size:12px;color:var(--muted)}.decision{padding:16px;border:1px solid var(--line);border-radius:12px}.decision strong{font-size:24px}.good{color:var(--positive)}.warning{color:var(--warning)}.bad{color:var(--bad)}.pipeline{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap}.step{flex:1;min-width:130px;padding:13px;background:var(--panel2);border-radius:10px;font-weight:600}.step small{display:block;font-weight:400;color:var(--muted)}.arrow{align-self:center;color:var(--muted)}.bar{height:9px;border-radius:5px;background:#263448;overflow:hidden}.bar>span{height:100%;display:block;background:var(--accent)}.metric{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);gap:15px}.metric:last-child{border-bottom:0}canvas{max-width:100%;border-radius:10px;background:#0a0a0a}.viewer{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}.viewer>div{min-width:0}.viewer canvas{width:100%;aspect-ratio:1;object-fit:contain}.repo{padding:11px 0;border-bottom:1px solid var(--line)}a{color:#9cdeeb;text-decoration:none}a:hover{text-decoration:underline}.foot{font-size:12px;color:var(--muted);margin-top:25px;border-top:1px solid var(--line);padding-top:14px}@media(max-width:820px){.hero,.cols2,.grid{grid-template-columns:1fr}.viewer{grid-template-columns:1fr 1fr}.viewer>div:last-child{grid-column:1/-1}}
-</style></head><body>
-<header><div class="logo">QualityRelay <span class="tag">17.0 RESEARCH</span></div><div class="tiny">Fully decentralized by design · No factory deployment claimed</div></header>
-<main class="container"><section class="hero"><div class="panel"><div class="eyebrow">Assured Scientific Factory</div><h1>Verified evidence.<br/>Safer decisions.</h1><p>Dual Vision, CAD geometry, verified metrology, 21 specialist roles, digital factory simulation, cost optimization, and human-governed physical sorting.</p><div class="notice">RESEARCH REFERENCE — no trained NVIDIA weights, live Nebius account, real camera data or factory-certified safety metrics are included.</div></div><div class="panel"><div class="eyebrow">Implementation snapshot</div><div class="statline"><div class="stat"><small>Specialist roles</small><strong>21</strong></div><div class="stat"><small>NVIDIA integration slots</small><strong>8</strong></div><div class="stat"><small>Vision stations</small><strong>2 planned</strong></div><div class="stat"><small>Scientific mode</small><strong>Seeded</strong></div></div><p class="tiny">Role count does not imply 21 separately trained or running LLMs.</p></div></section>
-<div class="tabs" role="tablist"><button class="active" data-view="overview">Factory Overview</button><button data-view="vision">Photo / CAD Lab</button><button data-view="simulation">Simulation Lab</button><button data-view="agents">Agent Evidence Room</button><button data-view="economics">Cost Intelligence</button><button data-view="sources">Research + Sources</button></div>
-<section id="overview" class="view active"><div class="panel"><h2>Manufacturing evidence pipeline</h2><div class="pipeline"><div class="step">Digital Factory<small>6-stage flow-shop reference</small></div><div class="arrow">→</div><div class="step">Independent Sensors<small>Phone / Pi / CAD / Caliper</small></div><div class="arrow">→</div><div class="step">SAFE-MESH<small>Lineage + HOLD + active inspection</small></div><div class="arrow">→</div><div class="step">Human Review<small>PASS_REVIEW ≠ PASS</small></div><div class="arrow">→</div><div class="step">Sorter ACK<small>Only if physical sensor confirms</small></div></div></div><div class="cols2" style="margin-top:15px"><div class="panel"><h2>What is implemented?</h2><div class="metric"><span>HMAC evidence / ACL / event ledger</span><strong class="good">TESTED</strong></div><div class="metric"><span>Bayesian VOI & matching</span><strong class="good">TESTED</strong></div><div class="metric"><span>Factory flow shop simulation</span><strong class="good">TESTED</strong></div><div class="metric"><span>Physical Pi camera + NVIDIA weights</span><strong class="warning">NOT TESTED</strong></div><div class="metric"><span>Real servo sorting</span><strong class="warning">NOT CONNECTED</strong></div></div><div class="panel"><h2>Decision policy</h2><div class="decision"><div class="tiny">Example: phone clear, Pi suspect, metrology verified</div><strong class="warning">HOLD</strong><p class="muted">Disagreement requires human reinspection. Neither LLM majority voting nor synthetic CAD geometry can authorize a real release.</p></div></div></div></section>
-<section id="vision" class="view"><div class="panel"><h2>Local photo-to-reference comparator</h2><p class="muted">Use your own images. They are processed **locally in this browser** by an intentionally simple pixel-difference baseline. This is NOT a calibrated defect model or NVIDIA inference.</p><div class="grid"><div><label class="label" for="ref">Reference photo</label><input type="file" id="ref" accept="image/*"/></div><div><label class="label" for="live">Live / phone photo</label><input type="file" id="live" accept="image/*" capture="environment"/></div><div><label class="label" for="cad">CAD projection image (optional)</label><input type="file" id="cad" accept="image/*"/></div></div><div style="margin:16px 0"><button id="compare" class="primary">Compare images</button> <span id="visionOut" class="tiny">Upload reference and live first; same angle, light and scale required.</span></div><div class="viewer"><div><div class="tiny">Reference</div><canvas id="canvasRef" width="256" height="256"></canvas></div><div><div class="tiny">Current</div><canvas id="canvasLive" width="256" height="256"></canvas></div><div><div class="tiny">Absolute pixel-difference heatmap</div><canvas id="canvasDiff" width="256" height="256"></canvas></div></div><p class="tiny">A numerical difference is sensitive to lighting and pose. CAD files should first be rendered to a matched projection; a mere shape mask cannot certify 0.1 mm tolerances.</p></div><div class="panel" style="margin-top:15px"><h2>Try the user's original CAD sample</h2><div class="cols2"><div><img style="max-width:200px;background:black;border-radius:9px" src="../examples/cad/slot_nominal_21p00_top_projected.png" alt="STL slot top 2D projection"><p class="tiny">Slot nominal STL top orthographic silhouette (2D raster)</p></div><div><img style="max-width:200px;background:black;border-radius:9px" src="../examples/cad/tab_nominal_20p00_top_projected.png" alt="STL tab top 2D projection"><p class="tiny">Tab nominal STL top orthographic silhouette</p></div></div></div></section>
-<section id="simulation" class="view"><div class="cols2"><div class="panel"><h2>Seeded Digital Factory</h2><label class="label">Parts per simulation</label><input id="parts" type="number" min="1" max="50000" value="1000"/><label class="label">Camera noise (each camera)</label><input type="range" id="camnoise" min="0" max="25" value="4"/><span id="camnoiseOut" class="tiny">4%</span><label class="label">Pi station outage probability</label><input type="range" id="outage" min="0" max="30" value="5"/><span id="outageOut" class="tiny">5%</span><p><button id="run" class="primary">Run seeded benchmark API</button></p><p class="tiny">Requires `uvicorn qualityrelay17.api:app` on same host. Offline static example below remains readable.</p><div id="apiStatus" class="tiny">Backend not queried</div></div><div class="panel"><h2>Registered comparisons</h2><div class="metric"><span>Phone only</span><span>One visual source</span></div><div class="metric"><span>Metrology only</span><span>Clearance model</span></div><div class="metric"><span>Conservative rules</span><span>Strong comparator</span></div><div class="metric"><span>SAFE-MESH reference</span><span>Same safe decisions + inspection overhead</span></div><p class="notice">This reference deliberately does NOT demonstrate scientific superiority. Run physical experiments to test our hypotheses.</p></div></div><div class="panel" style="margin-top:15px"><h2>Example 30 × 1000 simulated specimens — not factory evidence</h2><div id="simTable"></div></div></section>
-<section id="agents" class="view"><div class="grid"><div class="panel"><h2>Quality / Metrology</h2><p class="muted">Tools: check_clearance, check_visual, read_evidence; no direct authority over final PASS.</p></div><div class="panel"><h2>Design / Assembly</h2><p class="muted">Review CAD revision, geometry fit, compatibility, check for independent risk evidence.</p></div><div class="panel"><h2>Inspection Planner</h2><p class="muted">Rank next best inspection by expected decision loss, time and cost.</p></div></div><div class="panel" style="margin-top:15px"><h2>Nebius adapter status</h2><div class="metric"><span>Live model inference</span><strong class="warning">DISABLED BY DEFAULT</strong></div><div class="metric"><span>21 roles</span><strong class="good">REGISTERED</strong></div><div class="metric"><span>Server-enforced tool ACL</span><strong class="good">REFERENCE TESTED</strong></div><p class="tiny">Select an entitled model from the live Nebius model catalog and explicitly opt in before making paid API calls.</p></div></section>
-<section id="economics" class="view"><div class="cols2"><div class="panel"><h2>Model inputs</h2><p class="muted">Costs are assumed until independent factory invoices/logs verify them.</p><label class="label">Escaped-defect cost per part ($)</label><input id="failureCost" type="number" value="150" min="1"/><label class="label">Inspection cost per measurement ($)</label><input id="inspectionCost" type="number" value="0.50" min="0" step="0.1"/><label class="label">Platform cost per run ($)</label><input id="platformCost" type="number" value="0" min="0"/><p class="tiny">The backed economics module prevents duplicate terminal defect outcomes.</p></div><div class="panel"><h2>Observed economic conclusion</h2><div class="decision"><strong class="warning">NO PROVEN SAVINGS</strong><p class="muted">Current reference policy makes the same HOLD/PASS decisions as conservative rules, but may spend more on additional inspections. Any claim of savings needs actual physical or pre-registered repeatable evidence.</p></div></div></div></section>
-<section id="sources" class="view"><div class="panel"><h2>Research / provenance</h2><div class="repo"><a target="_blank" href="https://link.springer.com/article/10.1186/s44147-026-01295-x">2026 manufacturing QA digital twins systematic review (235 studies)</a></div><div class="repo"><a target="_blank" href="https://proceedings.mlr.press/v306/li26ej.html">ICML 2026 multi-agent distributed information failure</a></div><div class="repo"><a target="_blank" href="https://www.nist.gov/publications/digital-twins-workshops-summary-report">NIST VVUQ/interoperability report</a></div><div class="repo"><a target="_blank" href="https://github.com/nvidia/cuopt">cuOpt optimization upstream</a></div><div class="repo"><a target="_blank" href="https://github.com/isaac-sim/IsaacSim">Isaac Sim GPU requirements and source</a></div><p class="tiny">More sources, 12 architectures and license table in local docs/ directory. Prior owned ZIP versions remain in legacy/.</p></div></section><div class="foot">QualityRelay 17.0 research-reference website · Local photo baseline does not upload images to a server · Demonstration actions are non-actuating.</div></main>
-<script>
-const tabs=document.querySelectorAll('.tabs button');tabs.forEach(b=>b.addEventListener('click',()=>{tabs.forEach(x=>x.classList.remove('active'));b.classList.add('active');document.querySelectorAll('.view').forEach(x=>x.classList.toggle('active',x.id===b.dataset.view));}));
-const results={
-  "origin": "SIMULATED",
-  "seeds": 30,
-  "n_per_seed": 1000,
-  "pre_registered_claim": "NO SUPERIORITY EXPECTED; compare conservative rule reference honestly",
-  "summary": {
-    "phone_only": {
-      "unsafe_pass_count": 625,
-      "unsafe_pass_rate": 0.020833333333333332,
-      "unsafe_pass_wilson_95": [
-        0.0192774213675112,
-        0.022511942855780034
-      ],
-      "mean_holds": 96.23333333333333,
-      "mean_cost": 3817.4666666666667
-    },
-    "metrology_only": {
-      "unsafe_pass_count": 1935,
-      "unsafe_pass_rate": 0.0645,
-      "unsafe_pass_wilson_95": [
-        0.0617757325178264,
-        0.06733578355711621
-      ],
-      "mean_holds": 24.366666666666667,
-      "mean_cost": 10223.733333333334
-    },
-    "conservative_rules": {
-      "unsafe_pass_count": 106,
-      "unsafe_pass_rate": 0.003533333333333333,
-      "unsafe_pass_wilson_95": [
-        0.0029224917802807403,
-        0.004271302358272275
-      ],
-      "mean_holds": 197.46666666666667,
-      "mean_cost": 2424.9333333333334
-    },
-    "safe_mesh_reference": {
-      "unsafe_pass_count": 106,
-      "unsafe_pass_rate": 0.003533333333333333,
-      "unsafe_pass_wilson_95": [
-        0.0029224917802807403,
-        0.004271302358272275
-      ],
-      "mean_holds": 197.46666666666667,
-      "mean_cost": 2462.866666666667
-    }
-  },
-  "paired_cost_difference_safe_mesh_minus_rules": 37.93333333333333
-};
-function rows(data){let h='<div class="metric"><strong>Policy</strong><strong>Unsafe PASS / mean cost ($)</strong></div>';for(const [key,v] of Object.entries(data.summary)){h+=`<div class="metric"><span>${key}</span><span>${(v.unsafe_pass_rate*100).toFixed(3)}% / ${v.mean_cost.toFixed(0)}</span></div>`;}h+='<p class="tiny">30 seeds, 1000 specimens per seed. Seeded generator data ONLY. No physical observations. SAFE-MESH has not beaten conservative rules.</p>';return h;}
-document.querySelector('#simTable').innerHTML=rows(results);
-for(const [id,out] of [['camnoise','camnoiseOut'],['outage','outageOut']])document.getElementById(id).oninput=e=>document.getElementById(out).textContent=e.target.value+'%';
-document.querySelector('#run').onclick=async()=>{const button=document.querySelector('#run');button.disabled=true;document.querySelector('#apiStatus').textContent='Computing or attempting API connection...';try{const response=await fetch('/simulation/compare',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({n:Number(document.querySelector('#parts').value),seed:2026,camera_noise:Number(document.querySelector('#camnoise').value)/100,network_outage:Number(document.querySelector('#outage').value)/100})});if(!response.ok)throw Error('HTTP '+response.status);const j=await response.json();let h='<div class="metric"><b>Policy</b><b>Unsafe passes / $ cost</b></div>';for(const [k,v]of Object.entries(j.policies))h+=`<div class="metric"><span>${k}</span><span>${v.unsafe_pass} / ${v.total_cost.toFixed(0)}</span></div>`;document.querySelector('#simTable').innerHTML=h+'<div class="notice">SIMULATED API run; not factory evidence</div>';document.querySelector('#apiStatus').textContent='Simulation completed: '+j.n+' virtual specimens (seed '+j.seed+')';}catch(err){document.querySelector('#apiStatus').textContent='No local API available: '+err.message+'. Start uvicorn or use included static result.';}finally{button.disabled=false;}};
-async function getImage(id){const f=document.getElementById(id).files?.[0];if(!f)return null;return await createImageBitmap(f);}
-function render(bmp,c){const x=c.getContext('2d',{willReadFrequently:true});x.fillStyle='#000';x.fillRect(0,0,c.width,c.height);x.drawImage(bmp,0,0,c.width,c.height);return x.getImageData(0,0,c.width,c.height)}
-document.querySelector('#compare').onclick=async()=>{try{const [r,l,cad]=await Promise.all(['ref','live','cad'].map(getImage));if(!r||!l)throw Error('Choose reference and live photos');const cr=document.querySelector('#canvasRef'),cl=document.querySelector('#canvasLive'),cd=document.querySelector('#canvasDiff');let a=render(r,cr),b=render(l,cl);let output=cd.getContext('2d').createImageData(256,256);let count=0;for(let k=0;k<output.data.length;k+=4){let d=(Math.abs(a.data[k]-b.data[k])+Math.abs(a.data[k+1]-b.data[k+1])+Math.abs(a.data[k+2]-b.data[k+2]))/3;count+=(d>40);output.data[k]=Math.min(255,d*2);output.data[k+1]=30;output.data[k+2]=20;output.data[k+3]=255;}cd.getContext('2d').putImageData(output,0,0);let s='Pixel difference '+(100*count/(256*256)).toFixed(2)+'%. Baseline only; poses/scales are not calibrated.';if(cad){const tmp=document.createElement('canvas');tmp.width=256;tmp.height=256;let p=render(cad,tmp),sum=0;for(let i=0;i<p.data.length;i+=4){sum+=(Math.abs(p.data[i]-b.data[i])+Math.abs(p.data[i+1]-b.data[i+1])+Math.abs(p.data[i+2]-b.data[i+2]))/3>40;}s+=' Raw CAD projection pixel difference: '+(100*sum/(256*256)).toFixed(2)+'% (NOT calibrated geometric deviation).';}document.querySelector('#visionOut').textContent=s;}catch(e){document.querySelector('#visionOut').textContent=e.message;}};
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>QualityRelay Studio · SAFE-MESH 18.1</title>
+<link rel="stylesheet" href="/sim/assets/site.css"/>
+<script type="importmap">
+{"imports":{
+ "three":"/sim/assets/three.module.js",
+ "three/addons/OrbitControls.js":"/sim/assets/OrbitControls.js",
+ "three/addons/STLLoader.js":"/sim/assets/STLLoader.js",
+ "three/addons/CSS2DRenderer.js":"/sim/assets/CSS2DRenderer.js",
+ "three/addons/RoomEnvironment.js":"/sim/assets/RoomEnvironment.js",
+ "three/addons/EffectComposer.js":"/sim/assets/EffectComposer.js",
+ "three/addons/RenderPass.js":"/sim/assets/RenderPass.js",
+ "three/addons/UnrealBloomPass.js":"/sim/assets/UnrealBloomPass.js",
+ "three/addons/OutputPass.js":"/sim/assets/OutputPass.js"}}
+</script>
+</head>
+<body>
+<header class="appbar">
+  <a class="brand" href="#lab" aria-label="QualityRelay Studio">
+    <svg viewBox="0 0 32 32" width="22" height="22" aria-hidden="true"><path d="M16 2 29 9.5v13L16 30 3 22.5v-13z" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M10 16.5l4 4 8-9" fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    QualityRelay <span>Studio</span>
+  </a>
+  <nav class="tabs" role="tablist">
+    <a href="#lab" data-view="lab">3D Lab</a><a href="#parts" data-view="parts">Parts</a>
+    <a href="#results" data-view="results">Results</a><a href="#science" data-view="science">Science</a><a href="#claims" data-view="claims">Claims</a>
+  </nav>
+  <div class="context" id="context">—</div>
+  <span class="tier" title="Every number in this studio comes from simulation, not from a factory">SIMULATED</span>
+  <button class="iconbtn" id="toggleInspector" title="Show / hide inspector (I)" aria-label="Toggle inspector">⟩</button>
+</header>
+
+<!-- ================= 3D LAB ================= -->
+<section class="view" id="view-lab">
+  <div class="studio" id="studio">
+    <aside class="dock left">
+      <div class="phead"><span>Run</span></div>
+      <div class="pbody">
+        <div class="seg" id="modeSeg"><button data-mode="single" class="on">Single</button><button data-mode="compare">Compare</button></div>
+        <label>Scenario<select id="scenario"></select></label>
+        <label><span id="policyLabel">Decision policy</span>
+          <select id="policy"><option value="bayes">Calibrated Bayes (QualityRelay)</option><option value="rules">Fixed rule (today)</option><option value="hold_all">Hold everything</option></select></label>
+        <label>Pairing<select id="pairing"><option value="optimized">Risk-optimised (SciPy)</option><option value="fifo">First-in first-out</option></select></label>
+        <div class="row2"><label>Seed<input id="seed" type="number" min="0" max="999" value="0"/></label>
+          <label>Pairs<input id="npairs" type="number" min="10" max="150" value="60"/></label></div>
+        <div id="compareHint" hidden><p class="hint">Left: today (fixed rule + FIFO). Right: the policy above. Same parts, same sensor noise, same failures (common random numbers).</p><button class="ghost" id="demoBtn" style="width:100%;margin-bottom:10px">★ Demo: warping burst F03 · seed 3 · 100 pairs</button></div>
+        <button id="runBtn" class="primary">Run simulation</button>
+        <div id="runStatus" class="status" role="status"></div>
+      </div>
+      <div class="phead"><span>Story</span><span class="faint" id="storyStep">0 / 7</span></div>
+      <div class="pbody">
+        <p id="storyText" class="story">Take the guided tour of the line. The camera moves to each station.</p>
+        <div class="row2"><button class="ghost" id="storyPrev">◀ Back</button><button class="ghost" id="storyNext">Start tour ▶</button></div>
+      </div>
+      <div class="phead"><span>Live station events</span><span class="faint" id="liveState">waiting</span></div>
+      <div class="pbody"><div id="liveFeed" class="livefeed faint small">No physical events yet. Stations POST to <code>/sim/live/event</code>; events are shown, never acted on.</div></div>
+      <div class="phead"><span>Layers</span></div>
+      <div class="pbody">
+        <label class="check"><input id="labels" type="checkbox" checked/> Station labels <kbd>L</kbd></label>
+        <label class="check"><input id="truth" type="checkbox" checked/> Ground truth (evaluator only) <kbd>T</kbd></label>
+        <div class="legend">
+          <span><i class="sw slot"></i>Slot</span><span><i class="sw tab"></i>Tab</span>
+          <span><i class="sw review"></i>HOLD → review</span><span><i class="sw scrap"></i>Scrapped</span>
+          <span><i class="sw escape"></i>Escaped defect</span><span><i class="sw caught"></i>Caught (compare)</span>
+        </div>
+      </div>
+    </aside>
+
+    <div class="center">
+      <div class="viewports" id="viewports">
+        <div class="vp" id="vpA">
+          <div class="corner tl" id="titleA">QualityRelay</div>
+          <div class="corner tr counters" id="countA"></div>
+          <div class="corner bl faint" id="provA"></div>
+        </div>
+        <div class="vp" id="vpB" hidden>
+          <div class="corner tl" id="titleB">QualityRelay</div>
+          <div class="corner tr counters" id="countB"></div>
+          <div class="corner bl faint" id="provB"></div>
+        </div>
+      </div>
+      <div class="transport">
+        <button id="playBtn" class="iconbtn" aria-label="Play / pause (space)">❚❚</button>
+        <span class="clock num" id="clock">0:00</span>
+        <input id="timeline" type="range" min="0" max="1000" value="0" aria-label="Timeline"/>
+        <select id="speed" aria-label="Playback speed (simulated seconds per real second)"><option value="5">5×</option><option value="10" selected>10×</option><option value="20">20×</option><option value="60">60×</option><option value="150">150×</option></select>
+      </div>
+      <div class="metricstrip" id="metrics"></div>
+    </div>
+
+    <aside class="dock right" id="inspector">
+      <div class="phead"><span>Inspector</span><span class="faint" id="inspHint">click a part or a station</span></div>
+      <div class="pbody insp" id="inspBody"></div>
+    </aside>
+  </div>
+</section>
+
+<!-- ================= PARTS ================= -->
+<section class="view page" id="view-parts" hidden>
+  <div class="pagehead"><h1>Parts from CAD, measured from the mesh</h1>
+    <p>Widths come from a mid-length cross-section of each STL, not from file names. The fit check is a design check, not a physical measurement.</p></div>
+  <div class="partsgrid">
+    <aside class="dock">
+      <div class="phead"><div class="seg small"><button id="modeSingle" class="on">Single part</button><button id="modeFit">Fit check</button></div></div>
+      <div class="pbody"><div id="partList" class="partlist"></div>
+        <div id="fitPick" class="hidden"><label>Slot<select id="fitSlot"></select></label><label>Tab<select id="fitTab"></select></label><div id="fitVerdict" class="verdict"></div></div></div>
+    </aside>
+    <div class="vp tall" id="partCanvas"><div class="corner bl" id="partLabel"></div><div class="corner tl faint">CAD_STL_MEASURED</div></div>
+  </div>
+</section>
+
+<!-- ================= RESULTS ================= -->
+<section class="view page" id="view-results" hidden>
+  <div class="pagehead"><h1>Factory results: 15 scenarios × 20 seeds</h1>
+    <p><b>Product</b> means calibrated Bayes with risk-optimised pairing; <b>today</b> means the fixed rule with FIFO. Verdicts use the pre-registered rules (95% cluster bootstrap). ROI is a scenario outcome under illustrative prices, never a saving.</p></div>
+  <div class="kpis" id="kpis"></div>
+  <div class="card tablewrap"><table id="resultsTable"><thead><tr>
+    <th>Scenario</th><th class="num">Δ good / h</th><th class="num">Δ escapes / 1000</th><th class="num">Δ cost / good unit</th>
+    <th>Safety</th><th>Throughput</th><th>Cost</th><th class="num">P(product worse)</th></tr></thead><tbody></tbody></table></div>
+  <div class="charts">
+    <figure class="card chart" data-chart="good_per_hour"></figure><figure class="card chart" data-chart="delta_profit_interval"></figure>
+    <figure class="card chart" data-chart="hold_all_throughput"></figure><figure class="card chart" data-chart="scale"></figure>
+  </div>
+</section>
+
+<!-- ================= SCIENCE ================= -->
+<section class="view page" id="view-science" hidden>
+  <div class="pagehead"><h1>Collective-intelligence benchmark (Gate A, pre-registered)</h1>
+    <p>Mock agents with hidden truth. Each policy pays for every observation and every message. The primary result is <b>negative</b>: at default prices, the full SAFE-MESH + VOI agent holds every part.</p></div>
+  <div class="two">
+    <div class="card tablewrap"><h3>S01 nominal · 30 lots × 1000 parts</h3><table id="gateTable"><thead><tr>
+      <th>Policy</th><th class="num">Unsafe PASS / 1000</th><th class="num">Released good</th><th class="num">Cost / unit</th></tr></thead><tbody></tbody></table></div>
+    <div class="card tablewrap"><h3>NVIDIA Warp · 10⁷ parts per scenario</h3><table id="warpTable"><thead><tr>
+      <th>Scenario</th><th class="num">Rule</th><th class="num">Calibrated</th><th class="num">Δ [95% CI]</th></tr></thead><tbody></tbody></table>
+      <p class="faint small">Unsafe PASS per 1000 parts. Warp kernels make decisions identical to the CPU code, part for part (tested). Run on Warp's CPU backend; the GPU run is pending.</p></div>
+  </div>
+</section>
+
+<!-- ================= CLAIMS ================= -->
+<section class="view page" id="view-claims" hidden>
+  <div class="pagehead"><h1>What we can and cannot claim</h1></div>
+  <div class="two">
+    <div class="card claims ok"><h3>Supported, in simulation</h3><ul>
+      <li>The calibrated policy with risk-based pairing shipped fewer defective assemblies in <b>15/15</b> scenarios and kept throughput in <b>4/15</b>.</li>
+      <li>When a camera reading goes missing or the network drops, it kept about <b>95 more good assemblies per hour</b> than a rule that holds on missing data.</li>
+      <li>Optimising part matching against a pass/fail rule <b>increased</b> escapes under drift. It is safe only with a calibrated-risk objective.</li>
+      <li>Holding everything through one review station cut throughput by <b>82%</b>.</li>
+      <li>Correcting the cost accounting <b>reversed</b> an earlier "peer requests save money" result. We published the correction.</li></ul></div>
+    <div class="card claims no"><h3>Not claimed</h3><ul>
+      <li>Any factory measurement or proven saving. No physical run exists yet.</li>
+      <li>"21 agents collaborate". There are 21 <i>roles</i>, not 21 running models.</li>
+      <li>"8 NVIDIA systems running". Warp is used; the other adapters are <code>NOT_CONFIGURED</code>.</li>
+      <li>A payback period or annual saving.</li></ul></div>
+  </div>
+  <p class="faint small foot">Write-ups: docs/research/SIM_18_1_RESULTS.md · COLLECTIVE_GATE_A_RESULTS_31OCT.md · WARP_MC_AND_TUNING_31OCT.md · <a href="/legacy">17.0 page</a></p>
+</section>
+
+<script src="/sim/assets/qrcode.js"></script>
+<script type="module" src="/sim/assets/site.js"></script>
+</body>
+</html>

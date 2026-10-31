@@ -1,5 +1,11 @@
 # Results — pre-registered synthetic VOI protocol, 31 October 2026
 
+> **Correction (18.1 SCI-02, later 31 Oct):** `structured_request_lite`'s peer-request cost was
+> reported but not charged in this run. Re-run with corrected accounting, same seeds:
+> `examples/results/protocol_31oct_rerun_18_1/`. Every `voi_driven` verdict below is unchanged;
+> the request slice's cost comparisons reverse (now more expensive than fusion in 12/12
+> scenarios). See `COLLECTIVE_GATE_A_RESULTS_31OCT.md` section 2. Original files kept unedited.
+
 **Owner:** Bakdaulet. **Tier:** `SIMULATED`, every number. **Registration:**
 `PROTOCOL_REGISTRATION_31OCT.md` (committed before the run). **Artefacts:**
 `examples/results/protocol_31oct/` — `manifest.json` (commit, code hashes, verdicts), `S01.json` …
@@ -35,6 +41,9 @@ The arithmetic says "measure twice" for nearly every part, so the policy degener
 double-measurement rule on that axis rather than a targeted one. The obvious fix is a continuous
 caliper likelihood (how *close* to tolerance the reading was), which would concentrate retakes
 on near-tolerance parts. That is **not** in this run; it is the first exploratory item below.
+**Update, later on 31 Oct:** the Level-1 digital twin (`DIGITAL_TWIN_RUN_31OCT.md`) shows what this
+costs in time — the retakes drive the Caliper station to 99.8 % utilisation and cycle time to 24×
+the rule's. Cost-neutral on paper, infeasible on a one-caliper line.
 
 ## 2. All scenarios — `voi_driven` vs `conservative_rules` (descriptive, same rules applied)
 

@@ -6,6 +6,25 @@
 
 > **IMPORTANT: This document is a TASK BOARD and definition of acceptance, not a report of completed work.** The October 31 audit reported **111/111 Python tests passing**, but this does **not** establish that live GPU training, two physical cameras, LLM integration, the servo mechanism, or factory trials are complete. Two cost-accounting errors were found in previous benchmarks. Although the archive is labeled 18, multiple internal package labels still say 17.0.
 
+## CAPE research addendum — 31 October 2026
+
+**New proposed research method:** **CAPE — Capacity-Aware Provenance-Constrained Evidence Acquisition**. Detailed mathematical design, scientific baselines, negative-result policy and acceptance gates: [CAPE research specification](docs/research/CAPE_CAPACITY_AWARE_EVIDENCE_ACQUISITION.md).
+
+**Novelty is a hypothesis, not a proven discovery.** CAPE explores whether source-root-aware, permissioned decentralized evidence acquisition combined with *marginal factory queue/capacity costs* can outperform standard VOI and conservative rules under comparable safety conditions. Keep SAFE-MESH as the independent physical-action safety gate. CAPE extends V-DER/CAIR; it is not a replacement or a claim that Bayesian VOI, queueing theory or distributed agents were invented here.
+
+### Additional priority tasks (not yet done)
+
+- [ ] **CAPE-01 — Bakdaulet:** Fix P0 sensor and peer-request cost-accounting errors; add regression tests preventing double charges or free inspected evidence.
+- [ ] **CAPE-02 — Bakdaulet:** Implement deterministic capacity-aware NetVOI with a discrete-event factory queue model; run low/high utilization switching tests and scientifically fair B0–B8 baselines/ablations.
+- [ ] **CAPE-03 — Bakdaulet:** Evaluate actual throughput, p95 cycle time, unsafe PASS, hold, total factory cost and confidence intervals; report *negative* as well as positive results. Keep synthetic and physical results labeled separately.
+- [ ] **CAPE-04 — adilnurgg:** Supply authenticated, scoped peer-request/reply traces, source-root DAG, per-call communication and LLM costs, and real queue telemetry to the CAPE scientific tool. Expose its output through API and web; LLMs cannot compute or override safety decisions.
+- [ ] **CAPE-05 — adilnurgg:** Compare compatible OpenAI/Claude/Nebius provider adapters separately from the collaboration protocol and maintain the independent SAFE-MESH approval/ACK boundary.
+- [ ] **CAPE-06 — HyorinmaruK:** Physical specimens, camera/caliper calibration, empirical service-time measurements, supervised sorter ACK tests and presentation; **no simulation, Digital Twin coding, cloud or backend assignment**.
+
+**Acceptance:** demonstrate a case where an authorized new source changes the inspection plan; duplicate source evidence does not count twice; increasing queue congestion changes the admissible optimal inspection when appropriate; in an uncongested limit CAPE reduces to standard NetVOI; combined benchmark and physical test reports never overstate demonstrated savings.
+
+---
+
 ## 0. Ownership — final, mandatory allocation
 
 | Person / GitHub | Owns | Strict scope boundary |
@@ -74,6 +93,45 @@ When modules meet, ownership does not move. Each owner supplies the necessary da
 - [ ] **AGENT-03 — Explainable interaction traces:** Store message-level provenance; rejected, missing, and timed-out responses; before/after belief; chosen inspection; and decision changes. Expose JSON traces and a web dashboard trace viewer.
 - [ ] **AGENT-04 — Nebius live smoke test:** Validate actual credentials/permissions, a named deployed model, genuine tool calls, server-side tool allowlists, and token/latency/cost logging. **21 roles do not imply 21 separate running models.** Show actual active roles and report `NOT_CONFIGURED` when credentials are absent.
 - [ ] **AGENT-05 — Evidence lineage DAG:** Do not count two scores from the same underlying photo as independent sources. Trace all lineage ancestors. Stale, duplicate, unsigned, or mixed-origin evidence should trigger HOLD/review as required by policy.
+
+### P0 — LLM stack and deployment plan for all 21 roles (adilnurgg owns this)
+
+**Architectural decision:** Keep the 21 specialist role definitions already present in `qualityrelay17/roles.py`; do **not** train or host 21 separate LLMs. Use one verified, tool-calling Nebius Token Factory model as the shared stateless reasoning backend, while each role retains a distinct **server-enforced** evidence scope, tool allowlist, system prompt, budget, and auditable identity. Normally select **2–7 relevant roles per specimen**; do not invoke all 21 on every part. The individual agents must own/receive different evidence, not merely be differently named prompts that all see the same database.
+
+#### Exact recommended technology stack (candidate, not yet a verified live integration)
+
+| Layer | Choose | Reason and validation |
+|---|---|---|
+| LLM provider | **Nebius Token Factory** OpenAI-compatible API at `https://api.tokenfactory.nebius.com/v1/` | Already matches `qualityrelay17/nebius.py`; fetch `GET /v1/models` with the team's key and test a real tool call. Token Factory access is distinct from the shared Nebius H100 allocation. |
+| Default LLM candidate | **`zai-org/GLM-5.3-Flash`** | Currently listed by Nebius for agentic tool calling at lower cost. Confirm **this exact model ID** appears under the team's credentials and actually completes our JSON/tool schemas; do not hard-code availability as a fact. |
+| Lower-cost fallback candidate | **`Qwen/Qwen3-30B-A3B-Instruct-2507`** | For smaller text/tool tasks, subject to live access and loop/tool-call reliability tests. |
+| High-complexity escalation candidate | **`zai-org/GLM-5.3`** | Use only for selected hard diagnoses with token/cost caps; compare with the default on held-out cases. |
+| LLM API client | **Python `openai` SDK** with explicit `base_url` and environment variable `NEBIUS_API_KEY` | Existing adapter already follows this pattern; no credentials in repository or logs. |
+| Per-agent state-machine | **LangGraph** (`langgraph`) *or a fully equivalent documented custom async state machine* | Durable step transitions: observe → identify missing evidence → peer request → verify → hypothesis update → proposed inspection → decision review; checkpoint per case, never expose global raw evidence to all nodes. |
+| Cross-agent transport | **NATS JetStream** (`nats-py`), after first in-process contract tests | Signed typed messages, durable delivery, retries, idempotency and timeouts. NATS is transport, not authorization or the source of truth. Run roles as separately authorized workers to demonstrate genuinely distributed evidence. |
+| Validated messages | **Pydantic** JSON schemas; FastAPI for external routes | Reject forged identities, invalid payloads, missing/duplicate source roots and unauthorized role-to-tool requests before any LLM tool execution. |
+| Audit and evidence | Append-only event log + **PostgreSQL** (or existing storage adapter during MVP) | Store case_id, event_id, source_root, station origin, message request/response, model ID, tool calls, tokens, cost, latency and policy verdict. No indiscriminate raw data sharing. |
+| Safety | Existing `qualityrelay17/safe_mesh.py` and device-authenticated physical gateway | LLM output is advice only. It cannot authorize PASS on hardware, emit GPIO commands, override HOLD, or approve its own action. |
+| Visual intelligence | Bakdaulet's calibrated Computer Vision/CAD models | Vision scores, defect maps and measurements arrive as cited evidence; never assume the text LLM is the calibrated defect detector. |
+
+#### Individual tasks and acceptance gates
+
+- [ ] **LLM-01 — Entitlement and model verification:** set `NEBIUS_API_KEY` as a secret, not in Git; query `GET /v1/models`, record which of the candidate models the team can use, and perform one real text + JSON tool-call roundtrip. Capture a redacted run manifest with date, model ID and tool-call validity. Without entitlement, return `NOT_CONFIGURED`, not fake AI output.
+- [ ] **LLM-02 — Build the 21-role configuration:** extend `roles.py` with role-specific prompts, required sources, server-owned tool permissions, max rounds and max spend. Define clear owner-only evidence views for CAD/Design, Phone/Pi Vision, Metrology, Assembly, Process, Risk/Safety, Maintenance, Economics, Inspection Planner and remaining specialists. Preserve the **21 registered role names**, which are engineering roles rather than 21 independent foundation models.
+- [ ] **LLM-03 — Real reasoning loop:** extend `nebius.py` / `agent_tools.py` to validate model-produced function calls, execute only allowlisted read/inspection-planning tools, return signed/verified evidence summaries, and persist the complete multi-turn tool transcript. Start with Quality Inspector, Metrology Engineer, Design Geometry and Inspection Planner; expand role coverage after integration.
+- [ ] **LLM-04 — Authenticated peer messaging:** create structured `REQUEST_EVIDENCE`, `EVIDENCE_RESPONSE`, `REQUEST_DENIED`, `TIMEOUT`, `HYPOTHESIS_UPDATE`, `PROPOSE_INSPECTION` and `DECISION_PROPOSAL` envelopes with message_id, case_id, sender/recipient identity, desired evidence kind, reason, source roots, deadline, cost and approval status. A distinct worker must answer from data unavailable to the requester before the request.
+- [ ] **LLM-05 — Proper decentralization and lineage:** each specialist has scoped storage/permissions; do not emulate collaboration by handing one orchestrator all raw evidence. Enforce role authorization in server code, deduplicate by `source_root`, and prohibit replay or stale evidence. A shared broker or model API is allowed as infrastructure, but it must not be the all-knowing decision authority.
+- [ ] **LLM-06 — Adaptive, budgeted activation:** use verified evidence gaps and Bakdaulet's **measured** NetVOI/CAIR planner to activate only useful specialists; bound tokens, inspection charges, time and number of rounds. Never let LLM free-text invent sensitivity, posteriors or money amounts. Record both LLM compute cost and inspection-request cost exactly once.
+- [ ] **LLM-07 — Observable collaboration demo:** show a case where Quality Inspector initially lacks a caliper/CAD revision, requests it from a peer, receives a **new permitted independent source**, revises the belief or inspection plan, and obtains a safety-gated verdict; export a JSON trace and render the step sequence in the web dashboard.
+- [ ] **LLM-08 — Scientific baselines:** run an identical held-out case set for (a) conservative rules, (b) one full-context LLM (separate privileged-information bound), (c) one role under the same distributed information budget, (d) independent voting, (e) structured evidence exchange, and (f) structured exchange + adaptive NetVOI + SAFE-MESH. Keep model, prompt budgets, data availability, inspection prices and safety gate comparable where applicable. Bakdaulet owns experimental design/results; adilnurgg provides live traces and per-call costs.
+- [ ] **LLM-09 — Failure and adversarial tests:** reject hallucinated evidence IDs, missing provenance, forged role credentials, duplicate messages, prompt injection in CAD metadata, forbidden tools, stale readings, API failure, excessive tool rounds and network partitions; leave the part on `HOLD` when critical evidence is not verified.
+- [ ] **LLM-10 — Cloud and reproducibility:** adilnurgg owns service deployment, optional NATS/PostgreSQL containers, TLS, logs, key rotation, rate limits and budget ceilings. Pin dependencies and record prompt hashes, model name, schema version, model response validity and source_tier (`SIMULATED` versus verified physical). Integrate with GitHub Actions unit tests; run a separately labeled opt-in live Nebius integration check.
+
+**Minimum live acceptance demo:** `Quality Inspector → REQUEST_EVIDENCE → Metrology Engineer → EVIDENCE_RESPONSE → VERIFY source_root/ACL → UPDATE_BELIEF → Inspection Planner (measured NetVOI) → SAFE-MESH HOLD/PASS_REVIEW → human authorization if any physical action`. This must show **real API calls**, a real new source and its cost. A typed simulated test is useful but cannot be labeled a live 21-agent deployment.
+
+**Implementation pointers:** existing `qualityrelay17/roles.py`, `nebius.py`, `agent_tools.py`, `safe_mesh.py`; scientific design in `docs/architectures/02_SPECIALIST_LLM_AGENTS.md` and `docs/research/COLLECTIVE_17_1_BAKDAULET.md`.
+
+**Official/open-source references:** Nebius API: https://api.tokenfactory.nebius.com/docs ; Nebius model catalog: https://nebius.com/services/token-factory/models/glm-models-inference ; https://nebius.com/services/token-factory/models/qwen-models-inference ; examples: https://github.com/nebius/token-factory-cookbook ; LangGraph: https://github.com/langchain-ai/langgraph ; NATS: https://docs.nats.io/concepts/jetstream and https://github.com/nats-io/nats.py . Check library versions and licenses before pinning.
 
 ### P0 — Integration and release engineering
 

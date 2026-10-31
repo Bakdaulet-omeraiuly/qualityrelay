@@ -1,0 +1,494 @@
+{
+ "dirty_before_run": false,
+ "git_commit": "0c1019a8aa74e57f93b855cae6c8403ae9717c7c",
+ "origin": "SIMULATED",
+ "registration": "docs/research/INNOVATIONS_REGISTRATION_31OCT.md",
+ "results": {
+  "F01": {
+   "corrections_mean": 8.2,
+   "cusum_alarms_mean": 0.2,
+   "diff": {
+    "cost_per_good_unit": {
+     "ci95": [
+      -0.083904,
+      0.123492
+     ],
+     "mean": 0.018346837059230202
+    },
+    "downtime_h": {
+     "ci95": [
+      -0.057567,
+      0.010032
+     ],
+     "mean": -0.01584491666666666
+    },
+    "escapes_per_1000_shipped": {
+     "ci95": [
+      -0.523567,
+      0.776208
+     ],
+     "mean": 0.12649837782347398
+    },
+    "good_per_hour": {
+     "ci95": [
+      -3.663861,
+      2.456673
+     ],
+     "mean": -0.6093834003309297
+    },
+    "hold_inventory_part_hours": {
+     "ci95": [
+      -0.502876,
+      1.452007
+     ],
+     "mean": 0.4854858615997762
+    },
+    "holds": {
+     "ci95": [
+      -1.25,
+      3.5
+     ],
+     "mean": 1.15
+    },
+    "mean_cycle_s": {
+     "ci95": [
+      -2.357794,
+      13.672776
+     ],
+     "mean": 6.23097977269268
+    },
+    "operator_hours": {
+     "ci95": [
+      -0.089397,
+      0.079463
+     ],
+     "mean": 0.0016087916152457415
+    },
+    "profit_per_hour": {
+     "ci95": [
+      -33.518794,
+      23.34206
+     ],
+     "mean": -4.995052205792883
+    },
+    "scrapped_good_parts": {
+     "ci95": [
+      -0.2,
+      0.5
+     ],
+     "mean": 0.1
+    }
+   },
+   "ewma": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.4747396270925122,
+    "downtime_h": 0.5142048611111111,
+    "escapes_per_1000_shipped": 2.0689392932250716,
+    "good_per_hour": 197.8993487175821,
+    "hold_inventory_part_hours": 6.535172846111849,
+    "holds": 96.05,
+    "local_reinspections": 0,
+    "mean_cycle_s": 474.8365582471488,
+    "n_seeds": 20,
+    "operator_hours": 3.042064663441695,
+    "profit_per_hour": 898.3928361460037,
+    "scrapped_good_parts": 0.5,
+    "stale_evidence_holds": 0
+   },
+   "first_alarm_s_median": 1000000000.0,
+   "none": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.456392790033282,
+    "downtime_h": 0.5300497777777777,
+    "escapes_per_1000_shipped": 1.9424409154015976,
+    "good_per_hour": 198.508732117913,
+    "hold_inventory_part_hours": 6.049686984512073,
+    "holds": 94.9,
+    "local_reinspections": 0,
+    "mean_cycle_s": 468.6055784744561,
+    "n_seeds": 20,
+    "operator_hours": 3.040455871826449,
+    "profit_per_hour": 903.3878883517966,
+    "scrapped_good_parts": 0.4,
+    "stale_evidence_holds": 0
+   },
+   "title": "nominal single site",
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": false,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   }
+  },
+  "F02": {
+   "corrections_mean": 59.8,
+   "cusum_alarms_mean": 25.9,
+   "diff": {
+    "cost_per_good_unit": {
+     "ci95": [
+      -0.707133,
+      -0.223868
+     ],
+     "mean": -0.4667550302291945
+    },
+    "downtime_h": {
+     "ci95": [
+      -0.176395,
+      -0.040559
+     ],
+     "mean": -0.09911344444444443
+    },
+    "escapes_per_1000_shipped": {
+     "ci95": [
+      -3.939431,
+      -0.804133
+     ],
+     "mean": -2.3721271376113573
+    },
+    "good_per_hour": {
+     "ci95": [
+      33.044345,
+      47.764954
+     ],
+     "mean": 40.68063968746421
+    },
+    "hold_inventory_part_hours": {
+     "ci95": [
+      -18.83689,
+      -14.130848
+     ],
+     "mean": -16.39934861740346
+    },
+    "holds": {
+     "ci95": [
+      -39.6,
+      -35.5
+     ],
+     "mean": -37.6
+    },
+    "mean_cycle_s": {
+     "ci95": [
+      -113.126766,
+      -87.332113
+     ],
+     "mean": -100.596258438483
+    },
+    "operator_hours": {
+     "ci95": [
+      -1.162985,
+      -0.969488
+     ],
+     "mean": -1.068838424681166
+    },
+    "profit_per_hour": {
+     "ci95": [
+      192.485115,
+      303.503427
+     ],
+     "mean": 248.98515052583318
+    },
+    "scrapped_good_parts": {
+     "ci95": [
+      -3.95,
+      -2.6
+     ],
+     "mean": -3.25
+    }
+   },
+   "ewma": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.5682641121867122,
+    "downtime_h": 0.5455580833333333,
+    "escapes_per_1000_shipped": 2.5915290272618137,
+    "good_per_hour": 195.08607598828414,
+    "hold_inventory_part_hours": 7.199057312225581,
+    "holds": 99.85,
+    "local_reinspections": 0,
+    "mean_cycle_s": 477.2791331185314,
+    "n_seeds": 20,
+    "operator_hours": 3.1790449014202053,
+    "profit_per_hour": 863.3715484727638,
+    "scrapped_good_parts": 0.6,
+    "stale_evidence_holds": 0
+   },
+   "first_alarm_s_median": 2331.7,
+   "none": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 2.0350191424159068,
+    "downtime_h": 0.6446715277777778,
+    "escapes_per_1000_shipped": 4.9636561648731705,
+    "good_per_hour": 154.40543630081993,
+    "hold_inventory_part_hours": 23.598405929629045,
+    "holds": 137.45,
+    "local_reinspections": 0,
+    "mean_cycle_s": 577.8753915570144,
+    "n_seeds": 20,
+    "operator_hours": 4.2478833261013715,
+    "profit_per_hour": 614.3863979469306,
+    "scrapped_good_parts": 3.85,
+    "stale_evidence_holds": 0
+   },
+   "title": "process drift 0.15 mm/h",
+   "verdict": {
+    "better_on_all_three": true,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   }
+  },
+  "F03": {
+   "corrections_mean": 14.6,
+   "cusum_alarms_mean": 1.45,
+   "diff": {
+    "cost_per_good_unit": {
+     "ci95": [
+      -0.37588,
+      -0.017311
+     ],
+     "mean": -0.1964224352114909
+    },
+    "downtime_h": {
+     "ci95": [
+      -0.08136,
+      0.02322
+     ],
+     "mean": -0.022122555555555555
+    },
+    "escapes_per_1000_shipped": {
+     "ci95": [
+      -2.21291,
+      0.128802
+     ],
+     "mean": -1.0397843872998953
+    },
+    "good_per_hour": {
+     "ci95": [
+      7.080357,
+      18.937056
+     ],
+     "mean": 12.964477800269442
+    },
+    "hold_inventory_part_hours": {
+     "ci95": [
+      -6.249972,
+      -3.73465
+     ],
+     "mean": -4.98435801288287
+    },
+    "holds": {
+     "ci95": [
+      -16.1,
+      -10.25
+     ],
+     "mean": -13.2
+    },
+    "mean_cycle_s": {
+     "ci95": [
+      -54.848079,
+      -27.513552
+     ],
+     "mean": -41.34914670034392
+    },
+    "operator_hours": {
+     "ci95": [
+      -0.534676,
+      -0.31345
+     ],
+     "mean": -0.4222146174450254
+    },
+    "profit_per_hour": {
+     "ci95": [
+      48.793453,
+      139.362821
+     ],
+     "mean": 95.38076899009633
+    },
+    "scrapped_good_parts": {
+     "ci95": [
+      -1.2,
+      -0.05
+     ],
+     "mean": -0.6
+    }
+   },
+   "ewma": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.5764669432812393,
+    "downtime_h": 0.5650410277777778,
+    "escapes_per_1000_shipped": 2.475822255771536,
+    "good_per_hour": 187.91487021083537,
+    "hold_inventory_part_hours": 9.374099187490087,
+    "holds": 106.2,
+    "local_reinspections": 0,
+    "mean_cycle_s": 506.140039729592,
+    "n_seeds": 20,
+    "operator_hours": 3.430748019827279,
+    "profit_per_hour": 831.2475419721397,
+    "scrapped_good_parts": 0.95,
+    "stale_evidence_holds": 0
+   },
+   "first_alarm_s_median": 3299.0,
+   "none": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.7728893784927302,
+    "downtime_h": 0.5871635833333333,
+    "escapes_per_1000_shipped": 3.5156066430714312,
+    "good_per_hour": 174.95039241056594,
+    "hold_inventory_part_hours": 14.358457200372957,
+    "holds": 119.4,
+    "local_reinspections": 0,
+    "mean_cycle_s": 547.4891864299359,
+    "n_seeds": 20,
+    "operator_hours": 3.8529626372723045,
+    "profit_per_hour": 735.8667729820435,
+    "scrapped_good_parts": 1.55,
+    "stale_evidence_holds": 0
+   },
+   "title": "warping burst (warp_p 0.10)",
+   "verdict": {
+    "better_on_all_three": true,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   }
+  },
+  "M05": {
+   "corrections_mean": 49.5,
+   "cusum_alarms_mean": 13.75,
+   "diff": {
+    "cost_per_good_unit": {
+     "ci95": [
+      -0.742792,
+      -0.228517
+     ],
+     "mean": -0.47811050274544387
+    },
+    "downtime_h": {
+     "ci95": [
+      -0.002601,
+      0.041666
+     ],
+     "mean": 0.014491680555555542
+    },
+    "escapes_per_1000_shipped": {
+     "ci95": [
+      -4.518194,
+      -1.217137
+     ],
+     "mean": -2.7862997602543254
+    },
+    "good_per_hour": {
+     "ci95": [
+      -0.255859,
+      1.053711
+     ],
+     "mean": 0.4393578721222962
+    },
+    "hold_inventory_part_hours": {
+     "ci95": [
+      -1.721611,
+      -1.114262
+     ],
+     "mean": -1.4117507850609567
+    },
+    "holds": {
+     "ci95": [
+      -17.9,
+      -12.3
+     ],
+     "mean": -15.05
+    },
+    "mean_cycle_s": {
+     "ci95": [
+      -33.802221,
+      -2.05746
+     ],
+     "mean": -16.25376589508006
+    },
+    "operator_hours": {
+     "ci95": [
+      -0.458894,
+      -0.321544
+     ],
+     "mean": -0.38670709461796754
+    },
+    "profit_per_hour": {
+     "ci95": [
+      15.33811,
+      54.049392
+     ],
+     "mean": 34.10133494428617
+    },
+    "scrapped_good_parts": {
+     "ci95": [
+      -1.8,
+      -0.25
+     ],
+     "mean": -0.95
+    }
+   },
+   "ewma": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 2.815468664733241,
+    "downtime_h": 2.038673833333333,
+    "escapes_per_1000_shipped": 2.597723982813985,
+    "good_per_hour": 66.48786564559381,
+    "hold_inventory_part_hours": 2.988028809907539,
+    "holds": 80.9,
+    "local_reinspections": 0,
+    "mean_cycle_s": 1484.9748956440428,
+    "n_seeds": 20,
+    "operator_hours": 3.0558979976074894,
+    "profit_per_hour": 212.6989555926723,
+    "scrapped_good_parts": 0.6,
+    "stale_evidence_holds": 0
+   },
+   "first_alarm_s_median": 309.0,
+   "none": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 3.293579167478685,
+    "downtime_h": 2.0241821527777777,
+    "escapes_per_1000_shipped": 5.38402374306831,
+    "good_per_hour": 66.04850777347153,
+    "hold_inventory_part_hours": 4.399779594968496,
+    "holds": 95.95,
+    "local_reinspections": 0,
+    "mean_cycle_s": 1501.2286615391229,
+    "n_seeds": 20,
+    "operator_hours": 3.442605092225457,
+    "profit_per_hour": 178.59762064838614,
+    "scrapped_good_parts": 1.55,
+    "stale_evidence_holds": 0
+   },
+   "title": "supplier-T printers +0.15 mm bias and 0.10 mm caliper",
+   "verdict": {
+    "better_on_all_three": true,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   }
+  }
+ },
+ "seeds": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19
+ ]
+}
