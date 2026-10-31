@@ -2,7 +2,13 @@
 
 Registration: `P1_DECENTRALISATION_REGISTRATION.md` (commit `3e74f30`, before the code existed).
 Run: `python scripts/run_p1.py` on clean tree `04374e0` (`dirty_before_run: false`), 8 s.
-Data: `examples/results/p1_decentralisation/results.json`. Everything is **SIMULATED**, with
+Data: `examples/results/p1_decentralisation/results.json`.
+
+> **Re-run after integration (31 Oct, later, commit `50287e7`, clean tree):** the agents now exchange evidence over
+> adilnurgg's PeerBus (role-signed messages, ACL, VERIFY), so A2's bytes were re-measured. Every other
+> number is identical to the registered run (same decisions, 360-run equivalence). A2 sends
+> **4,719 bytes per part** (signed requests, responses and decision proposals), not 689; A1 sends
+> 4.0 MB. The tables below keep the registered run; read "689 B" as 4.7 kB for the current code. Everything is **SIMULATED**, with
 illustrative timings, prices, frame sizes and link speeds. 20 seeds x 200 pairs per arm and
 scenario, common random numbers (identical parts in every arm, checked by truth hash). No smoke run
 was looked at before the registered run.
@@ -24,7 +30,7 @@ the SIM-04 assumption modes: A2 1.314; A1 1.314 (S0, D1a, D1b-small), 1.517 (D1b
 
 ## Reading
 1. **Prediction S0 confirmed.** With a fast uplink, the central server and the agents make the
-   same decisions; only the bytes differ (5,800x fewer with summaries). This is the honest base
+   same decisions; only the bytes differ (about 850x fewer with signed PeerBus summaries; 5,800x in the registered run before the protocol carried signatures). This is the honest base
    case: decentralisation is not smarter.
 2. **It pays when the uplink cannot carry raw frames.** At 4 Mbit/s the raw load (~3.6 Mbit/s
    average, bursty) saturates the link: evidence arrives 54 s late on average, 41 parts per run miss
@@ -58,6 +64,6 @@ architecture and matches the earlier SIM finding.
 ## Claim the pitch may use (with `SIMULATED`)
 "In our simulated line, when the plant uplink cannot carry raw camera frames (4 Mbit/s for two
 2 MB frames per part) or the central server is down for 30 minutes, station agents that exchange
-~0.7 kB summaries kept full output while a central raw-evidence server lost half of it, with
+~5 kB of signed summaries per part kept full output while a central raw-evidence server lost half of it, with
 identical escapes. With a fast link they are equivalent; decentralisation is not smarter, it is
 more robust to the network." Scenario IDs P1-D1b, P1-D2, P1-S0.
