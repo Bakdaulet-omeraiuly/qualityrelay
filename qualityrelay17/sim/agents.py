@@ -22,9 +22,26 @@ Everything is SIMULATED.
 """
 from __future__ import annotations
 import json
+import secrets
 from math import sqrt
 
 from .engine import surface_posterior, width_posterior, phi, TOL
+from ..contracts import Evidence, sign_evidence
+from ..collective.peer_protocol import PeerBus
+from ..collective.trace import Trace
+
+# adilnurgg's collaboration protocol (qualityrelay17/collective, AGENT-01..05) carries every evidence
+# exchange between agents: role-signed messages, ACL from roles.py, ownership, VERIFY of station
+# signature / staleness / lineage, and a trace. Our agents are bound to his registered roles:
+ROLE_OF = {'vision': 'quality_inspector', 'vision_pi': 'additive_manufacturing_expert', 'metrology': 'metrology_engineer',
+           'assembly': 'assembly_engineer', 'cost': 'operations_research', 'process': 'spc_agent',
+           'learning': 'bayesian_statistician', 'governance': 'safety_governance'}
+AGENT_OF = {v: (k if k != 'vision_pi' else 'vision') for k, v in ROLE_OF.items()}
+OWNERSHIP = {'PHONE_IMAGE': 'quality_inspector', 'PI_IMAGE': 'additive_manufacturing_expert', 'CALIPER': 'metrology_engineer'}
+STATION_KEYS = {st: f'sim-station-key-{st}' for st in ('phone', 'pi', 'phone_local', 'caliper', 'caliper_local')}
+# Simulated parts can wait in the buffer for a long time; age is handled by the line's own SAFE-MESH
+# evidence deadline (engine), so the bus freshness window is set to one shift.
+BUS_MAX_AGE_S = 8 * 3600.0
 
 AGENTS = {
     'vision': dict(name='Vision agent', inside='statistic', what='calibrated camera likelihoods -> P(surface defect)'),
@@ -33,8 +50,12 @@ AGENTS = {
     'assembly': dict(name='Assembly agent', inside='decision rule', what='combines both parts\' evidence into P(unsafe pair)'),
     'cost': dict(name='Cost agent', inside='decision rule', what='expected cost of PASS vs HOLD; threshold = hold / (hold + escape)'),
     'learning': dict(name='Learning agent', inside='statistic', what='camera flag vs expert verdict, Wilson interval vs calibration'),
+    'governance': dict(name='Safety gate', inside='rule', what='receives every DECISION_PROPOSAL (SAFE-MESH role); missing or late evidence -> HOLD'),
 }
-KINDS = ('OBSERVATION', 'MEASUREMENT', 'REQUEST_EVIDENCE', 'EVIDENCE_RESPONSE', 'DECISION_REQUEST', 'DECISION',
+for _k, _r in ROLE_OF.items():
+    if _k in AGENTS:
+        AGENTS[_k]['role'] = _r
+KINDS = ('OBSERVATION', 'MEASUREMENT', 'REQUEST_EVIDENCE', 'EVIDENCE_RESPONSE', 'HYPOTHESIS_UPDATE', 'DECISION_PROPOSAL', 'DECISION_REQUEST', 'DECISION',
          'ALARM', 'PROPOSE_SETPOINT', 'REVIEW_OUTCOME', 'SHIPPED', 'PROPOSE_RECALIBRATION')
 
 
@@ -57,6 +78,10 @@ class AgentTeam:
         self.process_state = {'cusum': {}, 'bias': {}, 'offset': {}}
         self.learning = {'flagged': 0, 'flag_confirmed': 0, 'predicted_sum': 0.0, 'reviews': 0, 'shipped': 0, 'proposals': []}
         self.alarms, self.setpoints = [], []
+        # signed Evidence per part, owned by the role of the station that captured it
+        self.evidence = {}          # part_id -> list[Evidence]
+        self.role_keys = {r: secrets.token_hex(16) for r in set(ROLE_OF.values())}
+        self.protocol = dict(requests=0, outcomes={}, verify={}, signatures_checked=0, cost_charged=0.0, decision_proposals=0)
 
     # ---- bus --------------------------------------------------------------------------
     def _send(self, kind, sender, recipient, case, body):
@@ -72,6 +97,19 @@ class AgentTeam:
         # an expert clearance stays valid when the part is re-inspected at the assembly site
         self.vision_store[pid] = {'cams': cams, 'site': p['site'], 'expert_cleared': prev.get('expert_cleared', False)}
         self.metrology_store[pid] = (p['measured_mm'], p['caliper_sd'])
+        now, cal = self.f.env.now, self.f.model.calibration_id
+        ev = []
+        for cam, v in cams.items():
+            if v is None:
+                continue  # a failed capture produces no evidence (SENSOR_FAILURE on request), never a 'clear'
+            kind = 'PI_IMAGE' if cam == 'pi' else 'PHONE_IMAGE'
+            ev.append(sign_evidence(Evidence(f'{pid}:{cam}:{now:.3f}', pid, cam, kind, 'SIMULATED', f'frame:{pid}:{cam}:{now:.3f}', now,
+                                             'suspect' if v else 'clear', {}, calibration_id=cal), STATION_KEYS[cam]))
+        st = 'caliper_local' if local else 'caliper'
+        ev.append(sign_evidence(Evidence(f'{pid}:{st}:{now:.3f}', pid, st, 'CALIPER', 'SIMULATED', f'reading:{pid}:{st}:{now:.3f}', now,
+                                         'verified', {'measurement_mm': p['measured_mm'], 'uncertainty_mm': p['caliper_sd'],
+                                                      'unit': 'mm', 'validated': True}, calibration_id='caliper-sim'), STATION_KEYS[st]))
+        self.evidence[pid] = ev
         where = 'assembly-site re-inspection' if local else site.name
         self._send('OBSERVATION', 'vision', 'vision', pid, {'cams': {c: (None if v is None else ('suspect' if v else 'clear')) for c, v in cams.items()},
                                                             'where': where})
@@ -145,23 +183,37 @@ class AgentTeam:
     # ---- assembly side ----------------------------------------------------------------
     def pair_decision(self, s, t, *, stale, threshold, pair_id):
         f = self.f
+        bus = self._bus()
+        self._rejected = []
         ev = {}
         for part, kind in ((s, 'slot'), (t, 'tab')):
             pid = part['part_id']
-            self._send('REQUEST_EVIDENCE', 'assembly', 'vision', pair_id, {'part': pid, 'want': 'P(surface defect)'})
-            ps, src = self._vision_surface(pid)
-            self._send('EVIDENCE_RESPONSE', 'vision', 'assembly', pair_id, {'part': pid, 'p_surface': None if ps is None else round(ps, 6), 'source': src})
-            self._send('REQUEST_EVIDENCE', 'assembly', 'metrology', pair_id, {'part': pid, 'want': 'width posterior'})
-            reading, sd = self.metrology_store.get(pid, (part['measured_mm'], part['caliper_sd']))
+            got = self._request(bus, pid, pair_id)
+            # surface: Vision's calibrated likelihoods applied to the VERIFIED camera verdicts it received
+            cams = {x['station_id']: x['verdict'] == 'suspect' for x in got if x['kind'] in ('PHONE_IMAGE', 'PI_IMAGE')}
+            rec = self.vision_store.get(pid, {})
+            if rec.get('expert_cleared'):
+                ps, src = 0.001, 'EXPERT_CLEARED'
+            elif f.sc.evidence_sharing == 'summary' and rec.get('site') != f.sc.assembly_site:
+                ps, src = f.model.p_crack_given_supplier_pass, 'SUPPLIER_SUMMARY'
+            else:
+                ps, src = surface_posterior(cams, f.model, tuple(cams)), 'CAMERAS'
+            cal = [x for x in got if x['kind'] == 'CALIPER']
+            if cal:
+                reading, sd = cal[0]['payload']['measurement_mm'], cal[0]['payload']['uncertainty_mm']
+            else:  # no verified reading: fall back to the prior only (decision will be conservative)
+                reading, sd = part['measured_mm'], part['caliper_sd']
             mu, var = width_posterior(reading, kind, f.model, sd)
-            self._send('EVIDENCE_RESPONSE', 'metrology', 'assembly', pair_id, {'part': pid, 'mean_mm': round(mu, 4), 'sd_mm': round(sqrt(var), 4),
-                                                                               'reading_mm': round(reading, 4)})
+            self._send('HYPOTHESIS_UPDATE', 'assembly', 'assembly', pair_id, {'part': pid, 'p_surface': round(ps, 6), 'source': src,
+                                                                             'mean_mm': round(mu, 4), 'sd_mm': round(sqrt(var), 4)})
             ev[kind] = dict(ps=ps, mu=mu, var=var, reading=reading)
         measured_clear = ev['slot']['reading'] - ev['tab']['reading']
         p_dim = phi((TOL - (ev['slot']['mu'] - ev['tab']['mu'])) / sqrt(ev['slot']['var'] + ev['tab']['var']))
         p_unsafe = 1 - (1 - ev['slot']['ps']) * (1 - ev['tab']['ps']) * (1 - p_dim)
         if stale:
             hold, reason = True, 'STALE_OR_MISSING_EVIDENCE'
+        elif self._rejected:  # VERIFY refused a record (forged, stale, duplicate source, ACL, timeout): SAFE-MESH -> HOLD
+            hold, reason = True, 'UNVERIFIED_EVIDENCE'
         elif f.policy == 'rules':
             hold, reason = measured_clear < TOL, 'RULE_CLEARANCE'
         elif f.policy == 'hold_all':
@@ -177,10 +229,63 @@ class AgentTeam:
                                                              'threshold': round(threshold, 5),
                                                              'expected_cost_pass': round(p_unsafe * f.costs.escaped_defect, 4),
                                                              'expected_cost_hold': f.costs.hold})
+        prop = bus.make('DECISION_PROPOSAL', 'assembly_engineer', 'safety_governance', pair_id,
+                        {'state': 'HOLD' if hold else 'PASS_REVIEW', 'reasons': [reason], 'p_unsafe': round(p_unsafe, 6),
+                         'decided_by': 'operations_research (Cost agent)'})
+        bus.send(prop)
+        self.protocol['decision_proposals'] += 1
+        self._log_bus(prop, 'governance')
         self.decisions[pair_id] = dict(stage='pair', t=round(f.env.now, 3), decision='HOLD' if hold else 'PASS', reason=reason,
                                        p=round(p_unsafe, 6), p_dim=round(p_dim, 6), slot=s['part_id'], tab=t['part_id'],
                                        measured_clearance_mm=round(measured_clear, 4))
-        return hold, ('STALE_OR_MISSING_EVIDENCE' if stale else ('BAYES_THRESHOLD' if f.policy == 'bayes' else reason)), p_unsafe
+        return hold, ('STALE_OR_MISSING_EVIDENCE' if stale else reason if reason == 'UNVERIFIED_EVIDENCE' else
+                      ('BAYES_THRESHOLD' if f.policy == 'bayes' else reason)), p_unsafe
+
+    # ---- adilnurgg's PeerBus ------------------------------------------------------------------
+    def _bus(self):
+        now = self.f.env.now
+        bus = PeerBus(role_keys=self.role_keys, station_keys=STATION_KEYS, ownership=OWNERSHIP, now=now,
+                      max_age_s=BUS_MAX_AGE_S, trace=Trace(now=now), request_cost=self.f.costs.peer_request)
+        for role in ('assembly_engineer', 'quality_inspector', 'additive_manufacturing_expert', 'metrology_engineer', 'safety_governance'):
+            bus.register(role, [])
+        return bus
+
+    def _log_bus(self, m, recipient_agent=None):
+        d = m.to_dict()
+        b = len(json.dumps(d, separators=(',', ':'), default=str))
+        frm, to = AGENT_OF.get(m.sender_role, m.sender_role), recipient_agent or AGENT_OF.get(m.recipient_role, m.recipient_role)
+        body = {**m.body, 'protocol': 'PeerBus', 'roles': f'{m.sender_role}->{m.recipient_role}', 'signed': bool(m.signature)}
+        if 'summaries' in body:  # keep the UI light: identifiers and verdicts, not the full records
+            body['summaries'] = [{k: x.get(k) for k in ('kind', 'station_id', 'verdict', 'verification_status', 'payload')} for x in body['summaries']]
+        self.messages.append([round(self.f.env.now, 3), m.kind, frm, to, m.case_id, body, b])
+
+    def _request(self, bus, pid, case_label):
+        """assembly_engineer asks each owner for this part's evidence through the bus; returns VERIFIED summaries."""
+        own = {'quality_inspector': [], 'additive_manufacturing_expert': [], 'metrology_engineer': []}
+        for e in self.evidence.get(pid, []):
+            own[OWNERSHIP[e.kind]].append(e)
+        for role, evs in own.items():
+            bus.store(role).own = evs
+        before = bus.cost_charged
+        kinds = ['PHONE_IMAGE'] + (['PI_IMAGE'] if 'pi' in self.f.sc.cameras else []) + ['CALIPER']
+        got = []
+        for kind in kinds:
+            req = bus.make('REQUEST_EVIDENCE', 'assembly_engineer', OWNERSHIP[kind], pid,
+                           {'requested_kind': kind, 'reason_code': 'PAIR_GATE', 'hypotheses': ['surface_defect', 'clearance_below_0.5mm'],
+                            'max_cost': self.f.costs.peer_request, 'deadline_ms': 1500, 'pair': case_label})
+            reply = bus.send(req)
+            self._log_bus(req); self._log_bus(reply)
+            P = self.protocol
+            P['requests'] += 1; P['signatures_checked'] += 2
+            out = reply.body['outcome']; P['outcomes'][out] = P['outcomes'].get(out, 0) + 1
+            if out not in ('GRANTED', 'SENSOR_FAILURE'):  # SENSOR_FAILURE = a capture that never happened (treated as no reading)
+                self._rejected.append((pid, kind, out))
+            for x in reply.body['summaries']:
+                P['verify'][x['verification_status']] = P['verify'].get(x['verification_status'], 0) + 1
+                if x['verification_status'] == 'VERIFIED':
+                    got.append(x)
+        self.protocol['cost_charged'] += bus.cost_charged - before
+        return got
 
     # ---- outcomes -----------------------------------------------------------------------
     def on_review(self, case, outcome, *, flagged_parts=(), confirmed_parts=()):
@@ -223,6 +328,8 @@ class AgentTeam:
         spc = {'nominal_mm': {'slot': f.design['slot_opening_mm'], 'tab': f.design['tab_width_mm']},
                'sigma_mm': {s.name: round((s.width_sd_mm ** 2 + s.caliper_sd_mm ** 2) ** 0.5, 4) for s in f.sc.sites},
                'cusum': {'k': 0.5, 'h': 5}, 'clip_mm': 0.2}
-        return dict(roster=AGENTS, kinds=list(KINDS), messages=self.messages, decisions=self.decisions, spc=spc,
+        self.protocol['cost_charged'] = round(self.protocol['cost_charged'], 4)
+        return dict(roster=AGENTS, kinds=list(KINDS), messages=self.messages, decisions=self.decisions, spc=spc, protocol=self.protocol,
+                    protocol_source='qualityrelay17/collective (adilnurgg): PeerBus, role-signed messages, ACL, VERIFY',
                     alarms=self.alarms, setpoints=self.setpoints, learning=self.learning, per_agent=senders,
                     total_messages=len(self.messages), total_bytes=sum(m[6] for m in self.messages))

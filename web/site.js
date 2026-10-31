@@ -995,12 +995,12 @@ function renderInspector() {
 // ---------------------------------------------------------------- agents: live analytics (right dock)
 // Every number here is computed from the agents' own messages up to the playback time.
 // Ground truth (escapes) is shown only with the "Ground truth" layer on. SIMULATED.
-const AG_NODES = { vision: [56, 24], cost: [284, 24], assembly: [170, 95], metrology: [56, 166], process: [170, 166], learning: [284, 166] };
-const AG_NAME = { vision: 'Vision', metrology: 'Metrology', assembly: 'Assembly', process: 'Process', cost: 'Cost', learning: 'Learning' };
+const AG_NODES = { vision: [56, 24], governance: [170, 24], cost: [284, 24], assembly: [170, 95], metrology: [56, 166], process: [170, 166], learning: [284, 166] };
+const AG_NAME = { vision: 'Vision', metrology: 'Metrology', assembly: 'Assembly', process: 'Process', cost: 'Cost', learning: 'Learning', governance: 'Safety' };
 const AG_COL = { pass: '#76b900', released: '#199e70', rework: '#9085e9', scrap: '#6b727c', pending: '#e0b000', hold: '#e0b000' };
 const REASON = {
   DIMENSIONAL_RISK: 'Clearance risk', SURFACE_RISK_SLOT: 'Slot surface', SURFACE_RISK_TAB: 'Tab surface', SURFACE_RISK: 'Surface (camera)',
-  STALE_OR_MISSING_EVIDENCE: 'Missing / late evidence', RULE_CLEARANCE: 'Rule: clearance < 0.5', RULE_ANY_FLAG_OR_MISSING: 'Rule: camera flag',
+  STALE_OR_MISSING_EVIDENCE: 'Missing / late evidence', UNVERIFIED_EVIDENCE: 'Evidence failed VERIFY', RULE_CLEARANCE: 'Rule: clearance < 0.5', RULE_ANY_FLAG_OR_MISSING: 'Rule: camera flag',
   HOLD_ALL_POLICY: 'Hold-all policy', RULE_CLEARANCE_AFTER_REVIEW: 'Rule after review',
 };
 const agState = { last: 0, side: null, tab: 'agents' };
@@ -1019,6 +1019,7 @@ function agentsAt(run, t) {
   const A = run.agents, msgs = A.messages, n = lastIdx(msgs, t);
   const edges = {}, sent = {}, reasons = {}, pairDec = {}, pairOut = {}, partOut = {};
   let partHolds = 0, bytes = 0, alarms = [], proposals = 0;
+  const proto = { requests: 0, responses: 0, proposals: 0, out: {}, ver: {} };
   for (let i = 0; i < n; i++) {
     const [mt, kind, from, to, cas, body, b] = msgs[i];
     bytes += b; sent[from] = (sent[from] || 0) + 1;
@@ -1028,7 +1029,12 @@ function agentsAt(run, t) {
       if (body.decision === 'HOLD') { const r = A.decisions[cas]?.reason || body.reason; reasons[r] = (reasons[r] || 0) + 1; if (body.stage === 'part') partHolds++; }
     } else if (kind === 'REVIEW_OUTCOME' && to === 'learning') {
       if (String(cas).startsWith('P-')) pairOut[cas] = body.outcome; else partOut[cas] = body.outcome;
-    } else if (kind === 'ALARM') alarms.push([mt, body]);
+    } else if (kind === 'EVIDENCE_RESPONSE' && body.protocol === 'PeerBus') {
+      proto.responses++; proto.out[body.outcome] = (proto.out[body.outcome] || 0) + 1;
+      for (const x of body.summaries || []) proto.ver[x.verification_status] = (proto.ver[x.verification_status] || 0) + 1;
+    } else if (kind === 'REQUEST_EVIDENCE' && body.protocol === 'PeerBus') proto.requests++;
+    else if (kind === 'DECISION_PROPOSAL') proto.proposals++;
+    else if (kind === 'ALARM') alarms.push([mt, body]);
     else if (kind === 'PROPOSE_RECALIBRATION') proposals++;
   }
   const decided = Object.keys(pairDec), pass = decided.filter((k) => pairDec[k].decision === 'PASS').length;
@@ -1040,7 +1046,7 @@ function agentsAt(run, t) {
   // Learning: share of surface holds the expert confirmed vs the share the Vision agent predicted
   let flagged = 0, confirmed = 0, predicted = 0;
   for (const [pid, o] of Object.entries(partOut)) { flagged++; if (o === 'scrapped') confirmed++; predicted += A.decisions[pid]?.p || 0; }
-  return { n, edges, sent, reasons, decided: decided.length, mix, partHolds, bytes, alarms, proposals, truthEsc, flagged, confirmed,
+  return { proto, n, edges, sent, reasons, decided: decided.length, mix, partHolds, bytes, alarms, proposals, truthEsc, flagged, confirmed,
     predicted: flagged ? predicted / flagged : null, recent: msgs.slice(Math.max(0, n - 60), n) };
 }
 
@@ -1063,8 +1069,8 @@ function agNet(run, s, t) {
   }
   for (const [id, [x, y]] of Object.entries(AG_NODES)) {
     const cls = ['node', s.sent[id] ? 'active' : '', id === 'process' && recentAlarm ? 'alarm' : '', id === 'learning' && s.proposals ? 'prop' : ''].join(' ');
-    const r = run.agents.roster[id];
-    svg += `<g class="${cls}" transform="translate(${x - 50},${y - 18})"><title>${r.name}: ${r.what} (${r.inside}, no LLM)</title>
+    const r = run.agents.roster[id]; if (!r) continue;
+    svg += `<g class="${cls}" transform="translate(${x - 50},${y - 18})"><title>${r.name}${r.role ? ` = adilnurgg role ${r.role}` : ''}: ${r.what} (${r.inside}, no LLM)</title>
       <rect width="100" height="36" rx="8"/><text x="10" y="15">${AG_NAME[id]}</text><text class="sub" x="10" y="28">${s.sent[id] || 0} sent</text>
       <text class="sub" x="92" y="15" text-anchor="end">${r.inside === 'statistic' ? 'stat' : 'rule'}</text></g>`;
   }
@@ -1101,8 +1107,14 @@ function agLine(m) {
   const [mt, kind, from, to, cas, b] = m, id = shortId(cas);
   let k = kind.replace('_', ' ').toLowerCase(), cls = '', txt;
   if (kind === 'DECISION') { cls = b.decision === 'HOLD' ? 'hold' : 'pass'; k = b.decision; txt = `<b>${AG_NAME[from]}</b> → ${AG_NAME[to]}: ${id} ${b.decision === 'HOLD' ? `held (${REASON[b.reason] || b.reason})` : 'released'}`; }
-  else if (kind === 'REQUEST_EVIDENCE') txt = `<b>${AG_NAME[from]}</b> asks ${AG_NAME[to]}: ${b.want} of ${shortId(b.part)}`;
-  else if (kind === 'EVIDENCE_RESPONSE') txt = `<b>${AG_NAME[from]}</b> → ${AG_NAME[to]}: ${shortId(b.part)} ${b.mean_mm !== undefined ? `${b.mean_mm.toFixed(3)} ± ${b.sd_mm.toFixed(3)} mm` : `P(defect) ${(100 * (b.p_surface ?? 0)).toFixed(2)}% (${(b.source || '').toLowerCase().replace('_', ' ')})`}`;
+  else if (kind === 'REQUEST_EVIDENCE') txt = `<b>${AG_NAME[from]}</b> asks ${AG_NAME[to]} for ${(b.requested_kind || '').replace('_', ' ').toLowerCase()} of ${id} <span class="faint">· signed</span>`;
+  else if (kind === 'EVIDENCE_RESPONSE') {
+    const x = (b.summaries || [])[0] || {}, ok = b.outcome === 'GRANTED';
+    cls = ok ? '' : 'alarm'; k = ok ? 'verified' : b.outcome;
+    txt = `<b>${AG_NAME[from]}</b> → ${AG_NAME[to]}: ${id} ${x.kind === 'CALIPER' ? `${(x.payload?.measurement_mm ?? 0).toFixed(3)} mm` : x.verdict || ''} <span class="faint">· ${b.outcome}${x.verification_status ? ' / ' + x.verification_status : ''}</span>`;
+  }
+  else if (kind === 'HYPOTHESIS_UPDATE') txt = `<b>Assembly</b> belief for ${shortId(b.part)}: P(surface) ${(100 * b.p_surface).toFixed(2)}%, width ${b.mean_mm.toFixed(3)} ± ${b.sd_mm.toFixed(3)} mm`;
+  else if (kind === 'DECISION_PROPOSAL') { cls = b.state === 'HOLD' ? 'hold' : 'pass'; k = 'proposal'; txt = `<b>Assembly</b> → Safety: ${id} ${b.state} <span class="faint">· signed</span>`; }
   else if (kind === 'DECISION_REQUEST') txt = `<b>${AG_NAME[from]}</b> → Cost: ${id} ${b.p_unsafe !== undefined ? `P(unsafe) ${(100 * b.p_unsafe).toFixed(2)}%` : b.p_surface !== null && b.p_surface !== undefined ? `P(surface) ${(100 * b.p_surface).toFixed(2)}%` : 'rule check'}`;
   else if (kind === 'MEASUREMENT') txt = `<b>Metrology</b> → Process: ${id} ${b.reading_mm.toFixed(3)} mm`;
   else if (kind === 'ALARM') { cls = 'alarm'; txt = `<b>Process</b>: CUSUM alarm, ${b.kind} printer ${b.direction} (${b.site})`; }
@@ -1138,7 +1150,7 @@ function renderAgents(force) {
       ${ok ? 'Consistent with the camera calibration.' : '<b style="color:#f0c64a">Outside the interval: Learning proposes recalibration (proposal only).</b>'}</div>`;
   }
   el.innerHTML = `${side}
-    <div class="ag-head"><h2>Six agents deciding this run</h2><span class="chk ${ck.identical ? 'ok' : 'bad'}" title="${ck.note}">${ck.identical ? '✓' : '✗'} ${ck.equal}/${ck.pairs} decisions = reference</span></div>
+    <div class="ag-head"><h2>Agents deciding this run</h2><span class="chk ${ck.identical ? 'ok' : 'bad'}" title="${ck.note}">${ck.identical ? '✓' : '✗'} ${ck.equal}/${ck.pairs} decisions = reference</span></div>
     <div class="faint small" style="margin:-4px 0 10px">Cost agent: ${A.policy_inside}. Code, not LLMs. SIMULATED.</div>
     <div class="ag-kpis">
       <div class="ag-kpi"><b>${s.decided}</b><span>pairs decided</span></div>
@@ -1149,6 +1161,14 @@ function renderAgents(force) {
       <div class="ag-kpi"><b>${s.decided ? (s.bytes / s.decided / 1024).toFixed(2) : '0'}<small style="font-size:11px"> KB</small></b><span>data / pair</span></div>
     </div>
     <div class="ag-sec"><h4>Who talks to whom <em>${s.n} messages</em></h4>${agNet(run, s, lab.t)}</div>
+    <div class="ag-sec"><h4>Protocol · adilnurgg's PeerBus <em>role-signed</em></h4>
+      <div class="ag-roster">
+        <span>evidence requests (ACL checked)</span><span>${s.proto.requests}</span>
+        <span>granted / refused</span><span>${s.proto.out.GRANTED || 0} / ${s.proto.responses - (s.proto.out.GRANTED || 0)}</span>
+        <span>VERIFY ok · forged · stale · dup</span><span>${s.proto.ver.VERIFIED || 0} · ${s.proto.ver.BAD_SIGNATURE || 0} · ${s.proto.ver.STALE_EVIDENCE || 0} · ${s.proto.ver.DUPLICATE_SOURCE || 0}</span>
+        <span>decision proposals → safety_governance</span><span>${s.proto.proposals}</span>
+      </div>
+      <div class="faint small" style="margin-top:6px">Roles: ${Object.entries(A.roster).filter(([, r]) => r.role).map(([k, r]) => `${AG_NAME[k]} = <code>${r.role}</code>`).join(', ')}.</div></div>
     <div class="ag-sec"><h4>Pair decisions <em>${s.decided}</em></h4>
       <div class="ag-bar">${mixKeys.filter((k) => s.mix[k]).map((k) => `<i style="width:${(100 * s.mix[k] / tot).toFixed(2)}%;background:${AG_COL[k]}" title="${mixLbl[k]}: ${s.mix[k]}"></i>`).join('')}</div>
       <div class="ag-leg">${mixKeys.map((k) => `<span><i style="background:${AG_COL[k]}"></i>${mixLbl[k]} <b class="num">${s.mix[k]}</b></span>`).join('')}</div></div>
