@@ -76,6 +76,8 @@ class RunRequest(BaseModel):
     seed: int = Field(0, ge=0, le=10_000)
     n_pairs: int = Field(60, ge=10, le=150)
     reprint: bool = True  # website default: closed-loop reprint of confirmed defects
+    phone_only: bool = True  # website default: one iPhone camera per lane (registered results use phone + Pi)
+    two_lanes: bool = True   # website default: separate slot and tab conveyor lanes
 
 
 def _who(key: str):
@@ -96,7 +98,12 @@ def run(req: RunRequest):
     if req.scenario not in BY_ID or req.policy not in POLICIES or req.pairing not in PAIRINGS:
         raise HTTPException(422, 'unknown scenario/policy/pairing')
     sc = replace(BY_ID[req.scenario], n_pairs=req.n_pairs)
-    f = Factory(sc, req.seed, req.policy, req.pairing, model=_model(), keep_log=True, reprint=req.reprint)
+    if req.phone_only:
+        sc = replace(sc, cameras=('phone',))
+    if req.two_lanes:
+        sc = replace(sc, sites=tuple(replace(s, inspection_lines=max(2, s.inspection_lines)) if s.makes == 'both' else s for s in sc.sites))
+    f = Factory(sc, req.seed, req.policy, req.pairing, model=_model(), keep_log=True, reprint=req.reprint,
+                lane_by_kind=req.two_lanes)
     summary = f.run()
     tl = {p['part_id']: [] for p in f.parts}
     for start, end, station, key in f.events:
@@ -123,6 +130,7 @@ def run(req: RunRequest):
                           caliper_sd=p.get('caliper_sd'), cams={k: (None if v is None else bool(v)) for k, v in raw.items()},
                           surface_posterior=None if ps is None else round(ps, 5), reviewed=bool(p.get('reviewed')),
                           reprint_of=p.get('reprint_of'), reprinted_as=p.get('reprinted_as'), root_id=p.get('root_id'),
+                          line=p.get('line', 0),
                           events=sorted(tl[p['part_id']], key=lambda e: e[1]),
                           pair=pr.get('pair_id'), decision=pr.get('decision'), escaped=bool(pr.get('escaped'))))
     pairs = []
@@ -141,8 +149,11 @@ def run(req: RunRequest):
                       p_unsafe=pr.get('p_unsafe', round(f.pair_risk(s, t), 6)))
         pairs.append(ev)
     stations = {}
+    line_of = {p['part_id']: p.get('line', 0) for p in f.parts}
     for start, end, station, key in f.events:
         st_ = STATION_OF.get(key.partition(':')[0], station)
+        if st_ in ('phone', 'pi', 'caliper'):  # per-lane stations: key them by inspection line
+            st_ = f"{st_}_{line_of.get(_who(key)[1][0], 0)}"
         d = stations.setdefault(st_, dict(visits=0, busy_s=0.0))
         d['visits'] += 1; d['busy_s'] += end - start
     for d in stations.values():
@@ -150,6 +161,7 @@ def run(req: RunRequest):
     keep = ('makespan_s', 'shipped', 'shipped_good', 'escaped', 'good_per_hour', 'mean_cycle_s', 'part_holds', 'pair_holds',
             'holds_stale_evidence', 'scrapped_parts', 'reworks', 'downtime_s', 'conservation_ok', 'truth_sha256', 'reprints')
     return dict(source_tier=SOURCE_TIER, model_version=MODEL_VERSION, scenario=req.scenario, title=sc.title, reprint=req.reprint,
+                cameras=list(sc.cameras), two_lanes=req.two_lanes,
                 policy=req.policy, pairing=req.pairing, seed=req.seed, n_pairs=req.n_pairs,
                 kpis={k: summary[k] for k in keep}, parts=parts, pairs=pairs, stations=stations,
                 model=dict(calibration_id=m.calibration_id, phone_sens=m.phone_sens, phone_spec=m.phone_spec,
@@ -206,3 +218,49 @@ def _results_bundle():
 @router.get('/results')
 def results():
     return _results_bundle()
+
+
+# ---- camera captures (real photos) -> training folders for VISION-04 -------------------------
+class CaptureRequest(BaseModel):
+    lane: str = Field('slot', pattern='^(slot|tab)$')
+    label: str = Field('inbox', pattern='^(good|defect|inbox)$')
+    image_b64: str = Field(..., min_length=32, max_length=12_000_000)
+
+
+PRINTS = ROOT / 'data' / 'prints'   # data/ is git-ignored; the anomaly pipeline reads data/prints/good|defect
+
+
+@router.post('/vision/capture')
+def vision_capture(req: CaptureRequest):
+    """Save one real iPhone/webcam photo as PHYSICAL_CAPTURE training data and report the NVIDIA
+    anomaly model status. No score is invented: until a model is trained on PHYSICAL_CAPTURE photos
+    (VISION-04 on the Brev L4), the status is NOT_CONFIGURED."""
+    import base64, hashlib, time
+    raw = req.image_b64.split(',', 1)[1] if req.image_b64.startswith('data:') else req.image_b64
+    try:
+        data = base64.b64decode(raw, validate=True)
+    except Exception:  # noqa: BLE001
+        raise HTTPException(422, 'image_b64 is not valid base64')
+    if len(data) > 8_000_000:
+        raise HTTPException(413, 'image larger than 8 MB')
+    import cv2
+    import numpy as np
+    img = cv2.imdecode(np.frombuffer(data, np.uint8), cv2.IMREAD_COLOR)
+    if img is None:
+        raise HTTPException(422, 'not a decodable image')
+    sha = hashlib.sha256(data).hexdigest()
+    ext = '.png' if data[:8] == b'\x89PNG\r\n\x1a\n' else '.jpg'
+    folder = PRINTS / req.label
+    folder.mkdir(parents=True, exist_ok=True)
+    path = folder / f"{time.strftime('%Y%m%dT%H%M%S')}_{req.lane}_{sha[:10]}{ext}"
+    path.write_bytes(data)
+    counts = {k: len(list((PRINTS / k).glob('*'))) if (PRINTS / k).exists() else 0 for k in ('good', 'defect', 'inbox')}
+    ready = counts['good'] >= 30 and counts['defect'] >= 10
+    saved = str(path.relative_to(ROOT)) if path.is_relative_to(ROOT) else str(path)
+    return dict(source_tier='PHYSICAL_CAPTURE', saved=saved, sha256=sha, width=int(img.shape[1]),
+                height=int(img.shape[0]), lane=req.lane, label=req.label, dataset_counts=counts,
+                nvidia_anomaly=dict(status='NOT_CONFIGURED',
+                                    reason='The STFPM model has only been trained on synthetic CAD renders and MVTec; scoring a real '
+                                           'photo with it would be out of domain. Train it on these PHYSICAL_CAPTURE photos first.',
+                                    ready_to_train=ready, need=dict(good=30, defect=10),
+                                    train_command='python scripts/train_anomaly.py --data captured --root data/prints --epochs 100 --size 256  (Brev L4)'))

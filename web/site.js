@@ -24,6 +24,8 @@ const hash = (s) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c
 // Conveyor speed in scene units per SIMULATED second (1 unit ≈ 0.25 m in this layout -> ~0.15 m/s).
 const BELT_SPEED = 0.6;
 const BELT_Y = 0.62;  // conveyor surface height
+const LANE_STATIONS = new Set(['phone', 'pi', 'caliper']);
+const laneKey = (st, line) => (LANE_STATIONS.has(st) ? `${st}_${line || 0}` : st);
 const ease = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
 
 // ---------------------------------------------------------------- STL
@@ -96,16 +98,19 @@ const ann = (text, cls = 'ann') => { const d = document.createElement('div'); d.
 
 // ---------------------------------------------------------------- factory layout
 const P = {
-  printer_slot: [-14, -2.6], printer_tab: [-14, 2.6], phone: [-8.5, 0], pi: [-5.5, 0], caliper: [-2.5, 0],
-  buffer: [1, 0], assembly: [4.5, 0], sorting: [7.5, 0], ship: [11.5, 0], review: [2.5, -6], rework: [6.5, -6], scrap: [11.5, -6],
+  printer_slot: [-14, -2.6], printer_tab: [-14, 2.6], phone_0: [-8.5, -1], phone_1: [-8.5, 1], caliper_0: [-4.5, -1], caliper_1: [-4.5, 1],
+  buffer: [0.6, 0], assembly: [4.5, 0], sorting: [7.5, 0], ship: [11.5, 0], review: [2.5, -6], rework: [6.5, -6], scrap: [11.5, -6],
   phone_local: [-5.5, 6], caliper_local: [-2.5, 6],
 };
 const STATION_INFO = {
   printer_slot: ['Slot printers', 'Print jobs of 4 parts (one lot). Width drift, warping and cracks are generated here; MTBF/MTTR failures.'],
   printer_tab: ['Tab printers', 'Print jobs of 4 parts (one lot). Kit-based CONWIP stops printing when the buffer is full.'],
-  phone: ['Phone camera', 'First independent surface check. A missing reading is never treated as "clear".'],
-  pi: ['Pi camera', 'Second independent surface check (edge device). It is unreachable during network partitions.'],
-  caliper: ['Caliper + operator', 'Measures width (σ 0.05 mm). It shares the operator pool with review and rework.'],
+  phone: ['iPhone camera', 'Surface check. A missing reading is never treated as "clear".'],
+  caliper: ['Caliper', 'Measures width (σ 0.05 mm).'],
+  phone_0: ['iPhone camera · slot lane', 'Surface check of every slot. A missing reading is never treated as "clear". Click "Open camera" to see its view or attach a real photo.'],
+  phone_1: ['iPhone camera · tab lane', 'Surface check of every tab. A missing reading is never treated as "clear". Click "Open camera" to see its view or attach a real photo.'],
+  caliper_0: ['Caliper · slot lane', 'Measures slot opening (σ 0.05 mm). One operator serves both calipers and also review/rework.'],
+  caliper_1: ['Caliper · tab lane', 'Measures tab width (σ 0.05 mm). One operator serves both calipers and also review/rework.'],
   buffer: ['Pairing buffer', 'Slots and tabs wait here to be paired: FIFO, or risk-optimised by linear assignment (SciPy).'],
   assembly: ['Assembly', 'Assembles a pair only after the pair gate says PASS_REVIEW.'],
   sorting: ['Sorter', 'Sends assembled pairs to shipping.'],
@@ -147,23 +152,28 @@ class FactoryView {
 
     // ---- conveyor: frame, legs, instanced rollers, belt, drums, motor
     const alu = metal(0x8d96a0, { metalness: 0.75, roughness: 0.32 }), dark = metal(0x1f242b, { roughness: 0.6 });
-    const X0 = -13, X1 = 10, L = X1 - X0, XC = (X0 + X1) / 2;
-    const cv = document.createElement('canvas'); cv.width = 256; cv.height = 32; const g = cv.getContext('2d');
-    g.fillStyle = '#1a1f25'; g.fillRect(0, 0, 256, 32); g.fillStyle = '#242a32'; for (let i = 0; i < 256; i += 16) g.fillRect(i, 0, 5, 32);
-    this.beltTex = new THREE.CanvasTexture(cv); this.beltTex.wrapS = THREE.RepeatWrapping; this.beltTex.repeat.set(L / 1.92, 1); this.beltTex.colorSpace = THREE.SRGBColorSpace;
-    const beltTop = new THREE.MeshStandardMaterial({ map: this.beltTex, roughness: 0.75 });
-    const belt = new THREE.Mesh(new THREE.BoxGeometry(L, 0.04, 1.18), [dark, dark, beltTop, dark, dark, dark]);
-    belt.position.set(XC, BELT_Y - 0.02, 0); belt.receiveShadow = true; sc.add(belt);
-    for (const z of [-0.66, 0.66]) { const ch = new THREE.Mesh(new THREE.BoxGeometry(L, 0.2, 0.06), alu); ch.position.set(XC, BELT_Y - 0.06, z); ch.castShadow = true; sc.add(ch); }
-    for (let x = X0 + 0.4; x < X1; x += 2.3) for (const z of [-0.6, 0.6]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, BELT_Y - 0.12, 0.07), alu); leg.position.set(x, (BELT_Y - 0.12) / 2, z); leg.castShadow = true; sc.add(leg); }
-    for (let x = X0 + 0.4; x < X1; x += 2.3) { const cb = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 1.2), alu); cb.position.set(x, 0.12, 0); sc.add(cb); }
+    this.beltTexes = []; this.rollerXZ = [];
+    const conveyor = (x0, x1, z, motorSide = -1) => {
+      const L = x1 - x0, XC = (x0 + x1) / 2;
+      const cv = document.createElement('canvas'); cv.width = 256; cv.height = 32; const g = cv.getContext('2d');
+      g.fillStyle = '#1a1f25'; g.fillRect(0, 0, 256, 32); g.fillStyle = '#242a32'; for (let i = 0; i < 256; i += 16) g.fillRect(i, 0, 5, 32);
+      const tex = new THREE.CanvasTexture(cv); tex.wrapS = THREE.RepeatWrapping; tex.repeat.set(L / 1.92, 1); tex.colorSpace = THREE.SRGBColorSpace; this.beltTexes.push(tex);
+      const belt = new THREE.Mesh(new THREE.BoxGeometry(L, 0.04, 1.18), [dark, dark, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.75 }), dark, dark, dark]);
+      belt.position.set(XC, BELT_Y - 0.02, z); belt.receiveShadow = true; sc.add(belt);
+      for (const dz of [-0.66, 0.66]) { const ch = new THREE.Mesh(new THREE.BoxGeometry(L, 0.2, 0.06), alu); ch.position.set(XC, BELT_Y - 0.06, z + dz); ch.castShadow = true; sc.add(ch); }
+      for (let x = x0 + 0.4; x < x1; x += 2.3) {
+        for (const dz of [-0.6, 0.6]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, BELT_Y - 0.12, 0.07), alu); leg.position.set(x, (BELT_Y - 0.12) / 2, z + dz); leg.castShadow = true; sc.add(leg); }
+        const cb = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 1.2), alu); cb.position.set(x, 0.12, z); sc.add(cb);
+      }
+      for (let x = x0 + 0.14; x < x1 - 0.1; x += 0.28) this.rollerXZ.push([x, z]);
+      for (const x of [x0, x1]) { const dr = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.25, 20), alu); dr.rotation.x = Math.PI / 2; dr.position.set(x, BELT_Y - 0.08, z); sc.add(dr); }
+      const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.5, 20), metal(0x2f5f9e)); motor.rotation.x = Math.PI / 2; motor.position.set(x1 - 0.3, BELT_Y - 0.25, z + motorSide * 0.96); motor.castShadow = true; sc.add(motor);
+      const gearbox = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.3, 0.26), dark); gearbox.position.set(x1 - 0.3, BELT_Y - 0.25, z + motorSide * 0.62); sc.add(gearbox);
+    };
+    conveyor(-12.6, -0.3, -1, -1); conveyor(-12.6, -0.3, 1, 1); conveyor(1.5, 10, 0, -1);
     const rollerGeo = new THREE.CylinderGeometry(0.055, 0.055, 1.3, 14); rollerGeo.rotateX(Math.PI / 2);
-    const nR = Math.floor(L / 0.28); this.rollers = new THREE.InstancedMesh(rollerGeo, metal(0xb8c0c8, { metalness: 0.9, roughness: 0.22 }), nR);
-    this.rollerX = []; for (let i = 0; i < nR; i++) this.rollerX.push(X0 + 0.14 + i * 0.28);
+    this.rollers = new THREE.InstancedMesh(rollerGeo, metal(0xb8c0c8, { metalness: 0.9, roughness: 0.22 }), this.rollerXZ.length);
     this.rollerAngle = 0; this.rollerDummy = new THREE.Object3D(); sc.add(this.rollers); this.updateRollers();
-    for (const x of [X0, X1]) { const dr = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.25, 20), alu); dr.rotation.x = Math.PI / 2; dr.position.set(x, BELT_Y - 0.08, 0); sc.add(dr); }
-    const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.55, 20), metal(0x2f5f9e)); motor.rotation.x = Math.PI / 2; motor.position.set(X1 - 0.3, BELT_Y - 0.25, -0.98); motor.castShadow = true; sc.add(motor);
-    const gearbox = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.34, 0.3), dark); gearbox.position.set(X1 - 0.3, BELT_Y - 0.25, -0.62); sc.add(gearbox);
 
     const lampAt = (x, y, z) => { const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), new THREE.MeshStandardMaterial({ color: LAMP_OFF, emissive: BLACK })); lamp.position.set(x, y, z); sc.add(lamp); return lamp; };
     const box = (key, w, d, h, color) => {
@@ -199,20 +209,31 @@ class FactoryView {
       this.stations[key] = { mesh: hit, lamp, label: l, intervals: [], printer: { gantry, head, nozzle, wipMesh, readout: r, kind } };
     };
     printer('printer_slot', 'slot'); printer('printer_tab', 'tab');
-    const cam = (key) => {
-      const [x, z] = P[key]; box(key, 0.35, 0.35, 2.4, 0x59636f);
-      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 1.1), metal(0x59636f)); arm.position.set(x, 2.35, z + 0.45); sc.add(arm);
-      const head = new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.42, 0.55), metal(0x1d2127, { metalness: 0.6 })); head.position.set(x, 2.35, z + 0.95); sc.add(head);
-      const lens = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 0.12, 24), new THREE.MeshStandardMaterial({ color: 0x0b0d10, emissive: C.accent, emissiveIntensity: 0.15 }));
-      lens.position.set(x, 2.12, z + 0.95); sc.add(lens);
-      const cone = new THREE.Mesh(new THREE.ConeGeometry(0.75, 2.0, 32, 1, true), new THREE.MeshBasicMaterial({ color: C.accent, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }));
-      cone.position.set(x, 1.1, z + 0.45); sc.add(cone);
-      Object.assign(this.stations[key], { lens, cone });
+    const iphone = (key) => {
+      const [x, z] = P[key], side = Math.sign(z) || 1, y = 2.2;
+      box(key, 0.12, 0.12, y + 0.25, 0x59636f);                     // post outside the lane
+      this.stations[key].mesh.position.z = z + side * 0.95;
+      this.stations[key].lamp.position.set(x, y + 0.42, z + side * 0.95); this.stations[key].label.position.set(x, y + 0.75, z + side * 0.95);
+      const arm = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 1.0), alu); arm.position.set(x, y + 0.2, z + side * 0.48); sc.add(arm);
+      const body = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.04, 0.86), new THREE.MeshPhysicalMaterial({ color: 0x1b1d21, metalness: 0.6, roughness: 0.25, clearcoat: 1 }));
+      body.position.set(x, y, z); body.castShadow = true; body.userData = { station: key }; sc.add(body);
+      const bump = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.02, 0.2), metal(0x2a2d33)); bump.position.set(x - 0.08, y - 0.03, z - 0.26); sc.add(bump);
+      const lenses = [];
+      for (const [dx, dz] of [[-0.12, -0.31], [-0.04, -0.31], [-0.12, -0.21]]) {
+        const l = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.03, 20), new THREE.MeshStandardMaterial({ color: 0x050608, emissive: C.accent, emissiveIntensity: 0.1 }));
+        l.position.set(x + dx, y - 0.045, z + dz); sc.add(l); lenses.push(l);
+      }
+      const cone = new THREE.Mesh(new THREE.ConeGeometry(0.55, y - BELT_Y, 32, 1, true), new THREE.MeshBasicMaterial({ color: C.accent, transparent: true, opacity: 0, depthWrite: false, side: THREE.DoubleSide }));
+      cone.position.set(x, (y + BELT_Y) / 2, z); sc.add(cone);
+      Object.assign(this.stations[key], { lens: lenses[0], lenses, cone, camPos: [x - 0.1, y - 0.1, z - 0.26], camTarget: [x - 0.1, BELT_Y, z - 0.26] });
     };
-    cam('phone'); cam('pi');
-    box('caliper', 1.6, 1.3, 1.05, 0x66717e);
-    this.jaws = [-1, 1].map((sgn) => { const j = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.7, 1.0), metal(0x9aa3ad, { metalness: 0.8, roughness: 0.3 })); j.position.set(P.caliper[0] + sgn * 0.3, 1.4, 0); sc.add(j); return j; });
-    box('buffer', 1.9, 2.4, 0.7, 0x37414d); box('assembly', 2.0, 1.8, 1.25, 0x52687e); box('sorting', 1.6, 1.6, 0.85, 0x4a5867);
+    iphone('phone_0'); iphone('phone_1');
+    this.jaws = {};
+    for (const line of [0, 1]) {
+      const key = `caliper_${line}`; box(key, 1.5, 1.3, 1.05, 0x66717e);
+      this.jaws[line] = [-1, 1].map((sgn) => { const j = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.6, 0.9), metal(0x9aa3ad, { metalness: 0.8, roughness: 0.3 })); j.position.set(P[key][0] + sgn * 0.3, 1.35, P[key][1]); sc.add(j); return j; });
+    }
+    box('buffer', 1.6, 3.4, 0.7, 0x37414d); box('assembly', 2.0, 1.8, 1.25, 0x52687e); box('sorting', 1.6, 1.6, 0.85, 0x4a5867);
     // ---- robot arm at assembly (3 animated joints)
     { const base = new THREE.Group(); base.position.set(P.assembly[0], 0, -1.75); this.s.scene.add(base);
       const orange = metal(0xe07b1a, { roughness: 0.45 }), dk = metal(0x1f242b), al = metal(0x8d96a0, { metalness: 0.75, roughness: 0.32 });
@@ -229,7 +250,7 @@ class FactoryView {
       this.robot = { yaw, shoulder, elbow }; }
     // ---- operators (hi-vis vest, helmet) at caliper, review and rework
     this.operators = [];
-    for (const [ox, oz] of [[P.caliper[0], -1.45], [P.review[0], P.review[1] - 1.45], [P.rework[0], P.rework[1] - 1.35]]) {
+    for (const [ox, oz] of [[P.caliper_0[0] + 0.9, 0], [P.review[0], P.review[1] - 1.45], [P.rework[0], P.rework[1] - 1.35]]) {
       const o = new THREE.Group(); o.position.set(ox, 0, oz); o.scale.setScalar(1.25); this.s.scene.add(o);
       const legs = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.5, 4, 12), metal(0x2b3445)); legs.position.y = 0.45; o.add(legs);
       const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.21, 0.42, 4, 12), metal(0xd99a00, { roughness: 0.6 })); torso.position.y = 1.08; o.add(torso);
@@ -241,7 +262,7 @@ class FactoryView {
 
     box('ship', 2.8, 2.8, 0.22, 0x235c34); box('review', 2.4, 2.0, 0.95, 0x7a6418); box('rework', 2.0, 1.8, 0.95, 0x574c66); box('scrap', 2.8, 2.8, 0.22, 0x5e2a2a);
     box('phone_local', 0.35, 0.35, 1.6, 0x59636f); box('caliper_local', 1.4, 1.2, 0.9, 0x66717e);
-    for (const k of ['caliper', 'phone', 'pi']) { const r = ann('', 'readout'); r.position.set(P[k][0], k === 'caliper' ? 2.3 : 3.1, P[k][1]); r.visible = false; sc.add(r); this.readouts[k] = r; }
+    for (const k of ['caliper_0', 'caliper_1', 'phone_0', 'phone_1']) { const r = ann('', 'readout'); r.position.set(P[k][0], k.startsWith('caliper') ? 2.2 : 3.4, P[k][1] + (k.startsWith('phone') ? Math.sign(P[k][1]) * 0.95 : 0)); r.visible = false; sc.add(r); this.readouts[k] = r; }
     this.ring = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.035, 8, 48), new THREE.MeshStandardMaterial({ color: C.accent, emissive: C.accent, emissiveIntensity: 1.6 }));
     this.ring.rotation.x = Math.PI / 2; this.ring.visible = false; sc.add(this.ring);
     this.stationRing = new THREE.Mesh(new THREE.RingGeometry(1.7, 1.8, 64), new THREE.MeshBasicMaterial({ color: C.accent, side: THREE.DoubleSide }));
@@ -249,7 +270,7 @@ class FactoryView {
   }
   updateRollers() {
     const d = this.rollerDummy;
-    this.rollerX.forEach((x, i) => { d.position.set(x, BELT_Y - 0.085, 0); d.rotation.set(0, 0, this.rollerAngle); d.updateMatrix(); this.rollers.setMatrixAt(i, d.matrix); });
+    this.rollerXZ.forEach(([x, z], i) => { d.position.set(x, BELT_Y - 0.085, z); d.rotation.set(0, 0, this.rollerAngle); d.updateMatrix(); this.rollers.setMatrixAt(i, d.matrix); });
     this.rollers.instanceMatrix.needsUpdate = true;
   }
   setLabels(on) { for (const [k, s] of Object.entries(this.stations)) s.label.visible = on && !s.hiddenStation; }
@@ -263,7 +284,7 @@ class FactoryView {
       const mat = new THREE.MeshPhysicalMaterial({ color: p.kind === 'slot' ? C.slot : C.tab, roughness: 0.38, metalness: 0.05, clearcoat: 0.6, clearcoatRoughness: 0.3 });
       const m = new THREE.Mesh(this.partGeo[p.kind], mat); m.castShadow = true; m.visible = false; m.userData = { part: p.id }; sc.add(m);
       const review = p.events.filter((e) => e[0] === 'review').map((e) => [e[1], e[2]]);
-      for (const [stn, a, b] of p.events) this.stations[stn]?.intervals.push([a, b, p]);
+      for (const [stn, a, b] of p.events) this.stations[laneKey(stn, p.line)]?.intervals.push([a, b, p]);
       const endT = kf[kf.length - 1][0];
       this.parts.push({ p, kf, m, review, endT, shipT: p.fate === 'shipped' ? endT : null, scrapT: p.fate === 'scrap' ? endT : null,
         caught: caughtIds.has(p.id), yaw: (hash(p.id) - 0.5) * 0.5 });
@@ -281,7 +302,7 @@ class FactoryView {
   update(t, dtReal, playing, truth) {  // eslint-disable-line
     if (!this.data) return { ship: 0, hold: 0, scrap: 0, esc: 0 };
     // belt texture: 12 repeats over 23 units -> 1 texture unit = 1.92 scene units
-    if (playing) this.beltTex.offset.x -= (dtReal * lab.speed * BELT_SPEED) / 1.92;
+    if (playing) for (const tx of this.beltTexes) tx.offset.x -= (dtReal * lab.speed * BELT_SPEED) / 1.92;
     let ship = 0, hold = 0, scrap = 0, esc = 0; const shipped = new Set(); let selVisible = false;
     for (const x of this.parts) {
       const xy = at(x.kf, t); x.m.visible = !!xy; if (!xy) continue;
@@ -305,14 +326,14 @@ class FactoryView {
       const busyCol = k === 'review' ? C.review : C.accent;
       st.lamp.material.emissive.copy(cur ? busyCol : BLACK); st.lamp.material.emissiveIntensity = cur ? 2.2 : 0;
       st.lamp.material.color.copy(cur ? busyCol : LAMP_OFF);
-      if (st.cone) { st.cone.material.opacity = cur ? 0.12 : 0; st.lens.material.emissiveIntensity = cur ? 2.0 : 0.15; }
+      if (st.cone) { st.cone.material.opacity = cur ? 0.12 : 0; for (const l of st.lenses || [st.lens]) l.material.emissiveIntensity = cur ? 2.0 : 0.1; }
       const r = this.readouts[k];
       if (r) {
         r.visible = !!cur;
         if (cur) {
           const p = cur[2];
-          if (k === 'caliper') { r.element.textContent = `${fmt(p.measured_mm, 3)} mm`; r.element.style.background = ''; }
-          else { const v = p.cams?.[k]; r.element.textContent = v === null || v === undefined ? '— missing' : v ? '⚑ flagged' : '✔ clear'; r.element.style.background = v ? css('--review') : (v === null ? css('--scrap') : ''); }
+          if (k.startsWith('caliper')) { r.element.textContent = `${fmt(p.measured_mm, 3)} mm`; r.element.style.background = ''; }
+          else { const v = p.cams?.phone; r.element.textContent = v === null || v === undefined ? '— missing' : v ? '⚑ flagged' : '✔ clear'; r.element.style.background = v ? css('--review') : (v === null ? css('--scrap') : ''); }
         }
       }
     }
@@ -336,10 +357,13 @@ class FactoryView {
       this.robot.shoulder.rotation.z = busy ? 0.55 + Math.sin(ph * 2) * 0.25 : 0.2;
       this.robot.elbow.rotation.z = busy ? 1.1 + Math.cos(ph * 2) * 0.3 : 1.4;
     }
-    const opBusy = [this.stations.caliper, this.stations.review, this.stations.rework].map((st) => st.intervals.some(([a, b]) => t >= a && t <= b));
+    const busyAt = (st) => st.intervals.some(([a, b]) => t >= a && t <= b);
+    const opBusy = [busyAt(this.stations.caliper_0) || busyAt(this.stations.caliper_1), busyAt(this.stations.review), busyAt(this.stations.rework)];
     this.operators.forEach((o, i) => { o.position.y = opBusy[i] ? Math.abs(Math.sin(now * 4 + i)) * 0.03 : 0; o.rotation.x = opBusy[i] ? 0.12 : 0; });
-    const cb = this.stations.caliper.intervals.find(([a, b]) => t >= a && t <= b);
-    const gap = cb ? 0.17 : 0.3; this.jaws[0].position.x = P.caliper[0] - gap; this.jaws[1].position.x = P.caliper[0] + gap;
+    for (const line of [0, 1]) {
+      const key = `caliper_${line}`, gap = busyAt(this.stations[key]) ? 0.16 : 0.3;
+      this.jaws[line][0].position.x = P[key][0] - gap; this.jaws[line][1].position.x = P[key][0] + gap;
+    }
     return { ship, hold, scrap, esc };
   }
 
@@ -364,14 +388,16 @@ class FactoryView {
 
 // Height of a part's resting surface at (x, z): conveyor, buffer table, review/rework benches or floor pads.
 function heightAt(x, z) {
-  if (Math.abs(z) < 0.95 && x > -13.2 && x < 10.2) return BELT_Y + 0.07;
+  if (x > -12.8 && x < -0.2 && (Math.abs(z - 1) < 0.62 || Math.abs(z + 1) < 0.62)) return BELT_Y + 0.07;
+  if (x > 1.3 && x < 10.2 && Math.abs(z) < 0.62) return BELT_Y + 0.07;
+  if (Math.abs(x - P.buffer[0]) < 0.85 && Math.abs(z) < 1.75) return 0.76;
   if (z < -4.6 && x > 0.8 && x < 8.4) return 1.02;
   if (Math.abs(x - P.printer_slot[0] - 1.7) < 0.3) return 0.25;
   return 0.25;
 }
 function pathFor(p, binIndex) {
-  const kf = [], j = hash(p.id), jz = (j - 0.5) * 0.9;
-  const pos = (k, dx = 0, dz = 0) => { const [x, z] = P[k] || P.buffer; return [x + dx, z + dz]; };
+  const kf = [], j = hash(p.id), jz = (j - 0.5) * 0.6;
+  const pos = (k, dx = 0, dz = 0) => { const [x, z] = P[laneKey(k, p.line)] || P.buffer; return [x + dx, z + dz]; };
   const pr = p.kind === 'slot' ? 'printer_slot' : 'printer_tab';
   const first = p.events.length ? p.events[0][1] : p.print_t + 60;
   const out = Math.max(p.print_t, first - 25);
@@ -389,7 +415,7 @@ function pathFor(p, binIndex) {
   }
   const last = kf[kf.length - 1][0];
   const binPos = (k) => { const [x, z] = P[k]; const i = binIndex; return [x - 1.05 + (i % 6) * 0.42, z - 1.05 + (Math.floor(i / 6) % 6) * 0.42]; };
-  const lastKey = prevKey, [lx, lz] = pos(lastKey), toBin = (k) => Math.hypot(P[k][0] - lx, P[k][1] - lz) / BELT_SPEED;
+  const [lx, lz] = pos(prevKey), toBin = (k) => Math.hypot(P[k][0] - lx, P[k][1] - lz) / BELT_SPEED;
   if (p.fate === 'shipped') kf.push([last + toBin('ship'), ...binPos('ship')]);
   else if (p.fate === 'scrap') kf.push([last + toBin('scrap'), ...binPos('scrap')]);
   else kf.push([last + 4, ...pos('buffer', (j - 0.5) * 1.2, jz)]);
@@ -409,8 +435,8 @@ function at(kf, t) {
 const STORY = [
   ['Overview', 'One simulated shift of the Slot/Tab line. Each moving part is one simulated part from the discrete-event engine.', [-2, 23, 25.5], [-1.4, 0, -1.6]],
   ['Printers', 'Slots and tabs are printed in lots of 4. Width drift, warping and cracks are generated here; printers fail and get repaired (MTBF/MTTR).', [-19, 5, 7], [-14, 1, 0]],
-  ['Two cameras', 'Phone and Pi cameras check the surface independently. The readout shows each result. A missing reading is never a "clear".', [-11, 4.5, 6], [-7, 1.5, 0]],
-  ['Caliper', 'An operator measures the width. The calibrated policy turns the reading into a posterior. Click any part to see its evidence chain.', [-4, 3.5, 4.5], [-2.5, 1, 0]],
+  ['Two lanes, iPhone cameras', 'Slots run on one lane, tabs on the other. An iPhone camera over each lane checks the surface; the readout shows its result. Click a camera and choose "Open camera" to see its view or attach a real photo.', [-11, 5, 7], [-8, 1.2, 0]],
+  ['Calipers', 'One operator serves both calipers. The calibrated policy turns each reading into a posterior. Click any part to see its evidence chain.', [-6, 3.8, 5.5], [-4.5, 0.8, 0]],
   ['Pairing and gate', 'Risk-optimised pairing picks partners (SciPy linear assignment). The pair gate still decides: P(unsafe) ≥ 1.32% means HOLD, whatever pairing saves.', [0, 6, 7], [2.5, 0.5, -0.5]],
   ['Review (HOLD)', 'Held parts go to review (45 s, shared operator). Holding everything looks "safe and cheap" on paper but cuts throughput by 82%.', [3, 6, 0], [3.5, 0.5, -5]],
   ['Shipped', 'Turn on ground truth: a red part is a shipped defect. In Compare mode, purple parts are defects the rule shipped and QualityRelay stopped.', [9, 6, 6], [11, 0, -2]],
@@ -458,6 +484,11 @@ async function initLab() {
         });
       }
       lab.views.forEach((v, i) => { if (i === 0 || lab.mode === 'compare') v.s.render(); });
+      if (lab.camView && !$('#studio').classList.contains('noinsp')) {
+        const cones = [...Object.values(lab.camView.view.stations).filter((s) => s.cone).map((s) => s.cone), lab.camView.view.stationRing, lab.camView.view.ring];
+        const prev = cones.map((c) => c.visible); cones.forEach((c) => (c.visible = false));   // the camera must not see its own light cone
+        lab.camView.renderer.render(lab.camView.view.s.scene, lab.camView.cam); cones.forEach((c, i) => (c.visible = prev[i]));
+      }
     }
     requestAnimationFrame(loop);
   };
@@ -468,6 +499,7 @@ async function initLab() {
   if (q.get('seed')) $('#seed').value = q.get('seed'); if (q.get('pairs')) $('#npairs').value = q.get('pairs');
   if (q.get('mode') === 'compare') await setMode('compare'); else await run();
   lab.views.forEach((v) => v.s.flyTo(fitCam(v, STORY[0][2], STORY[0][3]), STORY[0][3], 2.6));
+  if (q.get('select')?.startsWith('phone_') || q.get('select')?.startsWith('caliper_')) select({ type: 'station', id: q.get('select'), side: 0 });
   if (q.get('select') === 'caught') { const id = [...lab.caught][0] || lab.runs.at(-1)?.parts.find((p) => p.pair)?.id; if (id) select({ type: 'part', id, side: lab.runs.length - 1 }); }
 }
 
@@ -602,7 +634,7 @@ function partCard(p, side, truth) {
     ${p.reprint_of ? `<div class="why" style="border-color:var(--caught)"><b>↻ Reprint</b> of <span class="link" data-part="${p.reprint_of}" data-side="${side}">${p.reprint_of}</span>: the defective original was scrapped and this part was printed again from the nominal CAD model (printer re-zeroed). It went through the full inspection again.</div>` : ''}
     ${p.reprinted_as ? `<div class="why"><b>Defect confirmed → reprinted</b> as <span class="link" data-part="${p.reprinted_as}" data-side="${side}">${p.reprinted_as}</span>.</div>` : ''}
     <section><h4>Evidence (what the system saw)</h4><div class="kv">
-      ${Object.entries(p.cams || {}).map(([k, v]) => `<span>${STN[k] || k}</span><span>${camTxt(v)}</span>`).join('')}
+      ${Object.entries(p.cams || {}).map(([k, v]) => `<span>${STN[k] || k} · ${p.kind} lane</span><span>${camTxt(v)}</span>`).join('')}
       <span>caliper reading</span><span>${fmt(p.measured_mm, 3)} mm (σ ${fmt(p.caliper_sd, 2)})</span>
       <span>P(surface defect)</span><span>${p.surface_posterior === null ? '—' : pct(p.surface_posterior, 3)}</span>
       <span>expert review</span><span>${p.reviewed ? 'cleared' : p.events.some((e) => e[0] === 'review') ? 'yes' : 'no'}</span></div>
@@ -611,12 +643,23 @@ function partCard(p, side, truth) {
     <section><h4>Timeline</h4><ul class="tl">${tl || '<li><span>—</span></li>'}</ul></section>
     ${truthSec}`;
 }
+function cameraSection(k) {
+  return `<section><h4>Camera · ${k === 'phone_0' ? 'slot' : 'tab'} lane</h4>
+    <div class="camview" id="camView"><span class="corner tl faint">SIMULATED VIEW</span></div>
+    <div class="row2" style="margin-top:8px"><button class="ghost" id="camDevice">📷 Open device camera</button>
+      <label class="ghost filebtn">⬆ Upload photo<input type="file" accept="image/*" capture="environment" id="camFile" hidden></label></div>
+    <video id="camVideo" class="camimg" playsinline muted hidden></video><img id="camPhoto" class="camimg" alt="captured photo" hidden>
+    <div class="row2" style="margin-top:8px"><select id="camLabel" aria-label="Label"><option value="inbox">label later</option><option value="good">good part</option><option value="defect">defective part</option></select>
+      <button class="primary" id="camSave" disabled>Save + NVIDIA check</button></div>
+    <div id="camResult" class="faint small" style="margin-top:8px">The photo is saved as PHYSICAL_CAPTURE training data (data/prints/…). The NVIDIA anomaly model scores it once it has been trained on real photos.</div></section>`;
+}
 function stationCard(k, side) {
   const run = lab.runs[side], s = run?.stations[k], [name, desc] = STATION_INFO[k];
   return `<h2>${name}</h2><div class="sub">station · ${run.scenario} · ${run.policy}+${run.pairing}</div><p class="muted">${desc}</p>
     ${s ? `<section><h4>Load in this run</h4><div class="kv"><span>visits</span><span>${s.visits}</span><span>busy time</span><span>${fmt(s.busy_s / 60, 1)} min</span>
       <span>busy share of the run</span><span>${pct(s.busy_share, 0)}</span><span>mean service</span><span>${fmt(s.busy_s / Math.max(1, s.visits), 1)} s</span></div>
-      <div class="bar"><i style="width:${Math.min(100, 100 * s.busy_share)}%"></i></div></section>` : '<section><p class="faint">No timed visits are recorded for this station in this run.</p></section>'}`;
+      <div class="bar"><i style="width:${Math.min(100, 100 * s.busy_share)}%"></i></div></section>` : '<section><p class="faint">No timed visits are recorded for this station in this run.</p></section>'}
+    ${k.startsWith('phone_') ? cameraSection(k) : ''}`;
 }
 function summaryCard() {
   if (!lab.runs.length) return '<p class="faint">Run a simulation.</p>';
@@ -631,7 +674,8 @@ function summaryCard() {
     <li><span>click a part</span><span class="faint">evidence chain behind its decision</span><span></span></li>
     <li><span>click a station</span><span class="faint">its load in this run</span><span></span></li>
     <li><span>keys</span><span class="faint"><kbd>space</kbd> play · <kbd>L</kbd> labels · <kbd>T</kbd> truth · <kbd>←</kbd><kbd>→</kbd> tour</span><span></span></li></ul></section>
-    <section><h4>Provenance</h4><p class="faint small">SIMULATED. Toy part generator, illustrative station timings, held-out calibration ${r.model.calibration_id}. Not a factory measurement.</p></section>`;
+    <section><h4>Provenance</h4><p class="faint small">SIMULATED. Toy part generator, illustrative station timings, held-out calibration ${r.model.calibration_id}. Not a factory measurement.
+      This 3D Lab runs two lanes with one iPhone camera each (cameras: ${(r.cameras || []).join(', ')}) and reprints confirmed defects. The pre-registered results in the Results tab used phone + Pi cameras without reprint.</p></section>`;
   return html;
 }
 function renderInspector() {
@@ -641,8 +685,49 @@ function renderInspector() {
     const p = findPart(sel.id, side); html = p ? partCard(p, side, truth) : summaryCard(); $('#inspHint').textContent = 'part';
   } else if (sel?.type === 'station') { html = stationCard(sel.id, Math.min(sel.side ?? 0, lab.runs.length - 1)); $('#inspHint').textContent = 'station'; }
   else { html = summaryCard(); $('#inspHint').textContent = 'click a part or a station'; }
+  stopCamera(); lab.camView = null;
   $('#inspBody').innerHTML = html;
+  if (sel?.type === 'station' && sel.id.startsWith('phone_')) bindCameraPanel(sel.id, Math.min(sel.side ?? 0, lab.runs.length - 1));
   $$('#inspBody [data-part]').forEach((el) => (el.onclick = () => select({ type: 'part', id: el.dataset.part, side: el.dataset.side !== undefined ? +el.dataset.side : 0 })));
+}
+
+// ---------------------------------------------------------------- camera panel
+let camStream = null, camRenderer = null;
+function stopCamera() { camStream?.getTracks().forEach((t) => t.stop()); camStream = null; }
+function bindCameraPanel(k, side) {
+  const view = lab.views[side], st = view.stations[k];
+  const el = $('#camView');
+  if (!camRenderer) { camRenderer = new THREE.WebGLRenderer({ antialias: true }); camRenderer.setPixelRatio(Math.min(devicePixelRatio, 2)); camRenderer.toneMapping = THREE.ACESFilmicToneMapping; }
+  camRenderer.setSize(el.clientWidth, el.clientHeight); el.prepend(camRenderer.domElement);
+  const cam = new THREE.PerspectiveCamera(58, el.clientWidth / el.clientHeight, 0.02, 60);
+  cam.up.set(0, 0, -1); cam.position.set(...st.camPos); cam.lookAt(...st.camTarget);
+  lab.camView = { view, cam, renderer: camRenderer };
+  let photo = null;
+  const setPhoto = (dataUrl) => { photo = dataUrl; $('#camPhoto').src = dataUrl; $('#camPhoto').hidden = false; $('#camVideo').hidden = true; $('#camSave').disabled = false; };
+  $('#camFile').onchange = (e) => { const f = e.target.files?.[0]; if (!f) return; const r = new FileReader(); r.onload = () => setPhoto(r.result); r.readAsDataURL(f); };
+  $('#camDevice').onclick = async () => {
+    if (camStream) {   // second click = capture a frame
+      const v = $('#camVideo'), c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight;
+      c.getContext('2d').drawImage(v, 0, 0); setPhoto(c.toDataURL('image/jpeg', 0.92)); stopCamera(); $('#camDevice').textContent = '📷 Open device camera'; return;
+    }
+    try {
+      camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 } } });
+      const v = $('#camVideo'); v.srcObject = camStream; v.hidden = false; $('#camPhoto').hidden = true; await v.play();
+      $('#camDevice').textContent = '⏺ Capture photo';
+    } catch (err) { $('#camResult').textContent = `Camera unavailable: ${err.message}. Use "Upload photo" instead.`; }
+  };
+  $('#camSave').onclick = async () => {
+    $('#camSave').disabled = true; $('#camResult').textContent = 'Saving…';
+    try {
+      const r = await api('/sim/vision/capture', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lane: k === 'phone_0' ? 'slot' : 'tab', label: $('#camLabel').value, image_b64: photo }) });
+      const n = r.nvidia_anomaly, c = r.dataset_counts;
+      $('#camResult').innerHTML = `<div class="kv"><span>saved</span><span>${r.saved.split('/').slice(-2).join('/')}</span><span>size</span><span>${r.width} × ${r.height}</span>
+        <span>tier</span><span>${r.source_tier}</span><span>dataset</span><span>good ${c.good} · defect ${c.defect} · inbox ${c.inbox}</span></div>
+        <div class="why"><b>NVIDIA anomaly model: ${n.status}.</b> ${n.reason} ${n.ready_to_train ? '<b>Enough photos to train now:</b>' : `Need ≥ ${n.need.good} good and ≥ ${n.need.defect} defect photos, then:`} <code>${n.train_command}</code></div>`;
+    } catch (err) { $('#camResult').textContent = `Save failed: ${err.message}`; }
+    $('#camSave').disabled = false;
+  };
 }
 
 // ---------------------------------------------------------------- parts page

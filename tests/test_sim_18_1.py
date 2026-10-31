@@ -237,3 +237,13 @@ def test_reprint_loop_replaces_scrapped_parts_and_reinspects_them():
     base = run_factory(sc, 2, 'bayes', 'fifo', model=MODEL, keep_log=False)
     assert base['truth_sha256'] == o['truth_sha256'] and base['reprints'] == 0
     assert o['shipped'] >= base['shipped']
+
+
+def test_phone_only_two_lane_configuration():
+    sc = replace(BY_ID['F01'], n_pairs=40, cameras=('phone',),
+                 sites=(replace(BY_ID['F01'].sites[0], inspection_lines=2),))
+    f = Factory(sc, 1, 'bayes', 'fifo', model=MODEL, lane_by_kind=True); o = f.run()
+    assert o['conservation_ok']
+    assert not any(e[2] == 'pi' for e in f.events)
+    assert all(set(p['obs']) <= {'phone'} for p in f.parts if 'obs' in p)
+    assert all(p['line'] == (0 if p['kind'] == 'slot' else 1) for p in f.parts)

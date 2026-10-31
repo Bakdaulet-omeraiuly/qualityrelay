@@ -106,7 +106,8 @@ def pair_unsafe_probability(slot_post, tab_post, ps_slot, ps_tab):
 class Factory:
     def __init__(self, sc: FactoryScenario, seed: int, policy: str, pairing: str = 'fifo', *, costs: Costs | None = None,
                  model: PartModel | None = None, batch_k: int = 8, keep_log: bool = True,
-                 pair_timeout_s: float | None = None, reprint: bool = False, max_reprints: int = 2):
+                 pair_timeout_s: float | None = None, reprint: bool = False, max_reprints: int = 2,
+                 lane_by_kind: bool = False):
         if policy not in POLICIES or pairing not in PAIRINGS:
             raise ValueError('unknown policy/pairing')
         if sc.evidence_sharing not in ('full', 'summary', 'none'):
@@ -121,6 +122,8 @@ class Factory:
         # (printer re-zeroed), which goes through the full inspection again. Off by default so the
         # registered SIM results are unchanged.
         self.reprint, self.max_reprints = reprint, max_reprints
+        # lane_by_kind: slots always use inspection line 0 and tabs line 1 (two conveyor lanes)
+        self.lane_by_kind = lane_by_kind
         self.design = nominal_design()
         self.env = env = Env()
         self.site = {s.name: s for s in sc.sites}
@@ -206,7 +209,7 @@ class Factory:
             yield ('release', {pr: 1})
             for k, i in enumerate(idxs):
                 p = draw_part(self.sc, self.seed, kind, i, site, t0, f'{site.name}:{job_id}', self.design)
-                p['line'] = i % site.inspection_lines
+                p['line'] = ((0 if kind == 'slot' else 1) if self.lane_by_kind else i) % site.inspection_lines
                 self.parts.append(p)
                 self.env.process(self.part(p, site))
 
@@ -215,7 +218,7 @@ class Factory:
         yield ('timeout', self._svc(f'tr:{p["part_id"]}', sc.transport_s))
         line = p['line']
         obs = {}
-        for st in ('phone', 'pi'):
+        for st in (c for c in ('phone', 'pi') if c in sc.cameras):
             yield from self._work([self.res[(site.name, st, line)]], f'{st}:{p["part_id"]}', STATION_S[st], st)
             val = p['cam'][st]
             if st == 'pi' and any(a <= self.env.now < b for a, b in sc.partition_windows_s):

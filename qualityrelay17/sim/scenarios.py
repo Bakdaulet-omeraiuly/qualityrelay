@@ -56,6 +56,7 @@ class FactoryScenario:
     cost_shock_at_s: float | None = None
     cost_shock_escape_multiplier: float = 1.0
     assembly_capacity: int = 1
+    cameras: tuple = ('phone', 'pi')         # surface cameras on each inspection line
 
     def as_dict(self):
         return asdict(self)

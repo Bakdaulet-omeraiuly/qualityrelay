@@ -40,3 +40,19 @@ def test_results_bundle_matches_the_registered_files():
     assert len(pv) == 15 and sum(x['safe'] for x in pv) == 15 and sum(x['throughput'] for x in pv) == 4
     assert d['gate_a']['summary']['B7_safe_mesh_voi']['released_good_rate'] == 0.0
     assert set(d['warp']) == {f'S0{i}' for i in range(1, 9)}
+
+
+def test_photo_capture_saves_physical_capture_and_never_invents_a_score(tmp_path, monkeypatch):
+    import base64
+    import cv2
+    import numpy as np
+    from qualityrelay17.sim import api_routes
+    monkeypatch.setattr(api_routes, 'PRINTS', tmp_path)
+    ok, buf = cv2.imencode('.png', np.full((40, 60, 3), 128, np.uint8))
+    b64 = 'data:image/png;base64,' + base64.b64encode(buf.tobytes()).decode()
+    r = c.post('/sim/vision/capture', json=dict(lane='tab', label='good', image_b64=b64)).json()
+    assert r['source_tier'] == 'PHYSICAL_CAPTURE' and (r['width'], r['height']) == (60, 40)
+    assert r['nvidia_anomaly']['status'] == 'NOT_CONFIGURED' and 'score' not in r['nvidia_anomaly']
+    assert len(list((tmp_path / 'good').glob('*.png'))) == 1
+    assert c.post('/sim/vision/capture', json=dict(lane='tab', label='good', image_b64='data:image/png;base64,' + 'A' * 64)).status_code == 422
+    assert c.post('/sim/vision/capture', json=dict(lane='x', label='good', image_b64=b64)).status_code == 422
