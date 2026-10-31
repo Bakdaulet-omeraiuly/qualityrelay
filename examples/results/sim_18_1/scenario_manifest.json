@@ -117,10 +117,10 @@
   "qualityrelay17/sim/experiment.py": "85ee5c0e6a3319e5fd6372c2493f048b58c25b1b7479393433cb2c4f238dafc8",
   "qualityrelay17/sim/optimization.py": "aef363e46f7025dfd2318fadf26a171c53a20ce0abeadd609808e8896d726d82",
   "qualityrelay17/sim/scenarios.py": "fa7c15719e97d4c782c6a97d78bdee976dd467368297d206308cf9bfcf17ad39",
-  "scripts/run_sim_18_1.py": "bc19c248672c9ef9a3fadec5f588a1e938a40f23568d0a606b9110d42e2d0ecf"
+  "scripts/run_sim_18_1.py": "93b217f53a4775f3ed2a428ee110b09848357480d3590f7cddd2e9e6858c812e"
  },
  "dirty_before_run": false,
- "git_commit": "90ec6fed5ef0b364e32d38a50022c23c5dbf8e8e",
+ "git_commit": "04dd8c8291bc8f2ad9cfd2dc4230dc671596c46f",
  "model_version": "qr-sim-18.1.0",
  "origin": "SIMULATED",
  "part_model": {
@@ -139,7 +139,7 @@
  "physical_calibration": "NOT_AVAILABLE (no PHY-03 caliper records yet)",
  "python": "3.13.9",
  "registration": "docs/research/SIM_18_1_REGISTRATION.md",
- "runtime_s": 53.3,
+ "runtime_s": 54.5,
  "scale_seeds": [
   0,
   1,
@@ -152,7 +152,7 @@
   8,
   9
  ],
- "scale_wall_s": 5.76,
+ "scale_wall_s": 6.38,
  "scenarios": {
   "F01": {
    "assembly_capacity": 1,
@@ -1004,7 +1004,7 @@
   "scipy_linear_sum_assignment": "WORKING",
   "scipy_milp_highs": "WORKING"
  },
- "started_utc": "2026-10-31T14:39:10Z",
+ "started_utc": "2026-10-31T14:40:52Z",
  "truth_sha256_by_scenario_seed": {
   "F01": [
    "254cf7405b5bed43c89a16f557f7a4594ea8d5e0732dc8cf681ac04bfa502333",
