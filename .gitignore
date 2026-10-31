@@ -13,3 +13,13 @@ secrets/
 *.db
 *.hef
 models/weights/
+# from HyorinmaruK/PhysicalQualityRelay
+venv/
+*.py[cod]
+.coverage
+htmlcov/
+build/
+dist/
+*.egg-info/
+captures/
+logs/

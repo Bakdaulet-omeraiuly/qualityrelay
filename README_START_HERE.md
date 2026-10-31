@@ -32,6 +32,10 @@ uvicorn qualityrelay17.api:app --host 127.0.0.1 --port 8000
 - `examples/cad/stl/`: copied from the user's own original 5.0 package; `examples/cad/*.png`: own 2D STL silhouette renders.
 - `examples/results/`: generated transparent simulation-only examples.
 - `legacy/`: byte-identical preserved user-provided historical releases; see preservation audit.
+- `docs/engineering/PHYSICAL_DEMO_OVERVIEW.md`: the physical manual-track demonstration (HyorinmaruK), with links to everything below.
+- `docs/engineering/MANUAL_TRACK_SERVO_SORTER_BUILD_GUIDE.md`: exact equipment, printing, wiring, assembly and physical validation procedure for the manual-track demonstration.
+- `.kiro/`: Kiro Web steering and implementation specification for the physical demonstration.
+- `firmware/manual_sorter/`: one-ESP32, human-confirmed servo-diverter firmware for the recommended first build.
 
 ## Major preserved decisions
 

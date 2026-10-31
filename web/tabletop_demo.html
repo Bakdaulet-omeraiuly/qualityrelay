@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>QualityRelay tabletop demo — one-spot manual walkthrough and video storyboard</title>
+<style>
+:root{--bg:#0b1017;--panel:#151d29;--panel2:#1b2635;--muted:#9aadc5;--line:#344154;--ink:#e9f0fb;--accent:#77c7d7;--good:#5ccc91;--warn:#efba71;--bad:#ee8e97}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+h1{font-size:19px;margin:0}h2{font-size:16px;margin:0 0 8px}h3{font-size:14px;margin:12px 0 4px;color:var(--accent)}
+a{color:#9cdeeb}
+.badge{font-size:11px;font-weight:700;letter-spacing:.4px;padding:5px 10px;border-radius:9px;background:#3a2b1b;color:#ffd79c}
+main{max-width:1280px;margin:auto;padding:14px 18px 44px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.cols{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;margin-top:12px}
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:960px){.cols,.cols2{grid-template-columns:1fr}}
+svg{width:100%;height:auto;display:block}
+.tiny{font-size:12px;color:var(--muted)}.muted{color:var(--muted)}
+button.primary{background:var(--accent);color:#07151e;border:0;padding:9px 15px;border-radius:9px;cursor:pointer;font:inherit;font-weight:800}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:8px 13px;border-radius:9px;cursor:pointer;font:inherit}
+button:disabled{opacity:.4;cursor:not-allowed}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;border-right:1px solid var(--line);background:#121925;color:var(--muted);padding:7px 11px;font:inherit;cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button.on{background:#15313b;color:var(--accent);font-weight:700}
+.actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.chip{font-size:11px;padding:4px 7px;border-radius:7px;background:#1d2838;color:var(--muted);border:1px solid var(--line)}
+.chip.now{color:#07151e;background:var(--accent);border-color:var(--accent);font-weight:700}
+.chip.done{color:var(--good);border-color:#2c5a43}
+.step{border-left:3px solid var(--accent);padding:4px 0 4px 12px}
+.step ul{margin:4px 0 4px 18px;padding:0}.step li{margin:2px 0}
+.tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.3px;padding:2px 6px;border-radius:5px;margin-right:4px;vertical-align:1px}
+.t-cam{background:#1b2f3a;color:#a0e8f5}.t-say{background:#203a2d;color:#9ef0c2}.t-do{background:#3a2f1b;color:#ffd79c}
+.decision{font-size:22px;font-weight:800}
+.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.note{padding:9px 11px;border-radius:9px;background:#332b21;color:#ffdda7;font-size:12.5px;margin-top:8px}
+.ok{padding:9px 11px;border-radius:9px;background:#183326;color:#bff3d6;font-size:12.5px;margin-top:8px}
+table{border-collapse:collapse;width:100%;font-size:12.5px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+details{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin-top:12px;background:var(--panel)}
+summary{cursor:pointer;font-weight:700;font-size:15px}
+details[open] summary{margin-bottom:8px}
+.mat{fill:#11161f;stroke:#2c3a4e}
+.pad{fill:#0c0c0e;stroke:#333}
+.spot{fill:none;stroke:#55627a;stroke-dasharray:4 3}
+.lbl{fill:#e9f0fb;font-size:11px}.lbls{fill:#9aadc5;font-size:9px}
+.comp{cursor:pointer}.comp:hover>*{filter:brightness(1.25)}
+.fov{fill:#77c7d7;opacity:.12;stroke:#77c7d7;stroke-dasharray:3 2}
+.spec{fill:#f4f4ef;stroke:#9aa}
+.tray{stroke-width:2;fill-opacity:.18}
+.hand{fill:none;stroke:#ffd79c;stroke-width:2.2;stroke-dasharray:6 4}
+</style>
+</head>
+<body>
+<header>
+  <h1>QualityRelay tabletop demo · one-spot manual walkthrough &amp; video storyboard</h1>
+  <span class="badge">STAGED WALKTHROUGH · you move the part by hand · not an automated system</span>
+</header>
+<main>
+  <div class="panel">
+    <p style="margin:0 0 6px">No long track and no servo. Everything sits in one spot. You measure by hand, show the part to one camera, read the decision, then <b>place the part in its tray by hand</b>. Record one part at a time.</p>
+    <div class="actions">
+      <span class="tiny">Scenario:</span>
+      <span class="seg" id="scn">
+        <button data-s="A" class="on">Good → PASS</button>
+        <button data-s="B">Tight → HOLD</button>
+        <button data-s="C">Anomaly → REJECT if confirmed</button>
+        <button data-s="D">Defect pair → REJECT</button>
+      </span>
+
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="panel">
+      <svg id="mat" viewBox="-20 -40 900 540" aria-label="Top view of the tabletop setup">
+        <text x="0" y="-22" class="lbl">One A3-size mat, top view. Click a part for notes.</text>
+        <rect x="0" y="0" width="860" height="470" rx="10" class="mat"/>
+
+        <!-- MEASURE spot -->
+        <g class="comp" data-info="measure">
+          <rect x="40" y="250" width="150" height="150" rx="6" class="spot"/>
+          <text x="115" y="243" text-anchor="middle" class="lbl" font-weight="700">1 · MEASURE</text>
+          <rect x="60" y="360" width="110" height="9" rx="2" fill="#b9c2cc"/>
+          <rect x="60" y="351" width="7" height="20" fill="#b9c2cc"/>
+          <rect x="96" y="372" width="44" height="22" rx="3" fill="#20262e" stroke="#9aadc5"/>
+          <text id="cal" x="118" y="388" text-anchor="middle" fill="#9ef0c2" font-size="12" font-family="monospace">--.--</text>
+          <text x="115" y="414" text-anchor="middle" class="lbls">digital caliper (by hand)</text>
+        </g>
+
+        <!-- SHOW-to-camera spot -->
+        <g class="comp" data-info="camera">
+          <polygon points="360,70 300,150 420,150" class="fov"/>
+          <rect x="300" y="150" width="120" height="110" class="fov"/>
+          <rect x="348" y="48" width="26" height="18" rx="4" fill="#2b3a4f" stroke="#77c7d7"/>
+          <circle cx="361" cy="57" r="5" fill="#77c7d7"/>
+          <text x="384" y="60" class="lbls">one camera (phone / webcam)</text>
+          <rect x="300" y="150" width="120" height="110" rx="6" class="spot"/>
+          <text x="360" y="143" text-anchor="middle" class="lbl" font-weight="700">2 · SHOW</text>
+          <text x="360" y="277" text-anchor="middle" class="lbls">dark pad: show caliper, then the part</text>
+        </g>
+
+        <!-- Laptop decision -->
+        <g class="comp" data-info="laptop">
+          <rect x="300" y="330" width="150" height="92" rx="5" fill="#0f1620" stroke="#77c7d7"/>
+          <text id="scr" x="375" y="372" text-anchor="middle" fill="#a0e8f5" font-size="15" font-weight="800">—</text>
+          <text x="375" y="392" text-anchor="middle" fill="#9aadc5" font-size="9">3 · DECISION (laptop)</text>
+        </g>
+
+        <!-- trays -->
+        <g class="comp" data-info="trays">
+          <rect x="700" y="20" width="150" height="130" rx="8" class="tray" stroke="#5ccc91" fill="#5ccc91"/>
+          <rect x="700" y="168" width="150" height="130" rx="8" class="tray" stroke="#efba71" fill="#efba71"/>
+          <rect x="700" y="316" width="150" height="130" rx="8" class="tray" stroke="#ee8e97" fill="#ee8e97"/>
+          <text x="775" y="44" text-anchor="middle" class="lbl" font-weight="700">PASS</text>
+          <text x="775" y="192" text-anchor="middle" class="lbl" font-weight="700">HOLD</text>
+          <text x="775" y="340" text-anchor="middle" class="lbl" font-weight="700">REJECT</text>
+          <text id="cPASS" x="775" y="120" text-anchor="middle" class="lbls">empty</text>
+          <text id="cHOLD" x="775" y="268" text-anchor="middle" class="lbls">empty</text>
+          <text id="cREJECT" x="775" y="416" text-anchor="middle" class="lbls">empty</text>
+          <text x="775" y="462" text-anchor="middle" class="lbls">4 · you place it here by hand</text>
+        </g>
+
+        <g id="handArrow"></g>
+        <g id="token"></g>
+      </svg>
+    </div>
+
+    <div class="panel">
+      <div class="chips" id="chips"></div>
+      <div id="box" class="step"></div>
+      <div class="actions" id="act"></div>
+      <div id="msg" class="tiny" style="margin-top:8px"></div>
+      <div id="info" class="tiny muted" style="margin-top:10px">Click a labeled part in the drawing for notes.</div>
+    </div>
+  </div>
+
+  <details>
+    <summary>Electronics (not needed for this video)</summary>
+    <div class="cols2" style="margin-top:4px">
+      <div class="panel" style="border-color:#2c5a43">
+        <h2>Nothing to wire</h2>
+        <p class="muted" style="margin-top:0">For this video you do not build the breadboard at all. The "sorting" is you placing the part in the right tray. You still film the whole story: measure, show, decide, route.</p>
+        <ul>
+          <li>One camera and the digital caliper.</li>
+          <li>Three trays labeled PASS / HOLD / REJECT.</li>
+        </ul>
+        <div class="ok">Keep it honest on camera: you move the part by hand; there is no automated gate in this version.</div>
+      </div>
+      <div class="panel">
+        <h2>Later, if you get a servo</h2>
+        <p class="muted" style="margin-top:0">A servo diverter is an optional upgrade, not needed for the video. If you add one later, the full hole-by-hole wiring and the Power MB V2 setup are in <a href="physical_build_guide.html">physical_build_guide.html</a>, and the firmware is <code>firmware/manual_sorter/esp32_manual_sorter.ino</code>.</p>
+      </div>
+    </div>
+  </details>
+
+  <details>
+    <summary>What to print and have on the table</summary>
+    <div class="panel" style="border:0;padding:0;margin-top:4px">
+      <table><thead><tr><th>item</th><th>need</th><th>notes</th></tr></thead><tbody>
+        <tr><td><b>Specimens</b></td><td>required</td><td>The one-file plate <code>examples/cad/formlabs/qualityrelay_specimen_plate.stl</code> (or the individual STLs). You need a good pair, a tight pair, an anomaly part, and a defect pair.</td></tr>
+        <tr><td><b>Digital caliper</b></td><td>required</td><td>You read it by hand.</td></tr>
+        <tr><td><b>One camera</b></td><td>required</td><td>Phone or webcam on a small stand or stack of books. It films the caliper display and the part.</td></tr>
+        <tr><td><b>Laptop</b></td><td>required</td><td>Shows the decision. The run log is <code>docs/engineering/templates/manual_track_run_log.csv</code>.</td></tr>
+        <tr><td><b>3 trays + labels</b></td><td>required</td><td>Small boxes or lids: PASS, HOLD, REJECT.</td></tr>
+        <tr><td><b>Dark mat + lamp</b></td><td>recommended</td><td>Dark paper under the SHOW square; one steady lamp.</td></tr>
+        <tr><td><b>ESP32 / servo / breadboard</b></td><td>not needed</td><td>No servo in this version. Optional later upgrade; see the full build guide.</td></tr>
+        <tr><td><b>Printed swivel chute / tower</b></td><td>not needed</td><td>Those are for the real servo track, not the tabletop video.</td></tr>
+      </tbody></table>
+    </div>
+  </details>
+
+  <details>
+    <summary>Recording tips</summary>
+    <div class="panel" style="border:0;padding:0;margin-top:4px"><ul>
+      <li>Lock the camera on its stand and do not move it between parts, so every clip lines up.</li>
+      <li>One continuous take per part: place, measure aloud, show to camera, read the decision, place in the tray.</li>
+      <li>Say the three caliper numbers out loud; it makes the measurement legible on film.</li>
+      <li>Keep a visible caption like "manual walkthrough — part moved by hand". It keeps the demo honest and still shows the full decision flow.</li>
+      <li>Fill one row of the run log per part as you go; film the log too.</li>
+      <li>Record the good part first (clean PASS), then tight (HOLD), then anomaly and defect (REJECT). Judges follow the escalation easily.</li>
+    </ul></div>
+  </details>
+
+  <p class="tiny" style="margin-top:14px">Log the measurements to CSV: <a href="measurement_logger.html">measurement_logger.html</a>. Full build if you later want the real line: <a href="physical_build_guide.html">physical_build_guide.html</a> · <a href="manual_track_visualizer.html">manual_track_visualizer.html</a></p>
+</main>
+
+<script>
+'use strict';
+const $=s=>document.querySelector(s);
+const NS='http://www.w3.org/2000/svg';
+function el(t,a,p,txt){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!==undefined)e.textContent=txt;if(p)p.appendChild(e);return e;}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+const INFO={
+  measure:['1 · Measure by hand','Put the specimen on this square. Measure the critical width three times with the digital caliper. You read and type the numbers; nothing is motorized.'],
+  camera:['2 · Show to one camera','One fixed camera films this square. First hold the caliper display here, then lay the part here. The same camera is your record of both the number and the part.'],
+  laptop:['3 · Decision','You apply the rules (or the dashboard shows them). Missing or inconsistent evidence is HOLD. REJECT only after you confirm a real nonconformance.'],
+  trays:['4 · Route by hand','Three trays. After the decision you place the part in the matching tray yourself. On camera, say this is a manual move, not an automated sort.']
+};
+document.querySelectorAll('#mat .comp').forEach(g=>g.addEventListener('click',e=>{const k=g.dataset.info;if(INFO[k]){$('#info').innerHTML='<b>'+esc(INFO[k][0])+'</b> — '+esc(INFO[k][1]);}e.stopPropagation();}));
+
+const SCN={
+  A:{title:'Good part',id:'S-GOOD',pair:'T-GOOD',readings:[21.18,21.20,21.19],nominal:21.20,fit:'PASS',anomaly:false,defect:false,vision:'clear'},
+  B:{title:'Tight part',id:'S-RISK',pair:'T-RISK',readings:[20.66,20.71,20.69],nominal:20.70,fit:'INDETERMINATE',anomaly:false,defect:false,vision:'clear'},
+  C:{title:'Anomaly fixture',id:'T-NOM-ANOM',pair:null,readings:[20.02,20.01,20.02],nominal:20.00,fit:null,anomaly:true,defect:false,vision:'anomaly candidate'},
+  D:{title:'Defect pair',id:'S-DEF',pair:'T-NOM',readings:[19.41,19.39,19.40],nominal:21.00,fit:'FAIL',anomaly:false,defect:true,vision:'clear'}
+};
+const TOL=0.15,SPREAD=0.05;
+const TRAY_Y={PASS:85,HOLD:233,REJECT:381};
+const count={PASS:0,HOLD:0,REJECT:0};
+
+let S=null;
+function decide(sc){
+  const spread=+(Math.max(...sc.readings)-Math.min(...sc.readings)).toFixed(3);
+  const mean=+(sc.readings.reduce((a,b)=>a+b,0)/sc.readings.length).toFixed(2);
+  const r=[];
+  if(spread>SPREAD)r.push(`Caliper spread ${spread.toFixed(2)} mm > ${SPREAD} mm.`);
+  if(Math.abs(mean-sc.nominal)>TOL)r.push(`Width ${mean.toFixed(2)} mm is outside ${sc.nominal.toFixed(2)} ± ${TOL} mm.`);
+  if(sc.pair&&sc.fit!=='PASS')r.push(`Fit with ${sc.pair} is ${sc.fit}.`);
+  if(!sc.pair)r.push('No fit test for a single part, so no automatic PASS.');
+  if(sc.defect){
+    if(S.confirm===true)return{state:'REJECT',mean,spread,reasons:['Human confirmed the nonconformance: width out of tolerance and fit FAIL (seeded defect).']};
+    r.push('Out-of-tolerance width and fit FAIL still need a person to confirm before REJECT.');
+  }
+  if(sc.anomaly){
+    if(S.confirm===true)return{state:'REJECT',mean,spread,reasons:['Human confirmed the visible nonconformance (anomaly fixture).']};
+    r.push('Visual anomaly is not human-confirmed, so it cannot cause REJECT.');
+  }
+  if(r.length)return{state:'HOLD',reasons:r,mean,spread};
+  return{state:'PASS',reasons:['All evidence present and consistent; human release.'],mean,spread};
+}
+
+const STEPS=[
+  {t:'Place & label the part',cam:'The part on the MEASURE square, label readable.',say:'This is specimen '+'{id}'+'.',do:'Set the part down and start a new row in the run log.'},
+  {t:'Measure by hand ×3',cam:'The caliper closing on the part, display readable.',say:'Readings: {readings} mm.',do:'Measure three times, re-seating the part. Type the numbers.'},
+  {t:'Show the caliper to the camera',cam:'The caliper display filling the SHOW square.',say:'The confirmed width is {mean} mm.',do:'Hold the display in the SHOW square for one still.'},
+  {t:'Show the part to the camera',cam:'The part in the SHOW square.',say:'Visual check: {vision}.',do:'Lay the part in the SHOW square. Do not touch its surface.'},
+  {t:'Read the decision',cam:'The laptop screen.',say:'The decision is {state}.',do:'Apply the rules (or let the dashboard show them).',decision:true},
+  {t:'Place the part in its tray by hand',cam:'Your hand moving the part into the {state} tray.',say:'It goes to {state}; I place it by hand.',do:'Move the part into the matching tray. On camera, say the placement is by hand.',route:true},
+  {t:'Reset for the next part',cam:'The empty mat.',say:'Next part.',do:'Clear the SHOW square and pick the next scenario.',reset:true}
+];
+
+function tween(ms,f){return new Promise(res=>{const t0=performance.now();function k(n){const x=Math.min(1,(n-t0)/ms);const e=x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;f(e);if(x<1)requestAnimationFrame(k);else res();}requestAnimationFrame(k);});}
+function tokenAt(x,y){const g=$('#token');g.innerHTML='';if(x===null)return;el('rect',{x:x-26,y:y-9,width:52,height:18,rx:2,class:'spec'},g);}
+const POS={measure:[115,325],show:[360,205]};
+
+function render(){
+  const sc=S.sc, st=STEPS[S.i];
+  $('#chips').innerHTML=STEPS.map((s,i)=>`<span class="chip ${i<S.i?'done':''} ${i===S.i?'now':''}">${i+1}</span>`).join('')+` <span class="chip">${esc(sc.title)} · ${esc(sc.id)}</span>`;
+  const dec=S.dec;
+  const letter=dec?{PASS:'P',HOLD:'H',REJECT:'R'}[dec.state]:'—';
+  const meanTxt=(dec&&dec.mean!=null?dec.mean:0).toFixed(2);
+  const fill=t=>t.replace('{id}',sc.id).replace('{readings}',sc.readings.map(r=>r.toFixed(2)).join(', ')).replace('{mean}',meanTxt).replace('{vision}',sc.vision).replace(/\{letter\}/g,letter).replace(/\{state\}/g,dec?dec.state:'—');
+  let html=`<h3>Step ${S.i+1} of ${STEPS.length} · ${esc(st.t)}</h3>`;
+  if(st.decision&&dec){const col=dec.state==='PASS'?'good':dec.state==='HOLD'?'warn':'bad';
+    html+=`<div class="decision ${col}">${dec.state}</div><ul>${dec.reasons.map(x=>`<li class="tiny">${esc(x)}</li>`).join('')}</ul>`;}
+  html+=`<div><span class="tag t-cam">CAMERA</span>${esc(fill(st.cam))}</div>`
+      +`<div><span class="tag t-say">SAY</span>${esc(fill(st.say))}</div>`
+      +`<div><span class="tag t-do">DO</span>${esc(fill(st.do))}</div>`;
+  $('#box').innerHTML=html;
+
+  const A=$('#act');A.innerHTML='';
+  // anomaly / defect need a human-confirm choice before the decision step shows REJECT
+  if(st.decision&&(sc.anomaly||sc.defect)&&S.confirm===null){
+    html;
+    const q=document.createElement('div');q.className='note';q.textContent=sc.defect?'Check the part: width far out of tolerance and the tab will not fit. Confirm the nonconformance?':'Look at the part: is the visible nonconformance real?';
+    $('#box').appendChild(q);
+    A.appendChild(mk('Yes, confirm → REJECT','ghost',()=>{S.confirm=true;S.dec=decide(sc);setScreen();render();}));
+    A.appendChild(mk('Not confirmed → HOLD','ghost',()=>{S.confirm=false;S.dec=decide(sc);setScreen();render();}));
+    return;
+  }
+  if(S.i<STEPS.length-1){
+    A.appendChild(mk(st.route?'Move it by hand ▶':'Next ▶','primary',next));
+  }else{
+    A.appendChild(mk('Finish / next part','primary',()=>{newRun($('#scn .on').dataset.s);}));
+  }
+  if(S.i>0)A.appendChild(mk('◀ Back','ghost',back));
+}
+function mk(t,c,f){const b=document.createElement('button');b.className=c;b.textContent=t;b.onclick=f;return b;}
+function setScreen(){$('#scr').textContent=S.dec?S.dec.state:'—';$('#scr').setAttribute('fill',S.dec?(S.dec.state==='PASS'?'#5ccc91':S.dec.state==='HOLD'?'#efba71':'#ee8e97'):'#a0e8f5');}
+
+async function next(){
+  const st=STEPS[S.i],sc=S.sc;
+  if(S.busy)return;S.busy=true;
+  if(S.i===0){tokenAt(...POS.measure);}
+  if(S.i===1){for(const v of sc.readings){$('#cal').textContent=v.toFixed(2);await tween(250,()=>{});}}
+  if(S.i===2){await tween(400,k=>tokenAt(POS.measure[0]+(POS.show[0]-POS.measure[0])*k,POS.measure[1]+(POS.show[1]-POS.measure[1])*k));}
+  if(st.decision){if(!S.dec){S.dec=decide(sc);setScreen();}}
+  if(st.route&&S.dec){
+    const [tx,ty]=[775,TRAY_Y[S.dec.state]];
+    const ha=$('#handArrow');ha.innerHTML='';el('path',{d:`M${POS.show[0]},${POS.show[1]} C${POS.show[0]+120},${POS.show[1]} ${tx-140},${ty} ${tx},${ty}`,class:'hand','marker-end':'url(#ah)'},ha);
+    if(!$('#ah')){const defs=el('defs',{},$('#mat'));const m=el('marker',{id:'ah',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:6,markerHeight:6,orient:'auto-start-reverse'},defs);el('path',{d:'M0,0L10,5L0,10z',fill:'#ffd79c'},m);}
+    await tween(650,k=>tokenAt(POS.show[0]+(tx-POS.show[0])*k,POS.show[1]+(ty-POS.show[1])*k));
+    $('#token').innerHTML='';$('#handArrow').innerHTML='';
+    count[S.dec.state]++;const n=count[S.dec.state];$('#c'+S.dec.state).textContent=n+(n===1?' part':' parts');
+  }
+  S.busy=false;S.i++;render();
+}
+function back(){if(S.busy||S.i===0)return;S.i--;if(S.i<2){tokenAt(...POS.measure);$('#cal').textContent='--.--';}if(S.i<4){S.dec=null;setScreen();}render();}
+
+function newRun(key){
+  const sc=JSON.parse(JSON.stringify(SCN[key]));
+  S={sc,i:0,dec:null,confirm:(SCN[key].anomaly||SCN[key].defect)?null:true,busy:false};
+  tokenAt(null);$('#cal').textContent='--.--';setScreen();$('#handArrow').innerHTML='';
+  render();
+}
+
+document.querySelectorAll('#scn button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#scn button').forEach(x=>x.classList.toggle('on',x===b));newRun(b.dataset.s);});
+newRun('A');
+</script>
+</body>
+</html>
