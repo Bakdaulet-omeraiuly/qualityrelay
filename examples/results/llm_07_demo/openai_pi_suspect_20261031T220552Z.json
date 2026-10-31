@@ -1,0 +1,710 @@
+{
+ "origin_note": "evidence is TEST_FIXTURE; LLM calls are live",
+ "run": {
+  "case_id": "TAB-B12",
+  "control_decision": "HOLD",
+  "criteria": {
+   "behavior_change": true,
+   "control_run_present": true,
+   "genuine_collaboration": true,
+   "information_asymmetry": true,
+   "new_verified_source": true,
+   "targeted_request": true
+  },
+  "decision": "HOLD",
+  "decision_changed": true,
+  "narrative": [
+   "Quality: missing PI_IMAGE, CALIPER, ASSEMBLY; hypotheses ['surface_defect', 'clearance_violation']",
+   "LLM openai:gpt-5.6-luna round 1: 750+50 tokens, 2275 ms, $0.00021",
+   "Quality -> Metrology: REQUEST_EVIDENCE CALIPER (reason: VERIFY_CLEARANCE, max $0.3, 1500.0 ms)",
+   "VERIFY m1: VERIFIED",
+   "Metrology -> Quality: EVIDENCE_RESPONSE GRANTED m1 [verified / source_root=met-1] (charged $0.3)",
+   "Quality: belief 0.007 -> 0.000 [CALIPER verified (sens=0.98, spec=0.98, ILLUSTRATIVE_NOT_CALIBRATED)]",
+   "LLM openai:gpt-5.6-luna round 2: 889+50 tokens, 1149 ms, $0.00024",
+   "Quality -> Assembly: REQUEST_EVIDENCE ASSEMBLY (reason: CLEARANCE_CONFIRMATION, max $0.3, 1500.0 ms)",
+   "VERIFY a1: VERIFIED",
+   "Assembly -> Quality: EVIDENCE_RESPONSE GRANTED a1 [verified / source_root=assembly-1] (charged $0.3)",
+   "Quality: belief 0.000 -> 0.000 [ignored: no likelihood model for ASSEMBLY]",
+   "LLM openai:gpt-5.6-luna round 3: 1025+54 tokens, 1332 ms, $0.00027",
+   "Quality -> Pi/AM: REQUEST_EVIDENCE PI_IMAGE (reason: RESOLVE_SURFACE_STATUS, max $0.3, 1500.0 ms)",
+   "VERIFY p2: VERIFIED",
+   "Pi/AM -> Quality: EVIDENCE_RESPONSE GRANTED p2 [verified / source_root=capture-pi-1] (charged $0.3)",
+   "Quality: belief 0.000 -> 0.001 [PI_IMAGE suspect (sens=0.85, spec=0.85, ILLUSTRATIVE_NOT_CALIBRATED)]",
+   "LLM openai:gpt-5.6-luna round 4: 1170+42 tokens, 1637 ms, $0.00028",
+   "openai:gpt-5.6-luna finished requesting: BUDGET_INSUFFICIENT; verified evidence includes suspect PI_IMAGE, but no further request is affordable and no missing kinds remain.",
+   "Quality: next NO_ACTION, NetVOI=+0.000 [ILLUSTRATIVE_NOT_CALIBRATED]",
+   "Quality: HOLD ['VISUAL_PI_SUSPECT']; without requests: HOLD; changed=True"
+  ],
+  "origin": "TEST_FIXTURE",
+  "planner": {
+   "model": "gpt-5.6-luna",
+   "planner": "llm",
+   "priced": true,
+   "provider": "openai",
+   "spend": {
+    "calls": 4,
+    "caps": {
+     "max_calls": 12,
+     "max_total_tokens": 60000,
+     "max_usd": 0.5
+    },
+    "total_tokens": 4030,
+    "usd": 0.001002
+   }
+  },
+  "run_id": "col-5ad6c4f9"
+ },
+ "task": "LLM-07",
+ "trace": {
+  "belief_final": 0.0008373146825592282,
+  "belief_path": [
+   {
+    "belief": 0.08,
+    "step": "prior"
+   },
+   {
+    "belief": 0.021276595744680844,
+    "note": "PHONE_IMAGE clear (sens=0.8, spec=0.8, ILLUSTRATIVE_NOT_CALIBRATED)",
+    "step": "own:PHONE_IMAGE"
+   },
+   {
+    "belief": 0.007194244604316546,
+    "note": "CAD_IMAGE clear (sens=0.7, spec=0.9, ILLUSTRATIVE_NOT_CALIBRATED)",
+    "step": "own:CAD_IMAGE"
+   },
+   {
+    "belief": 0.00014786337424220033,
+    "event_id": "m1",
+    "note": "CALIPER verified (sens=0.98, spec=0.98, ILLUSTRATIVE_NOT_CALIBRATED)",
+    "step": "peer:CALIPER"
+   },
+   {
+    "belief": 0.00014786337424220033,
+    "event_id": "a1",
+    "note": "ignored: no likelihood model for ASSEMBLY",
+    "step": "peer:ASSEMBLY"
+   },
+   {
+    "belief": 0.0008373146825592282,
+    "event_id": "p2",
+    "note": "PI_IMAGE suspect (sens=0.85, spec=0.85, ILLUSTRATIVE_NOT_CALIBRATED)",
+    "step": "peer:PI_IMAGE"
+   }
+  ],
+  "belief_prior": 0.08,
+  "case_id": "TAB-B12",
+  "control_decision": {
+   "action_requested": "REVIEW_OR_REINSPECT",
+   "evidence_coverage": 0.25,
+   "evidence_ids": [
+    "cad1",
+    "p1"
+   ],
+   "mode": "TEST_FIXTURE",
+   "reasons": [
+    "MISSING_ASSEMBLY",
+    "MISSING_CAMERA_EVIDENCE",
+    "MISSING_VERIFIED_METROLOGY",
+    "REQUIRED_PI_COUNT"
+   ],
+   "specimen_id": "TAB-B12",
+   "state": "HOLD"
+  },
+  "cost_charged": 0.9,
+  "criteria": {
+   "behavior_change": true,
+   "control_run_present": true,
+   "genuine_collaboration": true,
+   "information_asymmetry": true,
+   "new_verified_source": true,
+   "targeted_request": true
+  },
+  "decision": {
+   "action_requested": "REVIEW_OR_REINSPECT",
+   "evidence_coverage": 1.0,
+   "evidence_ids": [
+    "a1",
+    "cad1",
+    "m1",
+    "p1",
+    "p2"
+   ],
+   "mode": "TEST_FIXTURE",
+   "reasons": [
+    "VISUAL_PI_SUSPECT"
+   ],
+   "specimen_id": "TAB-B12",
+   "state": "HOLD"
+  },
+  "decision_changed": true,
+  "independent_sources_after": 5,
+  "independent_sources_before": 2,
+  "narrative": [
+   "Quality: missing PI_IMAGE, CALIPER, ASSEMBLY; hypotheses ['surface_defect', 'clearance_violation']",
+   "LLM openai:gpt-5.6-luna round 1: 750+50 tokens, 2275 ms, $0.00021",
+   "Quality -> Metrology: REQUEST_EVIDENCE CALIPER (reason: VERIFY_CLEARANCE, max $0.3, 1500.0 ms)",
+   "VERIFY m1: VERIFIED",
+   "Metrology -> Quality: EVIDENCE_RESPONSE GRANTED m1 [verified / source_root=met-1] (charged $0.3)",
+   "Quality: belief 0.007 -> 0.000 [CALIPER verified (sens=0.98, spec=0.98, ILLUSTRATIVE_NOT_CALIBRATED)]",
+   "LLM openai:gpt-5.6-luna round 2: 889+50 tokens, 1149 ms, $0.00024",
+   "Quality -> Assembly: REQUEST_EVIDENCE ASSEMBLY (reason: CLEARANCE_CONFIRMATION, max $0.3, 1500.0 ms)",
+   "VERIFY a1: VERIFIED",
+   "Assembly -> Quality: EVIDENCE_RESPONSE GRANTED a1 [verified / source_root=assembly-1] (charged $0.3)",
+   "Quality: belief 0.000 -> 0.000 [ignored: no likelihood model for ASSEMBLY]",
+   "LLM openai:gpt-5.6-luna round 3: 1025+54 tokens, 1332 ms, $0.00027",
+   "Quality -> Pi/AM: REQUEST_EVIDENCE PI_IMAGE (reason: RESOLVE_SURFACE_STATUS, max $0.3, 1500.0 ms)",
+   "VERIFY p2: VERIFIED",
+   "Pi/AM -> Quality: EVIDENCE_RESPONSE GRANTED p2 [verified / source_root=capture-pi-1] (charged $0.3)",
+   "Quality: belief 0.000 -> 0.001 [PI_IMAGE suspect (sens=0.85, spec=0.85, ILLUSTRATIVE_NOT_CALIBRATED)]",
+   "LLM openai:gpt-5.6-luna round 4: 1170+42 tokens, 1637 ms, $0.00028",
+   "openai:gpt-5.6-luna finished requesting: BUDGET_INSUFFICIENT; verified evidence includes suspect PI_IMAGE, but no further request is affordable and no missing kinds remain.",
+   "Quality: next NO_ACTION, NetVOI=+0.000 [ILLUSTRATIVE_NOT_CALIBRATED]",
+   "Quality: HOLD ['VISUAL_PI_SUSPECT']; without requests: HOLD; changed=True"
+  ],
+  "origin": "TEST_FIXTURE",
+  "planner": {
+   "model": "gpt-5.6-luna",
+   "planner": "llm",
+   "priced": true,
+   "provider": "openai",
+   "spend": {
+    "calls": 4,
+    "caps": {
+     "max_calls": 12,
+     "max_total_tokens": 60000,
+     "max_usd": 0.5
+    },
+    "total_tokens": 4030,
+    "usd": 0.001002
+   }
+  },
+  "proposal": {
+   "budget": 0.09999999999999998,
+   "candidates": [
+    {
+     "expected_entropy": 0.009766466367992221,
+     "expected_loss": 0.08373146825592283,
+     "inspection_cost": 0,
+     "name": "NO_ACTION",
+     "net_voi": 0.0
+    },
+    {
+     "expected_entropy": 0.00830164169696454,
+     "expected_loss": 0.18373146825592282,
+     "inspection_cost": 0.1,
+     "name": "PI_RECAPTURE",
+     "net_voi": -0.1
+    },
+    {
+     "expected_entropy": 0.008762825936295173,
+     "expected_loss": 0.18373146825592285,
+     "inspection_cost": 0.1,
+     "name": "PHONE_RECAPTURE",
+     "net_voi": -0.1
+    },
+    {
+     "expected_entropy": 0.0052767123946261315,
+     "expected_loss": 0.561624390484165,
+     "inspection_cost": 0.5,
+     "name": "CALIPER_RETAKE",
+     "net_voi": -0.477893
+    }
+   ],
+   "chosen": "NO_ACTION",
+   "likelihood_source": "ILLUSTRATIVE_NOT_CALIBRATED",
+   "net_voi": 0.0
+  },
+  "request_outcomes": {
+   "ASSEMBLY": "GRANTED",
+   "CALIPER": "GRANTED",
+   "PI_IMAGE": "GRANTED"
+  },
+  "requester": "quality_inspector",
+  "requests": 3,
+  "trace": {
+   "entries": [
+    {
+     "body": {
+      "have": [
+       "p1",
+       "cad1"
+      ],
+      "hypotheses": [
+       "surface_defect",
+       "clearance_violation"
+      ],
+      "missing": [
+       "PI_IMAGE",
+       "CALIPER",
+       "ASSEMBLY"
+      ]
+     },
+     "correlation_id": "",
+     "kind": "FIND_MISSING_EVIDENCE",
+     "message_id": "msg-e4387493bab6",
+     "outcome": null,
+     "recipient_role": "quality_inspector",
+     "sender_role": "quality_inspector",
+     "seq": 0,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "completion_tokens": 50,
+     "cost_usd": 0.00021,
+     "latency_ms": 2275.0,
+     "model": "gpt-5.6-luna",
+     "planner": "openai:gpt-5.6-luna",
+     "prompt_tokens": 750,
+     "provider": "openai",
+     "round": 1,
+     "seq": 1,
+     "t": 1000.0,
+     "type": "LLM_CALL"
+    },
+    {
+     "body": {
+      "deadline_ms": 1500.0,
+      "existing_evidence_ids": [
+       "p1",
+       "cad1"
+      ],
+      "existing_source_roots": [
+       "cad-pj-1",
+       "capture-phone-1"
+      ],
+      "hypotheses": [
+       "clearance_violation",
+       "surface_defect"
+      ],
+      "max_cost": 0.3,
+      "proposed_by": "openai:gpt-5.6-luna",
+      "reason_code": "VERIFY_CLEARANCE",
+      "requested_kind": "CALIPER"
+     },
+     "correlation_id": "",
+     "kind": "REQUEST_EVIDENCE",
+     "message_id": "msg-a0220ff4d6d6",
+     "outcome": null,
+     "recipient_role": "metrology_engineer",
+     "sender_role": "quality_inspector",
+     "seq": 2,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "event_id": "m1",
+     "new_source": true,
+     "outcome": "VERIFIED",
+     "seq": 3,
+     "source_root": "met-1",
+     "t": 1000.0,
+     "type": "VERIFY"
+    },
+    {
+     "body": {
+      "cost_charged": 0.3,
+      "outcome": "GRANTED",
+      "reason": "1 verified record(s)",
+      "requested_kind": "CALIPER",
+      "summaries": [
+       {
+        "calibration_id": "caliper-2026",
+        "event_id": "m1",
+        "kind": "CALIPER",
+        "model_version": "reference-0",
+        "new_source": true,
+        "observed_at": 1000.0,
+        "origin": "TEST_FIXTURE",
+        "parent_source_roots": [],
+        "payload": {
+         "measurement_mm": 20.1,
+         "uncertainty_mm": 0.05,
+         "unit": "mm",
+         "validated": true
+        },
+        "source_root": "met-1",
+        "station_id": "met",
+        "uncertainty": 0.05,
+        "unit": "mm",
+        "verdict": "verified",
+        "verification_status": "VERIFIED"
+       }
+      ]
+     },
+     "correlation_id": "msg-a0220ff4d6d6",
+     "kind": "EVIDENCE_RESPONSE",
+     "message_id": "msg-8bdde09b74a0",
+     "outcome": "GRANTED",
+     "recipient_role": "quality_inspector",
+     "sender_role": "metrology_engineer",
+     "seq": 4,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "body": {
+      "basis_event_ids": [
+       "m1"
+      ],
+      "belief_after": 0.00014786337424220033,
+      "belief_before": 0.007194244604316546,
+      "new_source_roots": [
+       "met-1"
+      ],
+      "note": "CALIPER verified (sens=0.98, spec=0.98, ILLUSTRATIVE_NOT_CALIBRATED)"
+     },
+     "correlation_id": "msg-a0220ff4d6d6",
+     "kind": "HYPOTHESIS_UPDATE",
+     "message_id": "msg-58074bc442a1",
+     "outcome": null,
+     "recipient_role": "quality_inspector",
+     "sender_role": "quality_inspector",
+     "seq": 5,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "completion_tokens": 50,
+     "cost_usd": 0.000238,
+     "latency_ms": 1149.2,
+     "model": "gpt-5.6-luna",
+     "planner": "openai:gpt-5.6-luna",
+     "prompt_tokens": 889,
+     "provider": "openai",
+     "round": 2,
+     "seq": 6,
+     "t": 1000.0,
+     "type": "LLM_CALL"
+    },
+    {
+     "body": {
+      "deadline_ms": 1500.0,
+      "existing_evidence_ids": [
+       "p1",
+       "cad1",
+       "m1"
+      ],
+      "existing_source_roots": [
+       "cad-pj-1",
+       "capture-phone-1",
+       "met-1"
+      ],
+      "hypotheses": [
+       "clearance_violation",
+       "surface_defect"
+      ],
+      "max_cost": 0.3,
+      "proposed_by": "openai:gpt-5.6-luna",
+      "reason_code": "CLEARANCE_CONFIRMATION",
+      "requested_kind": "ASSEMBLY"
+     },
+     "correlation_id": "",
+     "kind": "REQUEST_EVIDENCE",
+     "message_id": "msg-e76457a2be9a",
+     "outcome": null,
+     "recipient_role": "assembly_engineer",
+     "sender_role": "quality_inspector",
+     "seq": 7,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "event_id": "a1",
+     "new_source": true,
+     "outcome": "VERIFIED",
+     "seq": 8,
+     "source_root": "assembly-1",
+     "t": 1000.0,
+     "type": "VERIFY"
+    },
+    {
+     "body": {
+      "cost_charged": 0.3,
+      "outcome": "GRANTED",
+      "reason": "1 verified record(s)",
+      "requested_kind": "ASSEMBLY",
+      "summaries": [
+       {
+        "calibration_id": "assembly-fixture",
+        "event_id": "a1",
+        "kind": "ASSEMBLY",
+        "model_version": "reference-0",
+        "new_source": true,
+        "observed_at": 1000.0,
+        "origin": "TEST_FIXTURE",
+        "parent_source_roots": [],
+        "payload": {
+         "validated": true
+        },
+        "source_root": "assembly-1",
+        "station_id": "assembly",
+        "uncertainty": null,
+        "unit": null,
+        "verdict": "pass",
+        "verification_status": "VERIFIED"
+       }
+      ]
+     },
+     "correlation_id": "msg-e76457a2be9a",
+     "kind": "EVIDENCE_RESPONSE",
+     "message_id": "msg-04b5027fcf27",
+     "outcome": "GRANTED",
+     "recipient_role": "quality_inspector",
+     "sender_role": "assembly_engineer",
+     "seq": 9,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "body": {
+      "basis_event_ids": [
+       "a1"
+      ],
+      "belief_after": 0.00014786337424220033,
+      "belief_before": 0.00014786337424220033,
+      "new_source_roots": [
+       "assembly-1"
+      ],
+      "note": "ignored: no likelihood model for ASSEMBLY"
+     },
+     "correlation_id": "msg-e76457a2be9a",
+     "kind": "HYPOTHESIS_UPDATE",
+     "message_id": "msg-a50cd4665513",
+     "outcome": null,
+     "recipient_role": "quality_inspector",
+     "sender_role": "quality_inspector",
+     "seq": 10,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "completion_tokens": 54,
+     "cost_usd": 0.00027,
+     "latency_ms": 1331.5,
+     "model": "gpt-5.6-luna",
+     "planner": "openai:gpt-5.6-luna",
+     "prompt_tokens": 1025,
+     "provider": "openai",
+     "round": 3,
+     "seq": 11,
+     "t": 1000.0,
+     "type": "LLM_CALL"
+    },
+    {
+     "body": {
+      "deadline_ms": 1500.0,
+      "existing_evidence_ids": [
+       "p1",
+       "cad1",
+       "m1",
+       "a1"
+      ],
+      "existing_source_roots": [
+       "assembly-1",
+       "cad-pj-1",
+       "capture-phone-1",
+       "met-1"
+      ],
+      "hypotheses": [
+       "surface_defect",
+       "clearance_violation"
+      ],
+      "max_cost": 0.3,
+      "proposed_by": "openai:gpt-5.6-luna",
+      "reason_code": "RESOLVE_SURFACE_STATUS",
+      "requested_kind": "PI_IMAGE"
+     },
+     "correlation_id": "",
+     "kind": "REQUEST_EVIDENCE",
+     "message_id": "msg-8b9f87cb902b",
+     "outcome": null,
+     "recipient_role": "additive_manufacturing_expert",
+     "sender_role": "quality_inspector",
+     "seq": 12,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "event_id": "p2",
+     "new_source": true,
+     "outcome": "VERIFIED",
+     "seq": 13,
+     "source_root": "capture-pi-1",
+     "t": 1000.0,
+     "type": "VERIFY"
+    },
+    {
+     "body": {
+      "cost_charged": 0.3,
+      "outcome": "GRANTED",
+      "reason": "1 verified record(s)",
+      "requested_kind": "PI_IMAGE",
+      "summaries": [
+       {
+        "calibration_id": "ref-good",
+        "event_id": "p2",
+        "kind": "PI_IMAGE",
+        "model_version": "reference-0",
+        "new_source": true,
+        "observed_at": 1000.0,
+        "origin": "TEST_FIXTURE",
+        "parent_source_roots": [],
+        "payload": {},
+        "source_root": "capture-pi-1",
+        "station_id": "pi",
+        "uncertainty": null,
+        "unit": null,
+        "verdict": "suspect",
+        "verification_status": "VERIFIED"
+       }
+      ]
+     },
+     "correlation_id": "msg-8b9f87cb902b",
+     "kind": "EVIDENCE_RESPONSE",
+     "message_id": "msg-e9eb2ffad544",
+     "outcome": "GRANTED",
+     "recipient_role": "quality_inspector",
+     "sender_role": "additive_manufacturing_expert",
+     "seq": 14,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "body": {
+      "basis_event_ids": [
+       "p2"
+      ],
+      "belief_after": 0.0008373146825592282,
+      "belief_before": 0.00014786337424220033,
+      "new_source_roots": [
+       "capture-pi-1"
+      ],
+      "note": "PI_IMAGE suspect (sens=0.85, spec=0.85, ILLUSTRATIVE_NOT_CALIBRATED)"
+     },
+     "correlation_id": "msg-8b9f87cb902b",
+     "kind": "HYPOTHESIS_UPDATE",
+     "message_id": "msg-2fa40c2359ed",
+     "outcome": null,
+     "recipient_role": "quality_inspector",
+     "sender_role": "quality_inspector",
+     "seq": 15,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "completion_tokens": 42,
+     "cost_usd": 0.000284,
+     "latency_ms": 1637.2,
+     "model": "gpt-5.6-luna",
+     "planner": "openai:gpt-5.6-luna",
+     "prompt_tokens": 1170,
+     "provider": "openai",
+     "round": 4,
+     "seq": 16,
+     "t": 1000.0,
+     "type": "LLM_CALL"
+    },
+    {
+     "planner": "openai:gpt-5.6-luna",
+     "reason": "BUDGET_INSUFFICIENT; verified evidence includes suspect PI_IMAGE, but no further request is affordable and no missing kinds remain.",
+     "seq": 17,
+     "t": 1000.0,
+     "type": "PLANNER_FINISHED"
+    },
+    {
+     "body": {
+      "budget": 0.09999999999999998,
+      "candidates": [
+       {
+        "expected_entropy": 0.009766466367992221,
+        "expected_loss": 0.08373146825592283,
+        "inspection_cost": 0,
+        "name": "NO_ACTION",
+        "net_voi": 0.0
+       },
+       {
+        "expected_entropy": 0.00830164169696454,
+        "expected_loss": 0.18373146825592282,
+        "inspection_cost": 0.1,
+        "name": "PI_RECAPTURE",
+        "net_voi": -0.1
+       },
+       {
+        "expected_entropy": 0.008762825936295173,
+        "expected_loss": 0.18373146825592285,
+        "inspection_cost": 0.1,
+        "name": "PHONE_RECAPTURE",
+        "net_voi": -0.1
+       },
+       {
+        "expected_entropy": 0.0052767123946261315,
+        "expected_loss": 0.561624390484165,
+        "inspection_cost": 0.5,
+        "name": "CALIPER_RETAKE",
+        "net_voi": -0.477893
+       }
+      ],
+      "chosen": "NO_ACTION",
+      "likelihood_source": "ILLUSTRATIVE_NOT_CALIBRATED",
+      "net_voi": 0.0
+     },
+     "correlation_id": "",
+     "kind": "PROPOSE_INSPECTION",
+     "message_id": "msg-147db258c1af",
+     "outcome": null,
+     "recipient_role": "quality_inspector",
+     "sender_role": "quality_inspector",
+     "seq": 18,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    },
+    {
+     "body": {
+      "control_reasons": [
+       "MISSING_ASSEMBLY",
+       "MISSING_CAMERA_EVIDENCE",
+       "MISSING_VERIFIED_METROLOGY",
+       "REQUIRED_PI_COUNT"
+      ],
+      "control_state": "HOLD",
+      "decision_changed": true,
+      "evidence_ids": [
+       "a1",
+       "cad1",
+       "m1",
+       "p1",
+       "p2"
+      ],
+      "reasons": [
+       "VISUAL_PI_SUSPECT"
+      ],
+      "state": "HOLD"
+     },
+     "correlation_id": "",
+     "kind": "DECISION_PROPOSAL",
+     "message_id": "msg-72a76fd82c07",
+     "outcome": null,
+     "recipient_role": "safety_governance",
+     "sender_role": "quality_inspector",
+     "seq": 19,
+     "signature_valid": true,
+     "t": 1000.0,
+     "type": "MESSAGE"
+    }
+   ],
+   "schema_version": "17.1"
+  }
+ }
+}

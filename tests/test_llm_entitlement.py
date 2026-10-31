@@ -101,3 +101,21 @@ def test_auth_failure_and_unlisted_model_and_error_redaction():
 
 def test_latest_status_never_checked(tmp_path):
     assert le.latest_status('m', tmp_path / 'none') == {'state': 'NEVER_CHECKED'}
+
+
+def test_openai_provider_checks_the_configured_model_with_gpt5_call_parameters(tmp_path):
+    client = Fake(['gpt-5.6-luna', 'other'], good_replies())
+    extra = le.call_kwargs('openai', {'OPENAI_REASONING_EFFORT': 'none'})
+    m = run(client, provider='openai', model='gpt-5.6-luna', confirm_spend=True, extra=extra)
+    assert m['verdict'] == 'VERIFIED' and m['provider'] == 'openai' and m['candidates'] == ['gpt-5.6-luna']
+    assert all(c['max_completion_tokens'] == le.MAX_TOKENS and c['reasoning_effort'] == 'none' and 'max_tokens' not in c
+               for c in client.sent)
+    path = le.write_manifest(m, tmp_path)
+    assert path.name.startswith('openai_') and KEY not in path.read_text()
+    assert le.latest_status('gpt-5.6-luna', tmp_path, provider='openai')['state'] == 'VERIFIED'
+    assert le.latest_status('x', tmp_path, provider='nebius') == {'state': 'NEVER_CHECKED'}
+
+
+def test_openai_provider_without_key_names_the_openai_variable():
+    m = le.verify_entitlement(key='', provider='openai', model='gpt-5.6-luna', now=NOW)
+    assert m['verdict'] == 'NOT_CONFIGURED' and m['missing'] == ['OPENAI_API_KEY']

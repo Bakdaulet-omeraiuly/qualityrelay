@@ -1,4 +1,4 @@
-"""LLM-01: Nebius Token Factory entitlement and model verification.
+"""LLM-01: provider entitlement and model verification (Nebius Token Factory or OpenAI).
 
 Answers three questions with real calls, and writes a redacted run manifest:
   1. Does the team key list models at all?            GET /v1/models
@@ -10,6 +10,10 @@ Verdicts: NOT_CONFIGURED (no key, nothing called), AUTH_FAILED, MODELS_LISTED_ON
 paid calls not confirmed), NOT_ENTITLED (requested model not listed), FAILED (a roundtrip failed),
 VERIFIED. The manifest never contains the key; only a short SHA-256 fingerprint so rotation is visible.
 Nothing here can approve, decide or actuate: the probe tool only echoes a request back.
+
+Providers: 'nebius' checks the task-board candidates; 'openai' checks the one configured model.
+GPT-5.x on chat completions takes max_completion_tokens (not max_tokens) and needs
+reasoning_effort='none' to call tools, so per-provider call parameters are passed through.
 """
 from __future__ import annotations
 import hashlib, json, time
@@ -81,26 +85,42 @@ def _usage(resp, t0: float) -> dict:
             'completion_tokens': int(getattr(u, 'completion_tokens', 0) or 0)}
 
 
-def _call(client, **kw):
+PROVIDERS: dict[str, dict[str, Any]] = {
+    'nebius': {'base_url': NEBIUS_BASE_URL, 'key_env': 'NEBIUS_API_KEY', 'candidates': CANDIDATES},
+    'openai': {'base_url': None, 'key_env': 'OPENAI_API_KEY', 'candidates': ()},
+}
+
+
+def call_kwargs(provider: str, env: dict | None = None) -> dict:
+    """Per-provider limits for the probe calls (see module docstring)."""
+    if provider != 'openai':
+        return {'max_tokens': MAX_TOKENS}
+    out: dict[str, Any] = {'max_completion_tokens': MAX_TOKENS}
+    effort = ((env or {}).get('OPENAI_REASONING_EFFORT') or '').strip()
+    if effort: out['reasoning_effort'] = effort
+    return out
+
+
+def _call(client, extra: dict | None = None, **kw):
     t0 = time.perf_counter()
-    resp = client.chat.completions.create(temperature=0, max_tokens=MAX_TOKENS, **kw)
+    resp = client.chat.completions.create(temperature=0, **(extra if extra is not None else {'max_tokens': MAX_TOKENS}), **kw)
     return resp, _usage(resp, t0)
 
 
-def text_roundtrip(client, model: str) -> dict:
-    resp, use = _call(client, model=model, messages=[
+def text_roundtrip(client, model: str, extra: dict | None = None) -> dict:
+    resp, use = _call(client, extra, model=model, messages=[
         {'role': 'system', 'content': 'You are a connectivity check. Follow the instruction exactly.'},
         {'role': 'user', 'content': f'Reply with exactly this token and nothing else: {TEXT_TOKEN}'}])
     text = (resp.choices[0].message.content or '').strip()
     return {'ok': TEXT_TOKEN in text, 'response_excerpt': text[:80], 'response_model': getattr(resp, 'model', None), **use}
 
 
-def tool_roundtrip(client, model: str) -> dict:
+def tool_roundtrip(client, model: str, extra: dict | None = None) -> dict:
     """Call 1 must produce exactly one schema-valid request_evidence call; call 2 feeds back a tool
     result and must produce a final text answer. Both calls' usage is recorded."""
     messages: list[dict[str, Any]] = [{'role': 'system', 'content': PROBE_SYSTEM},
                 {'role': 'user', 'content': 'Specimen SLOT-07: phone photo flags possible OVERSIZE. What is your next step?'}]
-    resp, use1 = _call(client, model=model, messages=messages, tools=[PROBE_TOOL], tool_choice='auto')
+    resp, use1 = _call(client, extra, model=model, messages=messages, tools=[PROBE_TOOL], tool_choice='auto')
     msg = resp.choices[0].message
     calls = list(getattr(msg, 'tool_calls', None) or [])
     out: dict[str, Any] = {'ok': False, 'calls': [use1], 'tool_calls_returned': len(calls), 'problems': []}
@@ -122,7 +142,7 @@ def tool_roundtrip(client, model: str) -> dict:
                                   'function': {'name': call.function.name, 'arguments': call.function.arguments or '{}'}}]},
                  {'role': 'tool', 'tool_call_id': call.id,
                   'content': json.dumps({'status': 'REQUEST_ACCEPTED_FOR_PROBE', 'note': 'connectivity probe; no evidence returned'})}]
-    resp2, use2 = _call(client, model=model, messages=messages, tools=[PROBE_TOOL], tool_choice='auto')
+    resp2, use2 = _call(client, extra, model=model, messages=messages, tools=[PROBE_TOOL], tool_choice='auto')
     out['calls'].append(use2)
     final = resp2.choices[0].message
     out['final_answer_excerpt'] = (final.content or '')[:120]
@@ -133,18 +153,24 @@ def tool_roundtrip(client, model: str) -> dict:
 
 
 def verify_entitlement(*, key: str, client=None, model: str | None = None, all_candidates: bool = False,
-                       confirm_spend: bool = False, now: datetime | None = None) -> dict:
+                       confirm_spend: bool = False, now: datetime | None = None, provider: str = 'nebius',
+                       base_url: str | None = None, extra: dict | None = None) -> dict:
     """Run the LLM-01 checks and return the manifest (not yet written). `client` is injectable for tests."""
+    cfg = PROVIDERS[provider]
+    base_url = base_url or cfg['base_url']
+    candidates = cfg['candidates'] or ((model,) if model else ())
+    extra = call_kwargs(provider) if extra is None else extra
     now = now or datetime.now(timezone.utc)
-    m: dict[str, Any] = {'schema_version': SCHEMA_VERSION, 'task': 'LLM-01', 'provider': 'nebius', 'base_url': NEBIUS_BASE_URL,
-         'checked_at': now.strftime('%Y-%m-%dT%H:%M:%SZ'), 'candidates': list(CANDIDATES), 'source_tier': 'LIVE_API_CHECK',
+    m: dict[str, Any] = {'schema_version': SCHEMA_VERSION, 'task': 'LLM-01', 'provider': provider, 'base_url': base_url,
+         'checked_at': now.strftime('%Y-%m-%dT%H:%M:%SZ'), 'candidates': list(candidates), 'source_tier': 'LIVE_API_CHECK',
+         'call_parameters': {'temperature': 0, **extra},
          'decision_authority': 'none: probe only; no evidence, verdict or actuation is produced'}
     if not key:
-        return {**m, 'verdict': 'NOT_CONFIGURED', 'missing': ['NEBIUS_API_KEY'], 'key_fingerprint': None}
+        return {**m, 'verdict': 'NOT_CONFIGURED', 'missing': [cfg['key_env']], 'key_fingerprint': None}
     m['key_fingerprint'] = key_fingerprint(key)
     if client is None:
         from openai import OpenAI
-        client = OpenAI(api_key=key, base_url=NEBIUS_BASE_URL, timeout=30, max_retries=0)
+        client = OpenAI(api_key=key, base_url=base_url, timeout=30, max_retries=0)
     try:
         t0 = time.perf_counter()
         listed = sorted(x.id for x in client.models.list())
@@ -154,11 +180,11 @@ def verify_entitlement(*, key: str, client=None, model: str | None = None, all_c
         m['models_endpoint'] = {'ok': False, 'error': _redact(f'{type(ex).__name__}: {str(ex)[:200]}', key), 'http_status': status}
         return {**m, 'verdict': 'AUTH_FAILED' if status in (401, 403) else 'FAILED'}
     m['listed_models'] = listed
-    m['candidate_entitlement'] = {c: c in listed for c in CANDIDATES}
-    if model: targets, m['selection'] = [model], 'explicit (--model or NEBIUS_MODEL)'
-    elif all_candidates: targets, m['selection'] = [c for c in CANDIDATES if c in listed], 'all listed candidates'
+    m['candidate_entitlement'] = {c: c in listed for c in candidates}
+    if model: targets, m['selection'] = [model], 'explicit (--model or the provider MODEL variable)'
+    elif all_candidates: targets, m['selection'] = [c for c in candidates if c in listed], 'all listed candidates'
     else:
-        targets = [c for c in CANDIDATES if c in listed][:1]; m['selection'] = 'first listed candidate in preference order'
+        targets = [c for c in candidates if c in listed][:1]; m['selection'] = 'first listed candidate in preference order'
     m['tested'] = {}
     if not targets:
         return {**m, 'verdict': 'NOT_ENTITLED', 'detail': 'none of the candidate models is listed for this key'}
@@ -170,7 +196,7 @@ def verify_entitlement(*, key: str, client=None, model: str | None = None, all_c
     for t in targets:
         r: dict = {}
         for name, fn in (('text', text_roundtrip), ('tool_call', tool_roundtrip)):
-            try: r[name] = fn(client, t)
+            try: r[name] = fn(client, t, extra)
             except Exception as ex:
                 r[name] = {'ok': False, 'error': _redact(f'{type(ex).__name__}: {str(ex)[:200]}', key),
                            'http_status': getattr(ex, 'status_code', None)}
@@ -188,14 +214,14 @@ def verify_entitlement(*, key: str, client=None, model: str | None = None, all_c
 def write_manifest(manifest: dict, out_dir: Path = MANIFEST_DIR) -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     stamp = manifest['checked_at'].replace('-', '').replace(':', '')
-    path = out_dir / f'nebius_{stamp}.json'
+    path = out_dir / f"{manifest.get('provider', 'nebius')}_{stamp}.json"
     path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     return path
 
 
-def latest_status(model: str | None, out_dir: Path = MANIFEST_DIR) -> dict:
+def latest_status(model: str | None, out_dir: Path = MANIFEST_DIR, provider: str = 'nebius') -> dict:
     """What /integrations/llm reports: the newest manifest's verdict for this model. No call is made."""
-    files = sorted(out_dir.glob('nebius_*.json')) if out_dir.is_dir() else []
+    files = sorted(out_dir.glob(f'{provider}_*.json')) if out_dir.is_dir() else []
     if not files: return {'state': 'NEVER_CHECKED'}
     m = json.loads(files[-1].read_text(encoding='utf-8'))
     out = {'checked_at': m.get('checked_at'), 'manifest': files[-1].name, 'verdict': m.get('verdict'),

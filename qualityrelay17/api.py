@@ -483,10 +483,11 @@ def llm_status():
     for name,factory in PROVIDERS.items():
         try:out[name]=factory(_llm_env())[1]
         except Exception as ex:out[name]={'provider':name,'state':'ERROR','detail':type(ex).__name__}
-    if 'nebius' in out:  # LLM-01: last recorded entitlement check (scripts/verify_nebius_entitlement.py); never a live call
-        from .llm_entitlement import latest_status
-        try:out['nebius']['entitlement']=latest_status(out['nebius'].get('model'))
-        except (OSError,ValueError) as ex:out['nebius']['entitlement']={'state':'ERROR','detail':type(ex).__name__}
+    from .llm_entitlement import latest_status  # LLM-01: last recorded check (scripts/verify_nebius_entitlement.py); never a live call
+    for name in ('nebius','openai'):
+        if name not in out:continue
+        try:out[name]['entitlement']=latest_status(out[name].get('model'),provider=name)
+        except (OSError,ValueError) as ex:out[name]['entitlement']={'state':'ERROR','detail':type(ex).__name__}
     return {'providers':out,'decision_authority':'none: LLM planners only propose evidence requests; safe_mesh decides'}
 
 @app.get('/research/collective/scenarios')

@@ -1,14 +1,17 @@
 #!/usr/bin/env python
-"""LLM-01: verify the team's Nebius Token Factory entitlement and one model's text + tool-call roundtrip.
+"""LLM-01: verify a provider entitlement (Nebius Token Factory by default, or OpenAI) and one model's
+text + tool-call roundtrip.
 
   python scripts/verify_nebius_entitlement.py                       # list models only (free), record entitlement
   python scripts/verify_nebius_entitlement.py --confirm-spend       # + text and tool-call roundtrip, first listed candidate
   python scripts/verify_nebius_entitlement.py --confirm-spend --all-candidates
   python scripts/verify_nebius_entitlement.py --confirm-spend --model zai-org/GLM-5.3-Flash
+  python scripts/verify_nebius_entitlement.py --provider openai --confirm-spend   # OPENAI_MODEL, OPENAI_REASONING_EFFORT
 
-Key from the environment or the git-ignored .env (NEBIUS_API_KEY); NEBIUS_MODEL is used as --model if set.
+Key from the environment or the git-ignored .env (NEBIUS_API_KEY / OPENAI_API_KEY); NEBIUS_MODEL /
+OPENAI_MODEL is used as --model if set.
 A full check is 3 chat calls per model at max_tokens=512 each. Writes a redacted manifest to
-examples/results/llm_01_entitlement/nebius_<UTC>.json (the key itself is never written or printed).
+examples/results/llm_01_entitlement/<provider>_<UTC>.json (the key itself is never written or printed).
 Exit: 0 VERIFIED, 3 NOT_CONFIGURED, 4 MODELS_LISTED_ONLY, 2 anything else.
 """
 from __future__ import annotations
@@ -19,22 +22,26 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from qualityrelay17.api import read_dotenv  # noqa: E402
-from qualityrelay17.llm_entitlement import verify_entitlement, write_manifest, MANIFEST_DIR  # noqa: E402
+from qualityrelay17.llm_entitlement import verify_entitlement, write_manifest, call_kwargs, PROVIDERS, MANIFEST_DIR  # noqa: E402
 
 EXIT = {'VERIFIED': 0, 'NOT_CONFIGURED': 3, 'MODELS_LISTED_ONLY': 4}
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument('--provider', choices=sorted(PROVIDERS), default='nebius')
     ap.add_argument('--model', help='model id to test (default: NEBIUS_MODEL, else first listed candidate)')
     ap.add_argument('--all-candidates', action='store_true', help='test every listed candidate model')
     ap.add_argument('--confirm-spend', action='store_true', help='allow the paid chat roundtrips')
     ap.add_argument('--out-dir', type=Path, default=MANIFEST_DIR)
     a = ap.parse_args(argv)
     env = {**read_dotenv(), **{k: v for k, v in os.environ.items() if v}}
-    model = a.model or (None if a.all_candidates else (env.get('NEBIUS_MODEL') or '').strip() or None)
-    m = verify_entitlement(key=(env.get('NEBIUS_API_KEY') or '').strip(), model=model,
-                           all_candidates=a.all_candidates, confirm_spend=a.confirm_spend)
+    prefix = a.provider.upper()
+    model = a.model or (None if a.all_candidates else (env.get(f'{prefix}_MODEL') or '').strip() or None)
+    base_url = (env.get('OPENAI_BASE_URL') or '').strip() or None if a.provider == 'openai' else None
+    m = verify_entitlement(key=(env.get(PROVIDERS[a.provider]['key_env']) or '').strip(), model=model,
+                           all_candidates=a.all_candidates, confirm_spend=a.confirm_spend, provider=a.provider,
+                           base_url=base_url, extra=call_kwargs(a.provider, env))
     path = write_manifest(m, a.out_dir)
     print(f"verdict: {m['verdict']}")
     if 'candidate_entitlement' in m:
