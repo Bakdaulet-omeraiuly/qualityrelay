@@ -1,0 +1,54 @@
+{
+ "baselines": [
+  "B0_rules",
+  "B1_single_agent_fixed",
+  "B5_structured_fixed",
+  "B6_single_agent_voi",
+  "B7_safe_mesh_voi"
+ ],
+ "completeness": "COMPLETE",
+ "create_kwargs": {
+  "parallel_tool_calls": false,
+  "reasoning_effort": "none"
+ },
+ "dirty_before_run": false,
+ "dry_run": false,
+ "gate": "B (LLM backbone), smoke scale",
+ "git_commit": "f3a527b8d3e06367d80a48b05994ae289418d9fe",
+ "llm_policies": [
+  "B7_llm",
+  "B7_llm-specialist_roles"
+ ],
+ "model": "gpt-5.6-luna",
+ "n_per_seed": 30,
+ "origin": "SIMULATED",
+ "parts_with_planner_stopped": 0,
+ "prompt_sha256": {
+  "B7_llm": "4b145cd5f80b490a34fc3bf029b752b39615a9d4148f4e72d006922c35c19b68",
+  "B7_llm-specialist_roles": "36959b9bc715276ed3288865646120771e9c921511be42b9a8ae44e9e5ae7d25"
+ },
+ "provider": "openai",
+ "python": "3.13.14",
+ "runtime_s": 820.4,
+ "scenarios": [
+  "S11",
+  "S12",
+  "S13"
+ ],
+ "seeds": [
+  0
+ ],
+ "spend": {
+  "calls": 731,
+  "caps": {
+   "max_calls": 1980,
+   "max_total_tokens": 2000000,
+   "max_usd": 1.0
+  },
+  "total_tokens": 645633,
+  "usd": 0.155858
+ },
+ "started_utc": "2026-10-31T22:08:03Z",
+ "temperature": 0.0,
+ "tool_choice": "required"
+}

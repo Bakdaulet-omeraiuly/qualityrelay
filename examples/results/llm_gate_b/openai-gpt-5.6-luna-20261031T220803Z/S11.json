@@ -1,0 +1,4649 @@
+{
+ "belief_model": {
+  "calibration_id": "cal-e6c0a199854f+gauss-sigma0.05",
+  "clearance_prior_mean": 0.8507404496,
+  "clearance_prior_var": 0.0285526411,
+  "phone_re_sens": 0.9515384615,
+  "phone_re_spec": 0.9602758768,
+  "phone_sens": 0.9669230769,
+  "phone_spec": 0.9612382378,
+  "pi_re_sens": 0.9607692308,
+  "pi_re_spec": 0.9620936698,
+  "pi_sens": 0.9407692308,
+  "pi_spec": 0.9578165098,
+  "sigma_meas_mm": 0.05,
+  "source": "HELD_OUT_SYNTHETIC_CALIBRATION",
+  "surface_prior": 0.0649435056
+ },
+ "contrasts": [
+  {
+   "a": "B7_llm",
+   "b": "B7_safe_mesh_voi",
+   "cost_per_unit_diff": 0.5900000000000001,
+   "cost_per_unit_diff_ci95": [
+    0.59,
+    0.59
+   ],
+   "question": "LLM selector vs computed VOI (same belief, same gate)",
+   "released_good_rate_diff": 0.1,
+   "released_good_rate_diff_ci95": [
+    0.1,
+    0.1
+   ],
+   "unsafe_pass_rate_diff": 0.0,
+   "unsafe_pass_rate_diff_ci95": [
+    0.0,
+    0.0
+   ],
+   "verdict": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   }
+  },
+  {
+   "a": "B7_llm",
+   "b": "B0_rules",
+   "cost_per_unit_diff": 0.07333333333333343,
+   "cost_per_unit_diff_ci95": [
+    0.073333,
+    0.073333
+   ],
+   "question": "does the LLM-driven method beat the fixed rule?",
+   "released_good_rate_diff": 0.16666666666666666,
+   "released_good_rate_diff_ci95": [
+    0.166667,
+    0.166667
+   ],
+   "unsafe_pass_rate_diff": 0.0,
+   "unsafe_pass_rate_diff_ci95": [
+    0.0,
+    0.0
+   ],
+   "verdict": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   }
+  },
+  {
+   "a": "B7_llm",
+   "b": "B5_structured_fixed",
+   "cost_per_unit_diff": 0.38833333333333353,
+   "cost_per_unit_diff_ci95": [
+    0.388333,
+    0.388333
+   ],
+   "question": "LLM selection vs fixed request order",
+   "released_good_rate_diff": 0.1,
+   "released_good_rate_diff_ci95": [
+    0.1,
+    0.1
+   ],
+   "unsafe_pass_rate_diff": 0.0,
+   "unsafe_pass_rate_diff_ci95": [
+    0.0,
+    0.0
+   ],
+   "verdict": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   }
+  },
+  {
+   "a": "B7_llm",
+   "b": "B7_llm-specialist_roles",
+   "cost_per_unit_diff": 0.36833333333333346,
+   "cost_per_unit_diff_ci95": [
+    0.368333,
+    0.368333
+   ],
+   "question": "role prompt vs one generic prompt (same model)",
+   "released_good_rate_diff": 0.0,
+   "released_good_rate_diff_ci95": [
+    0.0,
+    0.0
+   ],
+   "unsafe_pass_rate_diff": 0.0,
+   "unsafe_pass_rate_diff_ci95": [
+    0.0,
+    0.0
+   ],
+   "verdict": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   }
+  }
+ ],
+ "llm": {
+  "B7_llm": {
+   "completion_tokens_per_part": 157.06666666666666,
+   "invalid_proposals_per_part": 0.0,
+   "llm_calls_per_part": 4.366666666666666,
+   "mean_llm_latency_ms_per_part": 4424.08,
+   "parts": 30,
+   "parts_with_planner_stopped": 0,
+   "peer_requests_per_part": 3.466666666666667,
+   "prompt_tokens_per_part": 3799.0666666666666,
+   "usd_total": 0.028452
+  },
+  "B7_llm-specialist_roles": {
+   "completion_tokens_per_part": 138.73333333333332,
+   "invalid_proposals_per_part": 0.0,
+   "llm_calls_per_part": 3.7666666666666666,
+   "mean_llm_latency_ms_per_part": 4113.856666666667,
+   "parts": 30,
+   "parts_with_planner_stopped": 0,
+   "peer_requests_per_part": 2.7666666666666666,
+   "prompt_tokens_per_part": 3089.2,
+   "usd_total": 0.023536
+  }
+ },
+ "n_per_seed": 30,
+ "not_configured": {
+  "B4_free_form_chat": "needs a live LLM backbone with token/latency logging (Gate B, AGENT-04)",
+  "B7-specialist_roles": "needs an LLM backbone: one generic prompt vs role prompts",
+  "B7-structured_protocol": "needs an LLM backbone: typed requests replaced by free chat"
+ },
+ "origin": "SIMULATED",
+ "per_seed": {
+  "B0_rules": [
+   {
+    "compute_cost": 0.0,
+    "cost": 56.5,
+    "duplicates_received": 0,
+    "false_hold": 6,
+    "flips_with_new_fact": 24,
+    "flips_without_new_fact": 0,
+    "hard_gate_triggered": 0,
+    "hold": 6,
+    "inspection_cost": 44.5,
+    "inspections": 89,
+    "latency_mean_s": 18.8,
+    "latency_p95_s": 19.0,
+    "latency_total_s": 564.0,
+    "n": 30,
+    "outcome_cost": 12.0,
+    "passed": 24,
+    "peer_requests": 0,
+    "released_good": 24,
+    "request_cost": 0.0,
+    "seed": 0,
+    "timeouts": 0,
+    "truly_safe": 30,
+    "unsafe_pass": 0
+   }
+  ],
+  "B1_single_agent_fixed": [
+   {
+    "compute_cost": 0.0,
+    "cost": 56.5,
+    "duplicates_received": 0,
+    "false_hold": 6,
+    "flips_with_new_fact": 24,
+    "flips_without_new_fact": 0,
+    "hard_gate_triggered": 0,
+    "hold": 6,
+    "inspection_cost": 44.5,
+    "inspections": 89,
+    "latency_mean_s": 18.8,
+    "latency_p95_s": 19.0,
+    "latency_total_s": 564.0,
+    "n": 30,
+    "outcome_cost": 12.0,
+    "passed": 24,
+    "peer_requests": 0,
+    "released_good": 24,
+    "request_cost": 0.0,
+    "seed": 0,
+    "timeouts": 0,
+    "truly_safe": 30,
+    "unsafe_pass": 0
+   }
+  ],
+  "B5_structured_fixed": [
+   {
+    "compute_cost": 0.0,
+    "cost": 47.05,
+    "duplicates_received": 0,
+    "false_hold": 4,
+    "flips_with_new_fact": 26,
+    "flips_without_new_fact": 0,
+    "hard_gate_triggered": 0,
+    "hold": 4,
+    "inspection_cost": 35.5,
+    "inspections": 71,
+    "latency_mean_s": 16.416666666666668,
+    "latency_p95_s": 33.5,
+    "latency_total_s": 492.5,
+    "n": 30,
+    "outcome_cost": 8.0,
+    "passed": 26,
+    "peer_requests": 71,
+    "released_good": 26,
+    "request_cost": 3.55,
+    "seed": 0,
+    "timeouts": 0,
+    "truly_safe": 30,
+    "unsafe_pass": 0
+   }
+  ],
+  "B6_single_agent_voi": [
+   {
+    "compute_cost": 0.0,
+    "cost": 38.5,
+    "duplicates_received": 0,
+    "false_hold": 4,
+    "flips_with_new_fact": 26,
+    "flips_without_new_fact": 0,
+    "hard_gate_triggered": 0,
+    "hold": 4,
+    "inspection_cost": 30.5,
+    "inspections": 61,
+    "latency_mean_s": 13.233333333333333,
+    "latency_p95_s": 20.0,
+    "latency_total_s": 397.0,
+    "n": 30,
+    "outcome_cost": 8.0,
+    "passed": 26,
+    "peer_requests": 0,
+    "released_good": 26,
+    "request_cost": 0.0,
+    "seed": 0,
+    "timeouts": 0,
+    "truly_safe": 30,
+    "unsafe_pass": 0
+   }
+  ],
+  "B7_llm": [
+   {
+    "compute_cost": 0.0,
+    "cost": 58.7,
+    "duplicates_received": 0,
+    "false_hold": 1,
+    "flips_with_new_fact": 31,
+    "flips_without_new_fact": 0,
+    "hard_gate_triggered": 0,
+    "hold": 1,
+    "inspection_cost": 51.5,
+    "inspections": 103,
+    "latency_mean_s": 23.3,
+    "latency_p95_s": 39.0,
+    "latency_total_s": 699.0,
+    "n": 30,
+    "outcome_cost": 2.0,
+    "passed": 29,
+    "peer_requests": 104,
+    "released_good": 29,
+    "request_cost": 5.2,
+    "seed": 0,
+    "timeouts": 1,
+    "truly_safe": 30,
+    "unsafe_pass": 0
+   }
+  ],
+  "B7_llm-specialist_roles": [
+   {
+    "compute_cost": 0.0,
+    "cost": 47.65,
+    "duplicates_received": 0,
+    "false_hold": 1,
+    "flips_with_new_fact": 31,
+    "flips_without_new_fact": 0,
+    "hard_gate_triggered": 0,
+    "hold": 1,
+    "inspection_cost": 41.5,
+    "inspections": 83,
+    "latency_mean_s": 18.85,
+    "latency_p95_s": 31.5,
+    "latency_total_s": 565.5,
+    "n": 30,
+    "outcome_cost": 2.0,
+    "passed": 29,
+    "peer_requests": 83,
+    "released_good": 29,
+    "request_cost": 4.15,
+    "seed": 0,
+    "timeouts": 0,
+    "truly_safe": 30,
+    "unsafe_pass": 0
+   }
+  ],
+  "B7_safe_mesh_voi": [
+   {
+    "compute_cost": 0.0,
+    "cost": 41.0,
+    "duplicates_received": 0,
+    "false_hold": 4,
+    "flips_with_new_fact": 26,
+    "flips_without_new_fact": 0,
+    "hard_gate_triggered": 4,
+    "hold": 4,
+    "inspection_cost": 30.0,
+    "inspections": 60,
+    "latency_mean_s": 14.0,
+    "latency_p95_s": 21.5,
+    "latency_total_s": 420.0,
+    "n": 30,
+    "outcome_cost": 8.0,
+    "passed": 26,
+    "peer_requests": 60,
+    "released_good": 26,
+    "request_cost": 3.0,
+    "seed": 0,
+    "timeouts": 0,
+    "truly_safe": 30,
+    "unsafe_pass": 0
+   }
+  ]
+ },
+ "scenario": {
+  "budget": 6,
+  "caliper_sigma_mm": 0.05,
+  "camera_noise": 0.04,
+  "costs": {
+   "compute_call": 0.0,
+   "escaped_defect": 150.0,
+   "hold": 2.0,
+   "inspection": 0.5,
+   "peer_request": 0.05,
+   "platform": 0.0,
+   "rework": 8.0,
+   "scrap": 20.0
+  },
+  "duplicate_photo_p": 0.0,
+  "network_outage": 0.05,
+  "process_shift_mm": 0.1,
+  "shared_camera_noise": 0.0,
+  "sid": "S11",
+  "title": "cheap messages (peer_request 0.05)"
+ },
+ "seeds": [
+  0
+ ],
+ "summary": {
+  "B0_rules": {
+   "compute_cost_per_unit": 0.0,
+   "conditional_risk_unsafe_given_pass": 0.0,
+   "cost_per_good_unit": 2.3541666666666665,
+   "cost_per_unit": 1.8833333333333333,
+   "decision_flips_with_new_fact_per_part": 0.8,
+   "decision_flips_without_new_fact_per_part": 0.0,
+   "duplicate_evidence_received_per_part": 0.0,
+   "false_hold_rate": 0.2,
+   "hard_gate_triggered_rate": 0.0,
+   "hold_rate": 0.2,
+   "inspection_cost_per_unit": 1.4833333333333334,
+   "latency_mean_s": 18.8,
+   "latency_p95_s_mean_over_lots": 19.0,
+   "mean_inspections": 2.966666666666667,
+   "mean_peer_requests": 0.0,
+   "outcome_cost_per_unit": 0.4,
+   "released_good_rate": 0.8,
+   "request_cost_per_unit": 0.0,
+   "serial_cell_good_per_hour": 153.19148936170214,
+   "timeouts_per_part": 0.0,
+   "unsafe_pass_rate": 0.0,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0,
+    0.113513
+   ],
+   "upper_bound_context_only": false
+  },
+  "B1_single_agent_fixed": {
+   "compute_cost_per_unit": 0.0,
+   "conditional_risk_unsafe_given_pass": 0.0,
+   "cost_per_good_unit": 2.3541666666666665,
+   "cost_per_unit": 1.8833333333333333,
+   "decision_flips_with_new_fact_per_part": 0.8,
+   "decision_flips_without_new_fact_per_part": 0.0,
+   "duplicate_evidence_received_per_part": 0.0,
+   "false_hold_rate": 0.2,
+   "hard_gate_triggered_rate": 0.0,
+   "hold_rate": 0.2,
+   "inspection_cost_per_unit": 1.4833333333333334,
+   "latency_mean_s": 18.8,
+   "latency_p95_s_mean_over_lots": 19.0,
+   "mean_inspections": 2.966666666666667,
+   "mean_peer_requests": 0.0,
+   "outcome_cost_per_unit": 0.4,
+   "released_good_rate": 0.8,
+   "request_cost_per_unit": 0.0,
+   "serial_cell_good_per_hour": 153.19148936170214,
+   "timeouts_per_part": 0.0,
+   "unsafe_pass_rate": 0.0,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0,
+    0.113513
+   ],
+   "upper_bound_context_only": false
+  },
+  "B5_structured_fixed": {
+   "compute_cost_per_unit": 0.0,
+   "conditional_risk_unsafe_given_pass": 0.0,
+   "cost_per_good_unit": 1.8096153846153844,
+   "cost_per_unit": 1.5683333333333331,
+   "decision_flips_with_new_fact_per_part": 0.8666666666666667,
+   "decision_flips_without_new_fact_per_part": 0.0,
+   "duplicate_evidence_received_per_part": 0.0,
+   "false_hold_rate": 0.13333333333333333,
+   "hard_gate_triggered_rate": 0.0,
+   "hold_rate": 0.13333333333333333,
+   "inspection_cost_per_unit": 1.1833333333333333,
+   "latency_mean_s": 16.416666666666668,
+   "latency_p95_s_mean_over_lots": 33.5,
+   "mean_inspections": 2.3666666666666667,
+   "mean_peer_requests": 2.3666666666666667,
+   "outcome_cost_per_unit": 0.26666666666666666,
+   "released_good_rate": 0.8666666666666667,
+   "request_cost_per_unit": 0.11833333333333333,
+   "serial_cell_good_per_hour": 190.0507614213198,
+   "timeouts_per_part": 0.0,
+   "unsafe_pass_rate": 0.0,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0,
+    0.113513
+   ],
+   "upper_bound_context_only": false
+  },
+  "B6_single_agent_voi": {
+   "compute_cost_per_unit": 0.0,
+   "conditional_risk_unsafe_given_pass": 0.0,
+   "cost_per_good_unit": 1.4807692307692308,
+   "cost_per_unit": 1.2833333333333334,
+   "decision_flips_with_new_fact_per_part": 0.8666666666666667,
+   "decision_flips_without_new_fact_per_part": 0.0,
+   "duplicate_evidence_received_per_part": 0.0,
+   "false_hold_rate": 0.13333333333333333,
+   "hard_gate_triggered_rate": 0.0,
+   "hold_rate": 0.13333333333333333,
+   "inspection_cost_per_unit": 1.0166666666666666,
+   "latency_mean_s": 13.233333333333333,
+   "latency_p95_s_mean_over_lots": 20.0,
+   "mean_inspections": 2.033333333333333,
+   "mean_peer_requests": 0.0,
+   "outcome_cost_per_unit": 0.26666666666666666,
+   "released_good_rate": 0.8666666666666667,
+   "request_cost_per_unit": 0.0,
+   "serial_cell_good_per_hour": 235.76826196473553,
+   "timeouts_per_part": 0.0,
+   "unsafe_pass_rate": 0.0,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0,
+    0.113513
+   ],
+   "upper_bound_context_only": false
+  },
+  "B7_llm": {
+   "compute_cost_per_unit": 0.0,
+   "conditional_risk_unsafe_given_pass": 0.0,
+   "cost_per_good_unit": 2.024137931034483,
+   "cost_per_unit": 1.9566666666666668,
+   "decision_flips_with_new_fact_per_part": 1.0333333333333334,
+   "decision_flips_without_new_fact_per_part": 0.0,
+   "duplicate_evidence_received_per_part": 0.0,
+   "false_hold_rate": 0.03333333333333333,
+   "hard_gate_triggered_rate": 0.0,
+   "hold_rate": 0.03333333333333333,
+   "inspection_cost_per_unit": 1.7166666666666666,
+   "latency_mean_s": 23.3,
+   "latency_p95_s_mean_over_lots": 39.0,
+   "mean_inspections": 3.433333333333333,
+   "mean_peer_requests": 3.466666666666667,
+   "outcome_cost_per_unit": 0.06666666666666667,
+   "released_good_rate": 0.9666666666666667,
+   "request_cost_per_unit": 0.17333333333333334,
+   "serial_cell_good_per_hour": 149.35622317596565,
+   "timeouts_per_part": 0.03333333333333333,
+   "unsafe_pass_rate": 0.0,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0,
+    0.113513
+   ],
+   "upper_bound_context_only": false
+  },
+  "B7_llm-specialist_roles": {
+   "compute_cost_per_unit": 0.0,
+   "conditional_risk_unsafe_given_pass": 0.0,
+   "cost_per_good_unit": 1.643103448275862,
+   "cost_per_unit": 1.5883333333333334,
+   "decision_flips_with_new_fact_per_part": 1.0333333333333334,
+   "decision_flips_without_new_fact_per_part": 0.0,
+   "duplicate_evidence_received_per_part": 0.0,
+   "false_hold_rate": 0.03333333333333333,
+   "hard_gate_triggered_rate": 0.0,
+   "hold_rate": 0.03333333333333333,
+   "inspection_cost_per_unit": 1.3833333333333333,
+   "latency_mean_s": 18.85,
+   "latency_p95_s_mean_over_lots": 31.5,
+   "mean_inspections": 2.7666666666666666,
+   "mean_peer_requests": 2.7666666666666666,
+   "outcome_cost_per_unit": 0.06666666666666667,
+   "released_good_rate": 0.9666666666666667,
+   "request_cost_per_unit": 0.13833333333333334,
+   "serial_cell_good_per_hour": 184.6153846153846,
+   "timeouts_per_part": 0.0,
+   "unsafe_pass_rate": 0.0,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0,
+    0.113513
+   ],
+   "upper_bound_context_only": false
+  },
+  "B7_safe_mesh_voi": {
+   "compute_cost_per_unit": 0.0,
+   "conditional_risk_unsafe_given_pass": 0.0,
+   "cost_per_good_unit": 1.5769230769230769,
+   "cost_per_unit": 1.3666666666666667,
+   "decision_flips_with_new_fact_per_part": 0.8666666666666667,
+   "decision_flips_without_new_fact_per_part": 0.0,
+   "duplicate_evidence_received_per_part": 0.0,
+   "false_hold_rate": 0.13333333333333333,
+   "hard_gate_triggered_rate": 0.13333333333333333,
+   "hold_rate": 0.13333333333333333,
+   "inspection_cost_per_unit": 1.0,
+   "latency_mean_s": 14.0,
+   "latency_p95_s_mean_over_lots": 21.5,
+   "mean_inspections": 2.0,
+   "mean_peer_requests": 2.0,
+   "outcome_cost_per_unit": 0.26666666666666666,
+   "released_good_rate": 0.8666666666666667,
+   "request_cost_per_unit": 0.1,
+   "serial_cell_good_per_hour": 222.85714285714286,
+   "timeouts_per_part": 0.0,
+   "unsafe_pass_rate": 0.0,
+   "unsafe_pass_wilson_95_descriptive_only": [
+    0,
+    0.113513
+   ],
+   "upper_bound_context_only": false
+  }
+ },
+ "traces": {
+  "B0_rules": [
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B0_rules/V-00000/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00000/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00000/e2",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "pi",
+      "sender": "single_agent",
+      "source_root": "V-00000/pi/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.019106,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00000/e3",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00000/caliper/0",
+      "type": "INSPECT",
+      "value": 1.1395550454895587
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.019106,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00000"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B0_rules/V-00001/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00001/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00001/e2",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "pi",
+      "sender": "single_agent",
+      "source_root": "V-00001/pi/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.019106,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00001/e3",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00001/caliper/0",
+      "type": "INSPECT",
+      "value": 0.9226488315410967
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.019106,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00001"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B0_rules/V-00002/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00002/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00002/e2",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "pi",
+      "sender": "single_agent",
+      "source_root": "V-00002/pi/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.019106,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00002/e3",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00002/caliper/0",
+      "type": "INSPECT",
+      "value": 1.3832960516744925
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.019106,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00002"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B0_rules/V-00003/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00003/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00003/e2",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "pi",
+      "sender": "single_agent",
+      "source_root": "V-00003/pi/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.019106,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00003/e3",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00003/caliper/0",
+      "type": "INSPECT",
+      "value": 0.6701459539416739
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000206,
+      "p_unsafe_before": 0.019106,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00003"
+   },
+   {
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B0_rules/V-00004/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00004/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00004/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00004/caliper/0",
+      "type": "INSPECT",
+      "value": 0.6528371100407744
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002599,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00004"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B0_rules/V-00005/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00005/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00005/e2",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "pi",
+      "sender": "single_agent",
+      "source_root": "V-00005/pi/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.019106,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B0_rules/V-00005/e3",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00005/caliper/0",
+      "type": "INSPECT",
+      "value": 0.9362831210814234
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.019106,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00005"
+   }
+  ],
+  "B1_single_agent_fixed": [
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00000/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00000/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00000/e2",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "pi",
+      "sender": "single_agent",
+      "source_root": "V-00000/pi/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.019106,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00000/e3",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00000/caliper/0",
+      "type": "INSPECT",
+      "value": 1.1395550454895587
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.019106,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00000"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00001/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00001/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00001/e2",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "pi",
+      "sender": "single_agent",
+      "source_root": "V-00001/pi/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.019106,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00001/e3",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00001/caliper/0",
+      "type": "INSPECT",
+      "value": 0.9226488315410967
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.019106,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00001"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00002/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00002/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00002/e2",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "pi",
+      "sender": "single_agent",
+      "source_root": "V-00002/pi/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.019106,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00002/e3",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00002/caliper/0",
+      "type": "INSPECT",
+      "value": 1.3832960516744925
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.019106,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00002"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00003/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00003/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00003/e2",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "pi",
+      "sender": "single_agent",
+      "source_root": "V-00003/pi/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.019106,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00003/e3",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00003/caliper/0",
+      "type": "INSPECT",
+      "value": 0.6701459539416739
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000206,
+      "p_unsafe_before": 0.019106,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00003"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00004/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00004/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00004/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00004/caliper/0",
+      "type": "INSPECT",
+      "value": 0.6528371100407744
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002599,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00004"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00005/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00005/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00005/e2",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "pi",
+      "sender": "single_agent",
+      "source_root": "V-00005/pi/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.019106,
+      "p_unsafe_before": 0.0213,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B1_single_agent_fixed/V-00005/e3",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00005/caliper/0",
+      "type": "INSPECT",
+      "value": 0.9362831210814234
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.019106,
+      "reason": "FIXED_SET",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00005"
+   }
+  ],
+  "B5_structured_fixed": [
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00000/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00000/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00000/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00000/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 1.1395550454895587
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064944,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00000/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00000/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00000/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00000/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.064944,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00000"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00001/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00001/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00001/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00001/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.9226488315410967
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064944,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00001/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00001/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00001/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00001/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.064944,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00001"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00002/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00002/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00002/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00002/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 1.3832960516744925
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064944,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00002/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00002/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00002/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00002/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.064944,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00002"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00003/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00003/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00003/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00003/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.6701459539416739
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064998,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00003/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00003/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00003/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00003/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002443,
+      "p_unsafe_before": 0.064998,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00003"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00004/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00004/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00004/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00004/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.6528371100407744
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.065145,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00004/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00004/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00004/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00004/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002599,
+      "p_unsafe_before": 0.065145,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00004"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00005/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00005/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00005/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00005/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.9362831210814234
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064944,
+      "p_unsafe_before": 0.082673,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00005/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B5_structured_fixed/V-00005/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B5_structured_fixed/V-00005/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00005/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.064944,
+      "reason": "FIXED_ORDER",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00005"
+   }
+  ],
+  "B6_single_agent_voi": [
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00000/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00000/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00000/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00000/caliper/0",
+      "type": "INSPECT",
+      "value": 1.1395550454895587
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00000"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00001/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00001/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00001/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00001/caliper/0",
+      "type": "INSPECT",
+      "value": 0.9226488315410967
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00001"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00002/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00002/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00002/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00002/caliper/0",
+      "type": "INSPECT",
+      "value": 1.3832960516744925
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00002"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00003/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00003/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00003/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00003/caliper/0",
+      "type": "INSPECT",
+      "value": 0.6701459539416739
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002443,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00003"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00004/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00004/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00004/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00004/caliper/0",
+      "type": "INSPECT",
+      "value": 0.6528371100407744
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002599,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00004"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00005/e1",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "phone",
+      "sender": "single_agent",
+      "source_root": "V-00005/phone/0",
+      "type": "INSPECT",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "event_id": "S11/s0/B6_single_agent_voi/V-00005/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "caliper",
+      "sender": "single_agent",
+      "source_root": "V-00005/caliper/0",
+      "type": "INSPECT",
+      "value": 0.9362831210814234
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00005"
+   }
+  ],
+  "B7_llm": [
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "DIMENSIONAL_GATE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 34,
+      "cost_usd": 0.000188,
+      "latency_ms": 1992.1,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 738,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:DIMENSIONAL_GATE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm/V-00000/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00000/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00000/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00000/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 1.1395550454895587
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064944,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:DIMENSIONAL_GATE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000206,
+      "latency_ms": 1332.0,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 814,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm/V-00000/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00000/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00000/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00000/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.064944,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "pi",
+       "reason_code": "CHECK_HIDDEN_DEFECT",
+       "recipient_role": "pi_agent"
+      },
+      "completion_tokens": 33,
+      "cost_usd": 0.000217,
+      "latency_ms": 1940.3,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 887,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "pi",
+      "reason": "LLM:CHECK_HIDDEN_DEFECT",
+      "receiver": "pi_agent",
+      "request_id": "S11/s0/B7_llm/V-00000/e5",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00000/e6",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00000/e5",
+      "sender": "pi_agent",
+      "source_root": "V-00000/pi/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.002384,
+      "reason": "LLM:CHECK_HIDDEN_DEFECT",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current evidence supports PASS_REVIEW with no safety-gate concerns; further requests are unlikely to improve the decision enough to justify cost."
+      },
+      "completion_tokens": 41,
+      "cost_usd": 0.000243,
+      "latency_ms": 1134.1,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 968,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00000"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000191,
+      "latency_ms": 913.0,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 738,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm/V-00001/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00001/e2",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00001/e1",
+      "sender": "phone_agent",
+      "source_root": "V-00001/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "RESOLVE_DIMENSIONAL_GATE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000205,
+      "latency_ms": 1023.1,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 809,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm/V-00001/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00001/e4",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00001/e3",
+      "sender": "metrology_agent",
+      "source_root": "V-00001/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.9226488315410967
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.0213,
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "pi",
+       "reason_code": "REDUCE_UNSAFE_RISK",
+       "recipient_role": "pi_agent"
+      },
+      "completion_tokens": 34,
+      "cost_usd": 0.000218,
+      "latency_ms": 1052.3,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 887,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "pi",
+      "reason": "LLM:REDUCE_UNSAFE_RISK",
+      "receiver": "pi_agent",
+      "request_id": "S11/s0/B7_llm/V-00001/e5",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00001/e6",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00001/e5",
+      "sender": "pi_agent",
+      "source_root": "V-00001/pi/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.002384,
+      "reason": "LLM:REDUCE_UNSAFE_RISK",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current evidence supports PASS_REVIEW with no safety-gate reasons; additional captures are unlikely to justify their cost."
+      },
+      "completion_tokens": 37,
+      "cost_usd": 0.000238,
+      "latency_ms": 1055.4,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 968,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00001"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000191,
+      "latency_ms": 828.3,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 738,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm/V-00002/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00002/e2",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00002/e1",
+      "sender": "phone_agent",
+      "source_root": "V-00002/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "RESOLVE_DIMENSIONAL_GATE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000205,
+      "latency_ms": 860.1,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 809,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm/V-00002/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00002/e4",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00002/e3",
+      "sender": "metrology_agent",
+      "source_root": "V-00002/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 1.3832960516744925
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.0213,
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "pi",
+       "reason_code": "INDEPENDENT_SAFETY_CHECK",
+       "recipient_role": "pi_agent"
+      },
+      "completion_tokens": 35,
+      "cost_usd": 0.000219,
+      "latency_ms": 1065.1,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 887,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "pi",
+      "reason": "LLM:INDEPENDENT_SAFETY_CHECK",
+      "receiver": "pi_agent",
+      "request_id": "S11/s0/B7_llm/V-00002/e5",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00002/e6",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00002/e5",
+      "sender": "pi_agent",
+      "source_root": "V-00002/pi/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.002384,
+      "reason": "LLM:INDEPENDENT_SAFETY_CHECK",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current evidence supports PASS_REVIEW with no safety-gate reasons; additional captures are unlikely to justify their cost."
+      },
+      "completion_tokens": 37,
+      "cost_usd": 0.000238,
+      "latency_ms": 1226.3,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 968,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00002"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000191,
+      "latency_ms": 942.6,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 738,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm/V-00003/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00003/e2",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00003/e1",
+      "sender": "phone_agent",
+      "source_root": "V-00003/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "RESOLVE_DIMENSIONAL_GATE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000205,
+      "latency_ms": 952.4,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 809,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm/V-00003/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00003/e4",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00003/e3",
+      "sender": "metrology_agent",
+      "source_root": "V-00003/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.6701459539416739
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002443,
+      "p_unsafe_before": 0.0213,
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "pi",
+       "reason_code": "CHECK_HIDDEN_DEFECT",
+       "recipient_role": "pi_agent"
+      },
+      "completion_tokens": 33,
+      "cost_usd": 0.000218,
+      "latency_ms": 1013.7,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 890,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "pi",
+      "reason": "LLM:CHECK_HIDDEN_DEFECT",
+      "receiver": "pi_agent",
+      "request_id": "S11/s0/B7_llm/V-00003/e5",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00003/e6",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00003/e5",
+      "sender": "pi_agent",
+      "source_root": "V-00003/pi/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000206,
+      "p_unsafe_before": 0.002443,
+      "reason": "LLM:CHECK_HIDDEN_DEFECT",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "VERIFY_CLEARANCE_MARGIN",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 34,
+      "cost_usd": 0.000235,
+      "latency_ms": 1128.2,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 971,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 1,
+      "kind": "caliper",
+      "reason": "LLM:VERIFY_CLEARANCE_MARGIN",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm/V-00003/e7",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00003/e8",
+      "index": 1,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00003/e7",
+      "sender": "metrology_agent",
+      "source_root": "V-00003/caliper/1",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.7088013142238312
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.000206,
+      "reason": "LLM:VERIFY_CLEARANCE_MARGIN",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "CHECK_SURFACE_DEFECT",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 33,
+      "cost_usd": 0.00025,
+      "latency_ms": 954.4,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 1054,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 1,
+      "kind": "phone",
+      "reason": "LLM:CHECK_SURFACE_DEFECT",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm/V-00003/e9",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00003/e10",
+      "index": 1,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00003/e9",
+      "sender": "phone_agent",
+      "source_root": "V-00003/phone/1",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 7e-06,
+      "p_unsafe_before": 0.000148,
+      "reason": "LLM:CHECK_SURFACE_DEFECT",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current evidence yields PASS_REVIEW with no safety-gate reasons; one remaining request is unlikely to improve the decision enough to justify its cost."
+      },
+      "completion_tokens": 43,
+      "cost_usd": 0.000279,
+      "latency_ms": 1680.4,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 1136,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00003"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "FILL_DIMENSIONAL_GAP",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 37,
+      "cost_usd": 0.000192,
+      "latency_ms": 961.6,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 738,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:FILL_DIMENSIONAL_GAP",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm/V-00004/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00004/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00004/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00004/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.6528371100407744
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.065145,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:FILL_DIMENSIONAL_GAP",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000206,
+      "latency_ms": 706.5,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 815,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm/V-00004/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00004/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00004/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00004/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002599,
+      "p_unsafe_before": 0.065145,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "pi",
+       "reason_code": "REDUCE_UNSAFE_RISK",
+       "recipient_role": "pi_agent"
+      },
+      "completion_tokens": 34,
+      "cost_usd": 0.000218,
+      "latency_ms": 854.9,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 888,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "pi",
+      "reason": "LLM:REDUCE_UNSAFE_RISK",
+      "receiver": "pi_agent",
+      "request_id": "S11/s0/B7_llm/V-00004/e5",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "kind": "pi",
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00004/e5",
+      "sender": "pi_agent",
+      "type": "TIMEOUT"
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": false,
+      "p_unsafe_after": 0.002599,
+      "p_unsafe_before": 0.002599,
+      "reason": "LLM:REDUCE_UNSAFE_RISK",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "REDUCE_SURFACE_GATE_UNCERTAINTY",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 38,
+      "cost_usd": 0.000225,
+      "latency_ms": 981.3,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 899,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 1,
+      "kind": "phone",
+      "reason": "LLM:REDUCE_SURFACE_GATE_UNCERTAINTY",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm/V-00004/e6",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00004/e7",
+      "index": 1,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00004/e6",
+      "sender": "phone_agent",
+      "source_root": "V-00004/phone/1",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000336,
+      "p_unsafe_before": 0.002599,
+      "reason": "LLM:REDUCE_SURFACE_GATE_UNCERTAINTY",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current evidence yields PASS_REVIEW with very low unsafe probability and no safety-gate reasons; further available captures are unlikely to justify their cost."
+      },
+      "completion_tokens": 43,
+      "cost_usd": 0.000246,
+      "latency_ms": 1141.6,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 970,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00004"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "GET_DIMENSIONAL_EVIDENCE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 37,
+      "cost_usd": 0.000192,
+      "latency_ms": 926.8,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 738,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:GET_DIMENSIONAL_EVIDENCE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm/V-00005/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00005/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00005/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00005/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.9362831210814234
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064944,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:GET_DIMENSIONAL_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000206,
+      "latency_ms": 890.7,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 814,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm/V-00005/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00005/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00005/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00005/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.064944,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "pi",
+       "reason_code": "CROSSCHECK_SURFACE",
+       "recipient_role": "pi_agent"
+      },
+      "completion_tokens": 33,
+      "cost_usd": 0.000217,
+      "latency_ms": 1356.3,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 887,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "pi",
+      "reason": "LLM:CROSSCHECK_SURFACE",
+      "receiver": "pi_agent",
+      "request_id": "S11/s0/B7_llm/V-00005/e5",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm/V-00005/e6",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm/V-00005/e5",
+      "sender": "pi_agent",
+      "source_root": "V-00005/pi/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.002384,
+      "reason": "LLM:CROSSCHECK_SURFACE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current evidence supports PASS_REVIEW with negligible unsafe probability and no safety-gate reasons; further captures are not worth the request cost."
+      },
+      "completion_tokens": 41,
+      "cost_usd": 0.000243,
+      "latency_ms": 1046.6,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 968,
+      "prompt_variant": "role",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00005"
+   }
+  ],
+  "B7_llm-specialist_roles": [
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "ADDRESS_DIMENSIONAL_GATE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 35,
+      "cost_usd": 0.000182,
+      "latency_ms": 1018.1,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 699,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:ADDRESS_DIMENSIONAL_GATE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00000/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00000/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00000/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00000/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 1.1395550454895587
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064944,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:ADDRESS_DIMENSIONAL_GATE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000199,
+      "latency_ms": 942.9,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 778,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00000/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00000/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00000/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00000/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.064944,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current calibrated unsafe probability is below the hold threshold, no safety-gate reasons are present, and further evidence is unlikely to justify its cost."
+      },
+      "completion_tokens": 43,
+      "cost_usd": 0.000222,
+      "latency_ms": 1431.5,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 854,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00000"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "ADDRESS_DIMENSIONAL_GATE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 35,
+      "cost_usd": 0.000182,
+      "latency_ms": 1023.4,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 699,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:ADDRESS_DIMENSIONAL_GATE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00001/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00001/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00001/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00001/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.9226488315410967
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064944,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:ADDRESS_DIMENSIONAL_GATE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000199,
+      "latency_ms": 921.1,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 778,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00001/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00001/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00001/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00001/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.064944,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "pi",
+       "reason_code": "CHECK_INDEPENDENT_DEFECT",
+       "recipient_role": "pi_agent"
+      },
+      "completion_tokens": 34,
+      "cost_usd": 0.000212,
+      "latency_ms": 1024.1,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 854,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "pi",
+      "reason": "LLM:CHECK_INDEPENDENT_DEFECT",
+      "receiver": "pi_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00001/e5",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00001/e6",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00001/e5",
+      "sender": "pi_agent",
+      "source_root": "V-00001/pi/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.002384,
+      "reason": "LLM:CHECK_INDEPENDENT_DEFECT",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current evidence strongly supports PASS_REVIEW with no safety-gate reasons; additional captures are unlikely to justify their cost."
+      },
+      "completion_tokens": 38,
+      "cost_usd": 0.000233,
+      "latency_ms": 1228.8,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 938,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00001"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "ADDRESS_DIMENSIONAL_GATE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 35,
+      "cost_usd": 0.000182,
+      "latency_ms": 829.1,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 699,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:ADDRESS_DIMENSIONAL_GATE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00002/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00002/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00002/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00002/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 1.3832960516744925
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064944,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:ADDRESS_DIMENSIONAL_GATE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000199,
+      "latency_ms": 912.2,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 778,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00002/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00002/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00002/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00002/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.064944,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "pi",
+       "reason_code": "REDUCE_RESIDUAL_UNSAFE_RISK",
+       "recipient_role": "pi_agent"
+      },
+      "completion_tokens": 37,
+      "cost_usd": 0.000215,
+      "latency_ms": 917.7,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 854,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "pi",
+      "reason": "LLM:REDUCE_RESIDUAL_UNSAFE_RISK",
+      "receiver": "pi_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00002/e5",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00002/e6",
+      "index": 0,
+      "kind": "pi",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00002/e5",
+      "sender": "pi_agent",
+      "source_root": "V-00002/pi/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "PASS_REVIEW",
+      "duplicate_of_existing_root": false,
+      "kind": "pi",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.000148,
+      "p_unsafe_before": 0.002384,
+      "reason": "LLM:REDUCE_RESIDUAL_UNSAFE_RISK",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current evidence yields PASS_REVIEW with no safety-gate reasons; additional captures are unlikely to justify their cost."
+      },
+      "completion_tokens": 37,
+      "cost_usd": 0.000232,
+      "latency_ms": 1036.7,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 938,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00002"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "RESOLVE_DIMENSIONAL_GATE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000183,
+      "latency_ms": 1043.7,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 699,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00003/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00003/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00003/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00003/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.6701459539416739
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064998,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000199,
+      "latency_ms": 801.7,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 781,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00003/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00003/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00003/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00003/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002443,
+      "p_unsafe_before": 0.064998,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current calibrated unsafe probability is below the hold threshold, safety gate has no reasons, and additional evidence is unlikely to justify its cost."
+      },
+      "completion_tokens": 41,
+      "cost_usd": 0.000221,
+      "latency_ms": 1422.3,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 857,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00003"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000183,
+      "latency_ms": 819.9,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 699,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00004/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00004/e2",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00004/e1",
+      "sender": "phone_agent",
+      "source_root": "V-00004/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "RESOLVE_DIMENSIONAL_GATE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000198,
+      "latency_ms": 802.9,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 773,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00004/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00004/e4",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00004/e3",
+      "sender": "metrology_agent",
+      "source_root": "V-00004/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.6528371100407744
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002599,
+      "p_unsafe_before": 0.0213,
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current evidence supports PASS_REVIEW with no safety-gate reasons; further captures are unlikely to justify their cost."
+      },
+      "completion_tokens": 37,
+      "cost_usd": 0.000215,
+      "latency_ms": 915.9,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 855,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00004"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "action": {
+       "action": "request",
+       "kind": "caliper",
+       "reason_code": "RESOLVE_DIMENSIONAL_GATE",
+       "recipient_role": "metrology_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000183,
+      "latency_ms": 1044.2,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 699,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00005/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00005/e2",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00005/e1",
+      "sender": "metrology_agent",
+      "source_root": "V-00005/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.9362831210814234
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.064944,
+      "p_unsafe_before": 0.082673,
+      "reason": "LLM:RESOLVE_DIMENSIONAL_GATE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "request",
+       "kind": "phone",
+       "reason_code": "INDEPENDENT_SURFACE_EVIDENCE",
+       "recipient_role": "phone_agent"
+      },
+      "completion_tokens": 36,
+      "cost_usd": 0.000199,
+      "latency_ms": 1271.5,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 778,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     },
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00005/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_llm-specialist_roles/V-00005/e4",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_llm-specialist_roles/V-00005/e3",
+      "sender": "phone_agent",
+      "source_root": "V-00005/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": null,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.064944,
+      "reason": "LLM:INDEPENDENT_SURFACE_EVIDENCE",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "action": {
+       "action": "finish",
+       "reason": "Current evidence supports PASS_REVIEW with very low unsafe probability and no safety-gate reasons; further captures are unlikely to justify their cost."
+      },
+      "completion_tokens": 42,
+      "cost_usd": 0.000221,
+      "latency_ms": 1493.1,
+      "model": "gpt-5.6-luna",
+      "planner": "openai:gpt-5.6-luna",
+      "prompt_tokens": 854,
+      "prompt_variant": "generic",
+      "provider": "openai",
+      "type": "LLM_CALL"
+     }
+    ],
+    "specimen_id": "V-00005"
+   }
+  ],
+  "B7_safe_mesh_voi": [
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "VOI",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00000/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00000/e2",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00000/e1",
+      "sender": "phone_agent",
+      "source_root": "V-00000/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.305588,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "VOI",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00000/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00000/e4",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00000/e3",
+      "sender": "metrology_agent",
+      "source_root": "V-00000/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 1.1395550454895587
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.94964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00000"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "VOI",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00001/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00001/e2",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00001/e1",
+      "sender": "phone_agent",
+      "source_root": "V-00001/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.305588,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "VOI",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00001/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00001/e4",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00001/e3",
+      "sender": "metrology_agent",
+      "source_root": "V-00001/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.9226488315410967
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.94964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00001"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "VOI",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00002/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00002/e2",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00002/e1",
+      "sender": "phone_agent",
+      "source_root": "V-00002/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.305588,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "VOI",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00002/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00002/e4",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00002/e3",
+      "sender": "metrology_agent",
+      "source_root": "V-00002/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 1.3832960516744925
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.94964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00002"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "VOI",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00003/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00003/e2",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00003/e1",
+      "sender": "phone_agent",
+      "source_root": "V-00003/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.305588,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "VOI",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00003/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00003/e4",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00003/e3",
+      "sender": "metrology_agent",
+      "source_root": "V-00003/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.6701459539416739
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.94964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002443,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00003"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "VOI",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00004/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00004/e2",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00004/e1",
+      "sender": "phone_agent",
+      "source_root": "V-00004/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.305588,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "VOI",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00004/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00004/e4",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00004/e3",
+      "sender": "metrology_agent",
+      "source_root": "V-00004/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.6528371100407744
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.94964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002599,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00004"
+   },
+   {
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "index": 0,
+      "kind": "phone",
+      "reason": "VOI",
+      "receiver": "phone_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00005/e1",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00005/e2",
+      "index": 0,
+      "kind": "phone",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00005/e1",
+      "sender": "phone_agent",
+      "source_root": "V-00005/phone/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": false
+     },
+     {
+      "disposition_after": "HOLD",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "phone",
+      "net_value": 0.305588,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.0213,
+      "p_unsafe_before": 0.082673,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     },
+     {
+      "index": 0,
+      "kind": "caliper",
+      "reason": "VOI",
+      "receiver": "metrology_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00005/e3",
+      "sender": "quality_agent",
+      "type": "REQUEST_EVIDENCE"
+     },
+     {
+      "event_id": "S11/s0/B7_safe_mesh_voi/V-00005/e4",
+      "index": 0,
+      "kind": "caliper",
+      "parent_source_roots": [],
+      "receiver": "quality_agent",
+      "request_id": "S11/s0/B7_safe_mesh_voi/V-00005/e3",
+      "sender": "metrology_agent",
+      "source_root": "V-00005/caliper/0",
+      "type": "RESPONSE_EVIDENCE",
+      "value": 0.9362831210814234
+     },
+     {
+      "disposition_after": "PASS_REVIEW",
+      "disposition_before": "HOLD",
+      "duplicate_of_existing_root": false,
+      "kind": "caliper",
+      "net_value": 0.94964,
+      "new_independent_fact": true,
+      "p_unsafe_after": 0.002384,
+      "p_unsafe_before": 0.0213,
+      "reason": "VOI",
+      "type": "UPDATE_BELIEF"
+     }
+    ],
+    "specimen_id": "V-00005"
+   }
+  ]
+ }
+}
