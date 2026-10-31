@@ -159,13 +159,16 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
         const flat = flattenForTrace(scene);
         flat.background = scene.background; flat.environment = hdr || scene.environment; flat.environmentIntensity = 1.1;
         tracer = new ptModule.WebGLPathTracer(renderer);
-        Object.assign(tracer, { minSamples: 1, renderDelay: 0, fadeDuration: 0, filterGlossyFactor: 0.5, dynamicLowRes: true });
+        // Show the normal render until 8 samples exist, then fade the traced image in (no raw noise on screen).
+        // Trace at CSS-pixel resolution: on Retina this is ~4x faster per sample.
+        Object.assign(tracer, { minSamples: 8, renderDelay: 0, fadeDuration: 700, filterGlossyFactor: 0.5, dynamicLowRes: false, rasterizeScene: true,
+          renderScale: 1 / Math.min(window.devicePixelRatio || 1, 2) });
         tracer.bounces = 6; tracer.tiles.set(2, 2);
         tracer.setScene(flat, camera);
-        this._onCam = () => tracer?.updateCamera(); controls.addEventListener('change', this._onCam);
+        this._camM = camera.matrixWorld.clone();
         if (labelRenderer) labelRenderer.domElement.style.visibility = 'hidden';
       } else if (!on && tracer) {
-        controls.removeEventListener('change', this._onCam); const t = tracer; tracer = null;
+        const t = tracer; tracer = null;
         try { t.dispose(); } catch (e) { /* r160 lacks some internals the tracer frees; nothing else to release */ }
         if (labelRenderer) labelRenderer.domElement.style.visibility = '';
       }
@@ -182,7 +185,11 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
         if (u >= 1) tween = null;
       }
       controls.update();
-      if (tracer) { tracer.renderSample(); return; }
+      if (tracer) {
+        camera.updateMatrixWorld();
+        if (!camera.matrixWorld.equals(this._camM)) { this._camM.copy(camera.matrixWorld); tracer.updateCamera(); }  // restart only when the view really moved
+        tracer.renderSample(); return;
+      }
       if (composer) composer.render(); else renderer.render(scene, camera);
       labelRenderer?.render(scene, camera);
     },
@@ -581,6 +588,7 @@ async function initLab() {
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
     if (!$('#view-lab').hidden) {
       if (lab.runs.length) {
+        if (lab.views[0]?.s.tracer && lab.playing) { lab.playing = false; $('#playBtn').textContent = '▶'; }  // Photo mode freezes the line
         if (lab.playing) { lab.t += dt * lab.speed; if (lab.t > lab.T) lab.t = lab.t0; $('#timeline').value = Math.round(1000 * (lab.t - lab.t0) / Math.max(1, lab.T - lab.t0)); }
         $('#clock').textContent = mmss(lab.t);
         const truth = $('#truth').checked;
@@ -607,7 +615,7 @@ async function initLab() {
   lab.views.forEach((v) => v.s.flyTo(fitCam(v, STORY[0][2], STORY[0][3]), STORY[0][3], 2.6));
   if (q.get('select')?.startsWith('phone_') || q.get('select')?.startsWith('caliper_')) select({ type: 'station', id: q.get('select'), side: 0 });
   if (q.get('part')) select({ type: 'part', id: q.get('part'), side: lab.runs.length - 1 });
-  if (q.get('photo') === '1') setTimeout(() => $('#photoBtn')?.click(), 1500);  // URL preset: open in Photo mode
+  if (q.get('photo') === '1') setTimeout(() => $('#photoBtn')?.click(), 3200);  // URL preset: open in Photo mode
   if (q.get('select') === 'caught') { const id = [...lab.caught][0] || lab.runs.at(-1)?.parts.find((p) => p.pair)?.id; if (id) select({ type: 'part', id, side: lab.runs.length - 1 }); }
 }
 
@@ -669,6 +677,7 @@ function story(i) {
 }
 
 async function run() {
+  if (lab.views[0]?.s.tracer) await exitPhoto();
   const btn = $('#runBtn'); btn.disabled = true; $('#runStatus').textContent = 'Running the discrete-event engine…';
   const base = { scenario: $('#scenario').value || 'F01', seed: +$('#seed').value, n_pairs: +$('#npairs').value };
   const right = { ...base, policy: $('#policy').value, pairing: $('#pairing').value };
@@ -1017,15 +1026,17 @@ async function initPhysical() {
     : '<tr><td colspan="6" class="faint">No photos with a matching specimen ID yet.</td></tr>';
 }
 
+let exitPhoto = async () => {};
 { const btn = $('#photoBtn'), save = $('#photoSave'), st = $('#photoStatus'); let on = false, tick = null;
   if (btn) btn.onclick = async () => {
     const v = lab.views[0]; if (!v) return;
     on = !on; btn.textContent = on ? 'Exit photo mode' : 'Photo mode'; save.disabled = !on;
     if (on) { lab.playing = false; $('#playBtn').textContent = '▶'; st.textContent = 'Building the path-tracing scene…';
       try { await v.s.photo(true); } catch (e) { st.textContent = `Photo mode unavailable: ${e.message}`; console.error("PHOTO", e.stack); on = false; btn.textContent = 'Photo mode'; save.disabled = true; return; }
-      tick = setInterval(() => { const t = v.s.tracer; if (t) st.textContent = `${t.samples.toFixed(0)} samples · path traced, SIMULATED scene (left view). Drag to re-frame.`; }, 500);
+      tick = setInterval(() => { const t = v.s.tracer; if (t) st.textContent = t.isCompiling ? 'Compiling the path tracer…' : t.samples < 8 ? `Warming up (${Math.floor(t.samples)}/8 samples)…` : `${Math.floor(t.samples)} samples · path traced, SIMULATED scene (left view). Sharper the longer you wait; dragging restarts.`; }, 500);
     } else { clearInterval(tick); await v.s.photo(false); st.textContent = ''; }
   };
+  exitPhoto = async () => { if (on) await btn.onclick(); };
   if (save) save.onclick = () => { const a = document.createElement('a'); a.href = lab.views[0].s.snapshot(); a.download = 'qualityrelay_photo_SIMULATED.png'; a.click(); };
 }
 { const hq = $('#hq'); if (hq) { hq.checked = QUALITY === 'high';
