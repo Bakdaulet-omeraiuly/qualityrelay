@@ -1,0 +1,21 @@
+{
+ "code_sha256": {
+  "qualityrelay17/gpu/warp_mc.py": "dd1e5fbb3a4aaa569c083fa5f5c894ac49852597a8b4428141190433f704f1c6",
+  "scripts/run_warp_mc.py": "d0dd58002f4eb60dbd821667e3056b22cd43dadbd068beb95e9b87bec4d58d23"
+ },
+ "device": "cpu",
+ "device_name": "arm",
+ "engine": "nvidia-warp",
+ "equivalence_tests": "tests/test_warp_mc.py",
+ "git_commit": "833ddeb2d7e0bf7c55ee23a891e1fa02e8ae2b27",
+ "host": "MacBook-Air-Bakdaulet.local",
+ "is_cuda": false,
+ "lots": 100,
+ "origin": "SIMULATED",
+ "parts_per_scenario": 10000000,
+ "python": "3.13.9",
+ "runtime_s": 9.7,
+ "seed": 2026,
+ "started_utc": "2026-10-31T15:00:09Z",
+ "warp_version": "1.18.0"
+}

@@ -1,0 +1,112 @@
+{
+ "device": "cpu",
+ "duplicate_rate": 0.0,
+ "engine": "nvidia-warp",
+ "kernel_seconds": 1.087,
+ "lots": 100,
+ "origin": "SIMULATED",
+ "paired_vs_B0": {
+  "B1_single_agent_fixed": {
+   "released_good_rate": {
+    "ci95": [
+     0.8387795103138627,
+     0.8392350896861374
+    ],
+    "diff": 0.8390073,
+    "discordant": [
+     8390073,
+     0
+    ]
+   },
+   "unsafe_diff_between_lot_se": 1.6519458987888348e-05,
+   "unsafe_pass_rate": {
+    "ci95": [
+     0.0023555624623107546,
+     0.0024160375376892453
+    ],
+    "diff": 0.0023858,
+    "discordant": [
+     23858,
+     0
+    ]
+   }
+  },
+  "F_collective_fusion": {
+   "released_good_rate": {
+    "ci95": [
+     0.8419692488375636,
+     0.8424211511624364
+    ],
+    "diff": 0.8421952,
+    "discordant": [
+     8421952,
+     0
+    ]
+   },
+   "unsafe_diff_between_lot_se": 1.6660759559243067e-05,
+   "unsafe_pass_rate": {
+    "ci95": [
+     0.0034726482287336406,
+     0.0035459517712663592
+    ],
+    "diff": 0.0035093,
+    "discordant": [
+     35093,
+     0
+    ]
+   }
+  }
+ },
+ "parts": 10000000,
+ "parts_per_second": 9199965,
+ "policies": {
+  "B0_rules": {
+   "false_hold_rate": 0.9215413,
+   "hold_rate": 1.0,
+   "released_good_rate": 0.0,
+   "unsafe_pass": 0,
+   "unsafe_pass_rate": 0.0,
+   "unsafe_pass_rate_between_lot_se": 0.0,
+   "unsafe_pass_wilson95": [
+    0.0,
+    3.841457405615933e-07
+   ]
+  },
+  "B1_single_agent_fixed": {
+   "false_hold_rate": 0.082534,
+   "hold_rate": 0.1586069,
+   "released_good_rate": 0.8390073,
+   "unsafe_pass": 23858,
+   "unsafe_pass_rate": 0.0023858,
+   "unsafe_pass_rate_between_lot_se": 1.6519458987888348e-05,
+   "unsafe_pass_wilson95": [
+    0.00235575302027143,
+    0.0024162292924793157
+   ]
+  },
+  "F_collective_fusion": {
+   "false_hold_rate": 0.0793461,
+   "hold_rate": 0.1542955,
+   "released_good_rate": 0.8421952,
+   "unsafe_pass": 35093,
+   "unsafe_pass_rate": 0.0035093,
+   "unsafe_pass_rate_between_lot_se": 1.6660759559243067e-05,
+   "unsafe_pass_wilson95": [
+    0.0034728384643271507,
+    0.0035461429852481157
+   ]
+  }
+ },
+ "scenario": {
+  "caliper_sigma": 0.05,
+  "camera_noise": 0.04,
+  "duplicate_p": 0.0,
+  "network_outage": 1.0,
+  "shared_noise": 0.0,
+  "shift": 0.1,
+  "sid": "S06",
+  "title": "Pi offline"
+ },
+ "seed": 2026,
+ "truly_safe_rate": 0.9215413
+}
