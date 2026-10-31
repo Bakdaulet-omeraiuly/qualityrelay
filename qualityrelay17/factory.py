@@ -105,12 +105,13 @@ def _collective_fusion_rows(rows, *, lk: Likelihoods, costs: Costs):
         hold = p_unsafe >= threshold
         outcome = 'hold' if hold else ('pass' if r['safe'] else 'escaped_defect')
         results.append(dict(specimen_id=r['specimen_id'], outcome=outcome, inspections=3,
+                             observations=['phone', 'pi', 'caliper'],
                              unsafe_pass=int(not hold and not r['safe']), p_unsafe=round(p_unsafe, 6),
                              surface_posterior=round(surface_p, 6), dimensional_posterior=round(dimensional_p, 6)))
     return results
 
 
-def _structured_request_rows(rows, *, lk: Likelihoods, costs: Costs, request_cost=0.3, indecisive_margin=0.03):
+def _structured_request_rows(rows, *, lk: Likelihoods, costs: Costs, indecisive_margin=0.03):
     """Smallest honest slice of the 17.1 evidence-request protocol
     (docs/research/COLLECTIVE_17_1_BAKDAULET.md) -- Gate A, one function.
 
@@ -134,21 +135,24 @@ def _structured_request_rows(rows, *, lk: Likelihoods, costs: Costs, request_cos
         dimensional_p = posterior(lk.dimensional_prior, lk.caliper_sens, lk.caliper_spec, r['measured_clearance'] < TOLERANCE_MM)
         phone_only_p = posterior(lk.surface_prior, lk.phone_sens, lk.phone_spec, bool(r['phone_suspect']))
         requested = abs(phone_only_p - threshold) <= indecisive_margin
-        checks = 2  # phone + caliper are always read
+        observations = ['phone', 'caliper']  # always read
         fused_surface_p = phone_only_p
         if requested:
-            checks += 1
+            observations.append('pi')
             fused_surface_p = posterior(phone_only_p, lk.pi_sens, lk.pi_spec, bool(r['pi_suspect']))
         p_unsafe = combined_defect_probability(fused_surface_p, dimensional_p)
         hold = p_unsafe >= threshold
         decided_without_request = combined_defect_probability(phone_only_p, dimensional_p) >= threshold
         outcome = 'hold' if hold else ('pass' if r['safe'] else 'escaped_defect')
         results.append(dict(
-            specimen_id=r['specimen_id'], outcome=outcome, inspections=checks,
-            unsafe_pass=int(not hold and not r['safe']), p_unsafe=round(p_unsafe, 6),
-            requested_pi_evidence=requested,
+            specimen_id=r['specimen_id'], outcome=outcome, inspections=len(observations),
+            observations=observations, unsafe_pass=int(not hold and not r['safe']), p_unsafe=round(p_unsafe, 6),
+            requested_pi_evidence=requested, peer_requests=int(requested),
             decision_flip_from_request=bool(requested and hold != decided_without_request),
-            request_cost_paid=round(request_cost, 4) if requested else 0.0,
+            # 18.1 SCI-02: this used to be reported but never charged. economics.calculate now
+            # bills peer_requests * Costs.peer_request on its own line, separate from the Pi
+            # observation itself (which is in `inspections`).
+            request_cost_paid=round(costs.peer_request, 4) if requested else 0.0,
         ))
     return results
 
@@ -200,6 +204,7 @@ def _adaptive_rows(rows, *, lk: Likelihoods, costs: Costs, selector: str):
         hold = p_unsafe >= threshold
         outcome = 'hold' if hold else ('pass' if r['safe'] else 'escaped_defect')
         results.append(dict(specimen_id=r['specimen_id'], outcome=outcome, inspections=3 + int(name != 'NO_ACTION'),
+                             observations=['phone', 'pi', 'caliper'] + ([name] if name != 'NO_ACTION' else []),
                              unsafe_pass=int(not hold and not r['safe']), chosen_action=name,
                              p_unsafe=round(p_unsafe, 6), net_voi_of_choice=round(best['net_voi'], 6),
                              decision_flip_from_fresh_evidence=bool(name != 'NO_ACTION' and hold != hold_before)))
@@ -223,18 +228,18 @@ def apply_policy(rows, policy: str, costs: Costs | None = None, likelihoods: Lik
     results=[]
     for r in rows:
         if policy=='phone_only':
-            hold=r['phone_suspect']; checks=1
+            hold=r['phone_suspect']; obs=['phone']
         elif policy=='metrology_only':
-            hold=r['measured_clearance']<TOLERANCE_MM;checks=1
+            hold=r['measured_clearance']<TOLERANCE_MM; obs=['caliper']
         elif policy=='conservative_rules':
-            hold=r['phone_suspect'] or r['pi_suspect'] or r['measured_clearance']<TOLERANCE_MM or r['network_down'];checks=3
+            hold=r['phone_suspect'] or r['pi_suspect'] or r['measured_clearance']<TOLERANCE_MM or r['network_down']; obs=['phone','pi','caliper']
         elif policy=='safe_mesh_reference':
             # Include extra inspection cost on disagreements; no model superiority implied.
             hold=r['phone_suspect'] or r['pi_suspect'] or r['measured_clearance']<TOLERANCE_MM or r['network_down'];
-            checks=3+int(r['phone_suspect']!=r['pi_suspect'])
+            obs=['phone','pi','caliper']+(['disagreement_review'] if r['phone_suspect']!=r['pi_suspect'] else [])
         else:raise ValueError('unknown policy')
         outcome='hold' if hold else ('pass' if r['safe'] else 'escaped_defect')
-        results.append(dict(specimen_id=r['specimen_id'],outcome=outcome,inspections=checks,unsafe_pass=int(not hold and not r['safe'])))
+        results.append(dict(specimen_id=r['specimen_id'],outcome=outcome,inspections=len(obs),observations=obs,unsafe_pass=int(not hold and not r['safe'])))
     return results
 
 
