@@ -652,7 +652,8 @@ async function initLab() {
   $('#timeline').oninput = (e) => { lab.t = lab.t0 + (lab.T - lab.t0) * e.target.value / 1000; lab.playing = false; $('#playBtn').textContent = '▶'; };
   $('#speed').onchange = (e) => (lab.speed = +e.target.value);
   $('#labels').onchange = () => lab.views.forEach((v) => v.setLabels($('#labels').checked));
-  $('#truth').onchange = () => renderInspector();
+  $('#truth').onchange = () => { renderInspector(); renderAgents(true); };
+  $$('.rtabs button').forEach((b) => (b.onclick = () => setRTab(b.dataset.rtab)));
   $('#storyNext').onclick = () => story(lab.story + 1); $('#storyPrev').onclick = () => story(lab.story - 1);
   $('#toggleInspector').onclick = () => $('#studio').classList.toggle('noinsp');
   lab.views.forEach((v, i) => { bindPicking(v, i); viewControls(v); });
@@ -698,6 +699,7 @@ async function initLab() {
         });
       }
       lab.views.forEach((v, i) => { if (i === 0 || lab.mode === 'compare') v.s.render(); });
+      renderAgents(false);
       if (lab.camView && !$('#studio').classList.contains('noinsp')) {
         const cones = [...Object.values(lab.camView.view.stations).filter((s) => s.cone).map((s) => s.cone), lab.camView.view.stationRing, lab.camView.view.ring];
         const prev = cones.map((c) => c.visible); cones.forEach((c) => (c.visible = false));   // the camera must not see its own light cone
@@ -780,7 +782,7 @@ function fitCam(v, cam, tgt) {
   const a = v.s.el.clientWidth / Math.max(1, v.s.el.clientHeight), f = Math.min(1.45, Math.max(1, 1.3 / a));
   return cam.map((c, i) => tgt[i] + (c - tgt[i]) * f);
 }
-function select(sel) { lab.sel = sel; lab.views.forEach((v) => v.select(sel)); renderInspector(); }
+function select(sel) { lab.sel = sel; lab.views.forEach((v) => v.select(sel)); renderInspector(); if (sel) setRTab('insp'); }
 function togglePlay() { lab.playing = !lab.playing; $('#playBtn').textContent = lab.playing ? '❚❚' : '▶'; }
 async function setMode(m) {
   lab.mode = m; $$('#modeSeg button').forEach((b) => b.classList.toggle('on', b.dataset.mode === m));
@@ -808,7 +810,7 @@ async function run() {
   try {
     const t0 = performance.now();
     lab.runs = await Promise.all(cfgs.map((c) => api('/sim/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(c) })));
-    lab.caught = new Set();
+    lab.caught = new Set(); agState.side = null; setTimeout(() => renderAgents(true), 0);
     if (lab.runs.length === 2) {
       const escL = new Set(lab.runs[0].parts.filter((p) => p.escaped).map((p) => p.id));
       for (const p of lab.runs[1].parts) if (escL.has(p.id) && !p.escaped) lab.caught.add(p.id);
@@ -981,13 +983,188 @@ function renderInspector() {
   const truth = $('#truth').checked, sel = lab.sel; let html;
   if (sel?.type === 'part') {
     const side = Math.min(sel.side ?? 0, lab.runs.length - 1);
-    const p = findPart(sel.id, side); html = p ? partCard(p, side, truth) : summaryCard(); $('#inspHint').textContent = 'part';
-  } else if (sel?.type === 'station') { html = stationCard(sel.id, Math.min(sel.side ?? 0, lab.runs.length - 1)); $('#inspHint').textContent = 'station'; }
-  else { html = summaryCard(); $('#inspHint').textContent = 'click a part or a station'; }
+    const p = findPart(sel.id, side); html = p ? partCard(p, side, truth) + agentConversation(lab.runs[side], p) : summaryCard(); $('#inspHint').textContent = '· part';
+  } else if (sel?.type === 'station') { html = stationCard(sel.id, Math.min(sel.side ?? 0, lab.runs.length - 1)); $('#inspHint').textContent = '· station'; }
+  else { html = summaryCard(); $('#inspHint').textContent = ''; }
   stopCamera(); lab.camView = null;
   $('#inspBody').innerHTML = html;
   if (sel?.type === 'station' && sel.id.startsWith('phone_')) bindCameraPanel(sel.id, Math.min(sel.side ?? 0, lab.runs.length - 1));
   $$('#inspBody [data-part]').forEach((el) => (el.onclick = () => select({ type: 'part', id: el.dataset.part, side: el.dataset.side !== undefined ? +el.dataset.side : 0 })));
+}
+
+// ---------------------------------------------------------------- agents: live analytics (right dock)
+// Every number here is computed from the agents' own messages up to the playback time.
+// Ground truth (escapes) is shown only with the "Ground truth" layer on. SIMULATED.
+const AG_NODES = { vision: [56, 24], cost: [284, 24], assembly: [170, 95], metrology: [56, 166], process: [170, 166], learning: [284, 166] };
+const AG_NAME = { vision: 'Vision', metrology: 'Metrology', assembly: 'Assembly', process: 'Process', cost: 'Cost', learning: 'Learning' };
+const AG_COL = { pass: '#76b900', released: '#199e70', rework: '#9085e9', scrap: '#6b727c', pending: '#e0b000', hold: '#e0b000' };
+const REASON = {
+  DIMENSIONAL_RISK: 'Clearance risk', SURFACE_RISK_SLOT: 'Slot surface', SURFACE_RISK_TAB: 'Tab surface', SURFACE_RISK: 'Surface (camera)',
+  STALE_OR_MISSING_EVIDENCE: 'Missing / late evidence', RULE_CLEARANCE: 'Rule: clearance < 0.5', RULE_ANY_FLAG_OR_MISSING: 'Rule: camera flag',
+  HOLD_ALL_POLICY: 'Hold-all policy', RULE_CLEARANCE_AFTER_REVIEW: 'Rule after review',
+};
+const agState = { last: 0, side: null, tab: 'agents' };
+const agRun = () => { const i = agState.side ?? lab.runs.length - 1; return lab.runs[i]; };
+const shortId = (id) => String(id).replace(/^P-/, '').replace(/([ST])-\d+-0*(\d+)/g, '$1$2');
+const lastIdx = (msgs, t) => { let lo = 0, hi = msgs.length; while (lo < hi) { const m = (lo + hi) >> 1; if (msgs[m][0] <= t) lo = m + 1; else hi = m; } return lo; };
+
+function setRTab(tab) {
+  agState.tab = tab;
+  $$('.rtabs button').forEach((b) => b.classList.toggle('on', b.dataset.rtab === tab));
+  $('#agentsBody').hidden = tab !== 'agents'; $('#inspBody').hidden = tab !== 'insp';
+  if (tab === 'agents') renderAgents(true);
+}
+
+function agentsAt(run, t) {
+  const A = run.agents, msgs = A.messages, n = lastIdx(msgs, t);
+  const edges = {}, sent = {}, reasons = {}, pairDec = {}, pairOut = {}, partOut = {};
+  let partHolds = 0, bytes = 0, alarms = [], proposals = 0;
+  for (let i = 0; i < n; i++) {
+    const [mt, kind, from, to, cas, body, b] = msgs[i];
+    bytes += b; sent[from] = (sent[from] || 0) + 1;
+    if (from !== to) { const k = `${from}>${to}`; edges[k] = (edges[k] || 0) + 1; }
+    if (kind === 'DECISION') {
+      if (body.stage === 'pair') pairDec[cas] = body;
+      if (body.decision === 'HOLD') { const r = A.decisions[cas]?.reason || body.reason; reasons[r] = (reasons[r] || 0) + 1; if (body.stage === 'part') partHolds++; }
+    } else if (kind === 'REVIEW_OUTCOME' && to === 'learning') {
+      if (String(cas).startsWith('P-')) pairOut[cas] = body.outcome; else partOut[cas] = body.outcome;
+    } else if (kind === 'ALARM') alarms.push([mt, body]);
+    else if (kind === 'PROPOSE_RECALIBRATION') proposals++;
+  }
+  const decided = Object.keys(pairDec), pass = decided.filter((k) => pairDec[k].decision === 'PASS').length;
+  const mix = { pass, released: 0, rework: 0, scrap: 0, pending: 0 };
+  for (const k of decided) if (pairDec[k].decision === 'HOLD') {
+    const o = pairOut[k]; if (o === 'released') mix.released++; else if (o === 'rework') mix.rework++; else if (o === 'split_scrap') mix.scrap++; else mix.pending++;
+  }
+  const truthEsc = run.pairs.filter((p) => p.escaped && p.shipped_s !== null && p.shipped_s !== undefined && p.shipped_s <= t).length;
+  // Learning: share of surface holds the expert confirmed vs the share the Vision agent predicted
+  let flagged = 0, confirmed = 0, predicted = 0;
+  for (const [pid, o] of Object.entries(partOut)) { flagged++; if (o === 'scrapped') confirmed++; predicted += A.decisions[pid]?.p || 0; }
+  return { n, edges, sent, reasons, decided: decided.length, mix, partHolds, bytes, alarms, proposals, truthEsc, flagged, confirmed,
+    predicted: flagged ? predicted / flagged : null, recent: msgs.slice(Math.max(0, n - 60), n) };
+}
+
+function agNet(run, s, t) {
+  const maxE = Math.max(1, ...Object.values(s.edges)), win = Math.max(2, lab.speed * 0.8);
+  const recentAlarm = s.alarms.length && t - s.alarms[s.alarms.length - 1][0] < 120;
+  let svg = '';
+  for (const [k, c] of Object.entries(s.edges)) {
+    const [a, b] = k.split('>'); if (!AG_NODES[a] || !AG_NODES[b]) continue;
+    const [x1, y1] = AG_NODES[a], [x2, y2] = AG_NODES[b];
+    svg += `<line class="edge" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${(1 + 4 * Math.sqrt(c / maxE)).toFixed(2)}"><title>${AG_NAME[a]} → ${AG_NAME[b]}: ${c} messages</title></line>`;
+  }
+  let pulses = 0;
+  for (let i = s.recent.length - 1; i >= 0 && pulses < 28; i--) {
+    const [mt, kind, a, b] = s.recent[i]; if (a === b || t - mt > win || !AG_NODES[a] || !AG_NODES[b]) continue;
+    const u = Math.min(1, (t - mt) / win), [x1, y1] = AG_NODES[a], [x2, y2] = AG_NODES[b];
+    const col = kind === 'ALARM' ? 'var(--escape)' : kind === 'DECISION' ? 'var(--review)' : '#e8eaed';
+    svg += `<circle class="pulse" cx="${(x1 + (x2 - x1) * u).toFixed(1)}" cy="${(y1 + (y2 - y1) * u).toFixed(1)}" r="3.2" fill="${col}" opacity="${(1 - u * 0.6).toFixed(2)}"/>`;
+    pulses++;
+  }
+  for (const [id, [x, y]] of Object.entries(AG_NODES)) {
+    const cls = ['node', s.sent[id] ? 'active' : '', id === 'process' && recentAlarm ? 'alarm' : '', id === 'learning' && s.proposals ? 'prop' : ''].join(' ');
+    const r = run.agents.roster[id];
+    svg += `<g class="${cls}" transform="translate(${x - 50},${y - 18})"><title>${r.name}: ${r.what} (${r.inside}, no LLM)</title>
+      <rect width="100" height="36" rx="8"/><text x="10" y="15">${AG_NAME[id]}</text><text class="sub" x="10" y="28">${s.sent[id] || 0} sent</text>
+      <text class="sub" x="92" y="15" text-anchor="end">${r.inside === 'statistic' ? 'stat' : 'rule'}</text></g>`;
+  }
+  return `<svg class="ag-net" viewBox="0 0 340 190" role="img" aria-label="Messages between the six agents">${svg}</svg>`;
+}
+
+function agSpc(run, t) {
+  const A = run.agents, cfg = A.spc, msgs = A.messages, n = lastIdx(msgs, t);
+  const t0 = lab.t0, T = Math.max(lab.T, t0 + 1), W = 340, H = 64, pad = 22;
+  const out = [];
+  for (const kind of ['slot', 'tab']) {
+    const pts = [], al = [];
+    for (let i = 0; i < n; i++) {
+      const m = msgs[i];
+      if (m[1] === 'MEASUREMENT' && m[5].kind === kind) { const d = m[5].reading_mm - cfg.nominal_mm[kind] - m[5].offset_mm; pts.push([m[0], d, cfg.sigma_mm[m[5].site] || 0.06]); }
+      else if (m[1] === 'ALARM' && m[5].kind === kind) al.push(m[0]);
+    }
+    const sig = pts.length ? pts.reduce((a, p) => a + p[2], 0) / pts.length : 0.06, lim = 3 * sig, Y = Math.max(0.3, lim * 1.35);
+    const x = (tt) => pad + (W - pad - 4) * (tt - t0) / (T - t0), y = (d) => H / 2 - (H / 2 - 6) * Math.max(-1, Math.min(1, d / Y));
+    let g = `<rect class="band" x="${pad}" y="${y(lim)}" width="${W - pad - 4}" height="${y(-lim) - y(lim)}"/>
+      <line class="lim" x1="${pad}" x2="${W - 4}" y1="${y(lim)}" y2="${y(lim)}"/><line class="lim" x1="${pad}" x2="${W - 4}" y1="${y(-lim)}" y2="${y(-lim)}"/>
+      <line class="ctr" x1="${pad}" x2="${W - 4}" y1="${y(0)}" y2="${y(0)}"/>
+      <text x="2" y="${y(lim) + 3}">+3σ</text><text x="2" y="${y(-lim) + 3}">−3σ</text><text x="${W - 4}" y="10" text-anchor="end">${kind} width − nominal (mm)</text>`;
+    const col = kind === 'slot' ? 'var(--slot)' : 'var(--tab)';
+    for (const [tt, d] of pts) g += `<circle cx="${x(tt).toFixed(1)}" cy="${y(d).toFixed(1)}" r="1.9" fill="${Math.abs(d) > lim ? 'var(--escape)' : col}" opacity=".9"/>`;
+    for (const tt of al) g += `<line x1="${x(tt)}" x2="${x(tt)}" y1="4" y2="${H - 4}" stroke="var(--escape)" stroke-width="1.5"><title>CUSUM alarm</title></line>`;
+    out.push(`<svg class="ag-spc" viewBox="0 0 ${W} ${H}" role="img" aria-label="${kind} control chart">${g}</svg>`);
+  }
+  return out.join('');
+}
+
+const fmtT = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+function agLine(m) {
+  const [mt, kind, from, to, cas, b] = m, id = shortId(cas);
+  let k = kind.replace('_', ' ').toLowerCase(), cls = '', txt;
+  if (kind === 'DECISION') { cls = b.decision === 'HOLD' ? 'hold' : 'pass'; k = b.decision; txt = `<b>${AG_NAME[from]}</b> → ${AG_NAME[to]}: ${id} ${b.decision === 'HOLD' ? `held (${REASON[b.reason] || b.reason})` : 'released'}`; }
+  else if (kind === 'REQUEST_EVIDENCE') txt = `<b>${AG_NAME[from]}</b> asks ${AG_NAME[to]}: ${b.want} of ${shortId(b.part)}`;
+  else if (kind === 'EVIDENCE_RESPONSE') txt = `<b>${AG_NAME[from]}</b> → ${AG_NAME[to]}: ${shortId(b.part)} ${b.mean_mm !== undefined ? `${b.mean_mm.toFixed(3)} ± ${b.sd_mm.toFixed(3)} mm` : `P(defect) ${(100 * (b.p_surface ?? 0)).toFixed(2)}% (${(b.source || '').toLowerCase().replace('_', ' ')})`}`;
+  else if (kind === 'DECISION_REQUEST') txt = `<b>${AG_NAME[from]}</b> → Cost: ${id} ${b.p_unsafe !== undefined ? `P(unsafe) ${(100 * b.p_unsafe).toFixed(2)}%` : b.p_surface !== null && b.p_surface !== undefined ? `P(surface) ${(100 * b.p_surface).toFixed(2)}%` : 'rule check'}`;
+  else if (kind === 'MEASUREMENT') txt = `<b>Metrology</b> → Process: ${id} ${b.reading_mm.toFixed(3)} mm`;
+  else if (kind === 'ALARM') { cls = 'alarm'; txt = `<b>Process</b>: CUSUM alarm, ${b.kind} printer ${b.direction} (${b.site})`; }
+  else if (kind === 'PROPOSE_SETPOINT') txt = `<b>Process</b> proposes ${b.kind} offset ${b.offset_mm > 0 ? '+' : ''}${b.offset_mm.toFixed(3)} mm`;
+  else if (kind === 'REVIEW_OUTCOME') txt = `<b>${AG_NAME[from]}</b> → ${AG_NAME[to]}: expert ${String(b.outcome || 'cleared').replace('_', ' ')} ${id}`;
+  else if (kind === 'PROPOSE_RECALIBRATION') { cls = 'alarm'; txt = `<b>Learning</b> proposes camera recalibration`; }
+  else if (kind === 'SHIPPED') txt = `<b>Assembly</b> → Learning: ${id} shipped`;
+  else txt = `<b>${AG_NAME[from] || from}</b>: ${kind.toLowerCase()} ${id}`;
+  return `<li><span class="t">${fmtT(mt)}</span><span><span class="k ${cls}">${k}</span>${txt}</span></li>`;
+}
+
+function renderAgents(force) {
+  const el = $('#agentsBody'); if (!el || el.hidden) return;
+  const now = performance.now(); if (!force && now - agState.last < 220) return; agState.last = now;
+  const run = agRun();
+  if (!run) { el.innerHTML = '<p class="faint">Run a simulation.</p>'; return; }
+  if (!run.agents) { el.innerHTML = '<p class="faint">This run was made without agents.</p>'; return; }
+  const s = agentsAt(run, lab.t), A = run.agents, truth = $('#truth').checked, ck = A.check;
+  const tot = Math.max(1, s.decided), mixKeys = ['pass', 'released', 'rework', 'scrap', 'pending'];
+  const mixLbl = { pass: 'released first pass', released: 'held → released', rework: 'held → reworked', scrap: 'held → scrapped / split', pending: 'held, in review' };
+  const rs = Object.entries(s.reasons).sort((a, b) => b[1] - a[1]), rmax = Math.max(1, ...rs.map((r) => r[1])), rsum = rs.reduce((a, r) => a + r[1], 0);
+  let cum = 0;
+  const side = lab.runs.length === 2 ? `<div class="seg mini" style="margin-bottom:8px">${lab.runs.map((r, i) => `<button class="${(agState.side ?? lab.runs.length - 1) === i ? 'on' : ''}" data-agside="${i}">${i === 0 ? 'Today · rule' : 'QualityRelay'}</button>`).join('')}</div>` : '';
+  let calib = '<span class="faint">Waits for at least 5 expert-reviewed surface holds.</span>';
+  if (s.flagged >= 5) {
+    const k = s.confirmed, n = s.flagged, z = 1.96, p = k / n, d = 1 + z * z / n, c = (p + z * z / (2 * n)) / d, h = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d;
+    const lo = Math.max(0, c - h), hi = Math.min(1, c + h), ok = s.predicted >= lo && s.predicted <= hi, X = (v) => 8 + 324 * v;
+    calib = `<svg class="ag-spc" viewBox="0 0 340 34" role="img" aria-label="calibration check"><line class="ctr" x1="8" x2="332" y1="17" y2="17"/>
+      <line x1="${X(lo)}" x2="${X(hi)}" y1="17" y2="17" stroke="var(--muted)" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="${X(p)}" cy="17" r="4" fill="var(--text)"/><path d="M${X(s.predicted)} 8 l5 9 -5 9 -5 -9z" fill="var(--review)"/>
+      <text x="8" y="32">0%</text><text x="332" y="32" text-anchor="end">100%</text></svg>
+      <div>Expert confirmed <b>${k}/${n}</b> surface holds (${(100 * p).toFixed(0)}%, 95% CI ${(100 * lo).toFixed(0)}–${(100 * hi).toFixed(0)}%); Vision predicted <b>${(100 * s.predicted).toFixed(0)}%</b> ◆.
+      ${ok ? 'Consistent with the camera calibration.' : '<b style="color:#f0c64a">Outside the interval: Learning proposes recalibration (proposal only).</b>'}</div>`;
+  }
+  el.innerHTML = `${side}
+    <div class="ag-head"><h2>Six agents deciding this run</h2><span class="chk ${ck.identical ? 'ok' : 'bad'}" title="${ck.note}">${ck.identical ? '✓' : '✗'} ${ck.equal}/${ck.pairs} decisions = reference</span></div>
+    <div class="faint small" style="margin:-4px 0 10px">Cost agent: ${A.policy_inside}. Code, not LLMs. SIMULATED.</div>
+    <div class="ag-kpis">
+      <div class="ag-kpi"><b>${s.decided}</b><span>pairs decided</span></div>
+      <div class="ag-kpi"><b>${s.decided ? Math.round(100 * s.mix.pass / tot) : 0}%</b><span>first-pass release</span></div>
+      <div class="ag-kpi"><b>${s.decided - s.mix.pass + s.partHolds}</b><span>holds</span></div>
+      <div class="ag-kpi"><b style="color:${truth && s.truthEsc ? 'var(--escape)' : ''}">${truth ? s.truthEsc : '—'}</b><span>escaped ${truth ? '(truth)' : '(turn on T)'}</span></div>
+      <div class="ag-kpi"><b>${s.decided ? (s.n / s.decided).toFixed(1) : '0'}</b><span>messages / pair</span></div>
+      <div class="ag-kpi"><b>${s.decided ? (s.bytes / s.decided / 1024).toFixed(2) : '0'}<small style="font-size:11px"> KB</small></b><span>data / pair</span></div>
+    </div>
+    <div class="ag-sec"><h4>Who talks to whom <em>${s.n} messages</em></h4>${agNet(run, s, lab.t)}</div>
+    <div class="ag-sec"><h4>Pair decisions <em>${s.decided}</em></h4>
+      <div class="ag-bar">${mixKeys.filter((k) => s.mix[k]).map((k) => `<i style="width:${(100 * s.mix[k] / tot).toFixed(2)}%;background:${AG_COL[k]}" title="${mixLbl[k]}: ${s.mix[k]}"></i>`).join('')}</div>
+      <div class="ag-leg">${mixKeys.map((k) => `<span><i style="background:${AG_COL[k]}"></i>${mixLbl[k]} <b class="num">${s.mix[k]}</b></span>`).join('')}</div></div>
+    <div class="ag-sec"><h4>Why parts are held <em>Pareto</em></h4>
+      ${rs.length ? `<div class="ag-pareto">${rs.map(([r, c]) => { cum += c; return `<span class="lbl" title="${r}">${REASON[r] || r}</span><span class="trk"><i style="width:${(100 * c / rmax).toFixed(1)}%"></i></span><span class="v">${c} <span class="faint">${Math.round(100 * cum / rsum)}%</span></span>`; }).join('')}</div>` : '<span class="faint small">No holds yet.</span>'}</div>
+    <div class="ag-sec"><h4>Process agent · control charts <em>${s.alarms.length} alarm${s.alarms.length === 1 ? '' : 's'}</em></h4>${agSpc(run, lab.t)}</div>
+    <div class="ag-sec"><h4>Learning agent · calibration check</h4><div class="ag-cal">${calib}</div></div>
+    <div class="ag-sec"><h4>Live log</h4><ul class="ag-log">${s.recent.filter((m) => m[2] !== m[3] || m[1] === 'PROPOSE_SETPOINT').slice(-9).reverse().map(agLine).join('') || '<li class="faint">Waiting for the first part.</li>'}</ul></div>`;
+  $$('[data-agside]', el).forEach((b) => (b.onclick = () => { agState.side = +b.dataset.agside; renderAgents(true); }));
+}
+
+function agentConversation(run, p) {
+  const A = run?.agents; if (!A) return '';
+  const msgs = A.messages.filter((m) => m[4] === p.id || (p.pair && m[4] === p.pair) || m[5]?.part === p.id);
+  if (!msgs.length) return '';
+  return `<section><h4>Agent conversation · ${msgs.length} messages</h4><ul class="ag-log ag-conv">${msgs.slice(0, 24).map(agLine).join('')}</ul></section>`;
 }
 
 // ---------------------------------------------------------------- camera panel

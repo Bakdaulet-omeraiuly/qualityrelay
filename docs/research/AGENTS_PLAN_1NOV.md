@@ -81,3 +81,20 @@ and are testing where decentralisation actually pays."
 
 Do not say: "decentralised agents beat a central system", "21 agents", any saving without
 scenario ID and `SIMULATED`, or that the agents run on separate devices (until P4 exists).
+
+## 5. Done 31 Oct evening: agents decide inside the simulated line (P2 + P3, first version)
+
+- `qualityrelay17/sim/agents.py`: Vision, Metrology, Process, Assembly, Cost, Learning, each with a
+  private store; Assembly learns part evidence only by REQUEST_EVIDENCE to Vision / Metrology; Cost
+  answers every DECISION_REQUEST; Process runs EWMA / CUSUM on Metrology's readings; Learning compares
+  the share of surface holds the expert confirmed with the share Vision predicted (Wilson interval)
+  and may only *propose* recalibration. Agents never receive ground truth (tested).
+- `Factory(..., agents=True)`; `/sim/run` (default `agents: true`) also runs the reference line and
+  reports `check.identical`. Equivalence sweep: 15 scenarios x 3 policies x 2 pairings x 2 seeds x
+  2 line layouts = 360 runs, 0 differences in decisions, P(unsafe), fates, alarms or set-points.
+- Studio right dock "Agents · live": decisions, first-pass release, holds, escapes (truth layer
+  only), messages and bytes per pair, message graph with live pulses, decision mix, Pareto of hold
+  reasons, Process control charts with CUSUM alarms, Learning calibration check, live log; clicking a
+  part shows its agent conversation.
+- Still true: in this simulation the agents compute what the built-in policy computes, so they do
+  not change any result by themselves. What would: P1 (D1-D3) and a real transport (P4).

@@ -1,0 +1,818 @@
+{
+ "origin": "SIMULATED",
+ "registration": "docs/research/P1_DECENTRALISATION_REGISTRATION.md",
+ "git": "04374e0d72a0b70783064959fecba54a7b7e2374",
+ "dirty_before_run": false,
+ "seeds": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19
+ ],
+ "n_pairs": 200,
+ "scenarios": {
+  "P1-S0": {
+   "uplink_mbps": 100.0,
+   "outages": [],
+   "frame_bytes": 2000000
+  },
+  "P1-D1a": {
+   "uplink_mbps": 20.0,
+   "outages": [],
+   "frame_bytes": 2000000
+  },
+  "P1-D1b": {
+   "uplink_mbps": 4.0,
+   "outages": [],
+   "frame_bytes": 2000000
+  },
+  "P1-D1c": {
+   "uplink_mbps": 2.0,
+   "outages": [],
+   "frame_bytes": 2000000
+  },
+  "P1-D2": {
+   "uplink_mbps": 20.0,
+   "outages": [
+    [
+     1800.0,
+     3600.0
+    ]
+   ],
+   "frame_bytes": 2000000
+  },
+  "P1-D1b-small": {
+   "uplink_mbps": 4.0,
+   "outages": [],
+   "frame_bytes": 500000
+  }
+ },
+ "results": {
+  "P1-S0": {
+   "means": {
+    "A0_isolated": {
+     "good_per_hour": 201.93074361177332,
+     "escapes_per_1000_shipped": 3.895904669970416,
+     "holds": 44.6,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 414.080474377324,
+     "bytes_per_part": 0.0,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.7288613154207484,
+     "conservation_ok": true
+    },
+    "A1_central": {
+     "good_per_hour": 195.71621610106536,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 44.35,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 462.90386897360673,
+     "bytes_per_part": 4000496.5,
+     "evidence_latency_s": 0.3200160000000174,
+     "cost_per_good_unit": 1.3140858595421705,
+     "conservation_ok": true
+    },
+    "A2_agents": {
+     "good_per_hour": 195.83311226305594,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 44.35,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 464.72484985461,
+     "bytes_per_part": 688.722,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.3140721073815285,
+     "conservation_ok": true
+    }
+   },
+   "A2_minus_A1": {
+    "good_per_hour": {
+     "mean": 0.1168961619905872,
+     "lo": -0.185557,
+     "hi": 0.50112
+    },
+    "escapes_per_1000_shipped": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "holds": {
+     "mean": 0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "holds_missing_or_late": {
+     "mean": 0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "mean_cycle_s": {
+     "mean": 1.8209808810032968,
+     "lo": -0.176302,
+     "hi": 5.159007
+    },
+    "bytes_per_part": {
+     "mean": -3999807.778,
+     "lo": -3999808.84275,
+     "hi": -3999806.7385
+    },
+    "evidence_latency_s": {
+     "mean": -0.3200160000000174,
+     "lo": -0.320016,
+     "hi": -0.320016
+    },
+    "cost_per_good_unit": {
+     "mean": -1.3752160642155343e-05,
+     "lo": -5.1e-05,
+     "hi": 1.2e-05
+    }
+   },
+   "A2_minus_A0": {
+    "good_per_hour": {
+     "mean": -6.09763134871736,
+     "lo": -14.810537,
+     "hi": -0.434323
+    },
+    "escapes_per_1000_shipped": {
+     "mean": -2.851383939585811,
+     "lo": -4.922561,
+     "hi": -1.291483
+    },
+    "holds": {
+     "mean": -0.25,
+     "lo": -0.9,
+     "hi": 0.4
+    },
+    "holds_missing_or_late": {
+     "mean": 0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "mean_cycle_s": {
+     "mean": 50.644375477286005,
+     "lo": 42.353524,
+     "hi": 58.719893
+    },
+    "bytes_per_part": {
+     "mean": 688.722,
+     "lo": 687.400625,
+     "hi": 689.957375
+    },
+    "evidence_latency_s": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "cost_per_good_unit": {
+     "mean": -0.41478920803922015,
+     "lo": -0.721356,
+     "hi": -0.178408
+    }
+   },
+   "verdict": {
+    "safety_ok": true,
+    "decentralisation_pays": false
+   }
+  },
+  "P1-D1a": {
+   "means": {
+    "A0_isolated": {
+     "good_per_hour": 201.93074361177332,
+     "escapes_per_1000_shipped": 3.895904669970416,
+     "holds": 44.6,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 414.080474377324,
+     "bytes_per_part": 0.0,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.7288613154207484,
+     "conservation_ok": true
+    },
+    "A1_central": {
+     "good_per_hour": 195.35560202937353,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 44.4,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 463.36434564698317,
+     "bytes_per_part": 4000496.5,
+     "evidence_latency_s": 1.6000800000000495,
+     "cost_per_good_unit": 1.314526283286669,
+     "conservation_ok": true
+    },
+    "A2_agents": {
+     "good_per_hour": 195.83311226305594,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 44.35,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 464.72484985461,
+     "bytes_per_part": 688.722,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.3140721073815285,
+     "conservation_ok": true
+    }
+   },
+   "A2_minus_A1": {
+    "good_per_hour": {
+     "mean": 0.4775102336824105,
+     "lo": 0.022535,
+     "hi": 1.070525
+    },
+    "escapes_per_1000_shipped": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "holds": {
+     "mean": -0.05,
+     "lo": -0.15,
+     "hi": 0.0
+    },
+    "holds_missing_or_late": {
+     "mean": 0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "mean_cycle_s": {
+     "mean": 1.3605042076268545,
+     "lo": -0.742894,
+     "hi": 4.800119
+    },
+    "bytes_per_part": {
+     "mean": -3999807.778,
+     "lo": -3999808.84275,
+     "hi": -3999806.7385
+    },
+    "evidence_latency_s": {
+     "mean": -1.6000800000000495,
+     "lo": -1.60008,
+     "hi": -1.60008
+    },
+    "cost_per_good_unit": {
+     "mean": -0.000454175905140819,
+     "lo": -0.001336,
+     "hi": -1e-06
+    }
+   },
+   "A2_minus_A0": {
+    "good_per_hour": {
+     "mean": -6.09763134871736,
+     "lo": -14.810537,
+     "hi": -0.434323
+    },
+    "escapes_per_1000_shipped": {
+     "mean": -2.851383939585811,
+     "lo": -4.922561,
+     "hi": -1.291483
+    },
+    "holds": {
+     "mean": -0.25,
+     "lo": -0.9,
+     "hi": 0.4
+    },
+    "holds_missing_or_late": {
+     "mean": 0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "mean_cycle_s": {
+     "mean": 50.644375477286005,
+     "lo": 42.353524,
+     "hi": 58.719893
+    },
+    "bytes_per_part": {
+     "mean": 688.722,
+     "lo": 687.400625,
+     "hi": 689.957375
+    },
+    "evidence_latency_s": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "cost_per_good_unit": {
+     "mean": -0.41478920803922015,
+     "lo": -0.721356,
+     "hi": -0.178408
+    }
+   },
+   "verdict": {
+    "safety_ok": true,
+    "decentralisation_pays": true
+   }
+  },
+  "P1-D1b": {
+   "means": {
+    "A0_isolated": {
+     "good_per_hour": 201.93074361177332,
+     "escapes_per_1000_shipped": 3.895904669970416,
+     "holds": 44.6,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 414.080474377324,
+     "bytes_per_part": 0.0,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.7288613154207484,
+     "conservation_ok": true
+    },
+    "A1_central": {
+     "good_per_hour": 104.44336601622562,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 119.85,
+     "holds_missing_or_late": 40.85,
+     "mean_cycle_s": 1019.379717472574,
+     "bytes_per_part": 4000496.5,
+     "evidence_latency_s": 53.810487692246,
+     "cost_per_good_unit": 1.5166299399160188,
+     "conservation_ok": true
+    },
+    "A2_agents": {
+     "good_per_hour": 195.83311226305594,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 44.35,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 464.72484985461,
+     "bytes_per_part": 688.722,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.3140721073815285,
+     "conservation_ok": true
+    }
+   },
+   "A2_minus_A1": {
+    "good_per_hour": {
+     "mean": 91.38974624683031,
+     "lo": 74.133894,
+     "hi": 106.950801
+    },
+    "escapes_per_1000_shipped": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "holds": {
+     "mean": -75.5,
+     "lo": -90.75,
+     "hi": -60.65
+    },
+    "holds_missing_or_late": {
+     "mean": -40.85,
+     "lo": -49.05,
+     "hi": -32.8
+    },
+    "mean_cycle_s": {
+     "mean": -554.654867617964,
+     "lo": -687.41519,
+     "hi": -419.162957
+    },
+    "bytes_per_part": {
+     "mean": -3999807.778,
+     "lo": -3999808.84275,
+     "hi": -3999806.7385
+    },
+    "evidence_latency_s": {
+     "mean": -53.810487692246,
+     "lo": -57.900975,
+     "hi": -50.022901
+    },
+    "cost_per_good_unit": {
+     "mean": -0.20255783253449033,
+     "lo": -0.248593,
+     "hi": -0.158122
+    }
+   },
+   "A2_minus_A0": {
+    "good_per_hour": {
+     "mean": -6.09763134871736,
+     "lo": -14.810537,
+     "hi": -0.434323
+    },
+    "escapes_per_1000_shipped": {
+     "mean": -2.851383939585811,
+     "lo": -4.922561,
+     "hi": -1.291483
+    },
+    "holds": {
+     "mean": -0.25,
+     "lo": -0.9,
+     "hi": 0.4
+    },
+    "holds_missing_or_late": {
+     "mean": 0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "mean_cycle_s": {
+     "mean": 50.644375477286005,
+     "lo": 42.353524,
+     "hi": 58.719893
+    },
+    "bytes_per_part": {
+     "mean": 688.722,
+     "lo": 687.400625,
+     "hi": 689.957375
+    },
+    "evidence_latency_s": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "cost_per_good_unit": {
+     "mean": -0.41478920803922015,
+     "lo": -0.721356,
+     "hi": -0.178408
+    }
+   },
+   "verdict": {
+    "safety_ok": true,
+    "decentralisation_pays": true
+   }
+  },
+  "P1-D1c": {
+   "means": {
+    "A0_isolated": {
+     "good_per_hour": 201.93074361177332,
+     "escapes_per_1000_shipped": 3.895904669970416,
+     "holds": 44.6,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 414.080474377324,
+     "bytes_per_part": 0.0,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.7288613154207484,
+     "conservation_ok": true
+    },
+    "A1_central": {
+     "good_per_hour": 43.16061244941671,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 333.85,
+     "holds_missing_or_late": 155.15,
+     "mean_cycle_s": 2645.510130864115,
+     "bytes_per_part": 4000496.5,
+     "evidence_latency_s": 127.65291707576495,
+     "cost_per_good_unit": 2.101983184510335,
+     "conservation_ok": true
+    },
+    "A2_agents": {
+     "good_per_hour": 195.83311226305594,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 44.35,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 464.72484985461,
+     "bytes_per_part": 688.722,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.3140721073815285,
+     "conservation_ok": true
+    }
+   },
+   "A2_minus_A1": {
+    "good_per_hour": {
+     "mean": 152.67249981363923,
+     "lo": 141.730414,
+     "hi": 164.107595
+    },
+    "escapes_per_1000_shipped": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "holds": {
+     "mean": -289.5,
+     "lo": -308.7,
+     "hi": -269.1
+    },
+    "holds_missing_or_late": {
+     "mean": -155.15,
+     "lo": -165.9,
+     "hi": -143.9
+    },
+    "mean_cycle_s": {
+     "mean": -2180.785281009505,
+     "lo": -2345.331081,
+     "hi": -2013.874109
+    },
+    "bytes_per_part": {
+     "mean": -3999807.778,
+     "lo": -3999808.83875,
+     "hi": -3999806.731625
+    },
+    "evidence_latency_s": {
+     "mean": -127.65291707576495,
+     "lo": -135.163563,
+     "hi": -120.447508
+    },
+    "cost_per_good_unit": {
+     "mean": -0.7879110771288066,
+     "lo": -0.862431,
+     "hi": -0.714189
+    }
+   },
+   "A2_minus_A0": {
+    "good_per_hour": {
+     "mean": -6.09763134871736,
+     "lo": -14.810537,
+     "hi": -0.434323
+    },
+    "escapes_per_1000_shipped": {
+     "mean": -2.851383939585811,
+     "lo": -4.922561,
+     "hi": -1.291483
+    },
+    "holds": {
+     "mean": -0.25,
+     "lo": -0.9,
+     "hi": 0.4
+    },
+    "holds_missing_or_late": {
+     "mean": 0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "mean_cycle_s": {
+     "mean": 50.644375477286005,
+     "lo": 42.353524,
+     "hi": 58.719893
+    },
+    "bytes_per_part": {
+     "mean": 688.722,
+     "lo": 687.400625,
+     "hi": 689.957375
+    },
+    "evidence_latency_s": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "cost_per_good_unit": {
+     "mean": -0.41478920803922015,
+     "lo": -0.721356,
+     "hi": -0.178408
+    }
+   },
+   "verdict": {
+    "safety_ok": true,
+    "decentralisation_pays": true
+   }
+  },
+  "P1-D2": {
+   "means": {
+    "A0_isolated": {
+     "good_per_hour": 201.93074361177332,
+     "escapes_per_1000_shipped": 3.895904669970416,
+     "holds": 44.6,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 414.080474377324,
+     "bytes_per_part": 0.0,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.7288613154207484,
+     "conservation_ok": true
+    },
+    "A1_central": {
+     "good_per_hour": 89.71464354495555,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 137.45,
+     "holds_missing_or_late": 50.7,
+     "mean_cycle_s": 1201.1588010606063,
+     "bytes_per_part": 4000496.5,
+     "evidence_latency_s": 200.09834351677003,
+     "cost_per_good_unit": 1.561844599849095,
+     "conservation_ok": true
+    },
+    "A2_agents": {
+     "good_per_hour": 195.83311226305594,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 44.35,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 464.72484985461,
+     "bytes_per_part": 688.722,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.3140721073815285,
+     "conservation_ok": true
+    }
+   },
+   "A2_minus_A1": {
+    "good_per_hour": {
+     "mean": 106.11846871810039,
+     "lo": 95.104467,
+     "hi": 117.435618
+    },
+    "escapes_per_1000_shipped": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "holds": {
+     "mean": -93.1,
+     "lo": -98.9,
+     "hi": -87.0
+    },
+    "holds_missing_or_late": {
+     "mean": -50.7,
+     "lo": -53.55,
+     "hi": -47.8
+    },
+    "mean_cycle_s": {
+     "mean": -736.4339512059961,
+     "lo": -813.211298,
+     "hi": -670.516361
+    },
+    "bytes_per_part": {
+     "mean": -3999807.778,
+     "lo": -3999808.84275,
+     "hi": -3999806.7385
+    },
+    "evidence_latency_s": {
+     "mean": -200.09834351677003,
+     "lo": -212.492751,
+     "hi": -187.025632
+    },
+    "cost_per_good_unit": {
+     "mean": -0.2477724924675667,
+     "lo": -0.280319,
+     "hi": -0.219231
+    }
+   },
+   "A2_minus_A0": {
+    "good_per_hour": {
+     "mean": -6.09763134871736,
+     "lo": -14.810537,
+     "hi": -0.434323
+    },
+    "escapes_per_1000_shipped": {
+     "mean": -2.851383939585811,
+     "lo": -4.922561,
+     "hi": -1.291483
+    },
+    "holds": {
+     "mean": -0.25,
+     "lo": -0.9,
+     "hi": 0.4
+    },
+    "holds_missing_or_late": {
+     "mean": 0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "mean_cycle_s": {
+     "mean": 50.644375477286005,
+     "lo": 42.353524,
+     "hi": 58.719893
+    },
+    "bytes_per_part": {
+     "mean": 688.722,
+     "lo": 687.400625,
+     "hi": 689.957375
+    },
+    "evidence_latency_s": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "cost_per_good_unit": {
+     "mean": -0.41478920803922015,
+     "lo": -0.721356,
+     "hi": -0.178408
+    }
+   },
+   "verdict": {
+    "safety_ok": true,
+    "decentralisation_pays": true
+   }
+  },
+  "P1-D1b-small": {
+   "means": {
+    "A0_isolated": {
+     "good_per_hour": 201.93074361177332,
+     "escapes_per_1000_shipped": 3.895904669970416,
+     "holds": 44.6,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 414.080474377324,
+     "bytes_per_part": 0.0,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.7288613154207484,
+     "conservation_ok": true
+    },
+    "A1_central": {
+     "good_per_hour": 195.33257007151667,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 44.4,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 463.4738598136207,
+     "bytes_per_part": 1000496.5,
+     "evidence_latency_s": 2.0003999999999325,
+     "cost_per_good_unit": 1.3145058909209069,
+     "conservation_ok": true
+    },
+    "A2_agents": {
+     "good_per_hour": 195.83311226305594,
+     "escapes_per_1000_shipped": 1.0445207303846047,
+     "holds": 44.35,
+     "holds_missing_or_late": 0,
+     "mean_cycle_s": 464.72484985461,
+     "bytes_per_part": 688.722,
+     "evidence_latency_s": 0.0,
+     "cost_per_good_unit": 1.3140721073815285,
+     "conservation_ok": true
+    }
+   },
+   "A2_minus_A1": {
+    "good_per_hour": {
+     "mean": 0.5005421915392787,
+     "lo": 0.046575,
+     "hi": 1.082641
+    },
+    "escapes_per_1000_shipped": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "holds": {
+     "mean": -0.05,
+     "lo": -0.15,
+     "hi": 0.0
+    },
+    "holds_missing_or_late": {
+     "mean": 0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "mean_cycle_s": {
+     "mean": 1.2509900409892765,
+     "lo": -0.820089,
+     "hi": 4.649543
+    },
+    "bytes_per_part": {
+     "mean": -999807.778,
+     "lo": -999808.84275,
+     "hi": -999806.7385
+    },
+    "evidence_latency_s": {
+     "mean": -2.0003999999999325,
+     "lo": -2.0004,
+     "hi": -2.0004
+    },
+    "cost_per_good_unit": {
+     "mean": -0.00043378353937857385,
+     "lo": -0.00133,
+     "hi": 4.2e-05
+    }
+   },
+   "A2_minus_A0": {
+    "good_per_hour": {
+     "mean": -6.09763134871736,
+     "lo": -14.810537,
+     "hi": -0.434323
+    },
+    "escapes_per_1000_shipped": {
+     "mean": -2.851383939585811,
+     "lo": -4.922561,
+     "hi": -1.291483
+    },
+    "holds": {
+     "mean": -0.25,
+     "lo": -0.9,
+     "hi": 0.4
+    },
+    "holds_missing_or_late": {
+     "mean": 0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "mean_cycle_s": {
+     "mean": 50.644375477286005,
+     "lo": 42.353524,
+     "hi": 58.719893
+    },
+    "bytes_per_part": {
+     "mean": 688.722,
+     "lo": 687.400625,
+     "hi": 689.957375
+    },
+    "evidence_latency_s": {
+     "mean": 0.0,
+     "lo": 0.0,
+     "hi": 0.0
+    },
+    "cost_per_good_unit": {
+     "mean": -0.41478920803922015,
+     "lo": -0.721356,
+     "hi": -0.178408
+    }
+   },
+   "verdict": {
+    "safety_ok": true,
+    "decentralisation_pays": true
+   }
+  }
+ }
+}
