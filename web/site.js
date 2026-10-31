@@ -21,6 +21,8 @@ const pct = (x, d = 2) => x === null || x === undefined ? '—' : `${(100 * x).t
 const mmss = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 const api = async (url, opts) => { const r = await fetch(url, opts); if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); return r.json(); };
 const hash = (s) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) / 4294967295; };
+// Conveyor speed in scene units per SIMULATED second (1 unit ≈ 0.25 m in this layout -> ~0.15 m/s).
+const BELT_SPEED = 0.6;
 const ease = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
 
 // ---------------------------------------------------------------- STL
@@ -197,9 +199,10 @@ class FactoryView {
     this.t0 = Math.max(0, Math.min(...this.parts.map((x) => x.kf[0][0])) - 2);
   }
 
-  update(t, dtReal, playing, truth) {
+  update(t, dtReal, playing, truth) {  // eslint-disable-line
     if (!this.data) return { ship: 0, hold: 0, scrap: 0, esc: 0 };
-    if (playing) this.beltTex.offset.x -= dtReal * 0.6;
+    // belt texture: 12 repeats over 23 units -> 1 texture unit = 1.92 scene units
+    if (playing) this.beltTex.offset.x -= (dtReal * lab.speed * BELT_SPEED) / 1.92;
     let ship = 0, hold = 0, scrap = 0, esc = 0; const shipped = new Set(); let selVisible = false;
     for (const x of this.parts) {
       const xy = at(x.kf, t); x.m.visible = !!xy; if (!xy) continue;
@@ -268,7 +271,8 @@ function pathFor(p, binIndex) {
   let prevEnd = out + 2, prevKey = pr;
   kf.push([prevEnd, ...pos(pr, 1.7, jz * 0.8)]);
   for (const [station, start, end] of p.events) {
-    const travel = Math.min(8, Math.max(0.5, start - prevEnd));
+    const [px, pz] = pos(prevKey), [sx, sz] = pos(station);
+    const travel = Math.min(Math.max(0.5, start - prevEnd), Math.hypot(sx - px, sz - pz) / BELT_SPEED);
     const arrive = Math.max(prevEnd, Math.min(start, prevEnd + travel));
     kf.push([prevEnd, ...pos(prevKey, prevKey.startsWith('printer') ? 1.7 : 0, prevKey.startsWith('printer') ? jz * 0.8 : jz * 0.25)]);
     if (start - arrive > 1) kf.push([arrive, ...pos(station, -1.15, jz)], [start - 0.5, ...pos(station, -0.95, jz)]);
@@ -277,8 +281,9 @@ function pathFor(p, binIndex) {
   }
   const last = kf[kf.length - 1][0];
   const binPos = (k) => { const [x, z] = P[k]; const i = binIndex; return [x - 1.05 + (i % 6) * 0.42, z - 1.05 + (Math.floor(i / 6) % 6) * 0.42]; };
-  if (p.fate === 'shipped') kf.push([last + 4, ...binPos('ship')]);
-  else if (p.fate === 'scrap') kf.push([last + 4, ...binPos('scrap')]);
+  const lastKey = prevKey, [lx, lz] = pos(lastKey), toBin = (k) => Math.hypot(P[k][0] - lx, P[k][1] - lz) / BELT_SPEED;
+  if (p.fate === 'shipped') kf.push([last + toBin('ship'), ...binPos('ship')]);
+  else if (p.fate === 'scrap') kf.push([last + toBin('scrap'), ...binPos('scrap')]);
   else kf.push([last + 4, ...pos('buffer', (j - 0.5) * 1.2, jz)]);
   return kf;
 }
@@ -302,7 +307,7 @@ const STORY = [
   ['Review (HOLD)', 'Held parts go to review (45 s, shared operator). Holding everything looks "safe and cheap" on paper but cuts throughput by 82%.', [3, 6, 0], [3.5, 0.5, -5]],
   ['Shipped', 'Turn on ground truth: a red part is a shipped defect. In Compare mode, purple parts are defects the rule shipped and QualityRelay stopped.', [9, 6, 6], [11, 0, -2]],
 ];
-const lab = { mode: 'single', views: [], runs: [], t: 0, T: 1, t0: 0, playing: true, speed: 60, sel: null, story: -1, caught: new Set() };
+const lab = { mode: 'single', views: [], runs: [], t: 0, T: 1, t0: 0, playing: true, speed: 10, sel: null, story: -1, caught: new Set() };
 
 async function initLab() {
   const [sg, tg] = await Promise.all([loadSTL('slot_nominal_21p00.stl'), loadSTL('tab_nominal_20p00.stl')]);
