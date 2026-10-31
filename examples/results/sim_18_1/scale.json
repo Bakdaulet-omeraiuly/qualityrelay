@@ -1,0 +1,137 @@
+{
+ "origin": "SIMULATED",
+ "tiers": {
+  "SC06": {
+   "bayes+optimized": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.4532874651543968,
+    "downtime_h": 0.5181726111111111,
+    "escapes_per_1000_shipped": 1.3844974609562135,
+    "good_per_hour": 63.65580804524497,
+    "hold_inventory_part_hours": 1.0625281239609008,
+    "holds": 34.5,
+    "local_reinspections": 0,
+    "mean_cycle_s": 680.8258818124407,
+    "n_seeds": 10,
+    "operator_hours": 1.1870793400643596,
+    "profit_per_hour": 289.76776820873806,
+    "scrapped_good_parts": 0.2,
+    "stale_evidence_holds": 0
+   },
+   "n_pairs": 150,
+   "operators": 2,
+   "product_vs_baseline": {
+    "better_on_all_three": true,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   },
+   "rules+fifo": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.8483954476787263,
+    "downtime_h": 0.5123228333333333,
+    "escapes_per_1000_shipped": 4.181837054070455,
+    "good_per_hour": 63.97820699132149,
+    "hold_inventory_part_hours": 1.1276979304359636,
+    "holds": 35.9,
+    "local_reinspections": 0,
+    "mean_cycle_s": 429.02952968559214,
+    "n_seeds": 10,
+    "operator_hours": 1.2131036133581443,
+    "profit_per_hour": 265.9419559822893,
+    "scrapped_good_parts": 0.2,
+    "stale_evidence_holds": 0
+   },
+   "stations": 6,
+   "truth_sha256_seed0": "7d98d67d05193094afdead6eb289beeb28686965160af7e5278f19b43b007ef3"
+  },
+  "SC10": {
+   "bayes+optimized": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.3453346480597645,
+    "downtime_h": 0.7549389722222223,
+    "escapes_per_1000_shipped": 1.0333956963777942,
+    "good_per_hour": 125.68058754868355,
+    "hold_inventory_part_hours": 1.9419188201994313,
+    "holds": 68.6,
+    "local_reinspections": 0,
+    "mean_cycle_s": 597.3029432668244,
+    "n_seeds": 10,
+    "operator_hours": 2.2773636698958653,
+    "profit_per_hour": 585.2011571931756,
+    "scrapped_good_parts": 0.5,
+    "stale_evidence_holds": 0
+   },
+   "n_pairs": 300,
+   "operators": 3,
+   "product_vs_baseline": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": false,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   },
+   "rules+fifo": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.5837265536409515,
+    "downtime_h": 0.7445111666666667,
+    "escapes_per_1000_shipped": 2.7494254208753457,
+    "good_per_hour": 128.11759825566338,
+    "hold_inventory_part_hours": 2.0393072665253773,
+    "holds": 69.4,
+    "local_reinspections": 0,
+    "mean_cycle_s": 478.0221959651688,
+    "n_seeds": 10,
+    "operator_hours": 2.280371783392269,
+    "profit_per_hour": 565.042813764019,
+    "scrapped_good_parts": 0.2,
+    "stale_evidence_holds": 0
+   },
+   "stations": 10,
+   "truth_sha256_seed0": "79ce93f34b742f95096234c5412910d564880221adefb7e42df7f6deda96d7d8"
+  },
+  "SC50": {
+   "bayes+optimized": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.4070126536064018,
+    "downtime_h": 3.2965138888888887,
+    "escapes_per_1000_shipped": 1.6071272525088685,
+    "good_per_hour": 700.6772579876366,
+    "hold_inventory_part_hours": 11.035319330972996,
+    "holds": 401,
+    "local_reinspections": 0,
+    "mean_cycle_s": 384.7590226287804,
+    "n_seeds": 10,
+    "operator_hours": 13.877252958212079,
+    "profit_per_hour": 3219.7264142884446,
+    "scrapped_good_parts": 1.2,
+    "stale_evidence_holds": 0
+   },
+   "n_pairs": 1800,
+   "operators": 13,
+   "product_vs_baseline": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   },
+   "rules+fifo": {
+    "conservation_ok": true,
+    "cost_per_good_unit": 1.750996952970882,
+    "downtime_h": 3.2687709444444444,
+    "escapes_per_1000_shipped": 3.902209272601774,
+    "good_per_hour": 706.2783371898454,
+    "hold_inventory_part_hours": 11.547855650147866,
+    "holds": 407,
+    "local_reinspections": 0,
+    "mean_cycle_s": 364.38445412797284,
+    "n_seeds": 10,
+    "operator_hours": 13.931902556914833,
+    "profit_per_hour": 2996.627566990268,
+    "scrapped_good_parts": 1.7,
+    "stale_evidence_holds": 0
+   },
+   "stations": 50,
+   "truth_sha256_seed0": "b9436a409f9e3d93d6e752100fd4cda8f0b80e80b61894e1414f923a85e4b4a6"
+  }
+ }
+}

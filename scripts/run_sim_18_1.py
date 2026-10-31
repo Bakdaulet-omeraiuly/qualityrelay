@@ -100,7 +100,11 @@ def main():
     (out / 'api' / 'simulation_runs.json').write_text(json.dumps(api_rows, indent=1, sort_keys=True))
 
     # ---- charts (+ the data table each is drawn from) ----
-    label = lambda sid: f'{sid} {BY_ID[sid].title[:30]}'  # noqa: E731
+    def label(sid, n=30):
+        t = BY_ID[sid].title
+        if len(t) > n:
+            t = t[:n].rsplit(' ', 1)[0].rstrip(',:;-') + '\u2026'
+        return f'{sid} {t}'
     gph_rows = [(label(sc.sid), {cfg_name(BASELINE): summarise(res[sc.sid][BASELINE])['good_per_hour'],
                                  cfg_name(PRODUCT): summarise(res[sc.sid][PRODUCT])['good_per_hour']}) for sc in main_sc]
     (out / 'charts' / 'good_per_hour.svg').write_text(charts.dot_plot(
