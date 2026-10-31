@@ -12,6 +12,9 @@
 | Decentralized real deployment | **NOT DEPLOYED** | research contracts and original 15.0 separate SQLite services |
 | Full virtual factory 3D NVIDIA scene | **NOT DEPLOYED** | small seeded six-stage discrete event reference |
 | NVIDIA 8 technologies actively integrated | **NOT CONFIGURED** | 8 explicit stubs, license/resource docs |
+| Anomaly detector trained on an NVIDIA GPU | **Done, reference-level** — STFPM on Brev L4; MVTec screw 0.948 / bottle 1.000 image AUROC (`EXTERNAL_DATASET`), own-STL synthetic 0.880 (`SIMULATED`) | `docs/research/ANOMALY_GPU_RUN_31OCT.md`, manifests in `docs/research/runs/` |
+| Anomaly detector validated on our printed parts | **NOT RUN** — no `PHYSICAL_CAPTURE` images exist yet | pipeline ready: `scripts/train_anomaly.py --data captured` |
+| Model deployed on Raspberry Pi + Hailo-8L | **NOT ATTEMPTED** — ONNX exported, compile steps unverified | `docs/engineering/ANOMALY_MODEL_HANDOFF.md` |
 | Physical servo sorter | **NOT CONNECTED** | stage/approval/ACK state machine, no GPIO command |
 | Physical industrial cost savings | **NOT MEASURED** | assumptions-only simulation economics |
 | A new scientific discovery was demonstrated | **NO** | hypotheses not yet supported vs matched conservative rules |
