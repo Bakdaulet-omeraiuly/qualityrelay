@@ -204,3 +204,10 @@ def test_charts_are_well_formed_and_labelled_simulated():
     for s in svgs:
         ET.fromstring(s)
         assert 'SIMULATED' in s and '<title>' in s
+
+
+@pytest.mark.parametrize('sid,seed,cfg', [('F08', 7, ('rules', 'fifo')), ('F10', 8, ('rules', 'optimized')),
+                                          ('F07', 14, ('bayes', 'optimized'))])
+def test_full_size_runs_that_used_to_deadlock_now_complete(sid, seed, cfg):
+    o = run_factory(BY_ID[sid], seed, *cfg, model=MODEL, keep_log=False)
+    assert o['conservation_ok'] and o['parts'] == 2 * BY_ID[sid].n_pairs

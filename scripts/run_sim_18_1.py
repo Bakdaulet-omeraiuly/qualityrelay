@@ -53,6 +53,10 @@ def main():
     t0 = time.time()
     scale = run_grid(scale_sc, list(range(a.scale_seeds)), configs=(BASELINE, PRODUCT))
     scale_wall = time.time() - t0
+    bad = [(sid, cfg, o['seed']) for grid in (res, scale, {'F01': {('hold_all', 'fifo'): hold_all}})
+           for sid, d in grid.items() for cfg, runs in d.items() for o in runs if not o['conservation_ok']]
+    if bad:
+        raise SystemExit(f'conservation violated (deadlock or lost parts) in {len(bad)} runs, e.g. {bad[:5]}')
 
     summary_rows, contrast_rows, roi, api_rows, truth = [], [], {}, [], {}
     for sc in main_sc:

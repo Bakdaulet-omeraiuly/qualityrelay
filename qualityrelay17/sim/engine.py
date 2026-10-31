@@ -119,7 +119,9 @@ class Factory:
         if sc.assembly_site not in self.site and len(sc.sites) > 1:
             self.site[sc.assembly_site] = SiteConfig(sc.assembly_site, makes='none', printers=1)
         mk = lambda n, c: env.resource(n, c)  # noqa: E731
-        self.wip = mk('WIP', sc.wip_cap)
+        # Kit-based CONWIP: one token pool per part kind. A single shared pool deadlocks when it
+        # fills with one kind (all slots, no tabs): nothing can pair, nothing frees a token.
+        self.wip = {k: mk(f'WIP-{k}', max(8, sc.wip_cap // 2)) for k in ('slot', 'tab')}
         self.res = {}
         for s in self.site.values():
             if s.makes != 'none':
@@ -154,7 +156,7 @@ class Factory:
     def _failure_delay(self, res):
         """Repair time to add if this resource has failed since its last use (exponential MTBF)."""
         sc = self.sc
-        if res.name.endswith('WIP') or 'operator' in res.name:
+        if res.name.startswith('WIP') or 'operator' in res.name:
             return 0.0
         mtbf = sc.mtbf_s / max(1e-9, sc.failure_scale)
         rng = self._next_fail.setdefault(res.name, [Random(f'fail:{self.seed}:{res.name}'), None])
@@ -188,7 +190,7 @@ class Factory:
     def printer(self, site: SiteConfig, jobs):
         pr = self.res[(site.name, 'printer')]
         for job_id, kind, idxs in jobs:
-            yield ('acquire', {self.wip: len(idxs)})
+            yield ('acquire', {self.wip[kind]: len(idxs)})
             yield ('acquire', {pr: 1})
             t0 = self.env.now
             delay = self._failure_delay(pr)
@@ -278,10 +280,10 @@ class Factory:
         if not p['crack'] and not p['warped']:
             self.stats['scrapped_good_parts'] += 1
         p['fate'] = 'scrap'
-        self.env.process(self._release_wip(1))
+        self.env.process(self._release_wip(p['kind'], 1))
 
-    def _release_wip(self, n):
-        yield ('release', {self.wip: n})
+    def _release_wip(self, kind, n):
+        yield ('release', {self.wip[kind]: n})
 
     def _try_pair(self, flush=False):
         S, T = self.buffer['slot'], self.buffer['tab']
@@ -395,7 +397,7 @@ class Factory:
                                            and self.env.now >= self.sc.cost_shock_at_s else 1.0),
                    cycle_s=round(self.env.now - min(s['t_print_s'], t['t_print_s']), 3))
         s['fate'] = t['fate'] = 'shipped'
-        yield ('release', {self.wip: 2})
+        yield ('release', {self.wip['slot']: 1, self.wip['tab']: 1})
 
     # ---- run -------------------------------------------------------------------------
     def run(self):
