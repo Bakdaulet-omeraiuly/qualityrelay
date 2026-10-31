@@ -58,6 +58,23 @@ plan before this goes on a slide as a result rather than "the wiring now works."
    HyorinmaruK's Pi images (`data/prints/good|defect/`); one command, see the write-up. Hailo
    compile not attempted (adilnurgg). The other seven NVIDIA adapters stay `NOT_CONFIGURED`.
 
+5. **18.1 science P0 (branch `science/18-1-p0`).** SCI-01/02 cost accounting fixed (peer
+   requests were never charged); SCI-03 re-run: `voi_driven` verdicts unchanged, the 17.1
+   request slice's "cheaper" result reversed. SCI-05..08: Gate-A B0..B7 + ablations, 14
+   registered scenarios, pre-registered. **Primary result NEGATIVE**: at default prices B7 holds
+   every part; it beats B0 only when holds are priced as review labour or messages are cheap.
+   Pitch-approved claims: `docs/research/COLLECTIVE_GATE_A_RESULTS_31OCT.md` section 4.
+
+6. **18.1 SIM-01..07 (branch `science/18-1-sim`).** Digital factory engine (own DES, Slot/Tab,
+   CONWIP, failures, operators, review/rework, multi-site), 18 scenarios with truth hashes, CAD
+   widths measured from STL, SciPy pairing + MILP capacity plan, Monte Carlo ROI, API records +
+   proposed schema for adilnurgg (`docs/research/sim_api/`). Product config safer + cheaper per
+   good unit in 15/15 scenarios, throughput kept in only 4/15; hold-all cuts throughput 82%.
+   Pitch claims: `docs/research/SIM_18_1_RESULTS.md`.
+7. **NVIDIA Warp + tuning (same branch).** Warp kernels with CPU-identical decisions, 10^7 parts x 8
+   scenarios on CPU (GPU run pending: Brev SSH blocked on this network); post-hoc pairing/deadline
+   tuning: `docs/research/WARP_MC_AND_TUNING_31OCT.md`.
+
 Reviewer for this branch: adilnurgg or HyorinmaruK (one review per `TEAM_OWNERSHIP_AND_GITHUB.md`;
 no safety/actuation code touched).
 

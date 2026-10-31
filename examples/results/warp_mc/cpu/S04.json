@@ -1,0 +1,112 @@
+{
+ "device": "cpu",
+ "duplicate_rate": 0.0,
+ "engine": "nvidia-warp",
+ "kernel_seconds": 1.0857,
+ "lots": 100,
+ "origin": "SIMULATED",
+ "paired_vs_B0": {
+  "B1_single_agent_fixed": {
+   "released_good_rate": {
+    "ci95": [
+     0.008128718874231314,
+     0.008441481125768686
+    ],
+    "diff": 0.0082851,
+    "discordant": [
+     360073,
+     277222
+    ]
+   },
+   "unsafe_diff_between_lot_se": 1.5999529664804194e-05,
+   "unsafe_pass_rate": {
+    "ci95": [
+     -0.0025020520241851624,
+     -0.0024293479758148375
+    ],
+    "diff": -0.0024657,
+    "discordant": [
+     4902,
+     29559
+    ]
+   }
+  },
+  "F_collective_fusion": {
+   "released_good_rate": {
+    "ci95": [
+     0.035782196683010255,
+     0.03601280331698974
+    ],
+    "diff": 0.0358975,
+    "discordant": [
+     358975,
+     0
+    ]
+   },
+   "unsafe_diff_between_lot_se": 7.40393016027176e-06,
+   "unsafe_pass_rate": {
+    "ci95": [
+     0.0005285612343940556,
+     0.0005574387656059444
+    ],
+    "diff": 0.000543,
+    "discordant": [
+     5430,
+     0
+    ]
+   }
+  }
+ },
+ "parts": 10000000,
+ "parts_per_second": 9210866,
+ "policies": {
+  "B0_rules": {
+   "false_hold_rate": 0.2411514,
+   "hold_rate": 0.309108,
+   "released_good_rate": 0.6803899,
+   "unsafe_pass": 105021,
+   "unsafe_pass_rate": 0.0105021,
+   "unsafe_pass_rate_between_lot_se": 3.531454474727193e-05,
+   "unsafe_pass_wilson95": [
+    0.010439105736185063,
+    0.010565470340881533
+   ]
+  },
+  "B1_single_agent_fixed": {
+   "false_hold_rate": 0.2328663,
+   "hold_rate": 0.3032886,
+   "released_good_rate": 0.688675,
+   "unsafe_pass": 80364,
+   "unsafe_pass_rate": 0.0080364,
+   "unsafe_pass_rate_between_lot_se": 3.1709068900001634e-05,
+   "unsafe_pass_wilson95": [
+    0.007981250256225744,
+    0.008091927715217159
+   ]
+  },
+  "F_collective_fusion": {
+   "false_hold_rate": 0.2052539,
+   "hold_rate": 0.2726675,
+   "released_good_rate": 0.7162874,
+   "unsafe_pass": 110451,
+   "unsafe_pass_rate": 0.0110451,
+   "unsafe_pass_rate_between_lot_se": 3.488436742882249e-05,
+   "unsafe_pass_wilson95": [
+    0.01098051052038244,
+    0.011110065139501883
+   ]
+  }
+ },
+ "scenario": {
+  "caliper_sigma": 0.05,
+  "camera_noise": 0.04,
+  "duplicate_p": 0.0,
+  "network_outage": 0.05,
+  "shared_noise": 0.15,
+  "shift": 0.1,
+  "sid": "S04",
+  "title": "shared lighting"
+ },
+ "seed": 2026,
+ "truly_safe_rate": 0.9215413
+}

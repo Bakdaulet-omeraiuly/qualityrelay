@@ -1,0 +1,770 @@
+{
+ "bayes_fifo_escapes_per_1000_on_tuning_seeds": 2.8225996142447194,
+ "better_on_all_three": [
+  "F01",
+  "F06",
+  "F07",
+  "F10",
+  "M03"
+ ],
+ "chosen": {
+  "escapes_per_1000": 2.1185941950519056,
+  "good_per_hour_vs_bayes_fifo": 1.0054556817313258,
+  "per_scenario_good_per_hour": {
+   "F01": 191.4261962794481,
+   "F02": 152.94070184035488,
+   "F03": 170.42013909235624,
+   "F08": 122.57311180265877,
+   "M01": 67.72739903544078,
+   "M05": 66.17134844092222
+  },
+  "setting": {
+   "batch_k": 2,
+   "pair_timeout_s": 60.0
+  }
+ },
+ "deadline_tradeoff_M04": {
+  "1200s|bayes+fifo": {
+   "cost_per_good_unit": 2.8356401991174924,
+   "escapes_per_1000": 2.4150422632396067,
+   "good_per_hour": 51.48246444510632,
+   "mean_cycle_s": 1918.2258313397215,
+   "stale_evidence_holds": 0
+  },
+  "1200s|rules+fifo": {
+   "cost_per_good_unit": 2.959846346508458,
+   "escapes_per_1000": 3.6219385995170748,
+   "good_per_hour": 51.2596246380576,
+   "mean_cycle_s": 1925.592095355725,
+   "stale_evidence_holds": 0
+  },
+  "120s|bayes+fifo": {
+   "cost_per_good_unit": 3.221498504528646,
+   "escapes_per_1000": 2.4162927166033827,
+   "good_per_hour": 50.31823671340637,
+   "mean_cycle_s": 2014.5741762094715,
+   "stale_evidence_holds": 284.9
+  },
+  "120s|rules+fifo": {
+   "cost_per_good_unit": 3.1684972869106063,
+   "escapes_per_1000": 2.4154589371980677,
+   "good_per_hour": 50.3122820109046,
+   "mean_cycle_s": 2016.0378058977942,
+   "stale_evidence_holds": 285.05
+  },
+  "300s|bayes+fifo": {
+   "cost_per_good_unit": 2.8373070132091094,
+   "escapes_per_1000": 2.414625733011383,
+   "good_per_hour": 52.008895966058965,
+   "mean_cycle_s": 1908.767931766391,
+   "stale_evidence_holds": 3.65
+  },
+  "300s|rules+fifo": {
+   "cost_per_good_unit": 3.015131441079793,
+   "escapes_per_1000": 3.9662010691498533,
+   "good_per_hour": 51.7705090247575,
+   "mean_cycle_s": 1916.0550504353312,
+   "stale_evidence_holds": 4.1
+  },
+  "600s|bayes+fifo": {
+   "cost_per_good_unit": 2.8356401991174924,
+   "escapes_per_1000": 2.4150422632396067,
+   "good_per_hour": 51.48246444510632,
+   "mean_cycle_s": 1918.2258313397215,
+   "stale_evidence_holds": 0
+  },
+  "600s|rules+fifo": {
+   "cost_per_good_unit": 2.959846346508458,
+   "escapes_per_1000": 3.6219385995170748,
+   "good_per_hour": 51.2596246380576,
+   "mean_cycle_s": 1925.592095355725,
+   "stale_evidence_holds": 0
+  }
+ },
+ "eval_seeds": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19
+ ],
+ "evaluation_vs_rules_fifo": {
+  "F01": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.454979,
+     -0.117419
+    ],
+    "mean": -0.2767552866062864
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -3.094512,
+     -0.899379
+    ],
+    "mean": -1.9347107991779275
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -2.910487,
+     1.26352
+    ],
+    "mean": -0.6929918108983728
+   },
+   "verdict": {
+    "better_on_all_three": true,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   }
+  },
+  "F02": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -1.513264,
+     -0.802404
+    ],
+    "mean": -1.1584177495143673
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -10.25369,
+     -5.577651
+    ],
+    "mean": -7.91735637291887
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -19.912561,
+     -10.326894
+    ],
+    "mean": -14.933370443276672
+   },
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   }
+  },
+  "F03": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -1.224839,
+     -0.546691
+    ],
+    "mean": -0.8751561742495084
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -8.203812,
+     -3.89373
+    ],
+    "mean": -5.9798181187791855
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -16.588696,
+     -5.85559
+    ],
+    "mean": -10.651638086371914
+   },
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   }
+  },
+  "F04": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.350426,
+     -0.048293
+    ],
+    "mean": -0.19618414534036788
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -2.403387,
+     -0.435925
+    ],
+    "mean": -1.4102450515144604
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -4.854806,
+     -0.150244
+    ],
+    "mean": -2.1877819916435945
+   },
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   }
+  },
+  "F05": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.486759,
+     -0.037977
+    ],
+    "mean": -0.24078475131892382
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -3.364721,
+     -0.518021
+    ],
+    "mean": -1.807565990341779
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -2.206331,
+     -1.188435
+    ],
+    "mean": -1.6854822523364519
+   },
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   }
+  },
+  "F06": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.625105,
+     -0.234984
+    ],
+    "mean": -0.4075012851799748
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -2.712576,
+     -0.133221
+    ],
+    "mean": -1.2933437273306876
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     84.542165,
+     107.543025
+    ],
+    "mean": 96.73520381975021
+   },
+   "verdict": {
+    "better_on_all_three": true,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   }
+  },
+  "F07": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.550744,
+     -0.16964
+    ],
+    "mean": -0.3535574563284442
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -2.707076,
+     -0.253025
+    ],
+    "mean": -1.4168492323982105
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     62.399064,
+     84.937342
+    ],
+    "mean": 74.70427216497777
+   },
+   "verdict": {
+    "better_on_all_three": true,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   }
+  },
+  "F08": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.321459,
+     -0.074641
+    ],
+    "mean": -0.19866713096247451
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -2.330278,
+     -0.649691
+    ],
+    "mean": -1.5520713901269052
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -11.395635,
+     0.098988
+    ],
+    "mean": -4.978793037033566
+   },
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   }
+  },
+  "F09": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.307472,
+     0.065883
+    ],
+    "mean": -0.12937856587210161
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -2.191422,
+     0.265141
+    ],
+    "mean": -1.0262953059392277
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -4.466006,
+     -0.1
+    ],
+    "mean": -2.3829158360911697
+   },
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": false,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   }
+  },
+  "F10": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.7641,
+     -0.180343
+    ],
+    "mean": -0.4711779935219984
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -3.094512,
+     -0.899379
+    ],
+    "mean": -1.9347107991779275
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -2.350832,
+     1.377262
+    ],
+    "mean": -0.4318633509764084
+   },
+   "verdict": {
+    "better_on_all_three": true,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   }
+  },
+  "M01": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.584753,
+     -0.16185
+    ],
+    "mean": -0.3629053614039699
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -4.29386,
+     -1.374736
+    ],
+    "mean": -2.7492292528901707
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -2.258214,
+     -0.453411
+    ],
+    "mean": -1.3072991646146321
+   },
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   }
+  },
+  "M02": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.584753,
+     -0.16185
+    ],
+    "mean": -0.3629053614039699
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -4.29386,
+     -1.374736
+    ],
+    "mean": -2.7492292528901707
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -2.258214,
+     -0.453411
+    ],
+    "mean": -1.3072991646146321
+   },
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   }
+  },
+  "M03": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.592407,
+     -0.242889
+    ],
+    "mean": -0.4050938135232003
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -4.13935,
+     -1.893683
+    ],
+    "mean": -2.9312105141183338
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -1.006398,
+     1.485604
+    ],
+    "mean": 0.15481514488652195
+   },
+   "verdict": {
+    "better_on_all_three": true,
+    "cheaper_per_good_unit": true,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   }
+  },
+  "M04": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.193591,
+     0.039838
+    ],
+    "mean": -0.06124095431042433
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -1.55297,
+     -0.001798
+    ],
+    "mean": -0.6891194256659008
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -0.303042,
+     0.466571
+    ],
+    "mean": 0.011291732808607336
+   },
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": false,
+    "safety_non_inferior": true,
+    "throughput_preserved": true
+   }
+  },
+  "M05": {
+   "cost_per_good_unit_diff": {
+    "ci95": [
+     -0.652107,
+     0.094125
+    ],
+    "mean": -0.2879073532880856
+   },
+   "escapes_per_1000_diff": {
+    "ci95": [
+     -4.519527,
+     0.194457
+    ],
+    "mean": -2.2474499875106786
+   },
+   "good_per_hour_diff": {
+    "ci95": [
+     -1.991553,
+     -0.617381
+    ],
+    "mean": -1.2543907661078812
+   },
+   "verdict": {
+    "better_on_all_three": false,
+    "cheaper_per_good_unit": false,
+    "safety_non_inferior": true,
+    "throughput_preserved": false
+   }
+  }
+ },
+ "origin": "SIMULATED",
+ "selection_rule": "among settings whose pooled escapes/1000 on the tuning seeds are <= those of\n  bayes+FIFO (optimisation must not cost safety vs no optimisation), pick the highest mean good/h\n  relative to bayes+FIFO, averaged over the tuning scenarios.",
+ "settings": [
+  {
+   "escapes_per_1000": 1.9537686549597477,
+   "good_per_hour_vs_bayes_fifo": 0.9944439808228412,
+   "per_scenario_good_per_hour": {
+    "F01": 191.75633712544087,
+    "F02": 152.5814023752487,
+    "F03": 169.54900502039857,
+    "F08": 115.04345392361728,
+    "M01": 67.71826046950267,
+    "M05": 66.45246775838832
+   },
+   "setting": {
+    "batch_k": 2,
+    "pair_timeout_s": null
+   }
+  },
+  {
+   "escapes_per_1000": 2.1185941950519056,
+   "good_per_hour_vs_bayes_fifo": 1.0054556817313258,
+   "per_scenario_good_per_hour": {
+    "F01": 191.4261962794481,
+    "F02": 152.94070184035488,
+    "F03": 170.42013909235624,
+    "F08": 122.57311180265877,
+    "M01": 67.72739903544078,
+    "M05": 66.17134844092222
+   },
+   "setting": {
+    "batch_k": 2,
+    "pair_timeout_s": 60.0
+   }
+  },
+  {
+   "escapes_per_1000": 2.5886007436343954,
+   "good_per_hour_vs_bayes_fifo": 0.9996974901753307,
+   "per_scenario_good_per_hour": {
+    "F01": 187.47588134671133,
+    "F02": 153.57897475913487,
+    "F03": 170.22794855472904,
+    "F08": 121.66706391948823,
+    "M01": 67.12850754736228,
+    "M05": 66.14654806551421
+   },
+   "setting": {
+    "batch_k": 2,
+    "pair_timeout_s": 180.0
+   }
+  },
+  {
+   "escapes_per_1000": 2.142436727486757,
+   "good_per_hour_vs_bayes_fifo": 0.9594701080300638,
+   "per_scenario_good_per_hour": {
+    "F01": 177.786387507378,
+    "F02": 148.95502089164103,
+    "F03": 160.92157447276907,
+    "F08": 113.62322706910184,
+    "M01": 65.94444110279716,
+    "M05": 64.84588231003697
+   },
+   "setting": {
+    "batch_k": 2,
+    "pair_timeout_s": 600.0
+   }
+  },
+  {
+   "escapes_per_1000": 1.7656198502754368,
+   "good_per_hour_vs_bayes_fifo": 0.9722422719588976,
+   "per_scenario_good_per_hour": {
+    "F01": 191.91715483726267,
+    "F02": 152.783533970726,
+    "F03": 171.22942322134733,
+    "F08": 114.43895581821641,
+    "M01": 62.6927838267072,
+    "M05": 61.96795871242744
+   },
+   "setting": {
+    "batch_k": 4,
+    "pair_timeout_s": null
+   }
+  },
+  {
+   "escapes_per_1000": 2.0240532843794865,
+   "good_per_hour_vs_bayes_fifo": 0.9961812884561395,
+   "per_scenario_good_per_hour": {
+    "F01": 190.20500191067342,
+    "F02": 152.57921088629297,
+    "F03": 172.1701630237769,
+    "F08": 117.6114467886525,
+    "M01": 66.98312158575527,
+    "M05": 65.91102909194636
+   },
+   "setting": {
+    "batch_k": 4,
+    "pair_timeout_s": 60.0
+   }
+  },
+  {
+   "escapes_per_1000": 1.76545360387929,
+   "good_per_hour_vs_bayes_fifo": 0.9904547049208831,
+   "per_scenario_good_per_hour": {
+    "F01": 187.6842667474564,
+    "F02": 154.60991957460564,
+    "F03": 170.69744252687963,
+    "F08": 119.12812723211255,
+    "M01": 65.6700668415502,
+    "M05": 64.59406635590105
+   },
+   "setting": {
+    "batch_k": 4,
+    "pair_timeout_s": 180.0
+   }
+  },
+  {
+   "escapes_per_1000": 1.8124470388852274,
+   "good_per_hour_vs_bayes_fifo": 0.9522967639127295,
+   "per_scenario_good_per_hour": {
+    "F01": 177.84847137862334,
+    "F02": 150.73266168489238,
+    "F03": 163.34282822860396,
+    "F08": 112.13501606003321,
+    "M01": 63.773546329137204,
+    "M05": 63.17504125228423
+   },
+   "setting": {
+    "batch_k": 4,
+    "pair_timeout_s": 600.0
+   }
+  },
+  {
+   "escapes_per_1000": 1.529051987767584,
+   "good_per_hour_vs_bayes_fifo": 0.9439018114360329,
+   "per_scenario_good_per_hour": {
+    "F01": 189.18420036512055,
+    "F02": 156.78950166399045,
+    "F03": 170.29585521753023,
+    "F08": 109.70751556135517,
+    "M01": 57.70491393931074,
+    "M05": 57.71796417246668
+   },
+   "setting": {
+    "batch_k": 8,
+    "pair_timeout_s": null
+   }
+  },
+  {
+   "escapes_per_1000": 2.189110938493044,
+   "good_per_hour_vs_bayes_fifo": 0.9813088403745881,
+   "per_scenario_good_per_hour": {
+    "F01": 191.15579867632482,
+    "F02": 151.20183503207898,
+    "F03": 172.8155044573767,
+    "F08": 114.48269967767958,
+    "M01": 64.86385652273142,
+    "M05": 63.80729459346097
+   },
+   "setting": {
+    "batch_k": 8,
+    "pair_timeout_s": 60.0
+   }
+  },
+  {
+   "escapes_per_1000": 1.4114658072408195,
+   "good_per_hour_vs_bayes_fifo": 0.9735169187807186,
+   "per_scenario_good_per_hour": {
+    "F01": 187.43748184115924,
+    "F02": 157.7342114511442,
+    "F03": 170.55260804603705,
+    "F08": 110.87998895729922,
+    "M01": 64.44528792377183,
+    "M05": 62.4660309697083
+   },
+   "setting": {
+    "batch_k": 8,
+    "pair_timeout_s": 180.0
+   }
+  },
+  {
+   "escapes_per_1000": 1.3171821709984712,
+   "good_per_hour_vs_bayes_fifo": 0.9284404724279974,
+   "per_scenario_good_per_hour": {
+    "F01": 176.24106095622375,
+    "F02": 153.74387275234966,
+    "F03": 162.30988272249704,
+    "F08": 106.58990521822136,
+    "M01": 60.30086268132572,
+    "M05": 59.79371976013329
+   },
+   "setting": {
+    "batch_k": 8,
+    "pair_timeout_s": 600.0
+   }
+  }
+ ],
+ "status": "EXPLORATORY_POST_HOC",
+ "tune_scenarios": [
+  "F01",
+  "F02",
+  "F03",
+  "F08",
+  "M01",
+  "M05"
+ ],
+ "tune_seeds": [
+  100,
+  101,
+  102,
+  103,
+  104,
+  105,
+  106,
+  107,
+  108,
+  109,
+  110,
+  111,
+  112,
+  113,
+  114,
+  115,
+  116,
+  117,
+  118,
+  119
+ ]
+}

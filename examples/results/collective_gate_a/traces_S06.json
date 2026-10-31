@@ -1,0 +1,6686 @@
+{
+ "origin": "SIMULATED",
+ "scenario": "S06",
+ "traces": {
+  "B0_rules": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00000/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00000/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.1395550454895587,
+      "source_root": "V-00000/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00000/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00001/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00001/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9226488315410967,
+      "source_root": "V-00001/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00001/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00002/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00002/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.383296051674496,
+      "source_root": "V-00002/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00002/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00003/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00003/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6701459539416739,
+      "source_root": "V-00003/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00003/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002443,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00004/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00004/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6528371100407744,
+      "source_root": "V-00004/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00004/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002599,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00005/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00005/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9362831210814234,
+      "source_root": "V-00005/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00005/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00006/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00006/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.44300434579062337,
+      "source_root": "V-00006/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00006/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.693639,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00007/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00007/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9895520992919721,
+      "source_root": "V-00007/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00007/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00008/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00008/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8190901149441617,
+      "source_root": "V-00008/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00008/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00009/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00009/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9498059383821719,
+      "source_root": "V-00009/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00009/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00010/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00010/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.2670540250464741,
+      "source_root": "V-00010/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00010/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00011/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00011/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8163640067967047,
+      "source_root": "V-00011/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B0_rules/V-00011/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   }
+  ],
+  "B1_single_agent_fixed": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00000/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00000/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.1395550454895587,
+      "source_root": "V-00000/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00000/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00001/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00001/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9226488315410967,
+      "source_root": "V-00001/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00001/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00002/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00002/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.383296051674496,
+      "source_root": "V-00002/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00002/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00003/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00003/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6701459539416739,
+      "source_root": "V-00003/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00003/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002443,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00004/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00004/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6528371100407744,
+      "source_root": "V-00004/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00004/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002599,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00005/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00005/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9362831210814234,
+      "source_root": "V-00005/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00005/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00006/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00006/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.44300434579062337,
+      "source_root": "V-00006/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00006/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.693639,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00007/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00007/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9895520992919721,
+      "source_root": "V-00007/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00007/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00008/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00008/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8190901149441617,
+      "source_root": "V-00008/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00008/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00009/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00009/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9498059383821719,
+      "source_root": "V-00009/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00009/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00010/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00010/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.2670540250464741,
+      "source_root": "V-00010/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00010/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00011/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00011/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8163640067967047,
+      "source_root": "V-00011/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B1_single_agent_fixed/V-00011/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   }
+  ],
+  "B2_full_information_upper_bound": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00000/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00000/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00000/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00000/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00000/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00000/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.1395550454895587,
+      "source_root": "V-00000/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00000/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 1.0802707835186973,
+      "source_root": "V-00000/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00000/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 1.1685838190025137,
+      "source_root": "V-00000/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00000/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00001/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00001/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00001/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00001/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00001/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00001/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9226488315410967,
+      "source_root": "V-00001/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00001/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.9669927307679066,
+      "source_root": "V-00001/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00001/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 0.940805342407475,
+      "source_root": "V-00001/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00001/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00002/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00002/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00002/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00002/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00002/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00002/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.383296051674496,
+      "source_root": "V-00002/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00002/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 1.3270646703385545,
+      "source_root": "V-00002/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00002/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 1.3744484537729864,
+      "source_root": "V-00002/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00002/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00003/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00003/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00003/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00003/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00003/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00003/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6701459539416739,
+      "source_root": "V-00003/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00003/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 6.5e-05,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.7088013142238312,
+      "source_root": "V-00003/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00003/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6.5e-05,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 0.679683748475165,
+      "source_root": "V-00003/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00003/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00004/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00004/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00004/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00004/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00004/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00004/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6528371100407744,
+      "source_root": "V-00004/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00004/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 0.000222,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.6924519384123548,
+      "source_root": "V-00004/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00004/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.000222,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 0.6505208321004913,
+      "source_root": "V-00004/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00004/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00005/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00005/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00005/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00005/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00005/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00005/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9362831210814234,
+      "source_root": "V-00005/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00005/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.8825107296510695,
+      "source_root": "V-00005/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00005/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 0.9285785927303245,
+      "source_root": "V-00005/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00005/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00006/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00006/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00006/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00006/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00006/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00006/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.44300434579062337,
+      "source_root": "V-00006/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00006/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 0.692909,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.5717958670408995,
+      "source_root": "V-00006/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00006/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.692909,
+      "p_unsafe_after": 0.264362,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 0.506794142634847,
+      "source_root": "V-00006/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00006/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.264362,
+      "p_unsafe_after": 0.275815,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00007/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00007/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00007/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00007/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00007/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00007/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9895520992919721,
+      "source_root": "V-00007/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00007/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.9409640948469452,
+      "source_root": "V-00007/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00007/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 0.8956693710305346,
+      "source_root": "V-00007/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00007/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00008/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00008/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00008/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00008/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00008/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00008/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8190901149441617,
+      "source_root": "V-00008/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00008/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.913370087634796,
+      "source_root": "V-00008/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00008/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 0.8153730903270902,
+      "source_root": "V-00008/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00008/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00009/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00009/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00009/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00009/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00009/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00009/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9498059383821719,
+      "source_root": "V-00009/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00009/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.9043233850670461,
+      "source_root": "V-00009/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00009/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 1.1190589139790157,
+      "source_root": "V-00009/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00009/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00010/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00010/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00010/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00010/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00010/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00010/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.2670540250464741,
+      "source_root": "V-00010/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00010/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 1.1538878973517186,
+      "source_root": "V-00010/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00010/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 1.2085373760200866,
+      "source_root": "V-00010/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00010/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00011/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00011/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00011/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00011/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.01908,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00011/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00011/e3"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.01908,
+      "p_unsafe_after": 0.018967,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8163640067967047,
+      "source_root": "V-00011/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00011/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.018967,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.8827613145721084,
+      "source_root": "V-00011/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00011/e5"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 2,
+      "value": 0.8878083134335404,
+      "source_root": "V-00011/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B2_full_information_upper_bound/V-00011/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ALL_AVAILABLE",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 6e-06,
+      "p_unsafe_after": 6e-06,
+      "disposition_before": "PASS_REVIEW",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   }
+  ],
+  "B3_majority_vote": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00000/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00000/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.1395550454895587,
+      "source_root": "V-00000/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00000/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00001/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00001/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9226488315410967,
+      "source_root": "V-00001/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00001/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00002/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00002/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.383296051674496,
+      "source_root": "V-00002/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00002/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00003/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00003/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6701459539416739,
+      "source_root": "V-00003/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00003/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002443,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00004/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00004/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6528371100407744,
+      "source_root": "V-00004/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00004/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002599,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00005/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00005/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9362831210814234,
+      "source_root": "V-00005/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00005/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00006/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00006/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.44300434579062337,
+      "source_root": "V-00006/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00006/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.693639,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00007/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00007/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9895520992919721,
+      "source_root": "V-00007/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00007/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00008/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00008/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8190901149441617,
+      "source_root": "V-00008/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00008/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00009/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00009/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9498059383821719,
+      "source_root": "V-00009/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00009/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00010/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00010/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.2670540250464741,
+      "source_root": "V-00010/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00010/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00011/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00011/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8163640067967047,
+      "source_root": "V-00011/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B3_majority_vote/V-00011/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_SET",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   }
+  ],
+  "B5_structured_fixed": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00000/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00000/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.1395550454895587,
+      "source_root": "V-00000/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00000/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.064944,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00000/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00000/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00000/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00000/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.064944,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00001/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00001/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9226488315410967,
+      "source_root": "V-00001/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00001/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.064944,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00001/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00001/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00001/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00001/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.064944,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00002/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00002/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.383296051674496,
+      "source_root": "V-00002/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00002/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.064944,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00002/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00002/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00002/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00002/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.064944,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00003/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00003/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6701459539416739,
+      "source_root": "V-00003/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00003/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.064998,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00003/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00003/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00003/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00003/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.064998,
+      "p_unsafe_after": 0.002443,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00004/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00004/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6528371100407744,
+      "source_root": "V-00004/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00004/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.065145,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00004/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00004/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00004/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00004/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.065145,
+      "p_unsafe_after": 0.002599,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00005/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00005/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9362831210814234,
+      "source_root": "V-00005/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00005/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.064944,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00005/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00005/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00005/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00005/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.064944,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.44300434579062337,
+      "source_root": "V-00006/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00006/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.712851,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00006/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00006/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.712851,
+      "p_unsafe_after": 0.693639,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e5",
+      "sender": "quality_agent",
+      "receiver": "pi_agent",
+      "kind": "pi",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "TIMEOUT",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e5",
+      "sender": "pi_agent",
+      "receiver": "quality_agent",
+      "kind": "pi"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "pi",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": false,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.693639,
+      "p_unsafe_after": 0.693639,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e6",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 1,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e6",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.5717958670408995,
+      "source_root": "V-00006/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00006/e7"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.693639,
+      "p_unsafe_after": 0.266111,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e8",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 1,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e8",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 1,
+      "value": false,
+      "source_root": "V-00006/phone/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00006/e9"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.266111,
+      "p_unsafe_after": 0.264446,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e10",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 2,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e10",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 2,
+      "value": 0.506794142634847,
+      "source_root": "V-00006/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00006/e11"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.264446,
+      "p_unsafe_after": 0.275898,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e12",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 2,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00006/e12",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 2,
+      "value": false,
+      "source_root": "V-00006/phone/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00006/e13"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.275898,
+      "p_unsafe_after": 0.275815,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00007/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00007/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9895520992919721,
+      "source_root": "V-00007/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00007/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.064944,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00007/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00007/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00007/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00007/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.064944,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00008/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00008/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8190901149441617,
+      "source_root": "V-00008/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00008/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.064944,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00008/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00008/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00008/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00008/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.064944,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00009/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00009/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9498059383821719,
+      "source_root": "V-00009/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00009/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.064944,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00009/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00009/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00009/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00009/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.064944,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00010/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00010/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.2670540250464741,
+      "source_root": "V-00010/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00010/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.064944,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00010/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00010/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00010/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00010/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.064944,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00011/e1",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00011/e1",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8163640067967047,
+      "source_root": "V-00011/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00011/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.064944,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00011/e3",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "FIXED_ORDER"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B5_structured_fixed/V-00011/e3",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00011/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B5_structured_fixed/V-00011/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "FIXED_ORDER",
+      "net_value": null,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.064944,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   }
+  ],
+  "B6_single_agent_voi": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00000/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00000/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.1395550454895587,
+      "source_root": "V-00000/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00000/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00001/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00001/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9226488315410967,
+      "source_root": "V-00001/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00001/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00002/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00002/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.383296051674496,
+      "source_root": "V-00002/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00002/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00003/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00003/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6701459539416739,
+      "source_root": "V-00003/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00003/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002443,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00004/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00004/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6528371100407744,
+      "source_root": "V-00004/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00004/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002599,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00005/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00005/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9362831210814234,
+      "source_root": "V-00005/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00005/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00006/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00006/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.44300434579062337,
+      "source_root": "V-00006/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00006/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.693639,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00007/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00007/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9895520992919721,
+      "source_root": "V-00007/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00007/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00008/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00008/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8190901149441617,
+      "source_root": "V-00008/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00008/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00009/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00009/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9498059383821719,
+      "source_root": "V-00009/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00009/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00010/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00010/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.2670540250464741,
+      "source_root": "V-00010/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00010/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "phone",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00011/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00011/e1"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "VOI",
+      "net_value": 0.400636,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "INSPECT",
+      "sender": "single_agent",
+      "receiver": "caliper",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8163640067967047,
+      "source_root": "V-00011/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B6_single_agent_voi/V-00011/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "VOI",
+      "net_value": 0.99964,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   }
+  ],
+  "B7_safe_mesh_voi": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   }
+  ],
+  "B7-peer_exchange": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   }
+  ],
+  "B7-provenance": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "hold",
+    "hard_gate": [
+     "NO_INDEPENDENT_SURFACE_EVIDENCE",
+     "NO_DIMENSIONAL_EVIDENCE"
+    ],
+    "messages": []
+   }
+  ],
+  "B7-cost_awareness": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00000/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00000/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00000/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00000/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00000/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00000/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.1395550454895587,
+      "source_root": "V-00000/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00000/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00001/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00001/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00001/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00001/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00001/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00001/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9226488315410967,
+      "source_root": "V-00001/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00001/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00002/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00002/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00002/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00002/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00002/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00002/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.383296051674496,
+      "source_root": "V-00002/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00002/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00003/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00003/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00003/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00003/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00003/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00003/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6701459539416739,
+      "source_root": "V-00003/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00003/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002443,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00004/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00004/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00004/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00004/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00004/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00004/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.6528371100407744,
+      "source_root": "V-00004/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00004/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002599,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00005/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00005/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00005/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00005/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00005/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00005/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9362831210814234,
+      "source_root": "V-00005/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00005/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00006/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00006/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00006/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00006/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00006/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00006/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.44300434579062337,
+      "source_root": "V-00006/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00006/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.693639,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00006/e5",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 1,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00006/e5",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 1,
+      "value": 0.5717958670408995,
+      "source_root": "V-00006/caliper/1",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00006/e6"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.238011,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.693639,
+      "p_unsafe_after": 0.266111,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00006/e7",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 2,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00006/e7",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 2,
+      "value": 0.506794142634847,
+      "source_root": "V-00006/caliper/2",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00006/e8"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.14144,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.266111,
+      "p_unsafe_after": 0.277537,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00007/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00007/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00007/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00007/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00007/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00007/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9895520992919721,
+      "source_root": "V-00007/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00007/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00008/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00008/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00008/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00008/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00008/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00008/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8190901149441617,
+      "source_root": "V-00008/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00008/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00009/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00009/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00009/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00009/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00009/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00009/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.9498059383821719,
+      "source_root": "V-00009/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00009/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00010/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00010/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00010/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00010/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00010/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00010/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 1.2670540250464741,
+      "source_root": "V-00010/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00010/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "pass_review",
+    "hard_gate": [],
+    "messages": [
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00011/e1",
+      "sender": "quality_agent",
+      "receiver": "phone_agent",
+      "kind": "phone",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00011/e1",
+      "sender": "phone_agent",
+      "receiver": "quality_agent",
+      "kind": "phone",
+      "index": 0,
+      "value": false,
+      "source_root": "V-00011/phone/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00011/e2"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "phone",
+      "reason": "ENTROPY",
+      "net_value": 0.184292,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.082673,
+      "p_unsafe_after": 0.0213,
+      "disposition_before": "HOLD",
+      "disposition_after": "HOLD"
+     },
+     {
+      "type": "REQUEST_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00011/e3",
+      "sender": "quality_agent",
+      "receiver": "metrology_agent",
+      "kind": "caliper",
+      "index": 0,
+      "reason": "ENTROPY"
+     },
+     {
+      "type": "RESPONSE_EVIDENCE",
+      "request_id": "S06/s0/B7-cost_awareness/V-00011/e3",
+      "sender": "metrology_agent",
+      "receiver": "quality_agent",
+      "kind": "caliper",
+      "index": 0,
+      "value": 0.8163640067967047,
+      "source_root": "V-00011/caliper/0",
+      "parent_source_roots": [],
+      "event_id": "S06/s0/B7-cost_awareness/V-00011/e4"
+     },
+     {
+      "type": "UPDATE_BELIEF",
+      "kind": "caliper",
+      "reason": "ENTROPY",
+      "net_value": 0.118307,
+      "new_independent_fact": true,
+      "duplicate_of_existing_root": false,
+      "p_unsafe_before": 0.0213,
+      "p_unsafe_after": 0.002384,
+      "disposition_before": "HOLD",
+      "disposition_after": "PASS_REVIEW"
+     }
+    ]
+   }
+  ],
+  "B7-hard_gate": [
+   {
+    "specimen_id": "V-00000",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00001",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00002",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00003",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00004",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00005",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00006",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00007",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00008",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00009",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00010",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   },
+   {
+    "specimen_id": "V-00011",
+    "decision": "hold",
+    "hard_gate": [],
+    "messages": []
+   }
+  ]
+ }
+}

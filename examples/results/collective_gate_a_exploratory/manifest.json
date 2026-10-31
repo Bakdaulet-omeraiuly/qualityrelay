@@ -1,0 +1,295 @@
+{
+ "belief_model": {
+  "calibration_id": "cal-e6c0a199854f+gauss-sigma0.05",
+  "clearance_prior_mean": 0.8507404496,
+  "clearance_prior_var": 0.0285526411,
+  "phone_re_sens": 0.9515384615,
+  "phone_re_spec": 0.9602758768,
+  "phone_sens": 0.9669230769,
+  "phone_spec": 0.9612382378,
+  "pi_re_sens": 0.9607692308,
+  "pi_re_spec": 0.9620936698,
+  "pi_sens": 0.9407692308,
+  "pi_spec": 0.9578165098,
+  "sigma_meas_mm": 0.05,
+  "source": "HELD_OUT_SYNTHETIC_CALIBRATION",
+  "surface_prior": 0.0649435056
+ },
+ "calibration_seeds": [
+  1000,
+  1001,
+  1002,
+  1003,
+  1004,
+  1005,
+  1006,
+  1007,
+  1008,
+  1009
+ ],
+ "code_sha256": {
+  "qualityrelay17/calibration.py": "bbb9080519b9de0807862f7cc4018c79658d620caeb6c4c8b7a65bbd93a8eb17",
+  "qualityrelay17/economics.py": "b6c458c3887d91ed77d57a19220d0ac9d15e5de36d8aaf045437f91918758e3a",
+  "qualityrelay17/experiments/__init__.py": "10d579de657b5bd2c1f033d45c25ff423bee59e0739d25a08f7ff5b3fc476ffa",
+  "qualityrelay17/experiments/belief.py": "738f65dcbf1fcbdb4fa6cc20eaae9f86726a221f3d09f5a9a90c87d74dafe729",
+  "qualityrelay17/experiments/collective_baselines.py": "5a6995df1f81e882256ee3e63507a9f216a22b8d1d007125e5f646f0e72221fe",
+  "qualityrelay17/experiments/collective_env.py": "9c00510bc2e838b952940163b7706491a5f77ab29a92fc090f4caba9e7a07d20",
+  "qualityrelay17/experiments/collective_eval.py": "3e115f8d37dd1c1fd4373519fe16e678ad02999afe3b4147fafa5a0477ec7e0a",
+  "qualityrelay17/experiments/scenarios.py": "6bf87d035137913061ae2d95fdfdba4031992eca6d087d615340523f16ef5a30",
+  "qualityrelay17/factory.py": "b6589446b66a08ee73661142bdf7768ebeca8bf71816d7f5f933b894a8689b20",
+  "scripts/run_collective_eval.py": "1a24896bd0fa193af5fd59de59f7e5285da04a270f2afefb398820048f07b2ad"
+ },
+ "dirty_before_run": false,
+ "exploratory": true,
+ "git_commit": "43daea238532c5d1e95f9a4dab943f58bbac39c8",
+ "n_per_seed": 1000,
+ "origin": "SIMULATED",
+ "python": "3.13.9",
+ "registration": "docs/research/COLLECTIVE_GATE_A_REGISTRATION.md",
+ "research_gate": {
+  "S01_B7_beats_B0_on_all_three_rules": null,
+  "result": "EXPLORATORY_NOT_A_GATE"
+ },
+ "runtime_s": 31.2,
+ "scenarios": [
+  {
+   "budget": 6,
+   "caliper_sigma_mm": 0.05,
+   "camera_noise": 0.04,
+   "costs": {
+    "compute_call": 0.0,
+    "escaped_defect": 150.0,
+    "hold": 2.0,
+    "inspection": 0.5,
+    "peer_request": 0.05,
+    "platform": 0.0,
+    "rework": 8.0,
+    "scrap": 20.0
+   },
+   "duplicate_photo_p": 0.5,
+   "network_outage": 0.05,
+   "process_shift_mm": 0.1,
+   "shared_camera_noise": 0.0,
+   "sid": "X01",
+   "title": "duplicated photo 0.5 + cheap messages 0.05 (provenance test)"
+  },
+  {
+   "budget": 6,
+   "caliper_sigma_mm": 0.05,
+   "camera_noise": 0.04,
+   "costs": {
+    "compute_call": 0.0,
+    "escaped_defect": 150.0,
+    "hold": 5.0,
+    "inspection": 0.5,
+    "peer_request": 0.05,
+    "platform": 0.0,
+    "rework": 8.0,
+    "scrap": 20.0
+   },
+   "duplicate_photo_p": 0.5,
+   "network_outage": 0.2,
+   "process_shift_mm": 0.1,
+   "shared_camera_noise": 0.1,
+   "sid": "X02",
+   "title": "combined stress (as S14) + hold 5.0 + cheap messages 0.05"
+  },
+  {
+   "budget": 6,
+   "caliper_sigma_mm": 0.05,
+   "camera_noise": 0.04,
+   "costs": {
+    "compute_call": 0.0,
+    "escaped_defect": 150.0,
+    "hold": 2.0,
+    "inspection": 0.5,
+    "peer_request": 0.05,
+    "platform": 0.0,
+    "rework": 8.0,
+    "scrap": 20.0
+   },
+   "duplicate_photo_p": 1.0,
+   "network_outage": 0.05,
+   "process_shift_mm": 0.1,
+   "shared_camera_noise": 0.0,
+   "sid": "X03",
+   "title": "duplicated photo 1.0 + cheap messages 0.05 (every Pi frame is a re-upload)"
+  }
+ ],
+ "seeds": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29
+ ],
+ "started_utc": "2026-10-31T14:19:24Z",
+ "verdicts": {
+  "X01": {
+   "B5_structured_fixed vs B3_majority_vote": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": false
+   },
+   "B6_single_agent_voi vs B1_single_agent_fixed": {
+    "cheaper": true,
+    "non_inferior_on_safety": false,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B0_rules": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B5_structured_fixed": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B6_single_agent_voi": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B7-cost_awareness": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": false
+   },
+   "B7_safe_mesh_voi vs B7-hard_gate": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B7-peer_exchange": {
+    "cheaper": true,
+    "non_inferior_on_safety": false,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B7-provenance": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   }
+  },
+  "X02": {
+   "B5_structured_fixed vs B3_majority_vote": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": false
+   },
+   "B6_single_agent_voi vs B1_single_agent_fixed": {
+    "cheaper": true,
+    "non_inferior_on_safety": false,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B0_rules": {
+    "cheaper": true,
+    "non_inferior_on_safety": false,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B5_structured_fixed": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B6_single_agent_voi": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B7-cost_awareness": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": false
+   },
+   "B7_safe_mesh_voi vs B7-hard_gate": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B7-peer_exchange": {
+    "cheaper": true,
+    "non_inferior_on_safety": false,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B7-provenance": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   }
+  },
+  "X03": {
+   "B5_structured_fixed vs B3_majority_vote": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": false
+   },
+   "B6_single_agent_voi vs B1_single_agent_fixed": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B0_rules": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B5_structured_fixed": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B6_single_agent_voi": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B7-cost_awareness": {
+    "cheaper": true,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": false
+   },
+   "B7_safe_mesh_voi vs B7-hard_gate": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B7-peer_exchange": {
+    "cheaper": true,
+    "non_inferior_on_safety": false,
+    "throughput_preserved": true
+   },
+   "B7_safe_mesh_voi vs B7-provenance": {
+    "cheaper": false,
+    "non_inferior_on_safety": true,
+    "throughput_preserved": true
+   }
+  }
+ }
+}

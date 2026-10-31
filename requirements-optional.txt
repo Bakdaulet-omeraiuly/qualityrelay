@@ -4,3 +4,7 @@ simpy>=4,<5
 # pip install anomalib (separate environment, CUDA/torch compatibility)
 # pip install ortools (CPU optimization baseline)
 # NVIDIA Isaac Sim, cuOpt, DeepStream, Cosmos etc must follow their separate docs and GPU requirements.
+
+# NVIDIA Warp rare-event Monte Carlo (qualityrelay17/gpu/warp_mc.py, scripts/run_warp_mc.py).
+# CPU wheel works everywhere; the Linux x86_64 wheel includes CUDA for NVIDIA GPUs.
+warp-lang>=1.5,<2

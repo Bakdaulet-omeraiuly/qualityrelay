@@ -1,0 +1,61 @@
+scenario,title,config,good_per_hour,escapes_per_1000_shipped,scrapped_good_parts,holds,hold_inventory_part_hours,operator_hours,downtime_h,mean_cycle_s,cost_per_good_unit,profit_per_hour,conservation_ok,n_seeds,stale_evidence_holds,local_reinspections
+F01,nominal single site,rules+fifo,201.54095,3.61942,0.25,88.45,4.78197,2.92955,0.50619,467.377,1.68747,865.06926,True,20,0,0
+F01,nominal single site,rules+optimized,201.0981,2.32936,0,84.15,3.41063,2.74577,0.4825,498.75576,1.48848,907.54756,True,20,0,0
+F01,nominal single site,bayes+fifo,198.50873,1.94244,0.4,94.9,6.04969,3.04046,0.53005,468.60558,1.45639,903.38789,True,20,0,0
+F01,nominal single site,bayes+optimized,197.1258,1.68033,0.45,87.35,4.38998,2.92486,0.51507,507.93268,1.40724,904.18518,True,20,0,0
+F02,process drift 0.15 mm/h,rules+fifo,169.21318,12.37247,2.8,109.55,12.90017,3.74028,0.6051,520.16747,3.11399,488.7928,True,20,0,0
+F02,process drift 0.15 mm/h,rules+optimized,192.97259,16.8234,0.35,87.4,4.27743,2.92591,0.5248,504.4843,3.74738,427.30063,True,20,0,0
+F02,process drift 0.15 mm/h,bayes+fifo,154.40544,4.96366,3.85,137.45,23.59841,4.24788,0.64467,577.87539,2.03502,614.3864,True,20,0,0
+F02,process drift 0.15 mm/h,bayes+optimized,162.79814,2.74994,4.1,107.75,11.49979,3.86719,0.62091,574.6601,1.66572,708.61725,True,20,0,0
+F03,warping burst (warp_p 0.10),rules+fifo,184.48253,9.10905,1.15,103.65,9.74689,3.53936,0.53763,509.41054,2.58866,624.62688,True,20,0,0
+F03,warping burst (warp_p 0.10),rules+optimized,200.25443,6.46663,0.15,85.55,3.70714,2.79962,0.48286,496.2422,2.12559,779.52035,True,20,0,0
+F03,warping burst (warp_p 0.10),bayes+fifo,174.95039,3.51561,1.55,119.4,14.35846,3.85296,0.58716,547.48919,1.77289,735.86677,True,20,0,0
+F03,warping burst (warp_p 0.10),bayes+optimized,173.77798,1.3064,1.35,102.55,8.93869,3.66766,0.60007,565.92294,1.42435,794.59565,True,20,0,0
+F04,crack burst (crack_p 0.10),rules+fifo,167.56858,6.59079,0.45,141.3,19.41611,3.60267,0.5543,493.50267,2.31477,612.34569,True,20,0,0
+F04,crack burst (crack_p 0.10),rules+optimized,170.98582,5.32376,0,137,15.56543,3.43413,0.53007,516.1771,2.11921,658.52653,True,20,0,0
+F04,crack burst (crack_p 0.10),bayes+fifo,163.08132,5.73889,0.35,146.7,22.58441,3.67786,0.57251,504.92649,2.20865,615.33047,True,20,0,0
+F04,crack burst (crack_p 0.10),bayes+optimized,167.30723,4.76777,0.3,139.35,15.71546,3.56353,0.55545,531.09668,2.04769,657.57778,True,20,0,0
+F05,camera noise 0.12 + lot lighting flips 0.10,rules+fifo,108.68271,8.52491,0.5,260.75,105.19516,5.1812,0.87263,1094.26707,2.64458,366.25008,True,20,0,0
+F05,camera noise 0.12 + lot lighting flips 0.10,rules+optimized,109.32435,7.86422,0.05,256.5,80.94575,5.03325,0.85902,1073.54322,2.55008,377.59175,True,20,0,0
+F05,camera noise 0.12 + lot lighting flips 0.10,bayes+fifo,105.99555,6.97046,0.5,267.35,108.81572,5.31592,0.8954,1112.16133,2.44243,378.46467,True,20,0,0
+F05,camera noise 0.12 + lot lighting flips 0.10,bayes+optimized,107.85119,6.45034,0.15,259.6,81.09962,5.22831,0.91264,1010.27669,2.35147,393.63144,True,20,0,0
+F06,missing observations 0.15,rules+fifo,100.21414,3.49454,0.25,285.2,123.56611,5.51648,0.92975,1179.16752,1.90699,411.19005,True,20,0,0
+F06,missing observations 0.15,rules+optimized,100.9414,1.67868,0.05,281.6,97.81965,5.38882,0.92378,1173.92147,1.64159,440.40509,True,20,0,0
+F06,missing observations 0.15,bayes+fifo,198.13681,2.59184,0.45,104.6,7.73803,3.15068,0.51078,481.69694,1.56321,876.79934,True,20,0,0
+F06,missing observations 0.15,bayes+optimized,195.21164,1.94209,0.5,96.2,5.6355,3.06042,0.51957,515.19196,1.45786,886.58376,True,20,0,0
+F07,network partition: Pi unreachable 30-90 min,rules+fifo,127.04632,4.008,0.35,194.65,73.83918,4.35942,0.85325,856.12477,1.88542,524.21841,True,20,0,0
+F07,network partition: Pi unreachable 30-90 min,rules+optimized,128.2684,2.19816,0,184.15,56.17698,4.08188,0.82378,857.03079,1.60329,563.8514,True,20,0,0
+F07,network partition: Pi unreachable 30-90 min,bayes+fifo,203.26269,3.49488,0.45,77.1,4.22972,2.79579,0.51104,461.8965,1.6719,879.36822,True,20,0,0
+F07,network partition: Pi unreachable 30-90 min,bayes+optimized,198.74854,2.97369,0.5,70.5,3.32964,2.74787,0.51507,500.43917,1.58896,875.5997,True,20,0,0
+F08,station failures x4,rules+fifo,125.48352,3.23747,0.3,88.95,6.83509,3.74255,2.9144,811.571,1.81856,529.88139,True,20,0,0
+F08,station failures x4,rules+optimized,120.43136,2.33372,0.05,84.1,4.82579,3.42377,2.86588,892.05033,1.67577,527.91432,True,20,0,0
+F08,station failures x4,bayes+fifo,119.01454,1.9421,0.3,95.55,8.29385,3.91971,3.13632,858.07981,1.67079,518.54224,True,20,0,0
+F08,station failures x4,bayes+optimized,115.61997,1.42363,0.2,86.9,5.79609,3.68551,3.02929,925.34712,1.56747,517.43082,True,20,0,0
+F09,quality bottleneck: 1 operator,rules+fifo,119.58659,3.10433,0.55,88.45,13.05107,3.05002,0.8883,828.7184,1.64045,521.40775,True,20,0,0
+F09,quality bottleneck: 1 operator,rules+optimized,124.47366,2.06995,0,84.1,8.01163,2.84667,0.84335,822.37519,1.48329,562.338,True,20,0,0
+F09,quality bottleneck: 1 operator,bayes+fifo,114.77758,2.20118,0.65,96.15,15.84709,3.17881,0.91011,862.79282,1.53724,513.22473,True,20,0,0
+F09,quality bottleneck: 1 operator,bayes+optimized,118.01797,1.2951,0.3,87.05,10.05667,3.03877,0.89975,857.9141,1.38626,544.63692,True,20,0,0
+F10,cost shock: escape cost x3 after 1 h,rules+fifo,201.54095,3.61942,0.25,88.45,4.78197,2.92955,0.50619,467.377,2.15534,767.78804,True,20,0,0
+F10,cost shock: escape cost x3 after 1 h,rules+optimized,201.0981,2.32936,0,84.15,3.41063,2.74577,0.4825,498.75576,1.83936,835.81129,True,20,0,0
+F10,cost shock: escape cost x3 after 1 h,bayes+fifo,197.93837,1.94244,0.45,97.05,6.41317,3.06955,0.53339,469.67798,1.80944,830.9521,True,20,0,0
+F10,cost shock: escape cost x3 after 1 h,bayes+optimized,197.1258,1.68033,0.45,87.35,4.38998,2.92486,0.51507,507.93268,1.71804,838.98894,True,20,0,0
+M01,"two suppliers -> assembly site, full evidence sharing",rules+fifo,67.28733,4.30879,0.05,66.65,2.01527,2.70358,1.95213,1471.88066,2.99278,202.73042,True,20,0,0
+M01,"two suppliers -> assembly site, full evidence sharing",rules+optimized,56.48366,2.42043,0,63.65,1.67583,2.70058,2.23136,1872.18292,2.76707,185.04205,True,20,0,0
+M01,"two suppliers -> assembly site, full evidence sharing",bayes+fifo,67.54569,1.90441,0.2,71.75,2.28411,2.80901,1.95225,1473.29077,2.67376,225.47392,True,20,0,0
+M01,"two suppliers -> assembly site, full evidence sharing",bayes+optimized,57.14632,1.21054,0.3,66.1,2.13402,2.87609,2.28475,1843.3185,2.60539,194.825,True,20,0,0
+M02,"two suppliers, summary-only sharing (no raw frames cross sites)",rules+fifo,67.28733,4.30879,0.05,66.65,2.01527,2.70358,1.95213,1471.88066,2.99278,202.73042,True,20,0,0
+M02,"two suppliers, summary-only sharing (no raw frames cross sites)",rules+optimized,56.48366,2.42043,0,63.65,1.67583,2.70058,2.23136,1872.18292,2.76707,185.04205,True,20,0,0
+M02,"two suppliers, summary-only sharing (no raw frames cross sites)",bayes+fifo,67.54569,1.90441,0.2,71.75,2.28411,2.80901,1.95225,1473.29077,2.67376,225.47392,True,20,0,0
+M02,"two suppliers, summary-only sharing (no raw frames cross sites)",bayes+optimized,57.1462,1.21054,0.3,66.1,2.13429,2.87609,2.28475,1843.17386,2.60539,194.82457,True,20,0,0
+M03,"two suppliers, sharing lost: assembly re-inspects locally",rules+fifo,59.22791,4.659,0.35,91.3,2.86269,4.6296,2.7898,1688.2437,3.30877,161.57633,True,20,0,583.05
+M03,"two suppliers, sharing lost: assembly re-inspects locally",rules+optimized,50.98013,2.07262,0,87.3,2.23763,4.50606,3.12824,2091.62358,2.96739,155.42878,True,20,0,583.05
+M03,"two suppliers, sharing lost: assembly re-inspects locally",bayes+fifo,59.79973,2.58985,0.45,96.85,3.18378,4.66909,2.76648,1676.7024,3.03665,178.4789,True,20,0,583.05
+M03,"two suppliers, sharing lost: assembly re-inspects locally",bayes+optimized,50.57869,1.21229,0.6,91.4,2.94876,4.82626,3.28019,2100.6684,2.88459,159.31401,True,20,0,583.05
+M04,"two suppliers, evidence lags capture by 1200 s (300 s after the part arrives; deadline 120 s)",rules+fifo,50.31228,2.41279,0.4,348.6,69.5381,6.61015,2.64304,2016.03781,3.1685,143.8103,True,20,285.05,0
+M04,"two suppliers, evidence lags capture by 1200 s (300 s after the part arrives; deadline 120 s)",rules+optimized,49.87651,1.90139,0,264.5,39.20333,5.35846,2.65868,2118.55902,3.00429,151.07602,True,20,201,0
+M04,"two suppliers, evidence lags capture by 1200 s (300 s after the part arrives; deadline 120 s)",bayes+fifo,50.31824,2.41279,0.5,348.65,69.45092,6.62271,2.64604,2014.57418,3.2215,141.17195,True,20,284.9,0
+M04,"two suppliers, evidence lags capture by 1200 s (300 s after the part arrives; deadline 120 s)",bayes+optimized,49.48177,1.21114,0.15,265.6,38.60892,5.51569,2.74195,2132.75349,2.9231,153.12344,True,20,201.15,0
+M05,supplier-T printers +0.15 mm bias and 0.10 mm caliper,rules+fifo,66.1213,8.31225,1,82.4,3.45205,3.19765,2.02422,1491.87628,3.67966,155.43871,True,20,0,0
+M05,supplier-T printers +0.15 mm bias and 0.10 mm caliper,rules+optimized,55.62559,12.93467,0.25,65.35,1.92813,2.82493,2.3163,1875.10638,4.41793,89.60648,True,20,0,0
+M05,supplier-T printers +0.15 mm bias and 0.10 mm caliper,bayes+fifo,66.04851,5.38402,1.55,95.95,4.39978,3.44261,2.02418,1501.22866,3.29358,178.59762,True,20,0,0
+M05,supplier-T printers +0.15 mm bias and 0.10 mm caliper,bayes+optimized,56.23689,3.29271,1.05,72.6,2.93922,3.22407,2.39006,1879.95784,2.97708,172.94781,True,20,0,0

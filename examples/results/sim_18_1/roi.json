@@ -1,0 +1,1388 @@
+{
+ "assumptions": {
+  "cloud_llm_per_decision": {
+   "high": 0.02,
+   "low": 0.0,
+   "mode": 0.002,
+   "note": "QR platform; 0 for the deterministic mock",
+   "unit": "cu/decision"
+  },
+  "downtime_cost_per_hour": {
+   "high": 40.0,
+   "low": 10.0,
+   "mode": 20.0,
+   "note": "lost-production overhead while a station is under repair",
+   "unit": "cu/h"
+  },
+  "equipment_life_years": {
+   "high": 4.0,
+   "low": 1.5,
+   "mode": 2.5,
+   "note": "amortisation horizon for capex",
+   "unit": "years"
+  },
+  "escape_cost": {
+   "high": 400.0,
+   "low": 80.0,
+   "mode": 150.0,
+   "note": "warranty / customer return; = economics.Costs.escaped_defect mode",
+   "unit": "cu/escape"
+  },
+  "hold_carrying_per_part_hour": {
+   "high": 0.15,
+   "low": 0.02,
+   "mode": 0.05,
+   "note": "quarantine floor space, handling, WIP capital",
+   "unit": "cu/part-h"
+  },
+  "integration_labour": {
+   "high": 15000.0,
+   "low": 2000.0,
+   "mode": 6000.0,
+   "note": "one-time site integration (12 doc: count it in ROI)",
+   "unit": "cu"
+  },
+  "labour_per_operator_hour": {
+   "high": 45.0,
+   "low": 20.0,
+   "mode": 30.0,
+   "note": "metrology/review/rework operator",
+   "unit": "cu/h"
+  },
+  "margin_per_good_assembly": {
+   "high": 10.0,
+   "low": 3.0,
+   "mode": 6.0,
+   "note": "sale price minus material of a good Slot/Tab assembly",
+   "unit": "cu/unit"
+  },
+  "material_per_part": {
+   "high": 0.6,
+   "low": 0.25,
+   "mode": 0.4,
+   "note": "PLA + energy per printed part",
+   "unit": "cu/part"
+  },
+  "operating_hours_per_year": {
+   "high": 6000.0,
+   "low": 2000.0,
+   "mode": 4000.0,
+   "note": "1-3 shifts",
+   "unit": "h/year"
+  },
+  "platform_capex": {
+   "high": 8000.0,
+   "low": 1500.0,
+   "mode": 3000.0,
+   "note": "Pi + Hailo + cameras + fixtures",
+   "unit": "cu"
+  },
+  "platform_maintenance_per_hour": {
+   "high": 4.0,
+   "low": 0.5,
+   "mode": 1.5,
+   "note": "QR monitoring, model upkeep",
+   "unit": "cu/h"
+  },
+  "printer_cost_per_busy_hour": {
+   "high": 1.0,
+   "low": 0.3,
+   "mode": 0.5,
+   "note": "energy + wear per printer while printing",
+   "unit": "cu/h"
+  },
+  "scrap_disposal_per_part": {
+   "high": 0.2,
+   "low": 0.05,
+   "mode": 0.1,
+   "note": "",
+   "unit": "cu/part"
+  },
+  "transport_per_part": {
+   "high": 0.05,
+   "low": 0.01,
+   "mode": 0.02,
+   "note": "intra-site; inter-site handled per scenario",
+   "unit": "cu/part"
+  }
+ },
+ "by_scenario": {
+  "F01": {
+   "annual_delta_profit": {
+    "mean": 252566.26566439602,
+    "p05": -423419.18280616094,
+    "p50": 153080.9691670461,
+    "p95": 1273247.2226053851
+   },
+   "delta_profit_per_hour": {
+    "mean": 62.624055679424686,
+    "p05": -107.46830339787903,
+    "p50": 43.18710900533074,
+    "p95": 317.58462561112833
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.6235,
+   "p_qr_worse": 0.358,
+   "payback_months": {
+    "mean": 3.0100523944725146,
+    "p05": 0.09861739247294249,
+    "p50": 0.9197615198939568,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 1.6874731128627496,
+     "items": {
+      "downtime": 10.124,
+      "escapes": 210.0,
+      "hold_inventory": 0.239,
+      "material": 320.0,
+      "operator_labour": 87.886,
+      "printer_time": 2.902,
+      "scrap_disposal": 2.32,
+      "transport": 16.0
+     },
+     "profit_per_hour": 865.0692591358163
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.4072422772117827,
+     "items": {
+      "cloud_llm": 0.774,
+      "downtime": 10.301,
+      "escapes": 97.5,
+      "hold_inventory": 0.22,
+      "material": 320.0,
+      "operator_labour": 87.746,
+      "platform_capex_amortised": 1.806,
+      "platform_maintenance": 3.01,
+      "printer_time": 2.902,
+      "scrap_disposal": 2.35,
+      "transport": 16.0
+     },
+     "profit_per_hour": 904.1851817156023
+    }
+   },
+   "roi_over_life": {
+    "mean": 60.24274172337621,
+    "p05": -102.90278743670126,
+    "p50": 30.277030080084902,
+    "p95": 315.63718707565084
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "F02": {
+   "annual_delta_profit": {
+    "mean": 1297991.9862966489,
+    "p05": -34759.07208457448,
+    "p50": 1088951.4261758754,
+    "p95": 3299776.9644830823
+   },
+   "delta_profit_per_hour": {
+    "mean": 324.1693711698376,
+    "p05": -9.488305807475854,
+    "p50": 290.090650897876,
+    "p95": 794.959446349312
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.949,
+   "p_qr_worse": 0.051,
+   "payback_months": {
+    "mean": 0.22695151893078225,
+    "p05": 0.03777840962610987,
+    "p50": 0.12577115201583738,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 3.113989925920415,
+     "items": {
+      "downtime": 12.102,
+      "escapes": 712.5,
+      "hold_inventory": 0.645,
+      "material": 320.0,
+      "operator_labour": 112.208,
+      "printer_time": 2.902,
+      "scrap_disposal": 2.63,
+      "transport": 16.0
+     },
+     "profit_per_hour": 488.7928019720838
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.6657177459730488,
+     "items": {
+      "cloud_llm": 0.775,
+      "downtime": 12.418,
+      "escapes": 157.5,
+      "hold_inventory": 0.575,
+      "material": 320.0,
+      "operator_labour": 116.016,
+      "platform_capex_amortised": 2.144,
+      "platform_maintenance": 3.573,
+      "printer_time": 2.902,
+      "scrap_disposal": 2.785,
+      "transport": 16.0
+     },
+     "profit_per_hour": 708.6172489306725
+    }
+   },
+   "roi_over_life": {
+    "mean": 314.8783105963241,
+    "p05": -3.376907069105062,
+    "p50": 243.4944635275087,
+    "p95": 859.1177386229721
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "F03": {
+   "annual_delta_profit": {
+    "mean": 1033677.3095712865,
+    "p05": -133903.7506340718,
+    "p50": 801179.7057749225,
+    "p95": 3178473.4066976723
+   },
+   "delta_profit_per_hour": {
+    "mean": 257.3491055087814,
+    "p05": -37.01307664893261,
+    "p50": 207.42159849828192,
+    "p95": 767.2620137006218
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.9095,
+   "p_qr_worse": 0.087,
+   "payback_months": {
+    "mean": 0.49032684478664085,
+    "p05": 0.040275712551886646,
+    "p50": 0.17191804723586562,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 2.588659929024528,
+     "items": {
+      "downtime": 10.753,
+      "escapes": 525.0,
+      "hold_inventory": 0.487,
+      "material": 320.0,
+      "operator_labour": 106.181,
+      "printer_time": 2.902,
+      "scrap_disposal": 2.565,
+      "transport": 16.0
+     },
+     "profit_per_hour": 624.6268827689329
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.4243503443329246,
+     "items": {
+      "cloud_llm": 0.775,
+      "downtime": 12.001,
+      "escapes": 75.0,
+      "hold_inventory": 0.447,
+      "material": 320.0,
+      "operator_labour": 110.03,
+      "platform_capex_amortised": 2.026,
+      "platform_maintenance": 3.377,
+      "printer_time": 2.902,
+      "scrap_disposal": 2.68,
+      "transport": 16.0
+     },
+     "profit_per_hour": 794.595649524589
+    }
+   },
+   "roi_over_life": {
+    "mean": 250.84513922415366,
+    "p05": -29.615758913774215,
+    "p50": 174.65393349622516,
+    "p95": 792.5116199486607
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "F04": {
+   "annual_delta_profit": {
+    "mean": 253106.5299963475,
+    "p05": -51095.262977541104,
+    "p50": 136569.0764221044,
+    "p95": 975613.1640027816
+   },
+   "delta_profit_per_hour": {
+    "mean": 63.27940209835684,
+    "p05": -12.300709406114038,
+    "p50": 36.46786159253179,
+    "p95": 249.5504184747257
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.6905,
+   "p_qr_worse": 0.2965,
+   "payback_months": {
+    "mean": 3.5668761168697887,
+    "p05": 0.13167814759561033,
+    "p50": 1.0356602092453748,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 2.3147665150823755,
+     "items": {
+      "downtime": 11.086,
+      "escapes": 352.5,
+      "hold_inventory": 0.971,
+      "material": 320.0,
+      "operator_labour": 108.08,
+      "printer_time": 2.902,
+      "scrap_disposal": 8.085,
+      "transport": 16.0
+     },
+     "profit_per_hour": 612.3456943238721
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 2.0476902462360846,
+     "items": {
+      "cloud_llm": 0.715,
+      "downtime": 11.109,
+      "escapes": 255.0,
+      "hold_inventory": 0.786,
+      "material": 320.0,
+      "operator_labour": 106.906,
+      "platform_capex_amortised": 1.95,
+      "platform_maintenance": 3.25,
+      "printer_time": 2.902,
+      "scrap_disposal": 8.075,
+      "transport": 16.0
+     },
+     "profit_per_hour": 657.5777825377711
+    }
+   },
+   "roi_over_life": {
+    "mean": 60.45902470159956,
+    "p05": -14.047929052752126,
+    "p50": 27.849751745978825,
+    "p95": 235.99000629568397
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "F05": {
+   "annual_delta_profit": {
+    "mean": 160272.0425738127,
+    "p05": -271516.86574295233,
+    "p50": -3525.877484541911,
+    "p95": 887425.6584847625
+   },
+   "delta_profit_per_hour": {
+    "mean": 40.0810750414438,
+    "p05": -69.84186487725295,
+    "p50": -0.754922868150004,
+    "p95": 215.58428963291652
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.4685,
+   "p_qr_worse": 0.513,
+   "payback_months": {
+    "mean": 3.584368728258635,
+    "p05": 0.1440565762213938,
+    "p50": 132.36688146931135,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 2.6445819941306556,
+     "items": {
+      "downtime": 17.453,
+      "escapes": 495.0,
+      "hold_inventory": 5.26,
+      "material": 320.0,
+      "operator_labour": 155.436,
+      "printer_time": 2.918,
+      "scrap_disposal": 2.165,
+      "transport": 16.0
+     },
+     "profit_per_hour": 366.25007963457557
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 2.351465497457617,
+     "items": {
+      "cloud_llm": 0.776,
+      "downtime": 18.253,
+      "escapes": 375.0,
+      "hold_inventory": 4.055,
+      "material": 320.0,
+      "operator_labour": 156.849,
+      "platform_capex_amortised": 3.244,
+      "platform_maintenance": 5.407,
+      "printer_time": 2.918,
+      "scrap_disposal": 2.13,
+      "transport": 16.0
+     },
+     "profit_per_hour": 393.6314386585861
+    }
+   },
+   "roi_over_life": {
+    "mean": 39.91979404580098,
+    "p05": -64.14725133588364,
+    "p50": -0.7314726148774098,
+    "p95": 227.4978927773544
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "F06": {
+   "annual_delta_profit": {
+    "mean": 1980079.8696332444,
+    "p05": 689804.8358495623,
+    "p50": 1844185.250611641,
+    "p95": 3751932.5284815035
+   },
+   "delta_profit_per_hour": {
+    "mean": 496.00505027281713,
+    "p05": 184.61195678261316,
+    "p50": 488.6335891474219,
+    "p95": 854.2845600118691
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 1.0,
+   "p_qr_worse": 0.0,
+   "payback_months": {
+    "mean": 0.09560064328588119,
+    "p05": 0.031009998879504994,
+    "p50": 0.07569825024497585,
+    "p95": 0.2228345075105822
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 1.9069877157948891,
+     "items": {
+      "downtime": 18.595,
+      "escapes": 202.5,
+      "hold_inventory": 6.178,
+      "material": 320.0,
+      "operator_labour": 165.494,
+      "printer_time": 2.918,
+      "scrap_disposal": 2.34,
+      "transport": 16.0
+     },
+     "profit_per_hour": 411.1900512017234
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.4578573870304465,
+     "items": {
+      "cloud_llm": 0.774,
+      "downtime": 10.391,
+      "escapes": 112.5,
+      "hold_inventory": 0.282,
+      "material": 320.0,
+      "operator_labour": 91.813,
+      "platform_capex_amortised": 1.823,
+      "platform_maintenance": 3.038,
+      "printer_time": 2.902,
+      "scrap_disposal": 2.34,
+      "transport": 16.0
+     },
+     "profit_per_hour": 886.5837553768708
+    }
+   },
+   "roi_over_life": {
+    "mean": 481.1646022558072,
+    "p05": 140.38814575824537,
+    "p50": 412.81648374705475,
+    "p95": 1035.43134314404
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "F07": {
+   "annual_delta_profit": {
+    "mean": 1453492.9215495014,
+    "p05": 338349.23517326,
+    "p50": 1311390.735184719,
+    "p95": 3025705.126138676
+   },
+   "delta_profit_per_hour": {
+    "mean": 363.5339654946053,
+    "p05": 91.42192879575788,
+    "p50": 341.3098886120275,
+    "p95": 721.4071311462005
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.9935,
+   "p_qr_worse": 0.0055,
+   "payback_months": {
+    "mean": 0.1774734878256994,
+    "p05": 0.03949782015514863,
+    "p50": 0.10452435372584454,
+    "p95": 0.4398288708871448
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 1.8854177133259313,
+     "items": {
+      "downtime": 17.065,
+      "escapes": 232.5,
+      "hold_inventory": 3.692,
+      "material": 320.0,
+      "operator_labour": 130.783,
+      "printer_time": 2.918,
+      "scrap_disposal": 2.33,
+      "transport": 16.0
+     },
+     "profit_per_hour": 524.2184111936728
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.5889627357487754,
+     "items": {
+      "cloud_llm": 0.775,
+      "downtime": 10.301,
+      "escapes": 172.5,
+      "hold_inventory": 0.166,
+      "material": 320.0,
+      "operator_labour": 82.436,
+      "platform_capex_amortised": 1.79,
+      "platform_maintenance": 2.984,
+      "printer_time": 2.902,
+      "scrap_disposal": 2.305,
+      "transport": 16.0
+     },
+     "profit_per_hour": 875.5997017488705
+    }
+   },
+   "roi_over_life": {
+    "mean": 352.2704139690048,
+    "p05": 69.61983203356034,
+    "p50": 297.5076977050315,
+    "p95": 843.7870032260645
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "F08": {
+   "annual_delta_profit": {
+    "mean": -10136.472761108149,
+    "p05": -628506.6062538405,
+    "p50": -73503.21273187936,
+    "p95": 847849.6999311902
+   },
+   "delta_profit_per_hour": {
+    "mean": -2.987014291130596,
+    "p05": -154.0718509798749,
+    "p50": -20.213478707829154,
+    "p95": 199.89787672603757
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.4025,
+   "p_qr_worse": 0.5925,
+   "payback_months": {
+    "mean": 1.8338783137395616,
+    "p05": 0.1614061055270577,
+    "p50": Infinity,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 1.8185626106511827,
+     "items": {
+      "downtime": 58.288,
+      "escapes": 187.5,
+      "hold_inventory": 0.342,
+      "material": 320.0,
+      "operator_labour": 112.277,
+      "printer_time": 3.078,
+      "scrap_disposal": 2.335,
+      "transport": 16.0
+     },
+     "profit_per_hour": 529.88139299679
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.567474267496646,
+     "items": {
+      "cloud_llm": 0.774,
+      "downtime": 60.586,
+      "escapes": 82.5,
+      "hold_inventory": 0.29,
+      "material": 320.0,
+      "operator_labour": 110.565,
+      "platform_capex_amortised": 3.261,
+      "platform_maintenance": 5.435,
+      "printer_time": 3.093,
+      "scrap_disposal": 2.335,
+      "transport": 16.0
+     },
+     "profit_per_hour": 517.4308189941573
+    }
+   },
+   "roi_over_life": {
+    "mean": -1.418143740243715,
+    "p05": -154.64837673241584,
+    "p50": -16.05582863470052,
+    "p95": 201.44830008408175
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "F09": {
+   "annual_delta_profit": {
+    "mean": 142504.14574034003,
+    "p05": -192042.95627328494,
+    "p50": -1978.202572398081,
+    "p95": 873823.382161633
+   },
+   "delta_profit_per_hour": {
+    "mean": 35.624243806552954,
+    "p05": -46.286243047954486,
+    "p50": -0.5289209125955949,
+    "p95": 225.59197675693042
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.458,
+   "p_qr_worse": 0.508,
+   "payback_months": {
+    "mean": 8.006238190740458,
+    "p05": 0.14691617555816588,
+    "p50": 47.842888372727685,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 1.6404517309799578,
+     "items": {
+      "downtime": 17.766,
+      "escapes": 180.0,
+      "hold_inventory": 0.653,
+      "material": 320.0,
+      "operator_labour": 91.501,
+      "printer_time": 2.918,
+      "scrap_disposal": 2.35,
+      "transport": 16.0
+     },
+     "profit_per_hour": 521.4077482388018
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.3862648816280436,
+     "items": {
+      "cloud_llm": 0.774,
+      "downtime": 17.995,
+      "escapes": 75.0,
+      "hold_inventory": 0.503,
+      "material": 320.0,
+      "operator_labour": 91.163,
+      "platform_capex_amortised": 2.998,
+      "platform_maintenance": 4.996,
+      "printer_time": 2.918,
+      "scrap_disposal": 2.335,
+      "transport": 16.0
+     },
+     "profit_per_hour": 544.6369173879079
+    }
+   },
+   "roi_over_life": {
+    "mean": 34.30714955562982,
+    "p05": -50.18197749470104,
+    "p50": -0.4107144745152406,
+    "p95": 214.1291850353483
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "F10": {
+   "annual_delta_profit": {
+    "mean": 426602.18731788435,
+    "p05": -842842.8923995504,
+    "p50": 240669.67932833606,
+    "p95": 2088515.8619710465
+   },
+   "delta_profit_per_hour": {
+    "mean": 105.90683423298437,
+    "p05": -215.25594717628042,
+    "p50": 63.67490700627866,
+    "p95": 509.5091394134548
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.6225,
+   "p_qr_worse": 0.3605,
+   "payback_months": {
+    "mean": 3.499942749637703,
+    "p05": 0.06196578543072319,
+    "p50": 0.6225014467173343,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 2.155338747634941,
+     "items": {
+      "downtime": 10.124,
+      "escapes": 390.0,
+      "hold_inventory": 0.239,
+      "material": 320.0,
+      "operator_labour": 87.886,
+      "printer_time": 2.902,
+      "scrap_disposal": 2.32,
+      "transport": 16.0
+     },
+     "profit_per_hour": 767.7880365949775
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.71804338799744,
+     "items": {
+      "cloud_llm": 0.774,
+      "downtime": 10.301,
+      "escapes": 217.5,
+      "hold_inventory": 0.22,
+      "material": 320.0,
+      "operator_labour": 87.746,
+      "platform_capex_amortised": 1.806,
+      "platform_maintenance": 3.01,
+      "printer_time": 2.902,
+      "scrap_disposal": 2.35,
+      "transport": 16.0
+     },
+     "profit_per_hour": 838.9889411791975
+    }
+   },
+   "roi_over_life": {
+    "mean": 102.71700070041051,
+    "p05": -171.91799021384597,
+    "p50": 50.056857897003596,
+    "p95": 515.7962480076143
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "M01": {
+   "annual_delta_profit": {
+    "mean": -33337.01705360207,
+    "p05": -319332.01402527036,
+    "p50": -71321.37864235076,
+    "p95": 359524.1210019493
+   },
+   "delta_profit_per_hour": {
+    "mean": -8.716786196208862,
+    "p05": -77.91954262162056,
+    "p50": -18.346961038168217,
+    "p95": 90.33035899303351
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.3525,
+   "p_qr_worse": 0.6365,
+   "payback_months": {
+    "mean": 4.4759679231785405,
+    "p05": 0.35831992342341434,
+    "p50": Infinity,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 1.9541088387777013,
+     "items": {
+      "downtime": 39.043,
+      "escapes": 187.5,
+      "hold_inventory": 0.101,
+      "material": 240.0,
+      "operator_labour": 81.107,
+      "printer_time": 2.33,
+      "scrap_disposal": 1.71,
+      "transport": 12.0
+     },
+     "profit_per_hour": 272.63435819885956
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.5688710440039821,
+     "items": {
+      "cloud_llm": 0.581,
+      "downtime": 45.695,
+      "escapes": 52.5,
+      "hold_inventory": 0.107,
+      "material": 240.0,
+      "operator_labour": 86.283,
+      "platform_capex_amortised": 4.685,
+      "platform_maintenance": 7.808,
+      "printer_time": 2.37,
+      "scrap_disposal": 1.75,
+      "transport": 12.0
+     },
+     "profit_per_hour": 254.0672593426872
+    }
+   },
+   "roi_over_life": {
+    "mean": -8.596529344696453,
+    "p05": -83.76070829151142,
+    "p50": -15.227756341844966,
+    "p95": 90.79482847142164
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "M02": {
+   "annual_delta_profit": {
+    "mean": -33339.28974078385,
+    "p05": -319332.01402527036,
+    "p50": -71321.37864235076,
+    "p95": 359524.1210019493
+   },
+   "delta_profit_per_hour": {
+    "mean": -8.717365516596603,
+    "p05": -77.91954262162056,
+    "p50": -18.346961038168217,
+    "p95": 90.33035899303351
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.3525,
+   "p_qr_worse": 0.6365,
+   "payback_months": {
+    "mean": 4.476555373293,
+    "p05": 0.35831992342341434,
+    "p50": Infinity,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 1.9541088387777013,
+     "items": {
+      "downtime": 39.043,
+      "escapes": 187.5,
+      "hold_inventory": 0.101,
+      "material": 240.0,
+      "operator_labour": 81.107,
+      "printer_time": 2.33,
+      "scrap_disposal": 1.71,
+      "transport": 12.0
+     },
+     "profit_per_hour": 272.63435819885956
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.5688711864503968,
+     "items": {
+      "cloud_llm": 0.581,
+      "downtime": 45.695,
+      "escapes": 52.5,
+      "hold_inventory": 0.107,
+      "material": 240.0,
+      "operator_labour": 86.283,
+      "platform_capex_amortised": 4.685,
+      "platform_maintenance": 7.808,
+      "printer_time": 2.37,
+      "scrap_disposal": 1.75,
+      "transport": 12.0
+     },
+     "profit_per_hour": 254.0667144832371
+    }
+   },
+   "roi_over_life": {
+    "mean": -8.597067400916805,
+    "p05": -83.76070829151142,
+    "p50": -15.227756341844966,
+    "p95": 90.79482847142164
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "M03": {
+   "annual_delta_profit": {
+    "mean": -5078.816148173682,
+    "p05": -328767.6681560035,
+    "p50": -22230.420724083528,
+    "p95": 407549.53975319024
+   },
+   "delta_profit_per_hour": {
+    "mean": -1.8365855497368488,
+    "p05": -79.93794450548995,
+    "p50": -5.970645194587121,
+    "p95": 104.50554831500025
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.441,
+   "p_qr_worse": 0.544,
+   "payback_months": {
+    "mean": 4.755146336285945,
+    "p05": 0.3360699551457673,
+    "p50": Infinity,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 2.268460712100217,
+     "items": {
+      "downtime": 55.796,
+      "escapes": 202.5,
+      "hold_inventory": 0.143,
+      "material": 240.0,
+      "operator_labour": 138.888,
+      "printer_time": 2.355,
+      "scrap_disposal": 1.75,
+      "transport": 12.0
+     },
+     "profit_per_hour": 223.18494380845334
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.8475381427095703,
+     "items": {
+      "cloud_llm": 0.581,
+      "downtime": 65.604,
+      "escapes": 52.5,
+      "hold_inventory": 0.147,
+      "material": 240.0,
+      "operator_labour": 144.788,
+      "platform_capex_amortised": 5.347,
+      "platform_maintenance": 8.911,
+      "printer_time": 2.4,
+      "scrap_disposal": 1.785,
+      "transport": 12.0
+     },
+     "profit_per_hour": 211.76577997787814
+    }
+   },
+   "roi_over_life": {
+    "mean": -2.072322156009713,
+    "p05": -84.06212691071124,
+    "p50": -5.083744557398281,
+    "p95": 95.5886953756369
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "M04": {
+   "annual_delta_profit": {
+    "mean": 44672.46862167462,
+    "p05": -110564.04173649242,
+    "p50": 12135.228011704037,
+    "p95": 276481.6806646152
+   },
+   "delta_profit_per_hour": {
+    "mean": 11.068971719198577,
+    "p05": -28.423508913760273,
+    "p50": 2.9827045523618096,
+    "p95": 72.30443138569794
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.5345,
+   "p_qr_worse": 0.389,
+   "payback_months": {
+    "mean": 13.65544563671541,
+    "p05": 0.45710330473595856,
+    "p50": 8.483641089005014,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 2.1307347909597723,
+     "items": {
+      "downtime": 52.861,
+      "escapes": 105.0,
+      "hold_inventory": 3.477,
+      "material": 240.0,
+      "operator_labour": 198.304,
+      "printer_time": 2.392,
+      "scrap_disposal": 1.74,
+      "transport": 12.0
+     },
+     "profit_per_hour": 196.03084205879426
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.8867658958682856,
+     "items": {
+      "cloud_llm": 0.581,
+      "downtime": 54.839,
+      "escapes": 52.5,
+      "hold_inventory": 1.93,
+      "material": 240.0,
+      "operator_labour": 165.471,
+      "platform_capex_amortised": 5.419,
+      "platform_maintenance": 9.031,
+      "printer_time": 2.398,
+      "scrap_disposal": 1.74,
+      "transport": 12.0
+     },
+     "profit_per_hour": 204.42617868259762
+    }
+   },
+   "roi_over_life": {
+    "mean": 11.050578593471611,
+    "p05": -25.076925434202387,
+    "p50": 2.780495450530638,
+    "p95": 71.37353446939133
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  },
+  "M05": {
+   "annual_delta_profit": {
+    "mean": 103738.63633839172,
+    "p05": -375387.8806040106,
+    "p50": 22764.7707922985,
+    "p95": 854802.5377218011
+   },
+   "delta_profit_per_hour": {
+    "mean": 25.625548061558362,
+    "p05": -95.84514164367141,
+    "p50": 5.626801022238226,
+    "p95": 209.19164713117328
+   },
+   "draws": 2000,
+   "p_payback_within_12_months": 0.5155,
+   "p_qr_worse": 0.4735,
+   "payback_months": {
+    "mean": 3.255083705668198,
+    "p05": 0.15783056744869794,
+    "p50": 5.299653607580929,
+    "p95": Infinity
+   },
+   "point_estimate_at_modes": {
+    "baseline": {
+     "cost_per_good_unit": 2.6331328878362616,
+     "items": {
+      "downtime": 40.484,
+      "escapes": 360.0,
+      "hold_inventory": 0.173,
+      "material": 240.0,
+      "operator_labour": 95.93,
+      "printer_time": 2.33,
+      "scrap_disposal": 1.845,
+      "transport": 12.0
+     },
+     "profit_per_hour": 224.64212694417012
+    },
+    "qualityrelay": {
+     "cost_per_good_unit": 1.9356861303107968,
+     "items": {
+      "cloud_llm": 0.581,
+      "downtime": 47.801,
+      "escapes": 142.5,
+      "hold_inventory": 0.147,
+      "material": 240.0,
+      "operator_labour": 96.722,
+      "platform_capex_amortised": 4.771,
+      "platform_maintenance": 7.951,
+      "printer_time": 2.376,
+      "scrap_disposal": 1.84,
+      "transport": 12.0
+     },
+     "profit_per_hour": 231.50593798793076
+    }
+   },
+   "roi_over_life": {
+    "mean": 25.885655639232354,
+    "p05": -92.12784549797095,
+    "p50": 5.479318240420264,
+    "p95": 211.960770092642
+   },
+   "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+   ],
+   "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+  }
+ },
+ "comparison": "bayes+optimized vs rules+fifo",
+ "status": "SCENARIO_OUTCOME_NOT_MEASURED_SAVINGS"
+}

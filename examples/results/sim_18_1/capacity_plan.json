@@ -1,0 +1,141 @@
+{
+ "origin": "SIMULATED",
+ "plans": {
+  "120": {
+   "assumptions": {
+    "costs_per_shift": {
+     "line": 60.0,
+     "operator": 200.0,
+     "printer": 40.0
+    },
+    "review_rate": 0.15,
+    "rework_rate": 0.03,
+    "rho_max": 0.85,
+    "station_s": {
+     "assembly": 9.0,
+     "caliper": 7.0,
+     "phone": 5.0,
+     "pi": 6.0,
+     "review": 45.0,
+     "rework": 120.0,
+     "sorting": 3.0
+    },
+    "status": "ILLUSTRATIVE_ASSUMPTION"
+   },
+   "cost_per_shift": 340.0,
+   "inspection_lines": 1,
+   "operators": 1,
+   "printers": 2,
+   "solver": "scipy.optimize.milp (HiGHS)",
+   "status": "OPTIMAL",
+   "target_pairs_per_hour": 120,
+   "utilisation": {
+    "line_bottleneck": 0.4666666666666667,
+    "operator": 0.8116666666666666,
+    "printer": 0.85
+   }
+  },
+  "240": {
+   "assumptions": {
+    "costs_per_shift": {
+     "line": 60.0,
+     "operator": 200.0,
+     "printer": 40.0
+    },
+    "review_rate": 0.15,
+    "rework_rate": 0.03,
+    "rho_max": 0.85,
+    "station_s": {
+     "assembly": 9.0,
+     "caliper": 7.0,
+     "phone": 5.0,
+     "pi": 6.0,
+     "review": 45.0,
+     "rework": 120.0,
+     "sorting": 3.0
+    },
+    "status": "ILLUSTRATIVE_ASSUMPTION"
+   },
+   "cost_per_shift": 680.0,
+   "inspection_lines": 2,
+   "operators": 2,
+   "printers": 4,
+   "solver": "scipy.optimize.milp (HiGHS)",
+   "status": "OPTIMAL",
+   "target_pairs_per_hour": 240,
+   "utilisation": {
+    "line_bottleneck": 0.4666666666666667,
+    "operator": 0.8116666666666666,
+    "printer": 0.85
+   }
+  },
+  "480": {
+   "assumptions": {
+    "costs_per_shift": {
+     "line": 60.0,
+     "operator": 200.0,
+     "printer": 40.0
+    },
+    "review_rate": 0.15,
+    "rework_rate": 0.03,
+    "rho_max": 0.85,
+    "station_s": {
+     "assembly": 9.0,
+     "caliper": 7.0,
+     "phone": 5.0,
+     "pi": 6.0,
+     "review": 45.0,
+     "rework": 120.0,
+     "sorting": 3.0
+    },
+    "status": "ILLUSTRATIVE_ASSUMPTION"
+   },
+   "cost_per_shift": 1300.0,
+   "inspection_lines": 3,
+   "operators": 4,
+   "printers": 8,
+   "solver": "scipy.optimize.milp (HiGHS)",
+   "status": "OPTIMAL",
+   "target_pairs_per_hour": 480,
+   "utilisation": {
+    "line_bottleneck": 0.6222222222222222,
+    "operator": 0.8116666666666666,
+    "printer": 0.85
+   }
+  },
+  "60": {
+   "assumptions": {
+    "costs_per_shift": {
+     "line": 60.0,
+     "operator": 200.0,
+     "printer": 40.0
+    },
+    "review_rate": 0.15,
+    "rework_rate": 0.03,
+    "rho_max": 0.85,
+    "station_s": {
+     "assembly": 9.0,
+     "caliper": 7.0,
+     "phone": 5.0,
+     "pi": 6.0,
+     "review": 45.0,
+     "rework": 120.0,
+     "sorting": 3.0
+    },
+    "status": "ILLUSTRATIVE_ASSUMPTION"
+   },
+   "cost_per_shift": 300.0,
+   "inspection_lines": 1,
+   "operators": 1,
+   "printers": 1,
+   "solver": "scipy.optimize.milp (HiGHS)",
+   "status": "OPTIMAL",
+   "target_pairs_per_hour": 60,
+   "utilisation": {
+    "line_bottleneck": 0.23333333333333334,
+    "operator": 0.4058333333333333,
+    "printer": 0.85
+   }
+  }
+ }
+}
