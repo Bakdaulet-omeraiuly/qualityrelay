@@ -39,9 +39,9 @@
   "qualityrelay17/factory.py": "b6589446b66a08ee73661142bdf7768ebeca8bf71816d7f5f933b894a8689b20",
   "scripts/run_collective_eval.py": "1a24896bd0fa193af5fd59de59f7e5285da04a270f2afefb398820048f07b2ad"
  },
- "dirty_before_run": true,
+ "dirty_before_run": false,
  "exploratory": true,
- "git_commit": "8a864eb0f70b5576c20c73bfac555697bc024763",
+ "git_commit": "43daea238532c5d1e95f9a4dab943f58bbac39c8",
  "n_per_seed": 1000,
  "origin": "SIMULATED",
  "python": "3.13.9",
@@ -50,7 +50,7 @@
   "S01_B7_beats_B0_on_all_three_rules": null,
   "result": "EXPLORATORY_NOT_A_GATE"
  },
- "runtime_s": 28.4,
+ "runtime_s": 31.2,
  "scenarios": [
   {
    "budget": 6,
@@ -148,7 +148,7 @@
   28,
   29
  ],
- "started_utc": "2026-10-31T14:18:32Z",
+ "started_utc": "2026-10-31T14:19:24Z",
  "verdicts": {
   "X01": {
    "B5_structured_fixed vs B3_majority_vote": {
