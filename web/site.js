@@ -358,6 +358,11 @@ class FactoryView {
       this.robot.elbow.rotation.z = busy ? 1.1 + Math.cos(ph * 2) * 0.3 : 1.4;
     }
     const busyAt = (st) => st.intervals.some(([a, b]) => t >= a && t <= b);
+    const lf = lab.liveFlash;
+    if (lf && performance.now() < lf.until && this.stations[lf.key]) {   // physical event: flash the station
+      const st = this.stations[lf.key]; st.lamp.material.color.copy(C.caught); st.lamp.material.emissive.copy(C.caught); st.lamp.material.emissiveIntensity = 3;
+      const r = this.readouts[lf.key]; if (r) { r.visible = true; r.element.textContent = lf.text; r.element.style.background = css('--caught'); }
+    }
     const opBusy = [busyAt(this.stations.caliper_0) || busyAt(this.stations.caliper_1), busyAt(this.stations.review), busyAt(this.stations.rework)];
     this.operators.forEach((o, i) => { o.position.y = opBusy[i] ? Math.abs(Math.sin(now * 4 + i)) * 0.03 : 0; o.rotation.x = opBusy[i] ? 0.12 : 0; });
     for (const line of [0, 1]) {
@@ -470,6 +475,7 @@ async function initLab() {
     else if (e.key === 'ArrowRight') story(lab.story + 1);
     else if (e.key === 'ArrowLeft') story(lab.story - 1);
   });
+  startLive();
   let last = performance.now();
   const loop = (now) => {
     const dt = Math.min(0.1, (now - last) / 1000); last = now;
@@ -500,9 +506,25 @@ async function initLab() {
   if (q.get('mode') === 'compare') await setMode('compare'); else await run();
   lab.views.forEach((v) => v.s.flyTo(fitCam(v, STORY[0][2], STORY[0][3]), STORY[0][3], 2.6));
   if (q.get('select')?.startsWith('phone_') || q.get('select')?.startsWith('caliper_')) select({ type: 'station', id: q.get('select'), side: 0 });
+  if (q.get('part')) select({ type: 'part', id: q.get('part'), side: lab.runs.length - 1 });
   if (q.get('select') === 'caught') { const id = [...lab.caught][0] || lab.runs.at(-1)?.parts.find((p) => p.pair)?.id; if (id) select({ type: 'part', id, side: lab.runs.length - 1 }); }
 }
 
+function startLive() {
+  if (!window.EventSource || new URLSearchParams(location.search).get('nolive')) return;  // nolive=1: screenshots / offline demos
+  const es = new EventSource('/sim/live/stream');
+  es.onopen = () => ($('#liveState').textContent = 'connected');
+  es.onerror = () => ($('#liveState').textContent = 'offline');
+  es.onmessage = (m) => {
+    const e = JSON.parse(m.data), feed = $('#liveFeed');
+    if (feed.classList.contains('faint')) { feed.classList.remove('faint'); feed.innerHTML = ''; }
+    feed.insertAdjacentHTML('afterbegin', `<div><b>LIVE</b><span>${e.station_id} · ${e.lane} · ${e.specimen_id} · ${e.value ?? ''} · ${e.source_tier}${e.verified ? '' : ' · unverified'}</span></div>`);
+    while (feed.children.length > 6) feed.lastChild.remove();
+    const key = e.station_id === 'phone' || e.station_id === 'caliper' ? `${e.station_id}_${e.lane === 'tab' ? 1 : 0}` : e.station_id === 'assembly' ? 'assembly' : null;
+    if (key) lab.liveFlash = { key, until: performance.now() + 2500, text: `LIVE ${e.value ?? ''}` };
+    $('#liveState').textContent = `${e.seq} events`;
+  };
+}
 function bindPicking(v, side) {
   const el = v.s.renderer.domElement; let down = null;
   const tip = document.createElement('div'); tip.className = 'tip'; tip.hidden = true; document.body.appendChild(tip);
@@ -640,8 +662,11 @@ function partCard(p, side, truth) {
       <span>expert review</span><span>${p.reviewed ? 'cleared' : p.events.some((e) => e[0] === 'review') ? 'yes' : 'no'}</span></div>
       <p class="faint small">Camera sensitivity/specificity come from a held-out calibration (${run.model.calibration_id}).</p></section>
     ${decision}
+    <section><h4>Plain-language explanation <span class="badge mute">template · no LLM</span></h4><p class="explain">${explain(p, pair, run, truth)}</p></section>
     <section><h4>Timeline</h4><ul class="tl">${tl || '<li><span>—</span></li>'}</ul></section>
-    ${truthSec}`;
+    ${truthSec}
+    <section><h4>Part passport (QR)</h4><div style="display:flex;gap:12px;align-items:center"><div class="qr">${passportQR(p.id)}</div>
+      <p class="faint small">Scan to reopen this exact part and its evidence chain. Phones on the same network need the server started with <code>--host 0.0.0.0</code>.</p></div></section>`;
 }
 function cameraSection(k) {
   return `<section><h4>Camera · ${k === 'phone_0' ? 'slot' : 'tab'} lane</h4>
@@ -652,6 +677,32 @@ function cameraSection(k) {
     <div class="row2" style="margin-top:8px"><select id="camLabel" aria-label="Label"><option value="inbox">label later</option><option value="good">good part</option><option value="defect">defective part</option></select>
       <button class="primary" id="camSave" disabled>Save + NVIDIA check</button></div>
     <div id="camResult" class="faint small" style="margin-top:8px">The photo is saved as PHYSICAL_CAPTURE training data (data/prints/…). The NVIDIA anomaly model scores it once it has been trained on real photos.</div></section>`;
+}
+function passportURL(id) {
+  const r = lab.runs.at(-1); const q = new URLSearchParams({ scenario: r.scenario, seed: r.seed, pairs: r.n_pairs, policy: r.policy, pairing: r.pairing, part: id });
+  if (lab.mode === 'compare') q.set('mode', 'compare');
+  return `${location.origin}/?${q}#lab`;
+}
+function passportQR(id) {
+  if (typeof qrcode !== 'function') return '<span class="faint">QR library missing</span>';
+  const q = qrcode(0, 'M'); q.addData(passportURL(id)); q.make(); return q.createSvgTag({ cellSize: 3, margin: 2, scalable: true });
+}
+// I7: deterministic, evidence-grounded explanation (no LLM key configured; nothing is invented)
+function explain(p, pair, run, truth) {
+  const kind = p.kind === 'slot' ? 'slot' : 'tab', nominal = p.kind === 'slot' ? 21.0 : 20.0, out = [];
+  out.push(`This ${kind} (${p.id}) was printed in ${p.lot.split(':').pop()} at ${mmss(p.print_t)}${p.reprint_of ? `, as a reprint of ${p.reprint_of}` : ''}.`);
+  const cam = p.cams?.phone;
+  out.push(cam === null || cam === undefined ? 'The iPhone camera produced no reading, so the surface counts as not checked, never as clear.'
+    : cam ? 'The iPhone camera flagged a possible surface defect, so the part went to expert review.' : 'The iPhone camera saw no surface defect.');
+  out.push(`The caliper measured ${fmt(p.measured_mm, 3)} mm (${sign(p.measured_mm - nominal, 3)} mm from the ${nominal.toFixed(1)} mm CAD nominal).`);
+  if (pair) {
+    if (pair.reason === 'STALE_OR_MISSING_EVIDENCE') out.push('Its pair was held because supplier evidence arrived after the deadline.');
+    else if (run.policy === 'rules') out.push(`Paired with ${p.kind === 'slot' ? pair.tab : pair.slot}, the measured clearance was ${fmt(pair.measured_clearance_mm, 3)} mm, so the rule said ${pair.decision === 'HOLD' ? 'HOLD (below 0.50 mm or a camera flag)' : 'PASS'}.`);
+    else out.push(`Paired with ${p.kind === 'slot' ? pair.tab : pair.slot}, the estimated clearance was ${fmt(pair.posterior_clearance_mm, 3)} ± ${fmt(pair.posterior_clearance_sd, 3)} mm. The chance the pair is unsafe came out at ${pct(pair.p_unsafe, 3)}, ${pair.p_unsafe >= pair.threshold ? 'above' : 'below'} the ${pct(pair.threshold, 2)} break-even, so it was ${pair.decision === 'HOLD' ? 'held for review' : 'passed for assembly'}.`);
+  }
+  out.push(p.fate === 'shipped' ? 'It was assembled and shipped.' : p.fate === 'scrap' ? `It was scrapped after review${p.reprinted_as ? ` and reprinted as ${p.reprinted_as}` : ''}.` : 'It was still waiting for a partner when the run ended.');
+  if (truth && pair) out.push(`Ground truth (evaluator only): the pair was ${pair.truly_safe ? 'safe' : 'unsafe'}, so the decision was ${(pair.decision === 'HOLD') !== pair.truly_safe ? 'right' : (pair.decision === 'HOLD' ? 'cautious (a false hold)' : 'wrong (an escape)')}.`);
+  return out.join(' ');
 }
 function stationCard(k, side) {
   const run = lab.runs[side], s = run?.stations[k], [name, desc] = STATION_INFO[k];
@@ -728,6 +779,10 @@ function bindCameraPanel(k, side) {
       $('#camResult').innerHTML = `<div class="kv">${meas}<span>saved</span><span>${r.saved.split('/').slice(-2).join('/')}</span><span>size</span><span>${r.width} × ${r.height}</span>
         <span>tier</span><span>${r.source_tier}</span><span>dataset</span><span>good ${c.good} · defect ${c.defect} · inbox ${c.inbox}</span></div>
         <div class="why"><b>NVIDIA anomaly model: ${n.status}.</b> ${n.reason} ${n.ready_to_train ? '<b>Enough photos to train now:</b>' : `Need ≥ ${n.need.good} good and ≥ ${n.need.defect} defect photos, then:`} <code>${n.train_command}</code></div>`;
+      try {
+        const sg = await api('/sim/vision/suggest?limit=3');
+        if (sg.suggestions.length) $('#camResult').insertAdjacentHTML('beforeend', `<div class="why"><b>Label next (most informative first):</b><br>${sg.suggestions.map((x) => `${x.file}: ${x.reason}`).join('<br>')}</div>`);
+      } catch { /* suggestions are optional */ }
     } catch (err) { $('#camResult').textContent = `Save failed: ${err.message}`; }
     $('#camSave').disabled = false;
   };
