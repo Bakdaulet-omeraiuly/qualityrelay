@@ -47,6 +47,8 @@ uvicorn qualityrelay17.api:app --host 127.0.0.1 --port 8000
 
 `examples/results/BENCHMARK_30x1000_SYNTHETIC.json`: 30 seeds x 1000 simulated specimens per seed. The present SAFE-MESH reference has same conservative rule decisions as conservative-rules, but incurs more inspection cost: **it is not better**. This honest negative result identifies the research work required: implement and calibrate adaptive active inspection, then evaluate on held-out physical lots.
 
+**31 Oct — pre-registered VOI protocol (Bakdaulet).** `scripts/run_protocol.py` runs 13 declared scenarios × 30 seeds × 1000 with held-out-calibrated likelihoods and decision rules fixed in advance (`docs/research/PROTOCOL_REGISTRATION_31OCT.md`). Verdicts per scenario, including the negative ones, are in `docs/research/PROTOCOL_RUN_31OCT_RESULTS.md` and `examples/results/protocol_31oct/manifest.json`. Still `SIMULATED`; still not a factory claim.
+
 ## Important restrictions
 
 - Downloaded/open-source GitHub libraries are NOT secretly bundled. Their source and licenses belong to their owners; see `docs/engineering/THIRD_PARTY_REUSE.md`.

@@ -27,23 +27,34 @@ ad hoc, and this was one exploratory run, not the pre-registered protocol. Bakda
 or replace those placeholders and re-run under `EXPERIMENT_PROTOCOL.md`'s actual seed/scenario
 plan before this goes on a slide as a result rather than "the wiring now works."
 
-## Bakdaulet — scientific engine
+> **Bakdaulet, 31 Oct:** superseded. The paragraph above is kept for the record; the "~27%"
+> number must not be quoted anywhere — see my section below and
+> `docs/research/PROTOCOL_RUN_31OCT_RESULTS.md` for what replaced it.
 
-1. Review and, if you agree with the approach, merge the `voi_driven` wiring in
-   `factory.py`/`benchmark.py`. If you don't agree with the placeholder sensitivity/
-   specificity/cost values or the prior heuristic, replace them — you own this file.
-2. Run the actual pre-registered protocol (30 seeds × 1000, the scenario grid in
-   `EXPERIMENT_PROTOCOL.md`), not just my 10-seed exploratory check, before reporting any
-   number publicly.
-3. Decide whether the EWMA/SPC and truncated-normal clearance-risk math from the 5.0 archive
-   (explicitly *not* in this 17.0 runtime per `04_SCIENTIFIC_ENGINE_VDER_CAIR.md`) is worth
-   porting back in, or whether the team is intentionally scoping down to the binary VOI +
-   surface-defect framing. Either is defensible — just make the choice explicit in the doc,
-   not by default.
-4. If GPU time is spent on anything, make it this: fine-tune a small anomaly-detection model
-   (MVTec AD + your own captured prints) on one H100, hand the result to adilnurgg/HyorinmaruK
-   for Hailo-8L deployment. Skip the other seven NVIDIA adapters — `STATUS_AND_GATES.md`
-   already correctly marks them `NOT_CONFIGURED`, and that's fine to stay true.
+## Bakdaulet — scientific engine (status 31 Oct, branch `science/vder-calibration`)
+
+1. **Done — reviewed and replaced, not merged as-is.** The night-before `voi_driven` had three
+   defects (loss scale ≠ benchmark costs; "recapture" re-read the same bit; invented prior and
+   likelihoods). Rewritten: `calibration.py` estimates sens/spec/priors on held-out seeds,
+   `vder.two_axis_action_scores` scores one-step NetVOI on `economics.Costs`, `factory.py`
+   draws fresh recapture/retake observations from a second RNG stream (17.0 columns
+   byte-identical, regression-tested). `entropy_driven` added as the cost-blind ablation.
+   The "~27% lower cost" exploratory number is void — it was computed against a mismatched
+   objective with no fresh evidence.
+2. **Done — pre-registered and run.** `docs/research/PROTOCOL_REGISTRATION_31OCT.md`
+   (committed before the run, decision rules fixed), `scripts/run_protocol.py`, 13 scenarios ×
+   30 seeds × 1000, results + verdicts in `docs/research/PROTOCOL_RUN_31OCT_RESULTS.md` and
+   `examples/results/protocol_31oct/manifest.json`. Use only numbers from that file on a slide,
+   with the scenario ID and `SIMULATED` tier.
+3. **Decided — not ported.** Recorded with reasons in
+   `docs/architectures/04_SCIENTIFIC_ENGINE_VDER_CAIR.md` (the 5.0 archive has EWMA design
+   text only, no code; the generator has no drift; no live time series yet).
+4. **Not done — no GPU/H100 access or captured prints from this seat.** Still the right call
+   if GPU time appears; nothing in this branch depends on it. The other seven NVIDIA adapters
+   stay `NOT_CONFIGURED`.
+
+Reviewer for this branch: adilnurgg or HyorinmaruK (one review per `TEAM_OWNERSHIP_AND_GITHUB.md`;
+no safety/actuation code touched).
 
 ## adilnurgg — backend, mesh, security
 

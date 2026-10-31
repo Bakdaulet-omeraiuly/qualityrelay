@@ -20,8 +20,18 @@ Select `argmin_a [ cost(a) + E_{y | E,a} min_d E_{H|E,y,a} L(d,H) ]`, including 
 ## Experimental failure modes
 Rare unsafe passes cause wide confidence intervals; ordinary accuracy hides safety errors. A cautious always-HOLD baseline may attain zero unsafe PASS but zero throughput. Therefore predefine BOTH unsafe PASS and released-good throughput at equal budget. Use paired runs and confidence intervals; no claim without experiments.
 
-## Current code
-`vder.py` exact binary pedagogical VOI. `factory.py` replayable seeded production scenarios. The 5.0 archive preserves the original Monte Carlo/EWMA architecture but those complete calibrated implementations are not present in the NEW 17 reference runtime.
+## Current code (updated 31 Oct, Bakdaulet)
+`vder.py`: binary pedagogical VOI plus `two_axis_action_scores` — one-step NetVOI over the two independent fault axes the generator has (surface, dimensional), scored on the **same** `economics.Costs` the benchmark grades with. `calibration.py`: sensitivity/specificity/priors **estimated on held-out seeds** (1000–1009) and frozen into every run manifest with counts and Wilson intervals; the invented 17.0 constants survive only as `LIKELIHOODS_PLACEHOLDER_17_0` for the mis-specification ablation. `factory.py`: replayable seeded scenarios; a second RNG stream supplies the recapture/retake observations `voi_driven` can pay for, so the 17.0 columns stay byte-identical. `benchmark.py`: scenario, calibration and costs are explicit inputs echoed in the output. Protocol: `docs/research/PROTOCOL_REGISTRATION_31OCT.md` (registered before running), runner `scripts/run_protocol.py`, results `docs/research/PROTOCOL_RUN_31OCT_RESULTS.md`.
+
+## Explicit scope decision: EWMA/SPC and truncated-normal clearance risk are NOT ported (31 Oct)
+Checked, not assumed: the 5.0 archive (`legacy/ORIGINAL_5_0_33_FILES.zip`) contains the EWMA / truncated-Monte-Carlo **design text** in its blueprint (λ=0.2, L=3 starting values; conditioning on local acceptance) and no implementation — its only Python file is `cad/generate_stl.py`. So "porting back" would mean writing it new.
+
+Decision for this event: **scope down to the binary two-axis VOI + surface-defect framing**, and do not build EWMA/SPC or the truncated-normal clearance model now. Reasons:
+1. `seeded_scenario` draws specimens i.i.d. — there is no process drift over the production index, so an EWMA would alarm on nothing and prove nothing. Adding drift to the generator *and* a detector in the same night would be tuning a detector to a toy we just built.
+2. There is no live time series yet. The first real one arrives when HyorinmaruK's repeatability screen and the ESP32 station produce caliper readings in sequence; EWMA parameters are supposed to come from that calibration dataset ("not from only five live points", 5.0 blueprint).
+3. The clearance decision already uses the caliper reading against tolerance with a calibrated sensitivity/specificity; the truncated-normal W−T model adds value only when lots are matched by distribution rather than measured per specimen (`matching.py`'s regime), which is not on the demo path.
+
+What this costs us: no drift-onset claim, no lot-pairing probability interval. Both are listed as future work in `CLAIMS_AND_OPEN_WORK.md`. Revisit when (a) a physical time series exists, or (b) the matching module becomes a presented result.
 
 ## Acceptance
 - All assumptions/version IDs saved in run manifest.
