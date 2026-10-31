@@ -2,22 +2,23 @@
 
 Finite simulated populations are seeded and policy-paired. For interval estimates,
 resample independent scenario/seed clusters rather than treating frames as independent.
+
+31 Oct: scenario parameters, calibration and costs are explicit inputs and are echoed in the
+output so every number carries the assumptions it was computed under
+(docs/research/PROTOCOL_REGISTRATION_31OCT.md). Paired blocks are produced for every
+policy against conservative_rules with the legacy key names preserved.
 """
-from math import sqrt
+from collections import Counter
+from dataclasses import asdict
 from statistics import mean
 from random import Random
-from .factory import seeded_scenario, apply_policy
+from .factory import seeded_scenario, apply_policy, POLICIES
 from .economics import Costs, calculate
+from .calibration import estimate_likelihoods, wilson_interval  # noqa: F401 (wilson re-exported)
 
-
-def wilson_interval(k, n, z=1.9599639845):
-    if n < 1:
-        return (0, 1)
-    p = k / n
-    denominator = 1 + z * z / n
-    center = (p + z * z / (2 * n)) / denominator
-    radius = z * sqrt((p * (1 - p) + z * z / (4 * n)) / n) / denominator
-    return (max(0, center - radius), min(1, center + radius))
+REFERENCE = 'conservative_rules'
+ALIASES = {'safe_mesh_reference': 'safe_mesh', 'voi_driven': 'voi', 'entropy_driven': 'entropy',
+           'collective_fusion': 'fusion', 'structured_request_lite': 'request'}
 
 
 def paired_cluster_bootstrap_ci(paired_differences, *, draws=2000, seed=12577, confidence=.95):
@@ -36,90 +37,110 @@ def paired_cluster_bootstrap_ci(paired_differences, *, draws=2000, seed=12577, c
     return [round(lower, 6), round(upper, 6)]
 
 
-def run_benchmark(seeds=range(30), n_per_seed=1000, shift=0.1):
-    policies = ('phone_only', 'metrology_only', 'conservative_rules', 'safe_mesh_reference', 'voi_driven', 'collective_fusion', 'structured_request_lite')
-    results = {p: [] for p in policies}
-    seed_values = list(seeds)
+def _paired_block(results, a, b, alias_a, alias_b, n_per_seed):
+    out = {}
+    pairs = list(zip(results[a], results[b]))
+    for metric, key, scale in (('cost', 'paired_cost_difference_{}_minus_{}', 1),
+                               ('unsafe_pass', 'paired_unsafe_pass_rate_difference_{}_minus_{}', n_per_seed),
+                               ('released_good', 'paired_released_good_rate_difference_{}_minus_{}', n_per_seed)):
+        diffs = [(x[metric] - y[metric]) / scale for x, y in pairs]
+        name = key.format(alias_a, alias_b)
+        out[name] = mean(diffs)
+        ci_name = name.replace('_difference_', '_') + '_cluster_bootstrap_95' if metric != 'cost' \
+            else f'paired_cost_difference_{alias_a}_minus_{alias_b}_cluster_bootstrap_95'
+        out[ci_name] = paired_cluster_bootstrap_ci(diffs)
+    return out
+
+
+def run_benchmark(seeds=range(30), n_per_seed=1000, shift=0.1, *, camera_noise=0.04, network_outage=0.05,
+                  shared_camera_noise=0.0, likelihoods=None, costs=None, calibration_seeds=range(1000, 1010),
+                  calibration_n=None):
+    scenario = dict(process_shift_mm=shift, camera_noise=camera_noise, network_outage=network_outage,
+                    shared_camera_noise=shared_camera_noise)
+    costs = costs or Costs()
+    seed_values = [int(s) for s in seeds]
     if not seed_values or n_per_seed < 1:
         raise ValueError('positive scenarios and specimen count required')
+    cal_seeds = [int(s) for s in calibration_seeds]
+    if set(cal_seeds) & set(seed_values):
+        raise ValueError('calibration seeds must be disjoint from test seeds')
+    lk = likelihoods or estimate_likelihoods(seeds=cal_seeds, n=calibration_n or n_per_seed, **scenario)
+    results = {p: [] for p in POLICIES}
     request_rate_by_seed = []
     for seed in seed_values:
-        rows = seeded_scenario(n_per_seed, int(seed), process_shift_mm=shift)
-        for policy in policies:
-            outcomes = apply_policy(rows, policy)
-            released_good = sum(row['outcome'] == 'pass' for row in outcomes)
-            results[policy].append({
-                'seed': int(seed),
+        rows = seeded_scenario(n_per_seed, seed, **scenario)
+        for policy in POLICIES:
+            outcomes = apply_policy(rows, policy, costs=costs, likelihoods=lk)
+            rec = {
+                'seed': seed,
                 'unsafe_pass': sum(row['unsafe_pass'] for row in outcomes),
-                'released_good': released_good,
+                'released_good': sum(row['outcome'] == 'pass' for row in outcomes),
                 'hold': sum(row['outcome'] == 'hold' for row in outcomes),
-                'cost': calculate(outcomes, Costs())['total_cost'],
-            })
+                'inspections': sum(row['inspections'] for row in outcomes),
+                'cost': calculate(outcomes, costs)['total_cost'],
+            }
+            if 'p_unsafe' in outcomes[0]:
+                truth = {r['specimen_id']: int(not r['safe']) for r in rows}
+                rec['brier'] = mean((row['p_unsafe'] - truth[row['specimen_id']]) ** 2 for row in outcomes)
+            if 'chosen_action' in outcomes[0]:
+                rec['actions'] = Counter(row['chosen_action'] for row in outcomes)
+                rec['flips'] = sum(row['decision_flip_from_fresh_evidence'] for row in outcomes)
+            results[policy].append(rec)
             if policy == 'structured_request_lite':
                 request_rate_by_seed.append(sum(row.get('requested_pi_evidence', False) for row in outcomes) / n_per_seed)
     summary = {}
-    for policy, rows in results.items():
-        total = len(rows) * n_per_seed
-        failures = sum(row['unsafe_pass'] for row in rows)
+    for policy, recs in results.items():
+        total = len(recs) * n_per_seed
+        failures = sum(r['unsafe_pass'] for r in recs)
         # Wilson is only a descriptive per-specimen interval. The clustered
         # scenario bootstrap below is the proper uncertainty comparison for policies.
-        summary[policy] = {
+        s = {
             'unsafe_pass_count': failures,
             'unsafe_pass_rate': failures / total,
             'unsafe_pass_wilson_95_descriptive_only': wilson_interval(failures, total),
-            'released_good_rate': sum(row['released_good'] for row in rows) / total,
-            'mean_holds': mean(row['hold'] for row in rows),
-            'mean_cost': mean(row['cost'] for row in rows),
+            'released_good_rate': sum(r['released_good'] for r in recs) / total,
+            'mean_holds': mean(r['hold'] for r in recs),
+            'mean_inspections': mean(r['inspections'] for r in recs),
+            'mean_cost': mean(r['cost'] for r in recs),
         }
-    cost_differences = [a['cost'] - b['cost'] for a, b in zip(results['safe_mesh_reference'], results['conservative_rules'])]
-    unsafe_differences = [(a['unsafe_pass'] - b['unsafe_pass']) / n_per_seed for a, b in zip(results['safe_mesh_reference'], results['conservative_rules'])]
-    release_differences = [(a['released_good'] - b['released_good']) / n_per_seed for a, b in zip(results['safe_mesh_reference'], results['conservative_rules'])]
-    # H2 (PRIOR_ART_AND_RESEARCH_QUESTIONS.md): does VOI-driven inspection selection change
-    # cost/unsafe-pass/throughput versus the fixed conservative_rules reference, same seeds?
-    voi_cost_differences = [a['cost'] - b['cost'] for a, b in zip(results['voi_driven'], results['conservative_rules'])]
-    voi_unsafe_differences = [(a['unsafe_pass'] - b['unsafe_pass']) / n_per_seed for a, b in zip(results['voi_driven'], results['conservative_rules'])]
-    voi_release_differences = [(a['released_good'] - b['released_good']) / n_per_seed for a, b in zip(results['voi_driven'], results['conservative_rules'])]
-    # H1-collective-adjacent: does fusing two independently-sourced votes beat the
-    # naive OR rule at matched inspection budget and matched/better unsafe-pass rate?
-    fusion_cost_differences = [a['cost'] - b['cost'] for a, b in zip(results['collective_fusion'], results['conservative_rules'])]
-    fusion_unsafe_differences = [(a['unsafe_pass'] - b['unsafe_pass']) / n_per_seed for a, b in zip(results['collective_fusion'], results['conservative_rules'])]
-    fusion_release_differences = [(a['released_good'] - b['released_good']) / n_per_seed for a, b in zip(results['collective_fusion'], results['conservative_rules'])]
-    # Bakdaulet's 17.1 control (docs/research/COLLECTIVE_17_1_BAKDAULET.md, section 3.4
-    # point 5): does SELECTIVELY requesting Pi evidence lose much against always having it
-    # for free (collective_fusion), while still requesting far less than every time?
-    request_vs_fusion_cost = [a['cost'] - b['cost'] for a, b in zip(results['structured_request_lite'], results['collective_fusion'])]
-    request_vs_fusion_unsafe = [(a['unsafe_pass'] - b['unsafe_pass']) / n_per_seed for a, b in zip(results['structured_request_lite'], results['collective_fusion'])]
-    return {
+        if 'brier' in recs[0]:
+            s['brier_p_unsafe'] = mean(r['brier'] for r in recs)
+        if 'actions' in recs[0]:
+            acts = sum((r['actions'] for r in recs), Counter())
+            s['action_distribution'] = {k: v / total for k, v in sorted(acts.items())}
+            s['fresh_evidence_flip_rate'] = sum(r['flips'] for r in recs) / total
+        summary[policy] = s
+    out = {
         'origin': 'SIMULATED',
         'seeds': len(seed_values),
+        'seed_values': seed_values,
         'n_per_seed': n_per_seed,
+        'scenario': scenario,
+        'costs': asdict(costs),
+        'calibration': lk.as_dict(),
         'mean_pi_request_rate_structured_request_lite': mean(request_rate_by_seed),
         'method': 'identical_seed_paired_policy_comparison_cluster_bootstrap_over_seed',
         'pre_registered_claim': 'NO SUPERIORITY EXPECTED; compare conservative rule reference honestly',
         'summary': summary,
-        'paired_cost_difference_safe_mesh_minus_rules': mean(cost_differences),
-        'paired_cost_difference_cluster_bootstrap_95': paired_cluster_bootstrap_ci(cost_differences),
-        'paired_unsafe_pass_rate_difference': mean(unsafe_differences),
-        'paired_unsafe_pass_rate_cluster_bootstrap_95': paired_cluster_bootstrap_ci(unsafe_differences),
-        'paired_released_good_rate_difference': mean(release_differences),
-        'paired_released_good_rate_cluster_bootstrap_95': paired_cluster_bootstrap_ci(release_differences),
-        'paired_cost_difference_voi_minus_rules': mean(voi_cost_differences),
-        'paired_cost_difference_voi_minus_rules_cluster_bootstrap_95': paired_cluster_bootstrap_ci(voi_cost_differences),
-        'paired_unsafe_pass_rate_difference_voi_minus_rules': mean(voi_unsafe_differences),
-        'paired_unsafe_pass_rate_voi_minus_rules_cluster_bootstrap_95': paired_cluster_bootstrap_ci(voi_unsafe_differences),
-        'paired_released_good_rate_difference_voi_minus_rules': mean(voi_release_differences),
-        'paired_released_good_rate_voi_minus_rules_cluster_bootstrap_95': paired_cluster_bootstrap_ci(voi_release_differences),
-        'paired_cost_difference_fusion_minus_rules': mean(fusion_cost_differences),
-        'paired_cost_difference_fusion_minus_rules_cluster_bootstrap_95': paired_cluster_bootstrap_ci(fusion_cost_differences),
-        'paired_unsafe_pass_rate_difference_fusion_minus_rules': mean(fusion_unsafe_differences),
-        'paired_unsafe_pass_rate_fusion_minus_rules_cluster_bootstrap_95': paired_cluster_bootstrap_ci(fusion_unsafe_differences),
-        'paired_released_good_rate_difference_fusion_minus_rules': mean(fusion_release_differences),
-        'paired_released_good_rate_fusion_minus_rules_cluster_bootstrap_95': paired_cluster_bootstrap_ci(fusion_release_differences),
-        'paired_cost_difference_request_minus_fusion': mean(request_vs_fusion_cost),
-        'paired_cost_difference_request_minus_fusion_cluster_bootstrap_95': paired_cluster_bootstrap_ci(request_vs_fusion_cost),
-        'paired_unsafe_pass_rate_difference_request_minus_fusion': mean(request_vs_fusion_unsafe),
-        'paired_unsafe_pass_rate_request_minus_fusion_cluster_bootstrap_95': paired_cluster_bootstrap_ci(request_vs_fusion_unsafe),
-        'warning': 'Toy generated data and assumed costs; no real-world improvement or scientific novelty established. '
-                   'collective_fusion advantage over conservative_rules was measured only under shared_camera_noise=0 '
-                   '(independent cameras) -- it shrinks under correlated camera noise; re-run before presenting either number alone.',
+        'per_seed': {p: [{k: (dict(v) if isinstance(v, Counter) else v) for k, v in r.items()} for r in recs]
+                     for p, recs in results.items()},
     }
+    for policy, alias in ALIASES.items():
+        out.update(_paired_block(results, policy, REFERENCE, alias, 'rules', n_per_seed))
+    # Legacy key names from 17.0 (safe_mesh_reference vs rules) kept for older docs/tests.
+    out['paired_cost_difference_cluster_bootstrap_95'] = out['paired_cost_difference_safe_mesh_minus_rules_cluster_bootstrap_95']
+    out['paired_unsafe_pass_rate_difference'] = out['paired_unsafe_pass_rate_difference_safe_mesh_minus_rules']
+    out['paired_unsafe_pass_rate_cluster_bootstrap_95'] = out['paired_unsafe_pass_rate_safe_mesh_minus_rules_cluster_bootstrap_95']
+    out['paired_released_good_rate_difference'] = out['paired_released_good_rate_difference_safe_mesh_minus_rules']
+    out['paired_released_good_rate_cluster_bootstrap_95'] = out['paired_released_good_rate_safe_mesh_minus_rules_cluster_bootstrap_95']
+    # 17.1 control (section 3.4 point 5): selective request vs always-free Pi.
+    out.update(_paired_block(results, 'structured_request_lite', 'collective_fusion', 'request', 'fusion', n_per_seed))
+    # Ablation B7 - cost_awareness: expected-loss selection vs entropy selection, same everything else.
+    out.update(_paired_block(results, 'voi_driven', 'entropy_driven', 'voi', 'entropy', n_per_seed))
+    # Ablation B7 - adaptive step: voi_driven vs the same posteriors with no purchase.
+    out.update(_paired_block(results, 'voi_driven', 'collective_fusion', 'voi', 'fusion', n_per_seed))
+    out['warning'] = ('Toy generated data and assumed costs; no real-world improvement or scientific novelty '
+                      'established. Likelihoods are a held-out SYNTHETIC calibration unless calibration.source says '
+                      'otherwise; results under shared_camera_noise > 0 test the independence assumption the '
+                      'posterior policies rely on -- report those alongside, never the baseline alone.')
+    return out

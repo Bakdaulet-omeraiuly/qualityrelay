@@ -1,0 +1,82 @@
+{
+ "conservative_rules:0:300": {
+  "hold": 58,
+  "total_cost": 716.0,
+  "unsafe_pass": 1
+ },
+ "conservative_rules:1:300": {
+  "hold": 69,
+  "total_cost": 888.0,
+  "unsafe_pass": 2
+ },
+ "conservative_rules:2026:1000": {
+  "hold": 211,
+  "total_cost": 2222.0,
+  "unsafe_pass": 2
+ },
+ "conservative_rules:2:300": {
+  "hold": 54,
+  "total_cost": 558.0,
+  "unsafe_pass": 0
+ },
+ "metrology_only:0:300": {
+  "hold": 8,
+  "total_cost": 2266.0,
+  "unsafe_pass": 14
+ },
+ "metrology_only:1:300": {
+  "hold": 14,
+  "total_cost": 3478.0,
+  "unsafe_pass": 22
+ },
+ "metrology_only:2026:1000": {
+  "hold": 22,
+  "total_cost": 7744.0,
+  "unsafe_pass": 48
+ },
+ "metrology_only:2:300": {
+  "hold": 7,
+  "total_cost": 3314.0,
+  "unsafe_pass": 21
+ },
+ "phone_only:0:300": {
+  "hold": 28,
+  "total_cost": 956.0,
+  "unsafe_pass": 5
+ },
+ "phone_only:1:300": {
+  "hold": 35,
+  "total_cost": 1720.0,
+  "unsafe_pass": 10
+ },
+ "phone_only:2026:1000": {
+  "hold": 86,
+  "total_cost": 3672.0,
+  "unsafe_pass": 20
+ },
+ "phone_only:2:300": {
+  "hold": 35,
+  "total_cost": 820.0,
+  "unsafe_pass": 4
+ },
+ "safe_mesh_reference:0:300": {
+  "hold": 58,
+  "total_cost": 730.0,
+  "unsafe_pass": 1
+ },
+ "safe_mesh_reference:1:300": {
+  "hold": 69,
+  "total_cost": 899.0,
+  "unsafe_pass": 2
+ },
+ "safe_mesh_reference:2026:1000": {
+  "hold": 211,
+  "total_cost": 2274.0,
+  "unsafe_pass": 2
+ },
+ "safe_mesh_reference:2:300": {
+  "hold": 54,
+  "total_cost": 567.0,
+  "unsafe_pass": 0
+ }
+}
