@@ -23,6 +23,7 @@ const api = async (url, opts) => { const r = await fetch(url, opts); if (!r.ok) 
 const hash = (s) => { let h = 2166136261; for (const c of s) h = Math.imul(h ^ c.charCodeAt(0), 16777619); return (h >>> 0) / 4294967295; };
 // Conveyor speed in scene units per SIMULATED second (1 unit ≈ 0.25 m in this layout -> ~0.15 m/s).
 const BELT_SPEED = 0.6;
+const BELT_Y = 0.62;  // conveyor surface height
 const ease = (u) => (u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2);
 
 // ---------------------------------------------------------------- STL
@@ -38,7 +39,7 @@ const metal = (color, o = {}) => new THREE.MeshStandardMaterial({ color, metalne
 function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true, labels = true } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 0.85;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   el.appendChild(renderer.domElement);
   const scene = new THREE.Scene();
@@ -126,35 +127,78 @@ class FactoryView {
   }
   build() {
     const sc = this.s.scene;
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(200, 160), new THREE.MeshStandardMaterial({ color: 0x0b0e12, roughness: 0.95, metalness: 0.0, envMapIntensity: 0.2 }));
+    // ---- hall: concrete floor, back wall with windows, pillars
+    const fc = document.createElement('canvas'); fc.width = fc.height = 512; const fg = fc.getContext('2d');
+    fg.fillStyle = '#15191e'; fg.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 9000; i++) { const v = 18 + Math.random() * 16; fg.fillStyle = `rgba(${v},${v + 3},${v + 7},0.5)`; fg.fillRect(Math.random() * 512, Math.random() * 512, 2, 2); }
+    fg.strokeStyle = 'rgba(0,0,0,0.35)'; fg.lineWidth = 2; fg.strokeRect(0, 0, 512, 512);
+    const floorTex = new THREE.CanvasTexture(fc); floorTex.wrapS = floorTex.wrapT = THREE.RepeatWrapping; floorTex.repeat.set(24, 18); floorTex.colorSpace = THREE.SRGBColorSpace;
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 90), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 0.85, metalness: 0.0, envMapIntensity: 0.25 }));
     floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; sc.add(floor);
-    const grid = new THREE.GridHelper(80, 80, 0x1e252e, 0x151a20); grid.position.y = 0.005; sc.add(grid);
-    // floor markings: zone pads and yellow safety lines along the walkway
-    const pad = (x, z, w, d, c) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ color: c, roughness: 1 })); m.rotation.x = -Math.PI / 2; m.position.set(x, 0.008, z); m.receiveShadow = true; sc.add(m); };
-    pad(-14, 0, 4.4, 8.6, 0x121821); pad(-5.5, 0, 9, 3.6, 0x111720); pad(6, 0, 12, 3.6, 0x111720); pad(5.5, -6, 12, 4.2, 0x16140f);
-    const dash = new THREE.MeshBasicMaterial({ color: 0x8a6d00 });
-    for (const z of [-1.75, 1.75]) for (let x = -12; x < 13; x += 1.2) { const d = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 0.07), dash); d.rotation.x = -Math.PI / 2; d.position.set(x, 0.012, z); sc.add(d); }
+    const pad = (x, z, w, d, c, o = 1) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, transparent: o < 1, opacity: o })); m.rotation.x = -Math.PI / 2; m.position.set(x, 0.006, z); m.receiveShadow = true; sc.add(m); };
+    pad(-1.5, 0, 25, 3.2, 0x1d2a24, 0.8); pad(5.5, -6, 12.5, 4.2, 0x2a2414, 0.8); pad(-14, 0, 4.6, 8.8, 0x1b2230, 0.8);
+    const dash = new THREE.MeshBasicMaterial({ color: 0xa88400 });
+    for (const z of [-1.62, 1.62]) for (let x = -13.5; x < 13; x += 1.1) { const d = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 0.08), dash); d.rotation.x = -Math.PI / 2; d.position.set(x, 0.012, z); sc.add(d); }
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(80, 6), metal(0x161b21, { roughness: 0.9 })); wall.position.set(0, 3, -13); wall.receiveShadow = true; sc.add(wall);
+    const winMat = new THREE.MeshStandardMaterial({ color: 0x0b0f14, emissive: 0x2b3f55, emissiveIntensity: 0.55 });
+    for (let x = -26; x <= 26; x += 4.4) { const w = new THREE.Mesh(new THREE.PlaneGeometry(3.4, 1.6), winMat); w.position.set(x, 4.1, -12.95); sc.add(w); }
+    for (let x = -24; x <= 24; x += 8) { const pl = new THREE.Mesh(new THREE.BoxGeometry(0.4, 6, 0.4), metal(0x343b45)); pl.position.set(x, 3, -12.7); pl.castShadow = true; sc.add(pl);
+      const hz = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.6), new THREE.MeshBasicMaterial({ color: 0xa88400 })); hz.position.set(x, 0.6, -12.49); sc.add(hz); }
+
+    // ---- conveyor: frame, legs, instanced rollers, belt, drums, motor
+    const alu = metal(0x8d96a0, { metalness: 0.75, roughness: 0.32 }), dark = metal(0x1f242b, { roughness: 0.6 });
+    const X0 = -13, X1 = 10, L = X1 - X0, XC = (X0 + X1) / 2;
     const cv = document.createElement('canvas'); cv.width = 256; cv.height = 32; const g = cv.getContext('2d');
-    g.fillStyle = '#1b2129'; g.fillRect(0, 0, 256, 32); g.fillStyle = '#28303a'; for (let i = 0; i < 256; i += 16) g.fillRect(i, 0, 6, 32);
-    this.beltTex = new THREE.CanvasTexture(cv); this.beltTex.wrapS = THREE.RepeatWrapping; this.beltTex.repeat.set(12, 1); this.beltTex.colorSpace = THREE.SRGBColorSpace;
-    const side = metal(0x2a313a);
-    const belt = new THREE.Mesh(new THREE.BoxGeometry(23, 0.14, 1.4), [side, side, new THREE.MeshStandardMaterial({ map: this.beltTex, roughness: 0.7 }), side, side, side]);
-    belt.position.set(-1.5, 0.07, 0); belt.receiveShadow = true; sc.add(belt);
-    for (const z of [-0.78, 0.78]) { const rail = new THREE.Mesh(new THREE.BoxGeometry(23, 0.08, 0.06), metal(0x4b5562, { metalness: 0.8, roughness: 0.25 })); rail.position.set(-1.5, 0.18, z); sc.add(rail); }
+    g.fillStyle = '#1a1f25'; g.fillRect(0, 0, 256, 32); g.fillStyle = '#242a32'; for (let i = 0; i < 256; i += 16) g.fillRect(i, 0, 5, 32);
+    this.beltTex = new THREE.CanvasTexture(cv); this.beltTex.wrapS = THREE.RepeatWrapping; this.beltTex.repeat.set(L / 1.92, 1); this.beltTex.colorSpace = THREE.SRGBColorSpace;
+    const beltTop = new THREE.MeshStandardMaterial({ map: this.beltTex, roughness: 0.75 });
+    const belt = new THREE.Mesh(new THREE.BoxGeometry(L, 0.04, 1.18), [dark, dark, beltTop, dark, dark, dark]);
+    belt.position.set(XC, BELT_Y - 0.02, 0); belt.receiveShadow = true; sc.add(belt);
+    for (const z of [-0.66, 0.66]) { const ch = new THREE.Mesh(new THREE.BoxGeometry(L, 0.2, 0.06), alu); ch.position.set(XC, BELT_Y - 0.06, z); ch.castShadow = true; sc.add(ch); }
+    for (let x = X0 + 0.4; x < X1; x += 2.3) for (const z of [-0.6, 0.6]) { const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, BELT_Y - 0.12, 0.07), alu); leg.position.set(x, (BELT_Y - 0.12) / 2, z); leg.castShadow = true; sc.add(leg); }
+    for (let x = X0 + 0.4; x < X1; x += 2.3) { const cb = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 1.2), alu); cb.position.set(x, 0.12, 0); sc.add(cb); }
+    const rollerGeo = new THREE.CylinderGeometry(0.055, 0.055, 1.3, 14); rollerGeo.rotateX(Math.PI / 2);
+    const nR = Math.floor(L / 0.28); this.rollers = new THREE.InstancedMesh(rollerGeo, metal(0xb8c0c8, { metalness: 0.9, roughness: 0.22 }), nR);
+    this.rollerX = []; for (let i = 0; i < nR; i++) this.rollerX.push(X0 + 0.14 + i * 0.28);
+    this.rollerAngle = 0; this.rollerDummy = new THREE.Object3D(); sc.add(this.rollers); this.updateRollers();
+    for (const x of [X0, X1]) { const dr = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 1.25, 20), alu); dr.rotation.x = Math.PI / 2; dr.position.set(x, BELT_Y - 0.08, 0); sc.add(dr); }
+    const motor = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 0.55, 20), metal(0x2f5f9e)); motor.rotation.x = Math.PI / 2; motor.position.set(X1 - 0.3, BELT_Y - 0.25, -0.98); motor.castShadow = true; sc.add(motor);
+    const gearbox = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.34, 0.3), dark); gearbox.position.set(X1 - 0.3, BELT_Y - 0.25, -0.62); sc.add(gearbox);
+
+    const lampAt = (x, y, z) => { const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.11, 16, 12), new THREE.MeshStandardMaterial({ color: LAMP_OFF, emissive: BLACK })); lamp.position.set(x, y, z); sc.add(lamp); return lamp; };
     const box = (key, w, d, h, color) => {
       const [x, z] = P[key];
       const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), metal(color)); m.position.set(x, h / 2, z);
       m.castShadow = m.receiveShadow = true; m.userData = { station: key }; sc.add(m);
-      const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.12, 16, 12), new THREE.MeshStandardMaterial({ color: LAMP_OFF, emissive: BLACK }));
-      lamp.position.set(x + w / 2 - 0.2, h + 0.12, z - d / 2 + 0.2); sc.add(lamp);
+      const lamp = lampAt(x + w / 2 - 0.2, h + 0.12, z - d / 2 + 0.2);
       const l = ann(STATION_INFO[key][0]); l.position.set(x, h + 0.55, z); sc.add(l); this.labels.push(l);
       this.stations[key] = { mesh: m, lamp, label: l, intervals: [] };
     };
-    box('printer_slot', 2.3, 2.1, 2.2, 0x3f5a7a); box('printer_tab', 2.3, 2.1, 2.2, 0x7d4f3a);
-    for (const k of ['printer_slot', 'printer_tab']) {
-      const [x, z] = P[k]; const win = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.9), new THREE.MeshStandardMaterial({ color: 0x0a0d10, emissive: 0x24361c, emissiveIntensity: 0.8 }));
-      win.position.set(x + 1.16, 1.25, z); win.rotation.y = Math.PI / 2; sc.add(win);
-    }
+
+    // ---- 3D printers (open frame): base, bed, posts, gantry + print head, part growing on the bed
+    const printer = (key, kind) => {
+      const [x, z] = P[key]; const grp = new THREE.Group(); grp.position.set(x, 0, z); sc.add(grp);
+      const add = (geo, mat, px, py, pz) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); m.castShadow = m.receiveShadow = true; grp.add(m); return m; };
+      add(new THREE.BoxGeometry(2.3, 0.7, 2.1), dark, 0, 0.35, 0);
+      add(new THREE.BoxGeometry(2.25, 0.04, 0.12), new THREE.MeshStandardMaterial({ color: kind === 'slot' ? C.slot : C.tab, emissive: kind === 'slot' ? C.slot : C.tab, emissiveIntensity: 0.25 }), 0, 0.6, 1.06);
+      for (const [px, pz] of [[-1.05, -0.95], [1.05, -0.95], [-1.05, 0.95], [1.05, 0.95]]) add(new THREE.BoxGeometry(0.08, 1.8, 0.08), alu, px, 1.6, pz);
+      for (const pz of [-0.95, 0.95]) add(new THREE.BoxGeometry(2.18, 0.08, 0.08), alu, 0, 2.5, pz);
+      for (const px of [-1.05, 1.05]) add(new THREE.BoxGeometry(0.08, 0.08, 1.98), alu, px, 2.5, 0);
+      add(new THREE.BoxGeometry(1.6, 0.06, 1.5), metal(0x2c3138, { metalness: 0.5 }), 0, 0.78, 0);
+      const gantry = add(new THREE.BoxGeometry(0.1, 0.1, 1.9), alu, 0, 1.55, 0);
+      const head = add(new THREE.BoxGeometry(0.28, 0.32, 0.26), metal(0xe8eaed, { roughness: 0.4 }), 0, 1.4, 0);
+      const nozzle = new THREE.Mesh(new THREE.ConeGeometry(0.05, 0.12, 12), new THREE.MeshStandardMaterial({ color: 0xffb347, emissive: 0xff7a00, emissiveIntensity: 0 }));
+      nozzle.rotation.x = Math.PI; nozzle.position.set(0, -0.22, 0); head.add(nozzle);
+      const wipMesh = new THREE.Mesh(this.partGeo[kind], new THREE.MeshPhysicalMaterial({ color: kind === 'slot' ? C.slot : C.tab, roughness: 0.5, transparent: true, opacity: 0.9 }));
+      wipMesh.position.set(0, 0.81, 0); wipMesh.scale.set(1, 0.001, 1); wipMesh.visible = false; grp.add(wipMesh);
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(2.3, 2.6, 2.1), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      hit.position.set(x, 1.3, z); hit.userData = { station: key }; sc.add(hit);
+      const lamp = lampAt(x + 0.95, 2.62, z - 0.85);
+      const l = ann(STATION_INFO[key][0]); l.position.set(x, 3.05, z); sc.add(l); this.labels.push(l);
+      const r = ann('', 'readout'); r.position.set(x, 3.5, z); r.visible = false; sc.add(r);
+      this.stations[key] = { mesh: hit, lamp, label: l, intervals: [], printer: { gantry, head, nozzle, wipMesh, readout: r, kind } };
+    };
+    printer('printer_slot', 'slot'); printer('printer_tab', 'tab');
     const cam = (key) => {
       const [x, z] = P[key]; box(key, 0.35, 0.35, 2.4, 0x59636f);
       const arm = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 1.1), metal(0x59636f)); arm.position.set(x, 2.35, z + 0.45); sc.add(arm);
@@ -168,7 +212,33 @@ class FactoryView {
     cam('phone'); cam('pi');
     box('caliper', 1.6, 1.3, 1.05, 0x66717e);
     this.jaws = [-1, 1].map((sgn) => { const j = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.7, 1.0), metal(0x9aa3ad, { metalness: 0.8, roughness: 0.3 })); j.position.set(P.caliper[0] + sgn * 0.3, 1.4, 0); sc.add(j); return j; });
-    box('buffer', 1.9, 2.4, 0.35, 0x37414d); box('assembly', 2.0, 1.8, 1.25, 0x52687e); box('sorting', 1.6, 1.6, 0.85, 0x4a5867);
+    box('buffer', 1.9, 2.4, 0.7, 0x37414d); box('assembly', 2.0, 1.8, 1.25, 0x52687e); box('sorting', 1.6, 1.6, 0.85, 0x4a5867);
+    // ---- robot arm at assembly (3 animated joints)
+    { const base = new THREE.Group(); base.position.set(P.assembly[0], 0, -1.75); this.s.scene.add(base);
+      const orange = metal(0xe07b1a, { roughness: 0.45 }), dk = metal(0x1f242b), al = metal(0x8d96a0, { metalness: 0.75, roughness: 0.32 });
+      const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.4, 0.5, 24), dk); pedestal.position.y = 0.25; pedestal.castShadow = true; base.add(pedestal);
+      const yaw = new THREE.Group(); yaw.position.y = 0.5; base.add(yaw);
+      const turret = new THREE.Mesh(new THREE.CylinderGeometry(0.26, 0.28, 0.3, 24), orange); turret.position.y = 0.15; turret.castShadow = true; yaw.add(turret);
+      const shoulder = new THREE.Group(); shoulder.position.y = 0.32; yaw.add(shoulder);
+      const upper = new THREE.Mesh(new THREE.BoxGeometry(0.2, 1.1, 0.22), orange); upper.position.y = 0.55; upper.castShadow = true; shoulder.add(upper);
+      const elbow = new THREE.Group(); elbow.position.y = 1.1; shoulder.add(elbow);
+      const fore = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.9, 0.18), orange); fore.position.y = 0.45; fore.castShadow = true; elbow.add(fore);
+      const wrist = new THREE.Group(); wrist.position.y = 0.9; elbow.add(wrist);
+      const grip = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.12, 0.14), dk); grip.position.y = 0.06; wrist.add(grip);
+      for (const sx of [-0.09, 0.09]) { const f = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.16, 0.08), al); f.position.set(sx, 0.18, 0); wrist.add(f); }
+      this.robot = { yaw, shoulder, elbow }; }
+    // ---- operators (hi-vis vest, helmet) at caliper, review and rework
+    this.operators = [];
+    for (const [ox, oz] of [[P.caliper[0], -1.45], [P.review[0], P.review[1] - 1.45], [P.rework[0], P.rework[1] - 1.35]]) {
+      const o = new THREE.Group(); o.position.set(ox, 0, oz); o.scale.setScalar(1.25); this.s.scene.add(o);
+      const legs = new THREE.Mesh(new THREE.CapsuleGeometry(0.16, 0.5, 4, 12), metal(0x2b3445)); legs.position.y = 0.45; o.add(legs);
+      const torso = new THREE.Mesh(new THREE.CapsuleGeometry(0.21, 0.42, 4, 12), metal(0xd99a00, { roughness: 0.6 })); torso.position.y = 1.08; o.add(torso);
+      const strip = new THREE.Mesh(new THREE.CylinderGeometry(0.215, 0.215, 0.05, 16), new THREE.MeshStandardMaterial({ color: 0xdddddd, emissive: 0x666666 })); strip.position.y = 1.0; o.add(strip);
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.15, 16, 12), metal(0xc49a78)); head.position.y = 1.58; o.add(head);
+      const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.165, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), metal(0xf2f2f2, { roughness: 0.35 })); helmet.position.y = 1.62; o.add(helmet);
+      o.traverse((m) => { if (m.isMesh) m.castShadow = true; }); this.operators.push(o);
+    }
+
     box('ship', 2.8, 2.8, 0.22, 0x235c34); box('review', 2.4, 2.0, 0.95, 0x7a6418); box('rework', 2.0, 1.8, 0.95, 0x574c66); box('scrap', 2.8, 2.8, 0.22, 0x5e2a2a);
     box('phone_local', 0.35, 0.35, 1.6, 0x59636f); box('caliper_local', 1.4, 1.2, 0.9, 0x66717e);
     for (const k of ['caliper', 'phone', 'pi']) { const r = ann('', 'readout'); r.position.set(P[k][0], k === 'caliper' ? 2.3 : 3.1, P[k][1]); r.visible = false; sc.add(r); this.readouts[k] = r; }
@@ -176,6 +246,11 @@ class FactoryView {
     this.ring.rotation.x = Math.PI / 2; this.ring.visible = false; sc.add(this.ring);
     this.stationRing = new THREE.Mesh(new THREE.RingGeometry(1.7, 1.8, 64), new THREE.MeshBasicMaterial({ color: C.accent, side: THREE.DoubleSide }));
     this.stationRing.rotation.x = -Math.PI / 2; this.stationRing.visible = false; sc.add(this.stationRing);
+  }
+  updateRollers() {
+    const d = this.rollerDummy;
+    this.rollerX.forEach((x, i) => { d.position.set(x, BELT_Y - 0.085, 0); d.rotation.set(0, 0, this.rollerAngle); d.updateMatrix(); this.rollers.setMatrixAt(i, d.matrix); });
+    this.rollers.instanceMatrix.needsUpdate = true;
   }
   setLabels(on) { for (const [k, s] of Object.entries(this.stations)) s.label.visible = on && !s.hiddenStation; }
 
@@ -193,6 +268,10 @@ class FactoryView {
       this.parts.push({ p, kf, m, review, endT, shipT: p.fate === 'shipped' ? endT : null, scrapT: p.fate === 'scrap' ? endT : null,
         caught: caughtIds.has(p.id), yaw: (hash(p.id) - 0.5) * 0.5 });
     }
+    for (const x of this.parts) {  // print jobs: from job start to the moment the part leaves the printer
+      const k = x.p.kind === 'slot' ? 'printer_slot' : 'printer_tab';
+      this.stations[k].intervals.push([x.p.print_t, x.kf[0][0], x.p]);
+    }
     const local = data.parts.some((p) => p.events.some((e) => e[0].endsWith('_local')));
     for (const k of ['phone_local', 'caliper_local']) { const s = this.stations[k]; s.mesh.visible = s.lamp.visible = local; s.hiddenStation = !local; }
     this.T = Math.max(...this.parts.map((x) => x.endT)) + 5;
@@ -208,7 +287,7 @@ class FactoryView {
       const xy = at(x.kf, t); x.m.visible = !!xy; if (!xy) continue;
       const inReview = x.review.some(([a, b]) => t >= a && t <= b);
       const stacked = x.p.kind === 'tab' && x.shipT && t >= x.shipT;
-      x.m.position.set(xy[0], 0.22 + (stacked ? 0.11 : 0) + xy[2], xy[1]); x.m.rotation.y = x.yaw;
+      x.m.position.set(xy[0], heightAt(xy[0], xy[1]) + (stacked ? 0.11 : 0) + xy[2], xy[1]); x.m.rotation.y = x.yaw;
       const mat = x.m.material; let col = x.p.kind === 'slot' ? C.slot : C.tab, em = BLACK, ei = 0;
       if (inReview) { col = C.review; em = C.review; ei = 0.35; }
       if (x.scrapT && t >= x.scrapT) col = C.scrap;
@@ -218,7 +297,7 @@ class FactoryView {
       if (x.review.length && t >= x.review[0][0]) hold++;
       if (x.scrapT && t >= x.scrapT) scrap++;
       if (x.shipT && t >= x.shipT && x.p.pair && !shipped.has(x.p.pair)) { shipped.add(x.p.pair); if (x.p.escaped) esc++; else ship++; }
-      if (this.selected === x.p.id) { selVisible = true; this.ring.position.set(x.m.position.x, 0.08, x.m.position.z); }
+      if (this.selected === x.p.id) { selVisible = true; this.ring.position.set(x.m.position.x, x.m.position.y - 0.12, x.m.position.z); }
     }
     this.ring.visible = selVisible;
     for (const [k, st] of Object.entries(this.stations)) {
@@ -237,6 +316,28 @@ class FactoryView {
         }
       }
     }
+    if (playing) { this.rollerAngle -= (dtReal * lab.speed * BELT_SPEED) / 0.055; this.updateRollers(); }
+    const now = performance.now() / 1000;
+    for (const k of ['printer_slot', 'printer_tab']) {
+      const st = this.stations[k], pr = st.printer, jobs = st.intervals.filter(([a, b]) => t >= a && t <= b);
+      const on = jobs.length > 0;
+      pr.gantry.position.x = on ? Math.sin(now * 2.1) * 0.6 : 0; pr.head.position.x = pr.gantry.position.x;
+      pr.head.position.z = on ? Math.sin(now * 3.3) * 0.55 : 0; pr.nozzle.material.emissiveIntensity = on ? 2.4 : 0;
+      pr.wipMesh.visible = on;
+      if (on) { const [a, b] = jobs[0]; pr.wipMesh.scale.y = Math.max(0.02, Math.min(1, (t - a) / Math.max(1, b - a))); }
+      const rep = jobs.find((j) => j[2].reprint_of);
+      pr.readout.visible = !!rep;
+      if (rep) { pr.readout.element.textContent = `↻ reprint ${rep[2].root_id || ''}`; pr.readout.element.style.background = css('--caught'); }
+    }
+    if (this.robot) {
+      const busy = this.stations.assembly.intervals.some(([a, b]) => t >= a && t <= b);
+      const ph = busy ? now * 2.4 : 0;
+      this.robot.yaw.rotation.y = busy ? Math.sin(ph) * 1.1 : 0.4;
+      this.robot.shoulder.rotation.z = busy ? 0.55 + Math.sin(ph * 2) * 0.25 : 0.2;
+      this.robot.elbow.rotation.z = busy ? 1.1 + Math.cos(ph * 2) * 0.3 : 1.4;
+    }
+    const opBusy = [this.stations.caliper, this.stations.review, this.stations.rework].map((st) => st.intervals.some(([a, b]) => t >= a && t <= b));
+    this.operators.forEach((o, i) => { o.position.y = opBusy[i] ? Math.abs(Math.sin(now * 4 + i)) * 0.03 : 0; o.rotation.x = opBusy[i] ? 0.12 : 0; });
     const cb = this.stations.caliper.intervals.find(([a, b]) => t >= a && t <= b);
     const gap = cb ? 0.17 : 0.3; this.jaws[0].position.x = P.caliper[0] - gap; this.jaws[1].position.x = P.caliper[0] + gap;
     return { ship, hold, scrap, esc };
@@ -261,6 +362,13 @@ class FactoryView {
   }
 }
 
+// Height of a part's resting surface at (x, z): conveyor, buffer table, review/rework benches or floor pads.
+function heightAt(x, z) {
+  if (Math.abs(z) < 0.95 && x > -13.2 && x < 10.2) return BELT_Y + 0.07;
+  if (z < -4.6 && x > 0.8 && x < 8.4) return 1.02;
+  if (Math.abs(x - P.printer_slot[0] - 1.7) < 0.3) return 0.25;
+  return 0.25;
+}
 function pathFor(p, binIndex) {
   const kf = [], j = hash(p.id), jz = (j - 0.5) * 0.9;
   const pos = (k, dx = 0, dz = 0) => { const [x, z] = P[k] || P.buffer; return [x + dx, z + dz]; };
@@ -491,6 +599,8 @@ function partCard(p, side, truth) {
   return `<h2>${p.kind === 'slot' ? 'Slot' : 'Tab'} <span class="num">${p.id}</span></h2>
     <div class="sub">${p.lot} · printed ${mmss(p.print_t)}${lab.runs.length > 1 ? ` · ${side ? 'right' : 'left'} view` : ''}</div>
     ${fate}${caught}
+    ${p.reprint_of ? `<div class="why" style="border-color:var(--caught)"><b>↻ Reprint</b> of <span class="link" data-part="${p.reprint_of}" data-side="${side}">${p.reprint_of}</span>: the defective original was scrapped and this part was printed again from the nominal CAD model (printer re-zeroed). It went through the full inspection again.</div>` : ''}
+    ${p.reprinted_as ? `<div class="why"><b>Defect confirmed → reprinted</b> as <span class="link" data-part="${p.reprinted_as}" data-side="${side}">${p.reprinted_as}</span>.</div>` : ''}
     <section><h4>Evidence (what the system saw)</h4><div class="kv">
       ${Object.entries(p.cams || {}).map(([k, v]) => `<span>${STN[k] || k}</span><span>${camTxt(v)}</span>`).join('')}
       <span>caliper reading</span><span>${fmt(p.measured_mm, 3)} mm (σ ${fmt(p.caliper_sd, 2)})</span>
