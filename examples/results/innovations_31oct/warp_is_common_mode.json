@@ -1,0 +1,426 @@
+{
+ "S01": {
+  "naive": {
+   "origin": "SIMULATED",
+   "scenario": {
+    "sid": "S01",
+    "title": "nominal",
+    "shift": 0.1,
+    "camera_noise": 0.04,
+    "network_outage": 0.05,
+    "shared_noise": 0.0,
+    "caliper_sigma": 0.05,
+    "duplicate_p": 0.0
+   },
+   "parts": 10000000,
+   "q_surface": 0.06,
+   "q_noise": 0.04,
+   "q_shift": 0.0,
+   "common_mode_fit": {
+    "c": 0.0,
+    "e": 0.04,
+    "n": 9531
+   },
+   "kernel_seconds": 1.377,
+   "policies": {
+    "B0_rules": {
+     "unsafe_pass_rate": 0.0033109,
+     "se": 1.8165731312529092e-05,
+     "ci95": [
+      0.003275295166627443,
+      0.003346504833372557
+     ],
+     "released_good_rate": 0.7999283
+    },
+    "B1_single_agent_fixed": {
+     "unsafe_pass_rate": 0.0003792,
+     "se": 6.15675407467279e-06,
+     "ci95": [
+      0.0003671327620136413,
+      0.0003912672379863587
+     ],
+     "released_good_rate": 0.8093499
+    },
+    "B1c_common_mode": {
+     "unsafe_pass_rate": 0.0003791,
+     "se": 6.155942520768043e-06,
+     "ci95": [
+      0.00036703435265929464,
+      0.00039116564734070536
+     ],
+     "released_good_rate": 0.8093416
+    }
+   }
+  },
+  "tilted": {
+   "q_s0.3_q_n0.25_shift0.0": {
+    "origin": "SIMULATED",
+    "scenario": {
+     "sid": "S01",
+     "title": "nominal",
+     "shift": 0.1,
+     "camera_noise": 0.04,
+     "network_outage": 0.05,
+     "shared_noise": 0.0,
+     "caliper_sigma": 0.05,
+     "duplicate_p": 0.0
+    },
+    "parts": 10000000,
+    "q_surface": 0.3,
+    "q_noise": 0.25,
+    "q_shift": 0.0,
+    "common_mode_fit": {
+     "c": 0.0,
+     "e": 0.04,
+     "n": 9531
+    },
+    "kernel_seconds": 1.421,
+    "policies": {
+     "B0_rules": {
+      "unsafe_pass_rate": 0.0032898509531428177,
+      "se": 2.6518344326125805e-05,
+      "ci95": [
+       0.003237874998263611,
+       0.0033418269080220243
+      ],
+      "released_good_rate": 0.8000151879681583
+     },
+     "B1_single_agent_fixed": {
+      "unsafe_pass_rate": 0.0003706373851428595,
+      "se": 6.210884589957461e-06,
+      "ci95": [
+       0.00035846405134654286,
+       0.0003828107189391761
+      ],
+      "released_good_rate": 0.809593044992188
+     },
+     "B1c_common_mode": {
+      "unsafe_pass_rate": 0.00037053037714285936,
+      "se": 6.210850090857053e-06,
+      "ci95": [
+       0.00035835711096477953,
+       0.0003827036433209392
+      ],
+      "released_good_rate": 0.8095813842653309
+     }
+    }
+   },
+   "q_s0.06_q_n0.04_shift0.2": {
+    "origin": "SIMULATED",
+    "scenario": {
+     "sid": "S01",
+     "title": "nominal",
+     "shift": 0.1,
+     "camera_noise": 0.04,
+     "network_outage": 0.05,
+     "shared_noise": 0.0,
+     "caliper_sigma": 0.05,
+     "duplicate_p": 0.0
+    },
+    "parts": 10000000,
+    "q_surface": 0.06,
+    "q_noise": 0.04,
+    "q_shift": 0.2,
+    "common_mode_fit": {
+     "c": 0.0,
+     "e": 0.04,
+     "n": 9531
+    },
+    "kernel_seconds": 1.241,
+    "policies": {
+     "B0_rules": {
+      "unsafe_pass_rate": 0.003307209284991108,
+      "se": 1.7811000630617204e-05,
+      "ci95": [
+       0.0032722997237550986,
+       0.0033421188462271177
+      ],
+      "released_good_rate": 0.7990630262902726
+     },
+     "B1_single_agent_fixed": {
+      "unsafe_pass_rate": 0.00037704187148760907,
+      "se": 1.5829800759394533e-05,
+      "ci95": [
+       0.0003460154619991958,
+       0.0004080682809760223
+      ],
+      "released_good_rate": 0.8084886661719236
+     },
+     "B1c_common_mode": {
+      "unsafe_pass_rate": 0.00037664521536728786,
+      "se": 1.5828736482695743e-05,
+      "ci95": [
+       0.0003456208918612042,
+       0.00040766953887337153
+      ],
+      "released_good_rate": 0.8084829695872701
+     }
+    }
+   },
+   "q_s0.3_q_n0.25_shift0.2": {
+    "origin": "SIMULATED",
+    "scenario": {
+     "sid": "S01",
+     "title": "nominal",
+     "shift": 0.1,
+     "camera_noise": 0.04,
+     "network_outage": 0.05,
+     "shared_noise": 0.0,
+     "caliper_sigma": 0.05,
+     "duplicate_p": 0.0
+    },
+    "parts": 10000000,
+    "q_surface": 0.3,
+    "q_noise": 0.25,
+    "q_shift": 0.2,
+    "common_mode_fit": {
+     "c": 0.0,
+     "e": 0.04,
+     "n": 9531
+    },
+    "kernel_seconds": 1.365,
+    "policies": {
+     "B0_rules": {
+      "unsafe_pass_rate": 0.0032840687936928153,
+      "se": 2.0314666580586246e-05,
+      "ci95": [
+       0.003244252047194866,
+       0.0033238855401907645
+      ],
+      "released_good_rate": 0.7976692608652
+     },
+     "B1_single_agent_fixed": {
+      "unsafe_pass_rate": 0.00036478302609282845,
+      "se": 5.386694902449186e-06,
+      "ci95": [
+       0.0003542251040840281,
+       0.00037534094810162883
+      ],
+      "released_good_rate": 0.8068494486958594
+     },
+     "B1c_common_mode": {
+      "unsafe_pass_rate": 0.00036474041268436965,
+      "se": 5.386762636268927e-06,
+      "ci95": [
+       0.00035418235791728254,
+       0.00037529846745145676
+      ],
+      "released_good_rate": 0.8068460562438432
+     }
+    }
+   }
+  }
+ },
+ "S04": {
+  "naive": {
+   "origin": "SIMULATED",
+   "scenario": {
+    "sid": "S04",
+    "title": "shared lighting",
+    "shift": 0.1,
+    "camera_noise": 0.04,
+    "network_outage": 0.05,
+    "shared_noise": 0.15,
+    "caliper_sigma": 0.05,
+    "duplicate_p": 0.0
+   },
+   "parts": 10000000,
+   "q_surface": 0.06,
+   "q_noise": 0.04,
+   "q_shift": 0.0,
+   "common_mode_fit": {
+    "c": 0.15,
+    "e": 0.0375,
+    "n": 9531
+   },
+   "kernel_seconds": 1.217,
+   "policies": {
+    "B0_rules": {
+     "unsafe_pass_rate": 0.0105229,
+     "se": 3.226789205323149e-05,
+     "ci95": [
+      0.010459654931575666,
+      0.010586145068424334
+     ],
+     "released_good_rate": 0.6802333
+    },
+    "B1_single_agent_fixed": {
+     "unsafe_pass_rate": 0.008085,
+     "se": 2.8318956151313207e-05,
+     "ci95": [
+      0.008029494845943426,
+      0.008140505154056574
+     ],
+     "released_good_rate": 0.688576
+    },
+    "B1c_common_mode": {
+     "unsafe_pass_rate": 0.0071134,
+     "se": 2.6575928093746792e-05,
+     "ci95": [
+      0.007061311180936256,
+      0.007165488819063743
+     ],
+     "released_good_rate": 0.6242902
+    }
+   }
+  },
+  "tilted": {
+   "q_s0.3_q_n0.25_shift0.0": {
+    "origin": "SIMULATED",
+    "scenario": {
+     "sid": "S04",
+     "title": "shared lighting",
+     "shift": 0.1,
+     "camera_noise": 0.04,
+     "network_outage": 0.05,
+     "shared_noise": 0.15,
+     "caliper_sigma": 0.05,
+     "duplicate_p": 0.0
+    },
+    "parts": 10000000,
+    "q_surface": 0.3,
+    "q_noise": 0.25,
+    "q_shift": 0.0,
+    "common_mode_fit": {
+     "c": 0.15,
+     "e": 0.0375,
+     "n": 9531
+    },
+    "kernel_seconds": 1.373,
+    "policies": {
+     "B0_rules": {
+      "unsafe_pass_rate": 0.01046353649371424,
+      "se": 2.8988509216435492e-05,
+      "ci95": [
+       0.010406719015650026,
+       0.010520353971778454
+      ],
+      "released_good_rate": 0.6802125880318333
+     },
+     "B1_single_agent_fixed": {
+      "unsafe_pass_rate": 0.00803143804342843,
+      "se": 1.6687932513649125e-05,
+      "ci95": [
+       0.007998729695701676,
+       0.008064146391155182
+      ],
+      "released_good_rate": 0.6886649717758548
+     },
+     "B1c_common_mode": {
+      "unsafe_pass_rate": 0.007082493074285512,
+      "se": 1.5069886792968577e-05,
+      "ci95": [
+       0.007052956096171294,
+       0.0071120300523997305
+      ],
+      "released_good_rate": 0.6243618969597797
+     }
+    }
+   },
+   "q_s0.06_q_n0.04_shift0.2": {
+    "origin": "SIMULATED",
+    "scenario": {
+     "sid": "S04",
+     "title": "shared lighting",
+     "shift": 0.1,
+     "camera_noise": 0.04,
+     "network_outage": 0.05,
+     "shared_noise": 0.15,
+     "caliper_sigma": 0.05,
+     "duplicate_p": 0.0
+    },
+    "parts": 10000000,
+    "q_surface": 0.06,
+    "q_noise": 0.04,
+    "q_shift": 0.2,
+    "common_mode_fit": {
+     "c": 0.15,
+     "e": 0.0375,
+     "n": 9531
+    },
+    "kernel_seconds": 1.209,
+    "policies": {
+     "B0_rules": {
+      "unsafe_pass_rate": 0.01041471800294188,
+      "se": 0.00010219177639616014,
+      "ci95": [
+       0.010214422121205406,
+       0.010615013884678353
+      ],
+      "released_good_rate": 0.6788884521060826
+     },
+     "B1_single_agent_fixed": {
+      "unsafe_pass_rate": 0.007967856674302694,
+      "se": 0.00010399939943700937,
+      "ci95": [
+       0.0077640178514061554,
+       0.008171695497199233
+      ],
+      "released_good_rate": 0.687190527946924
+     },
+     "B1c_common_mode": {
+      "unsafe_pass_rate": 0.007019640655228632,
+      "se": 0.00010092656352795252,
+      "ci95": [
+       0.006821824590713846,
+       0.007217456719743419
+      ],
+      "released_good_rate": 0.6229462096791641
+     }
+    }
+   },
+   "q_s0.3_q_n0.25_shift0.2": {
+    "origin": "SIMULATED",
+    "scenario": {
+     "sid": "S04",
+     "title": "shared lighting",
+     "shift": 0.1,
+     "camera_noise": 0.04,
+     "network_outage": 0.05,
+     "shared_noise": 0.15,
+     "caliper_sigma": 0.05,
+     "duplicate_p": 0.0
+    },
+    "parts": 10000000,
+    "q_surface": 0.3,
+    "q_noise": 0.25,
+    "q_shift": 0.2,
+    "common_mode_fit": {
+     "c": 0.15,
+     "e": 0.0375,
+     "n": 9531
+    },
+    "kernel_seconds": 1.37,
+    "policies": {
+     "B0_rules": {
+      "unsafe_pass_rate": 0.010452468229499618,
+      "se": 6.949738327454278e-05,
+      "ci95": [
+       0.010316253358281515,
+       0.010588683100717722
+      ],
+      "released_good_rate": 0.6782629221124649
+     },
+     "B1_single_agent_fixed": {
+      "unsafe_pass_rate": 0.008028977751419603,
+      "se": 6.877457418580967e-05,
+      "ci95": [
+       0.007894179586015416,
+       0.00816377591682379
+      ],
+      "released_good_rate": 0.6863298947720263
+     },
+     "B1c_common_mode": {
+      "unsafe_pass_rate": 0.007083040745541991,
+      "se": 6.675234888036812e-05,
+      "ci95": [
+       0.006952206141736469,
+       0.0072138753493475125
+      ],
+      "released_good_rate": 0.622341286829013
+     }
+    }
+   }
+  }
+ }
+}

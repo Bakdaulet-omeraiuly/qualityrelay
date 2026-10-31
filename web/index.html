@@ -55,6 +55,8 @@
         <p id="storyText" class="story">Take the guided tour of the line. The camera moves to each station.</p>
         <div class="row2"><button class="ghost" id="storyPrev">◀ Back</button><button class="ghost" id="storyNext">Start tour ▶</button></div>
       </div>
+      <div class="phead"><span>Live station events</span><span class="faint" id="liveState">waiting</span></div>
+      <div class="pbody"><div id="liveFeed" class="livefeed faint small">No physical events yet. Stations POST to <code>/sim/live/event</code>; events are shown, never acted on.</div></div>
       <div class="phead"><span>Layers</span></div>
       <div class="pbody">
         <label class="check"><input id="labels" type="checkbox" checked/> Station labels <kbd>L</kbd></label>
@@ -156,6 +158,7 @@
   <p class="faint small foot">Write-ups: docs/research/SIM_18_1_RESULTS.md · COLLECTIVE_GATE_A_RESULTS_31OCT.md · WARP_MC_AND_TUNING_31OCT.md · <a href="/legacy">17.0 page</a></p>
 </section>
 
+<script src="/sim/assets/qrcode.js"></script>
 <script type="module" src="/sim/assets/site.js"></script>
 </body>
 </html>

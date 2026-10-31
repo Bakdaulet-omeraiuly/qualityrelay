@@ -50,7 +50,7 @@ def stl(name: str):
 VENDOR = ROOT / 'web' / 'vendor'
 ASSETS = {'three.module.js', 'OrbitControls.js', 'STLLoader.js', 'CSS2DRenderer.js', 'RoomEnvironment.js',
           'EffectComposer.js', 'RenderPass.js', 'UnrealBloomPass.js', 'OutputPass.js', 'ShaderPass.js', 'MaskPass.js',
-          'Pass.js', 'CopyShader.js', 'LuminosityHighPassShader.js', 'OutputShader.js', 'site.js', 'site.css'}
+          'Pass.js', 'CopyShader.js', 'LuminosityHighPassShader.js', 'OutputShader.js', 'qrcode.js', 'site.js', 'site.css'}
 
 
 @router.get('/assets/{name}')
@@ -269,3 +269,79 @@ def vision_capture(req: CaptureRequest):
                                            'photo with it would be out of domain. Train it on these PHYSICAL_CAPTURE photos first.',
                                     ready_to_train=ready, need=dict(good=30, defect=10),
                                     train_command='python scripts/train_anomaly.py --data captured --root data/prints --epochs 100 --size 256  (Brev L4)'))
+
+
+# ---- I9 active learning: which photo to label next ------------------------------------------------
+@router.get('/vision/suggest')
+def vision_suggest(limit: int = 10):
+    """Uncertainty sampling for the dimensional model: unlabelled photos whose measured width is
+    closest to the decision boundary (tab ~20.5 mm / slot ~20.5 mm for the 0.5 mm clearance at the
+    nominal partner) are the most informative to label first. Unmeasurable photos come last."""
+    from ..vision_measure import measure_part_width
+    import cv2
+    inbox = PRINTS / 'inbox'
+    files = sorted(inbox.glob('*')) if inbox.exists() else []
+    d = nominal_design(); boundary = {'tab_width': d['slot_opening_mm'] - 0.5, 'slot_opening': d['tab_width_mm'] + 0.5}
+    rows = []
+    for f in files[:200]:
+        img = cv2.imread(str(f))
+        m = measure_part_width(img) if img is not None else dict(status='UNREADABLE')
+        if m.get('status') == 'MEASURED':
+            margin = abs(m['width_mm'] - boundary[m['kind']])
+            rows.append(dict(file=f.name, kind=m['kind'], width_mm=m['width_mm'], margin_mm=round(margin, 3),
+                             reason=f"width {m['width_mm']} mm is {margin:.2f} mm from the {boundary[m['kind']]:.2f} mm boundary"))
+        else:
+            rows.append(dict(file=f.name, kind=None, width_mm=None, margin_mm=None, reason=f"{m.get('status')}: label by eye"))
+    rows.sort(key=lambda r: (r['margin_mm'] is None, r['margin_mm'] if r['margin_mm'] is not None else 0))
+    return dict(source_tier='PHYSICAL_CAPTURE', inbox=len(files), suggestions=rows[:limit],
+                method='uncertainty sampling on the measured width vs the clearance boundary')
+
+
+# ---- I8 live mode: physical station events -> browser (Server-Sent Events, no extra dependency) ------
+import asyncio
+from collections import deque
+from fastapi import Request
+from fastapi.responses import StreamingResponse
+
+LIVE = deque(maxlen=500)
+_LIVE_SEQ = [0]
+
+
+class LiveEvent(BaseModel):
+    """Shared integration-contract fields (QUALITYRELAY_18_1_TEAM_TASKS_EN.md section 4). A
+    self-declared station is NOT a verified identity: events are displayed, never acted on, and
+    keep their declared tier (adilnurgg's authenticated ingest replaces this in production)."""
+    event_id: str = Field(..., max_length=120)
+    specimen_id: str = Field(..., max_length=120)
+    station_id: str = Field(..., pattern='^(phone|pi|caliper|assembly|sorter|virtual-station)$')
+    source_tier: str = Field('PHYSICAL_CAPTURE', pattern='^(SIMULATED|PHYSICAL_CAPTURE)$')
+    observed_at: str = Field(..., max_length=40)
+    lane: str = Field('slot', pattern='^(slot|tab)$')
+    value: str | float | bool | None = None
+    note: str | None = Field(None, max_length=200)
+
+
+@router.post('/live/event')
+def live_event(ev: LiveEvent):
+    _LIVE_SEQ[0] += 1
+    rec = dict(seq=_LIVE_SEQ[0], verified=False, **ev.model_dump())
+    LIVE.append(rec)
+    return dict(accepted=True, seq=rec['seq'], verified=False)
+
+
+@router.get('/live/recent')
+def live_recent(after: int = 0):
+    return [e for e in LIVE if e['seq'] > after]
+
+
+@router.get('/live/stream')
+async def live_stream(request: Request, after: int = 0):
+    async def gen():
+        last = after
+        while not await request.is_disconnected():
+            for e in [e for e in list(LIVE) if e['seq'] > last]:
+                last = e['seq']
+                yield f"data: {json.dumps(e)}\n\n"
+            yield ': keep-alive\n\n'
+            await asyncio.sleep(0.5)
+    return StreamingResponse(gen(), media_type='text/event-stream')
