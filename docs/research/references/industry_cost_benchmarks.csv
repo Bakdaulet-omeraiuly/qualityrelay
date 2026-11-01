@@ -1,0 +1,17 @@
+metric,value,unit,scope,original_source,original_year,found_via_url,confidence,used_in_deck
+unplanned_downtime_cost,2300000,USD_per_hour,large automotive plant,Siemens True Cost of Downtime,2024,https://oxmaint.com/industries/manufacturing-plant/cost-of-unplanned-downtime-in-manufacturing-2026,high,yes
+unplanned_downtime_annual_loss,1400000000000,USD_per_year,world's 500 largest companies (11% of revenue),Siemens True Cost of Downtime,2024,https://reliamag.com/topics/articles/cost-unplanned-downtime-manufacturing,high,yes
+unplanned_downtime_share_of_revenue,11,percent_of_revenue,world's 500 largest companies (8% in 2019-20),Siemens True Cost of Downtime,2024,https://reliamag.com/topics/articles/cost-unplanned-downtime-manufacturing,high,yes
+unplanned_downtime_cost,36000,USD_per_hour,fast-moving consumer goods (low end),Siemens True Cost of Downtime,2024,https://assets.new.siemens.com/siemens/assets/api/uuid:1b43afb5-2d07-47f7-9eb7-893fe7d0bc59/TCOD-2024_original.pdf,high,no
+unplanned_downtime_cost,1800000-2000000,USD_per_hour,semiconductor fab,Siemens True Cost of Downtime,2024,https://oxmaint.com/industries/manufacturing-plant/cost-of-unplanned-downtime-in-manufacturing-2026,medium,no
+unplanned_downtime_cost,260000,USD_per_hour,average manufacturer (some sources: up to),Aberdeen Research,,https://seqent.com/blog/the-true-cost-of-unplanned-downtime-by-industry/,low-medium,no
+unplanned_downtime_cost,125000,USD_per_hour,cross-sector median (3215 respondents; 11 sectors),ABB Value of Reliability,2023,https://seqent.com/blog/the-true-cost-of-unplanned-downtime-by-industry/,medium,no
+unplanned_downtime_cost,10000-50000,USD_per_hour,discrete manufacturing (lower end),,,https://reliamag.com/topics/articles/cost-unplanned-downtime-manufacturing,low-medium,no
+downtime_cost_increase_since_2019,50,percent,manufacturing overall,Aberdeen,,https://reliamag.com/topics/articles/cost-unplanned-downtime-manufacturing,low-medium,no
+cost_of_poor_quality,15-20,percent_of_sales,quality-related costs at many manufacturers,ASQ,,https://manufacturingleadgeneration.com/manufacturing-quality-statistics/,medium,yes
+cost_of_poor_quality,10-30,percent_of_revenue,typical manufacturer (<5% world-class),Learn Lean Sigma,,https://manufacturingleadgeneration.com/manufacturing-quality-statistics/,low-medium,no
+cost_of_poor_quality,15,percent_of_sales,average by complexity (range 5-35%),IISE,,https://manufacturingleadgeneration.com/manufacturing-quality-statistics/,low-medium,no
+visible_scrap_and_rework,1.4-2.2,percent_of_revenue,median ~1.4%; top performers <0.6%,APQC / EASE,,https://manufacturingleadgeneration.com/manufacturing-quality-statistics/,medium-low,no
+hidden_to_visible_copq_ratio,3-5,ratio,fully loaded COPQ vs visible scrap line,iFactory (vendor),,https://ifactoryapp.com/industries/manufacturing-plant/scrap-rework-reduction-cost-analysis-prevention,low,no
+scrap_or_rework_share,40,percent_of_parts,Tesla Model 3 ramp at one point,internal documents reported by CNBC,2018,https://www.cnbc.com/2018/06/05/tesla-factories-have-struggled-with-scrap-production-rate-reports.html,medium,no
+defect_cost_escalation,1:10:100,relative_cost,caught at production : assembly : customer,cost-of-quality heuristic,,https://manufacturo.com/resources/blog/the-cost-of-quality-in-high-complexity-manufacturing,low-medium,no
