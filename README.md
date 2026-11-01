@@ -7,8 +7,8 @@ ScienceClaw Hackathon 2026 (MIT LAMM × E14 Fund) · Team QualityRelay
 | | |
 |---|---|
 | 🌐 **Live demo** | [qualityrelay.vercel.app](https://qualityrelay.vercel.app) (digital factory, agent panel, CNC loop; all factory data `SIMULATED`) |
-| 🎬 **Demo video** | _add link_ |
-| 📊 **Slides** | [_add link_](https://docs.google.com/presentation/d/1Ha4QRPNheunBVRiOB4JxZryk_52QxJupUCgx1Kq5tS4/edit?slide=id.p4#slide=id.p4) |
+| 🎬 **Demo video** | [_video_](https://drive.google.com/drive/folders/1aUe0HOY6R9XZRMgreO4CbzcKuAj4X68m?usp=sharing) |
+| 📊 **Slides** | [_slides_](https://docs.google.com/presentation/d/1Ha4QRPNheunBVRiOB4JxZryk_52QxJupUCgx1Kq5tS4/edit?slide=id.p4#slide=id.p4) |
 | 🧾 **Every claim and its evidence** | [CLAIMS_AND_OPEN_WORK.md](CLAIMS_AND_OPEN_WORK.md) |
 
 ![QualityRelay at a glance](docs/readme/overview.png)
