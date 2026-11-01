@@ -16,6 +16,13 @@ Policies: 'rules' (fixed OR rule, the B0 analogue) and 'bayes' (calibrated poste
 break-even threshold, the B1 analogue). Pairing: 'fifo' or 'optimized' (SIM-05,
 optimization.match_batch). Common random numbers: identical parts, sensor noise, service noise
 and failure times for every policy. Every output is SIMULATED; timings are ILLUSTRATIVE.
+
+CNC cell demo (scenario D01, scenarios.CNC): the same engine with the machines read as CNCs. The camera
+also flags gross size errors; a caliper chamber measures every dimension of flagged parts only. Control
+modes: 'closed_loop' stops a machine after N consecutive flags, derives a correction from the chamber
+measurements, has an operator approve the program change, then resumes; 'audit' (today) lets the machine
+run and corrects it at the next scheduled audit; 'none' never corrects. Every event is logged and the
+waste is counted. No real machine, robot or conveyor is driven by any of this.
 """
 from __future__ import annotations
 from dataclasses import dataclass, asdict
@@ -27,11 +34,13 @@ from ..economics import Costs
 from . import SOURCE_TIER, MODEL_VERSION
 from .cad import nominal_design
 from .des import Env, Signal
-from .scenarios import FactoryScenario, SiteConfig, STATION_S, draw_part, truth_hash
+from .gcode import program as gcode_program, diff as gcode_diff
+from .scenarios import FactoryScenario, SiteConfig, STATION_S, FUNCTIONAL_TOL_MM, draw_part, truth_hash
 
 TOL = 0.5
 POLICIES = ('rules', 'bayes', 'hold_all')  # hold_all: the Gate-A B7 degenerate optimum, run through a real review station
 PAIRINGS = ('fifo', 'optimized')
+CONTROLS = ('none', 'closed_loop', 'audit')
 
 
 def phi(x):
@@ -90,8 +99,10 @@ def surface_posterior(cams: dict, m: PartModel, which=('phone', 'pi')) -> float:
     return p
 
 
-def width_posterior(reading: float, kind: str, m: PartModel, caliper_sd: float):
+def width_posterior(reading: float | None, kind: str, m: PartModel, caliper_sd: float):
     mu0, v0 = (m.slot_mean, m.slot_var) if kind == 'slot' else (m.tab_mean, m.tab_var)
+    if reading is None:  # not measured (caliper_mode 'flagged_only'): the process prior is all there is
+        return mu0, v0
     s2 = caliper_sd ** 2
     v = v0 * s2 / (v0 + s2)
     return v * (mu0 / v0 + reading / s2), v
@@ -109,11 +120,34 @@ class Factory:
                  pair_timeout_s: float | None = None, reprint: bool = False, max_reprints: int = 2,
                  lane_by_kind: bool = False, feedback: str = 'none', ewma_lambda: float = 0.1, deadband_mm: float = 0.05,
                  agents: bool = False, architecture: str = 'local', uplink_mbps: float = 100.0,
-                 image_bytes: int = 2_000_000, central_outages: tuple = ()):
+                 image_bytes: int = 2_000_000, central_outages: tuple = (),
+                 control: str = 'none', halt_on_flags: int = 3, confirm_n: int = 3, max_correction_mm: float = 2.0,
+                 audit_interval_s: float = 1800.0):
         if policy not in POLICIES or pairing not in PAIRINGS:
             raise ValueError('unknown policy/pairing')
         if sc.evidence_sharing not in ('full', 'summary', 'none'):
             raise ValueError('evidence_sharing')
+        if control not in CONTROLS:
+            raise ValueError('control must be none|closed_loop|audit')
+        if sc.caliper_mode not in ('every_part', 'flagged_only'):
+            raise ValueError('caliper_mode')
+        # CNC demo control loop (see module docstring). 'closed_loop': after halt_on_flags consecutive camera flags of one
+        # kind the machine stops; once confirm_n chamber measurements confirm nonconformance a correction is proposed,
+        # refused if beyond +-max_correction_mm (machine stays stopped: FAULT), otherwise approved by an operator and
+        # applied, then the machine resumes. 'audit': the machine keeps running; the chamber findings reach it at the
+        # next scheduled audit (every audit_interval_s). 'none': nothing is ever corrected.
+        self.control, self.halt_on_flags, self.confirm_n = control, halt_on_flags, confirm_n
+        self.max_correction_mm, self.audit_interval_s = max_correction_mm, audit_interval_s
+        self.halt = {'slot': None, 'tab': None}          # kind -> Signal while the machine is stopped
+        self.halt_since, self.halt_s = {}, {'slot': 0.0, 'tab': 0.0}
+        self.flag_run = {'slot': 0, 'tab': 0}            # consecutive camera flags per kind
+        self.machine_fault = {'slot': False, 'tab': False}
+        self.in_flight = {'slot': 0, 'tab': 0}           # parts made but not yet past the part gate (chamber included)
+        self.chamber_devs = {'slot': [], 'tab': []}      # (t, process deviation, part, made_t) of confirmed nonconforming parts
+        self.last_correction_t = {'slot': -1.0, 'tab': -1.0}
+        self.proposal_open = {'slot': False, 'tab': False}
+        self.next_audit_t = audit_interval_s
+        self.line_events = []
         self.sc, self.seed, self.policy, self.pairing = sc, seed, policy, pairing
         self.costs = costs or Costs(); self.model = model or calibrate_part_model()
         self.batch_k, self.keep_log = batch_k, keep_log
@@ -183,7 +217,9 @@ class Factory:
         self.hold_part_seconds = 0.0
         self.stats = dict(part_reviews=0, pair_reviews=0, reworks=0, rework_ok=0, scrapped_parts=0, scrapped_good_parts=0,
                           shipped=0, escaped=0, shipped_good=0, holds_stale_evidence=0, part_holds=0, pair_holds=0,
-                          local_reinspections=0, released_after_review=0, reprints=0, holds_missing_central=0)
+                          local_reinspections=0, released_after_review=0, reprints=0, holds_missing_central=0,
+                          camera_flags=0, chamber_checks=0, chamber_nonconforming=0, halts=0, proposals=0, corrections_applied=0,
+                          corrections_refused=0, audits=0)
 
     # ---- helpers -------------------------------------------------------------------
     def _svc(self, key, mean_s):
@@ -224,19 +260,28 @@ class Factory:
         return self.costs.hold / (self.costs.hold + esc)
 
     # ---- processes -----------------------------------------------------------------
+    def _wait_if_halted(self, kind):
+        while self.halt[kind] is not None:  # a stopped machine takes no new blank until it is resumed
+            yield ('wait', self.halt[kind])
+
     def printer(self, site: SiteConfig, jobs):
         pr = self.res[(site.name, 'printer')]
         for job_id, kind, idxs in jobs:
+            yield from self._wait_if_halted(kind)
             yield ('acquire', {self.wip[kind]: len(idxs)})
             yield ('acquire', {pr: 1})
             t0 = self.env.now
             delay = self._failure_delay(pr)
             yield ('timeout', delay + self._svc(f'print:{job_id}', site.print_setup_s + site.print_per_part_s * len(idxs)))
             yield ('release', {pr: 1})
+            if self.control == 'audit':
+                self._audit_check(site)
             off = self.offset.get((site.name, kind), 0.0)
             for k, i in enumerate(idxs):
                 p = draw_part(self.sc, self.seed, kind, i, site, t0, f'{site.name}:{job_id}', self.design, offset_mm=off)
                 p['line'] = ((0 if kind == 'slot' else 1) if self.lane_by_kind else i) % site.inspection_lines
+                p['machine_s'] = round((self.env.now - t0 - delay) / len(idxs), 3)  # machine time of this part (one blank each)
+                self.in_flight[kind] += 1
                 self.parts.append(p)
                 self.env.process(self.part(p, site))
 
@@ -251,13 +296,31 @@ class Factory:
             if st == 'pi' and any(a <= self.env.now < b for a, b in sc.partition_windows_s):
                 val = None  # Pi edge unreachable: no reading, never a 'clear'
             obs[st] = (val, self.env.now)
-        yield from self._work([self.res[(site.name, 'caliper', line)], self.res[(site.name, 'operator')]],
-                              f'cal:{p["part_id"]}', STATION_S['caliper'], 'caliper')
+        flagged = any(v for v, _t in obs.values())
+        p['flagged'] = flagged
+        if flagged:
+            self.stats['camera_flags'] += 1
+        if self.control == 'closed_loop' and p['t_print_s'] > self.last_correction_t[p['kind']]:
+            # only parts made with the current machine state count; parts made before a correction are still in the
+            # pipeline for a while and must not stop the corrected machine again
+            kind = p['kind']
+            self.flag_run[kind] = self.flag_run[kind] + 1 if flagged else 0
+            if flagged and self.flag_run[kind] >= self.halt_on_flags and self.halt[kind] is None and not self.machine_fault[kind]:
+                self._halt(kind, p)
+        if sc.caliper_mode == 'flagged_only':
+            # No inline caliper. A flagged part is measured in the chamber (below, via the part gate); an unflagged
+            # part is NOT measured: its width stays unknown and the pair gate falls back to the process prior.
+            p['measured_mm'] = None
+            p['caliper_sd'] = site.caliper_sd_mm
+        else:
+            yield from self._work([self.res[(site.name, 'caliper', line)], self.res[(site.name, 'operator')]],
+                                  f'cal:{p["part_id"]}', STATION_S['caliper'], 'caliper')
+            p['measured_mm'] = p['caliper'][0]
+            p['caliper_sd'] = site.caliper_sd_mm
         p['obs'] = obs
         p['obs_raw'] = {k: v for k, (v, _t) in obs.items()}  # display copy; review may clear p['obs']
-        p['measured_mm'] = p['caliper'][0]
-        p['caliper_sd'] = site.caliper_sd_mm
-        self._monitor(p, site)
+        if p['measured_mm'] is not None:
+            self._monitor(p, site)
         if self.agents:
             self.agents.on_inspected(p, site, obs)
         p['evidence_at'] = self.env.now + sc.evidence_latency_s
@@ -267,13 +330,14 @@ class Factory:
                 self.stats['part_holds'] += 1; self.stats['holds_missing_central'] += 1
                 ok = yield from self._review_part(p)
                 if not ok:
-                    self._upstream_exit(); return
+                    self._gate_passed(p); self._upstream_exit(); return
         # supplier-side part gate
         if self._part_hold(p, ('phone', 'pi')):
             self.stats['part_holds'] += 1
             ok = yield from self._review_part(p)
             if not ok:
-                self._upstream_exit(); return
+                self._gate_passed(p); self._upstream_exit(); return
+        self._gate_passed(p)
         if site.name != sc.assembly_site:
             yield ('timeout', sc.inter_site_transport_s)
             if sc.evidence_sharing == 'none':
@@ -377,7 +441,16 @@ class Factory:
             return any(v is None or v for v in vals.values())
         return surface_posterior(vals, self.model, tuple(vals)) >= self._threshold()
 
+    def _m(self, p):
+        """Width for a rule: the measurement, or the programmed nominal when the part was not measured
+        (today's practice: an unmeasured part is assumed to be what the program says)."""
+        if p['measured_mm'] is not None:
+            return p['measured_mm']
+        return self.design['slot_opening_mm'] if p['kind'] == 'slot' else self.design['tab_width_mm']
+
     def _review_part(self, p):
+        if self.sc.caliper_mode == 'flagged_only':
+            return (yield from self._chamber_part(p))
         self.stats['part_reviews'] += 1
         a = self.sc.assembly_site
         t0 = self.env.now
@@ -411,21 +484,224 @@ class Factory:
         pr = self.res[(site.name, 'printer')]
         n = old.get('reprints', 0) + 1
         root = old.get('root_id', old['part_id'])
+        yield from self._wait_if_halted(old['kind'])
         yield ('acquire', {self.wip[old['kind']]: 1})
         yield ('acquire', {pr: 1})
         t0 = self.env.now
         delay = self._failure_delay(pr)
         yield ('timeout', delay + self._svc(f'reprint:{root}:{n}', site.print_setup_s + site.print_per_part_s))
         yield ('release', {pr: 1})
+        # A re-machined CNC part is cut with the machine's current correction (the tool offset is machine state);
+        # a reprint on a printer is re-zeroed to the CAD model (registered behaviour).
+        off = self.offset.get((site.name, old['kind']), 0.0) if self.sc.machine == 'cnc' else 0.0
         p = draw_part(self.sc, self.seed, old['kind'], 10_000_000 * n + old['idx'], site, t0, f'{site.name}:reprint',
-                      self.design, seq_idx=old['seq_idx'], corrected=True)
-        p.update(part_id=f'{root}-R{n}', root_id=root, reprints=n, reprint_of=old['part_id'], line=old['line'])
+                      self.design, seq_idx=old['seq_idx'], corrected=True, offset_mm=off)
+        p.update(part_id=f'{root}-R{n}', root_id=root, reprints=n, reprint_of=old['part_id'], line=old['line'],
+                 machine_s=round(self.env.now - t0 - delay, 3))
+        self.in_flight[old['kind']] += 1
         old['reprinted_as'] = p['part_id']
         self.parts.append(p)
         self.env.process(self.part(p, site))
 
     def _release_wip(self, kind, n):
         yield ('release', {self.wip[kind]: n})
+
+    # ---- CNC demo: halt, caliper chamber, correction, audit ---------------------------------------
+    def _event(self, etype, kind, **body):
+        ev = dict(t=round(self.env.now, 3), type=etype, kind=kind, **body)
+        self.line_events.append(ev)
+        return ev
+
+    def _nominal(self, kind):
+        return self.design['slot_opening_mm'] if kind == 'slot' else self.design['tab_width_mm']
+
+    def _since_correction(self, kind):
+        """Chamber deviations of parts MADE with the current machine state (parts made before the last
+        correction are still in the pipeline for a while and say nothing about the corrected machine)."""
+        return [(d, pid) for t, d, pid, made in self.chamber_devs[kind] if made > self.last_correction_t[kind]]
+
+    def _halt(self, kind, p):
+        self.halt[kind] = Signal()
+        self.halt_since[kind] = self.env.now
+        self.stats['halts'] += 1
+        self._event('HALT', kind, part=p['part_id'], consecutive_flags=self.flag_run[kind],
+                    note=f'{self.flag_run[kind]} consecutive camera flags on {kind}s: the {kind} machine takes no new blank; '
+                         f'flagged parts go to the caliper chamber')
+        if self.agents:
+            self.agents.on_line_event(self.line_events[-1])
+        if len(self._since_correction(kind)) >= self.confirm_n and not self.proposal_open[kind]:  # already confirmed by the chamber
+            self.proposal_open[kind] = True
+            self.env.process(self._correct(kind, self.site[p['site']], 'chamber measurements before the halt'))
+
+    def _gate_passed(self, p):
+        """The part is past the part gate (released or scrapped). A stopped machine with nothing left to measure
+        and too few chamber confirmations resumes: the flags were not confirmed, so there is nothing to correct."""
+        kind = p['kind']
+        self.in_flight[kind] -= 1
+        if self.control != 'closed_loop' or self.halt[kind] is None or self.proposal_open[kind] or self.in_flight[kind] > 0 \
+                or self.machine_fault[kind]:  # FAULT: a refused correction keeps the machine stopped for maintenance
+            return
+        since = self._since_correction(kind)
+        if len(since) >= self.confirm_n:
+            self.proposal_open[kind] = True
+            self.env.process(self._correct(kind, self.site[p['site']], 'chamber measurements, last part in flight'))
+        else:
+            self._event('RESUMED_UNCONFIRMED', kind, chamber_confirmations=len(since), needed=self.confirm_n,
+                        note='no part of this kind is left before the gate and the chamber did not confirm the camera flags: resume, nothing to correct')
+            self._resume(kind)
+
+    def _resume(self, kind):
+        sig = self.halt[kind]
+        if sig is None:
+            return
+        self.halt_s[kind] += self.env.now - self.halt_since[kind]
+        self.halt[kind] = None
+        self.flag_run[kind] = 0
+        self.env.fire(sig)
+        self._event('RESUMED', kind, halted_s=round(self.env.now - self.halt_since[kind], 3))
+        if self.agents:
+            self.agents.on_line_event(self.line_events[-1])
+
+    def chamber_report(self, p, site):
+        """Every dimension of a flagged part against the CAD nominal (caliper readings are pre-drawn, CRN)."""
+        kind = p['kind']
+        nominal = self._nominal(kind)
+        dims = {('slot_opening_mm' if kind == 'slot' else 'tab_width_mm'):
+                dict(nominal_mm=nominal, tol_mm=FUNCTIONAL_TOL_MM, reading_mm=p['caliper'][2], functional=True)}
+        for name, d in p.get('dims', {}).items():
+            dims[name] = dict(nominal_mm=d['nominal_mm'], tol_mm=d['tol_mm'], reading_mm=d['reading_mm'], functional=False)
+        for d in dims.values():
+            d['deviation_mm'] = round(d['reading_mm'] - d['nominal_mm'], 4)
+            d['ok'] = abs(d['deviation_mm']) <= d['tol_mm']
+            d['reading_mm'] = round(d['reading_mm'], 4)
+        func = next(d for d in dims.values() if d['functional'])
+        return dict(dims=dims, functional=func, conforming=all(d['ok'] for d in dims.values()),
+                    caliper_sd_mm=site.caliper_sd_mm, instrument='digital caliper (SIMULATED readings)', operator='operator (simulated)')
+
+    def _chamber_part(self, p):
+        """Caliper chamber: an operator measures every dimension of a camera-flagged part and compares them with
+        the CAD nominal. Nonconforming (or a confirmed crack) -> scrap via the reject conveyor and a data point for
+        the correction; conforming -> released with a verified width. Unflagged parts never come here."""
+        self.stats['part_reviews'] += 1
+        self.stats['chamber_checks'] += 1
+        a, kind = self.sc.assembly_site, p['kind']
+        site = self.site[p['site']]
+        t0 = self.env.now
+        yield from self._work([self.res[(a, 'review')], self.res[(a, 'operator')]], f'ch:{p["part_id"]}', STATION_S['chamber'], 'chamber')
+        self.hold_part_seconds += self.env.now - t0
+        rep = self.chamber_report(p, site)
+        p['chamber'] = rep
+        p['measured_mm'] = rep['functional']['reading_mm']
+        p['caliper_sd'] = site.caliper_sd_mm
+        self._monitor(p, site)
+        if self.agents:
+            self.agents.on_chamber(p, site, rep)
+        if rep['conforming'] and not p['expert_crack_seen']:
+            self._event('CHAMBER_CONFORMING', kind, part=p['part_id'], width_mm=rep['functional']['reading_mm'])
+            if self.agents:
+                self.agents.on_review(p['part_id'], 'cleared', flagged_parts=[p['part_id']])
+            p['reviewed'] = True
+            p['obs'] = {}
+            p['expert_cleared'] = True
+            self.stats['released_after_review'] += 1
+            return True
+        self.stats['chamber_nonconforming'] += 1
+        dev = p['measured_mm'] - self._nominal(kind) - p.get('offset_mm', 0.0)  # process deviation, the part's own correction removed
+        self.chamber_devs[kind].append((self.env.now, dev, p['part_id'], p['t_print_s']))
+        bad = [k for k, d in rep['dims'].items() if not d['ok']] + (['crack'] if p['expert_crack_seen'] else [])
+        self._event('CHAMBER_NONCONFORMING', kind, part=p['part_id'], out_of_tolerance=bad, width_mm=rep['functional']['reading_mm'],
+                    deviation_mm=round(rep['functional']['deviation_mm'], 4), process_deviation_mm=round(dev, 4))
+        if self.agents:
+            self.agents.on_review(p['part_id'], 'scrapped', flagged_parts=[p['part_id']], confirmed_parts=[p['part_id']])
+        self._scrap(p)
+        if self.control == 'closed_loop' and self.halt[kind] is not None and not self.proposal_open[kind] \
+                and not self.machine_fault[kind] and len(self._since_correction(kind)) >= self.confirm_n:
+            self.proposal_open[kind] = True
+            self.env.process(self._correct(kind, site, 'chamber measurements after the halt'))
+        return False
+
+    def _proposal(self, kind, site, trigger, pts=None):
+        key = (site.name, kind)
+        pts = self._since_correction(kind) if pts is None else pts
+        est = mean(d for d, _ in pts)
+        cur = self.offset.get(key, 0.0)
+        new = cur - est
+        within = abs(new) <= self.max_correction_mm
+        before = gcode_program(kind, self.design, cur)
+        after = gcode_program(kind, self.design, new if within else cur, measured_dev_mm=est)
+        self.stats['proposals'] += 1
+        ev = self._event('CORRECTION_PROPOSED', kind, trigger=trigger, n_measurements=len(pts), parts=[pid for _, pid in pts],
+                         estimate_mm=round(est, 4), offset_before_mm=round(cur, 4), offset_after_mm=round(new, 4),
+                         within_limits=within, limit_mm=self.max_correction_mm,
+                         gcode_before=before, gcode_after=after, gcode_diff=gcode_diff(before, after))
+        if self.agents:
+            self.agents.on_line_event(ev)
+        return key, est, new, within
+
+    def _apply(self, kind, site, key, est, new, by):
+        self.offset[key] = new
+        self.last_correction_t[kind] = self.env.now
+        self.stats['corrections_applied'] += 1
+        self.corrections.append(dict(t=round(self.env.now, 1), site=site.name, kind=kind, estimate_mm=round(est, 4), offset_mm=round(new, 4), by=by))
+        ev = self._event('CORRECTION_APPLIED', kind, offset_mm=round(new, 4), by=by)
+        if self.agents:
+            self.agents.on_line_event(ev)
+
+    def _correct(self, kind, site, trigger):
+        """Closed loop: propose, have an operator approve (or refuse an out-of-limit change), apply, resume."""
+        key, est, new, within = self._proposal(kind, site, trigger)
+        if not within:
+            self.stats['corrections_refused'] += 1
+            self.machine_fault[kind] = True
+            ev = self._event('CORRECTION_REFUSED', kind, offset_after_mm=round(new, 4), limit_mm=self.max_correction_mm,
+                             note='proposed change exceeds the limit: nothing is changed, the machine stays stopped for maintenance (FAULT)')
+            if self.agents:
+                self.agents.on_line_event(ev)
+            self.proposal_open[kind] = False
+            return
+        a = self.sc.assembly_site
+        yield from self._work([self.res[(a, 'operator')]], f'ap:{kind}:{self.stats["proposals"]}', STATION_S['approval'], 'approval')
+        self._apply(kind, site, key, est, new, 'operator-approved program change (simulated)')
+        self.proposal_open[kind] = False
+        self._resume(kind)
+
+    def _audit_check(self, site):
+        """Today's line: the chamber findings reach the machine only at the scheduled audit. Checked lazily when a
+        machine finishes a job, so the correction lands on the first blank after the audit time."""
+        while self.env.now >= self.next_audit_t:
+            self.stats['audits'] += 1
+            at = self.next_audit_t
+            for kind in ('slot', 'tab'):
+                pts = [(d, pid) for t, d, pid, made in self.chamber_devs[kind] if made > self.last_correction_t[kind] and t <= at]
+                if not pts:
+                    continue
+                key, est, new, within = self._proposal(kind, site, f'scheduled audit at {at:.0f} s', pts)
+                if within:
+                    self._apply(kind, site, key, est, new, 'scheduled audit (simulated)')
+                else:
+                    self.stats['corrections_refused'] += 1
+                    self.machine_fault[kind] = True
+                    self._event('CORRECTION_REFUSED', kind, offset_after_mm=round(new, 4), limit_mm=self.max_correction_mm)
+            self._event('AUDIT', None, scheduled_s=at, nonconforming_found={k: sum(1 for t, *_ in self.chamber_devs[k] if t <= at) for k in ('slot', 'tab')})
+            self.next_audit_t += self.audit_interval_s
+
+    def waste(self, end):
+        """What the fault cost, counted from the event log (and, labelled, from ground truth)."""
+        st = self.stats
+        tol = FUNCTIONAL_TOL_MM
+        made_defective_truth = sum(1 for p in self.parts if abs(p['true_width_mm'] - self._nominal(p['kind'])) > tol)
+        first_fix = {k: next((e['t'] for e in self.line_events if e['type'] == 'CORRECTION_APPLIED' and e['kind'] == k), None) for k in ('slot', 'tab')}
+        made_before_fix = sum(1 for p in self.parts if first_fix[p['kind']] is None or p['t_print_s'] < first_fix[p['kind']])
+        first_flag = next((e['t'] for e in self.line_events if e['type'] == 'HALT'), None)
+        return dict(blanks_consumed=len(self.parts), scrapped_parts=st['scrapped_parts'], scrapped_good_parts=st['scrapped_good_parts'],
+                    machine_s_lost=round(sum(p.get('machine_s', 0.0) for p in self.parts if p.get('fate') == 'scrap'), 3),
+                    halted_s={k: round(v + ((end - self.halt_since[k]) if self.halt[k] is not None else 0.0), 3) for k, v in self.halt_s.items()},
+                    camera_flags=st['camera_flags'], chamber_checks=st['chamber_checks'], chamber_nonconforming=st['chamber_nonconforming'],
+                    halts=st['halts'], proposals=st['proposals'], corrections_applied=st['corrections_applied'], corrections_refused=st['corrections_refused'],
+                    audits=st['audits'], first_halt_s=first_flag, first_correction_s={k: v for k, v in first_fix.items()},
+                    parts_made_before_correction=made_before_fix,
+                    parts_made_out_of_tolerance_truth=made_defective_truth, escaped_pairs=st['escaped'],
+                    machine_fault={k: v for k, v in self.machine_fault.items()})
 
     def _try_pair(self, flush=False):
         S, T = self.buffer['slot'], self.buffer['tab']
@@ -486,9 +762,9 @@ class Factory:
             hold, reason = True, 'STALE_OR_MISSING_EVIDENCE'
             self.stats['holds_stale_evidence'] += 1
         elif self.policy == 'rules':
-            hold, reason = (s['measured_mm'] - t['measured_mm']) < TOL, 'RULE_CLEARANCE'
+            hold, reason = (self._m(s) - self._m(t)) < TOL, 'RULE_CLEARANCE'
         elif self.policy == 'hold_all':
-            hold, reason = (s['measured_mm'] - t['measured_mm']) < TOL, 'RULE_CLEARANCE_AFTER_REVIEW'
+            hold, reason = (self._m(s) - self._m(t)) < TOL, 'RULE_CLEARANCE_AFTER_REVIEW'
         else:
             p = self.pair_risk(s, t)
             rec['p_unsafe'] = round(p, 6)
@@ -617,6 +893,10 @@ class Factory:
             mean_evidence_latency_s=(sum(self.evidence_latency) / len(self.evidence_latency)) if self.evidence_latency else 0.0,
             correction_log=self.corrections[:200], alarm_log=self.alarms[:100],
             genealogy=shipped[:50] if self.keep_log else [],
+            # CNC demo: what the 3D Lab animates and counts. Empty / zero for the registered scenarios.
+            machine=self.sc.machine, control=self.control, halt_on_flags=self.halt_on_flags, confirm_n=self.confirm_n,
+            max_correction_mm=self.max_correction_mm, audit_interval_s=self.audit_interval_s if self.control == 'audit' else None,
+            caliper_mode=self.sc.caliper_mode, line_events=self.line_events[:400], waste=self.waste(end),
         )
 
 

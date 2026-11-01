@@ -106,17 +106,56 @@ class AgentTeam:
             ev.append(sign_evidence(Evidence(f'{pid}:{cam}:{now:.3f}', pid, cam, kind, 'SIMULATED', f'frame:{pid}:{cam}:{now:.3f}', now,
                                              'suspect' if v else 'clear', {}, calibration_id=cal), STATION_KEYS[cam]))
         st = 'caliper_local' if local else 'caliper'
-        ev.append(sign_evidence(Evidence(f'{pid}:{st}:{now:.3f}', pid, st, 'CALIPER', 'SIMULATED', f'reading:{pid}:{st}:{now:.3f}', now,
-                                         'verified', {'measurement_mm': p['measured_mm'], 'uncertainty_mm': p['caliper_sd'],
-                                                      'unit': 'mm', 'validated': True}, calibration_id='caliper-sim'), STATION_KEYS[st]))
+        if p['measured_mm'] is not None:  # caliper_mode 'flagged_only': an unflagged part has no caliper record at all
+            ev.append(self._caliper_evidence(pid, st, p['measured_mm'], p['caliper_sd'], now))
         self.evidence[pid] = ev
         where = 'assembly-site re-inspection' if local else site.name
         self._send('OBSERVATION', 'vision', 'vision', pid, {'cams': {c: (None if v is None else ('suspect' if v else 'clear')) for c, v in cams.items()},
                                                             'where': where})
+        if p['measured_mm'] is None:
+            return
         self._send('MEASUREMENT', 'metrology', 'process', pid, {'kind': p['kind'], 'site': site.name, 'reading_mm': round(p['measured_mm'], 4),
                                                                 'offset_mm': round(p.get('offset_mm', 0.0), 4)})
         if not local:
             self._process_observe(p, site)
+
+    def _caliper_evidence(self, pid, st, reading, sd, now):
+        return sign_evidence(Evidence(f'{pid}:{st}:{now:.3f}', pid, st, 'CALIPER', 'SIMULATED', f'reading:{pid}:{st}:{now:.3f}', now,
+                                      'verified', {'measurement_mm': reading, 'uncertainty_mm': sd, 'unit': 'mm', 'validated': True},
+                                      calibration_id='caliper-sim'), STATION_KEYS[st])
+
+    def on_chamber(self, p, site, rep):
+        """Caliper chamber (CNC demo): Metrology now owns a verified width for this flagged part and tells Process
+        about every dimension. Same CUSUM / EWMA update as the line's monitor."""
+        pid, now = p['part_id'], self.f.env.now
+        self.metrology_store[pid] = (p['measured_mm'], p['caliper_sd'])
+        self.evidence.setdefault(pid, []).append(self._caliper_evidence(pid, 'caliper', p['measured_mm'], p['caliper_sd'], now))
+        self._send('MEASUREMENT', 'metrology', 'process', pid, {'kind': p['kind'], 'site': site.name, 'reading_mm': round(p['measured_mm'], 4),
+                                                                'offset_mm': round(p.get('offset_mm', 0.0), 4), 'station': 'chamber',
+                                                                'dims': {k: dict(reading_mm=d['reading_mm'], nominal_mm=d['nominal_mm'], ok=d['ok'])
+                                                                         for k, d in rep['dims'].items()},
+                                                                'conforming': rep['conforming']})
+        self._process_observe(p, site)
+
+    def on_line_event(self, ev):
+        """Halt / correction events of the CNC demo as messages: Process proposes the program change, the Safety
+        gate records the operator's approval or the refusal. The engine decides; this is the trace of it."""
+        k, kind = ev['type'], ev.get('kind')
+        if k == 'HALT':
+            self._send('ALARM', 'process', 'governance', ev.get('part'), {'kind': kind, 'event': 'HALT', 'consecutive_flags': ev.get('consecutive_flags')})
+        elif k == 'CORRECTION_PROPOSED':
+            self._send('PROPOSE_SETPOINT', 'process', 'governance', f'{kind}-correction', {'kind': kind, 'estimate_mm': ev['estimate_mm'],
+                       'offset_mm': ev['offset_after_mm'], 'n_measurements': ev['n_measurements'], 'within_limits': ev['within_limits'],
+                       'gcode_lines_changed': len(ev['gcode_diff'])})
+        elif k == 'CORRECTION_APPLIED':
+            self.setpoints.append(dict(t=round(self.f.env.now, 1), kind=kind, offset_mm=ev['offset_mm'], by=ev['by']))
+            self._send('DECISION', 'governance', 'process', f'{kind}-correction', {'stage': 'correction', 'decision': 'PASS', 'reason': 'OPERATOR_APPROVED',
+                       'offset_mm': ev['offset_mm'], 'by': ev['by']})
+        elif k == 'CORRECTION_REFUSED':
+            self._send('DECISION', 'governance', 'process', f'{kind}-correction', {'stage': 'correction', 'decision': 'HOLD', 'reason': 'CORRECTION_LIMIT',
+                       'offset_mm': ev.get('offset_after_mm'), 'limit_mm': ev.get('limit_mm')})
+        elif k in ('RESUMED', 'RESUMED_UNCONFIRMED'):
+            self._send('ALARM', 'process', 'governance', f'{kind}-machine', {'kind': kind, 'event': k})
 
     def _process_observe(self, p, site):
         """Same EWMA / CUSUM as the line monitor (engine._monitor); the team test checks they agree."""
@@ -200,14 +239,16 @@ class AgentTeam:
                 ps, src = surface_posterior(cams, f.model, tuple(cams)), 'CAMERAS'
             cal = [x for x in got if x['kind'] == 'CALIPER']
             if cal:
-                reading, sd = cal[0]['payload']['measurement_mm'], cal[0]['payload']['uncertainty_mm']
+                reading, sd = cal[-1]['payload']['measurement_mm'], cal[-1]['payload']['uncertainty_mm']  # latest: the chamber's, if any
             else:  # no verified reading: fall back to the prior only (decision will be conservative)
                 reading, sd = part['measured_mm'], part['caliper_sd']
             mu, var = width_posterior(reading, kind, f.model, sd)
             self._send('HYPOTHESIS_UPDATE', 'assembly', 'assembly', pair_id, {'part': pid, 'p_surface': round(ps, 6), 'source': src,
-                                                                             'mean_mm': round(mu, 4), 'sd_mm': round(sqrt(var), 4)})
-            ev[kind] = dict(ps=ps, mu=mu, var=var, reading=reading)
-        measured_clear = ev['slot']['reading'] - ev['tab']['reading']
+                                                                             'mean_mm': round(mu, 4), 'sd_mm': round(sqrt(var), 4),
+                                                                             'measured': reading is not None})
+            # for the rule: an unmeasured part counts as the programmed nominal (engine._m), the same as the line
+            ev[kind] = dict(ps=ps, mu=mu, var=var, reading=reading, rule_mm=reading if reading is not None else f._nominal(kind))
+        measured_clear = ev['slot']['rule_mm'] - ev['tab']['rule_mm']
         p_dim = phi((TOL - (ev['slot']['mu'] - ev['tab']['mu'])) / sqrt(ev['slot']['var'] + ev['tab']['var']))
         p_unsafe = 1 - (1 - ev['slot']['ps']) * (1 - ev['tab']['ps']) * (1 - p_dim)
         if stale:
@@ -267,7 +308,10 @@ class AgentTeam:
         for role, evs in own.items():
             bus.store(role).own = evs
         before = bus.cost_charged
-        kinds = ['PHONE_IMAGE'] + (['PI_IMAGE'] if 'pi' in self.f.sc.cameras else []) + ['CALIPER']
+        # a line without an inline caliper (caliper_mode flagged_only) is asked for CALIPER only when Metrology was
+        # involved with this part (it went through the chamber); otherwise there is no record to ask for
+        has_caliper = self.f.sc.caliper_mode == 'every_part' or any(e.kind == 'CALIPER' for e in self.evidence.get(pid, []))
+        kinds = ['PHONE_IMAGE'] + (['PI_IMAGE'] if 'pi' in self.f.sc.cameras else []) + (['CALIPER'] if has_caliper else [])
         got = []
         for kind in kinds:
             req = bus.make('REQUEST_EVIDENCE', 'assembly_engineer', OWNERSHIP[kind], pid,

@@ -14,8 +14,8 @@ from pydantic import BaseModel, Field
 
 from . import SOURCE_TIER, MODEL_VERSION
 from .cad import cad_catalogue, nominal_design, STL_DIR
-from .engine import Factory, calibrate_part_model, POLICIES, PAIRINGS
-from .scenarios import GRID, MULTI, BY_ID
+from .engine import Factory, calibrate_part_model, POLICIES, PAIRINGS, CONTROLS
+from .scenarios import GRID, MULTI, CNC, BY_ID
 
 ROOT = Path(__file__).resolve().parents[2]
 RES = ROOT / 'examples' / 'results'
@@ -30,8 +30,9 @@ def _model():
 
 @router.get('/scenarios')
 def scenarios():
-    return [dict(sid=s.sid, title=s.title, group='single-site' if s.sid.startswith('F') else 'multi-site')
-            for s in list(GRID) + list(MULTI)]
+    group = {'F': 'single-site', 'M': 'multi-site', 'D': 'cnc-demo'}
+    return [dict(sid=s.sid, title=s.title, group=group[s.sid[0]], machine=s.machine, caliper_mode=s.caliper_mode)
+            for s in list(GRID) + list(MULTI) + list(CNC)]
 
 
 @router.get('/cad')
@@ -85,6 +86,12 @@ class RunRequest(BaseModel):
     phone_only: bool = True  # website default: one iPhone camera per lane (registered results use phone + Pi)
     two_lanes: bool = True   # website default: separate slot and tab conveyor lanes
     agents: bool = True      # decisions made by the six agents (sim/agents.py); a reference run checks they match
+    # CNC demo (D01). 'auto': closed loop for the QualityRelay policies, scheduled audit for today's rule; 'none' elsewhere.
+    control: str = Field('auto', pattern='^(auto|none|closed_loop|audit)$')
+    halt_on_flags: int = Field(3, ge=1, le=20)                 # consecutive camera flags that stop the machine
+    confirm_n: int = Field(3, ge=1, le=20)                     # chamber confirmations before a correction is proposed
+    max_correction_mm: float = Field(2.0, gt=0, le=10)         # a larger proposed change is refused (machine stays stopped)
+    audit_interval_s: float = Field(1800.0, ge=60, le=8 * 3600)  # today's line: the chamber findings reach the machine at the next audit
 
 
 def _who(key: str):
@@ -96,7 +103,15 @@ def _who(key: str):
 
 
 STATION_OF = {'phone': 'phone', 'pi': 'pi', 'cal': 'caliper', 'pl': 'phone_local', 'cl': 'caliper_local',
-              'rv': 'review', 'rvp': 'review', 'rw': 'rework', 'as': 'assembly', 'so': 'sorting'}
+              'rv': 'review', 'rvp': 'review', 'rw': 'rework', 'as': 'assembly', 'so': 'sorting', 'ch': 'chamber', 'ap': 'approval'}
+
+
+def _control(req: RunRequest, sc) -> str:
+    if req.control != 'auto':
+        return req.control
+    if sc.machine != 'cnc':
+        return 'none'
+    return 'audit' if req.policy == 'rules' else 'closed_loop'
 
 
 @router.post('/run')
@@ -109,13 +124,17 @@ def run(req: RunRequest):
         sc = replace(sc, cameras=('phone',))
     if req.two_lanes:
         sc = replace(sc, sites=tuple(replace(s, inspection_lines=max(2, s.inspection_lines)) if s.makes == 'both' else s for s in sc.sites))
+    control = _control(req, sc)
+    assert control in CONTROLS
+    loop = dict(control=control, halt_on_flags=req.halt_on_flags, confirm_n=req.confirm_n, max_correction_mm=req.max_correction_mm,
+                audit_interval_s=req.audit_interval_s)
     f = Factory(sc, req.seed, req.policy, req.pairing, model=_model(), keep_log=True, reprint=req.reprint,
-                lane_by_kind=req.two_lanes, agents=req.agents)
+                lane_by_kind=req.two_lanes, agents=req.agents, **loop)
     summary = f.run()
     agents_out = None
     if req.agents:
         # reference line without agents, same seed: every agent decision must equal the built-in computation
-        ref = Factory(sc, req.seed, req.policy, req.pairing, model=_model(), keep_log=True, reprint=req.reprint, lane_by_kind=req.two_lanes)
+        ref = Factory(sc, req.seed, req.policy, req.pairing, model=_model(), keep_log=True, reprint=req.reprint, lane_by_kind=req.two_lanes, **loop)
         ref.run()
         key = lambda p: (p['pair_id'], p['decision'], p.get('p_unsafe'), p.get('fate'))  # noqa: E731
         a_, r_ = [key(p) for p in f.pairs], [key(p) for p in ref.pairs]
@@ -138,6 +157,7 @@ def run(req: RunRequest):
         pair_of[pr['tab_id']] = pr
     by_id = {p['part_id']: p for p in f.parts}
     m = f.model
+    r3 = lambda v: None if v is None else round(v, 3)  # noqa: E731  an unmeasured part (caliper_mode flagged_only) stays None
     parts = []
     for p in f.parts:
         pr = pair_of.get(p['part_id'], {})
@@ -145,13 +165,15 @@ def run(req: RunRequest):
         ps = surface_posterior(raw, m, tuple(raw)) if raw else None
         parts.append(dict(id=p['part_id'], kind=p['kind'], site=p['site'], lot=p['lot_id'], print_t=p['t_print_s'],
                           crack=p['crack'], warped=p['warped'], fate=p.get('fate', 'unpaired'),
-                          width_mm=round(p['printed_width_mm'], 3), measured_mm=round(p.get('measured_mm', 0.0), 3),
+                          width_mm=round(p['printed_width_mm'], 3), measured_mm=r3(p.get('measured_mm')),
                           caliper_sd=p.get('caliper_sd'), cams={k: (None if v is None else bool(v)) for k, v in raw.items()},
                           surface_posterior=None if ps is None else round(ps, 5), reviewed=bool(p.get('reviewed')),
                           reprint_of=p.get('reprint_of'), reprinted_as=p.get('reprinted_as'), root_id=p.get('root_id'),
                           line=p.get('line', 0),
                           events=sorted(tl[p['part_id']], key=lambda e: e[1]),
-                          pair=pr.get('pair_id'), decision=pr.get('decision'), escaped=bool(pr.get('escaped'))))
+                          pair=pr.get('pair_id'), decision=pr.get('decision'), escaped=bool(pr.get('escaped')),
+                          flagged=bool(p.get('flagged')), offset_mm=round(p.get('offset_mm', 0.0), 4), machine_s=p.get('machine_s'),
+                          chamber=p.get('chamber')))
     pairs = []
     for pr in f.pairs:
         s, t = by_id.get(pr['slot_id']), by_id.get(pr['tab_id'])
@@ -161,7 +183,7 @@ def run(req: RunRequest):
                   threshold=round(f.costs.hold / (f.costs.hold + f.costs.escaped_defect), 5))
         if s and t and 'measured_mm' in s and 'measured_mm' in t:
             (ms, vs), (mt, vt) = width_posterior(s['measured_mm'], 'slot', m, s['caliper_sd']), width_posterior(t['measured_mm'], 'tab', m, t['caliper_sd'])
-            ev.update(measured_clearance_mm=round(s['measured_mm'] - t['measured_mm'], 4),
+            ev.update(measured_clearance_mm=round(f._m(s) - f._m(t), 4), both_measured=s['measured_mm'] is not None and t['measured_mm'] is not None,
                       posterior_clearance_mm=round(ms - mt, 4), posterior_clearance_sd=round(sqrt(vs + vt), 4),
                       p_dimensional=round(phi((TOL - (ms - mt)) / sqrt(vs + vt)), 6),
                       p_surface_slot=round(f._ps(s), 6), p_surface_tab=round(f._ps(t), 6),
@@ -182,6 +204,11 @@ def run(req: RunRequest):
     return dict(source_tier=SOURCE_TIER, model_version=MODEL_VERSION, scenario=req.scenario, title=sc.title, reprint=req.reprint,
                 cameras=list(sc.cameras), two_lanes=req.two_lanes,
                 policy=req.policy, pairing=req.pairing, seed=req.seed, n_pairs=req.n_pairs,
+                machine=sc.machine, caliper_mode=sc.caliper_mode, control=control, tool_offset_fault_mm=sc.tool_offset_fault_mm,
+                loop=dict(halt_on_flags=req.halt_on_flags, confirm_n=req.confirm_n, max_correction_mm=req.max_correction_mm,
+                          audit_interval_s=req.audit_interval_s if control == 'audit' else None),
+                line_events=summary['line_events'], waste=summary['waste'],
+                nominal=dict(slot=f.design['slot_opening_mm'], tab=f.design['tab_width_mm']),
                 kpis={k: summary[k] for k in keep}, parts=parts, pairs=pairs, stations=stations, agents=agents_out,
                 costs=dict(hold=f.costs.hold, escaped_defect=f.costs.escaped_defect),
                 model=dict(calibration_id=m.calibration_id, phone_sens=m.phone_sens, phone_spec=m.phone_spec,

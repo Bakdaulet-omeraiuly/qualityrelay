@@ -91,7 +91,15 @@
         <label>Pairing<select id="pairing"><option value="optimized">Risk-optimised (SciPy)</option><option value="fifo">First-in first-out</option></select></label>
         <div class="row2"><label>Seed<input id="seed" type="number" min="0" max="999" value="0"/></label>
           <label>Pairs<input id="npairs" type="number" min="10" max="150" value="60"/></label></div>
+        <div id="loopCfg" hidden>
+          <p class="hint">CNC cell: the camera flags gross size errors; only flagged parts are measured in the caliper chamber. QualityRelay stops the machine, measures, proposes the program change, an operator approves, the machine resumes. Today's line finds the same fault at its scheduled audit.</p>
+          <div class="row2"><label>Stop after N flags in a row<input id="haltN" type="number" min="1" max="20" value="3"/></label>
+            <label>Chamber confirmations<input id="confirmN" type="number" min="1" max="20" value="3"/></label></div>
+          <div class="row2"><label>Correction limit (± mm)<input id="limitMm" type="number" min="0.1" max="10" step="0.1" value="2"/></label>
+            <label title="An assumption about today's line, not a measurement.">Today: audit every (min)<input id="auditMin" type="number" min="1" max="480" value="30"/></label></div>
+        </div>
         <div id="compareHint" hidden><p class="hint">Left: today (fixed rule + FIFO). Right: the policy above. Same parts, same sensor noise, same failures (common random numbers).</p><button class="ghost" id="demoBtn" style="width:100%;margin-bottom:10px">★ Demo: warping burst F03 · seed 3 · 100 pairs</button></div>
+        <button class="ghost" id="demoCncBtn" style="width:100%;margin-bottom:10px" title="Scenario D01 in Compare mode: today's audit line on the left, the closed loop on the right.">★ Demo: CNC cell D01 · first batch defective</button>
         <button id="runBtn" class="primary">Run simulation</button>
         <div id="runStatus" class="status" role="status"></div>
       </div>
@@ -139,9 +147,10 @@
 
     <aside class="dock right" id="inspector">
       <div class="rtabs" role="tablist">
-        <button class="on" data-rtab="agents" role="tab">Agents · live</button><button data-rtab="insp" role="tab">Inspector <span class="faint" id="inspHint"></span></button>
+        <button class="on" data-rtab="agents" role="tab">Agents · live</button><button data-rtab="loop" role="tab" hidden>Loop</button><button data-rtab="insp" role="tab">Inspector <span class="faint" id="inspHint"></span></button>
       </div>
       <div class="pbody agentsPanel" id="agentsBody"><p class="faint">Run a simulation.</p></div>
+      <div class="pbody agentsPanel" id="loopBody" hidden><p class="faint">Run the CNC cell scenario (D01).</p></div>
       <div class="pbody insp" id="inspBody" hidden></div>
     </aside>
   </div>
@@ -252,7 +261,8 @@
       <li>Any factory measurement or proven saving. No physical run exists yet.</li>
       <li>"21 agents collaborate". There are 21 <i>roles</i>, not 21 running models.</li>
       <li>"8 NVIDIA systems running". Warp is used; the other adapters are <code>NOT_CONFIGURED</code>.</li>
-      <li>A payback period or annual saving.</li></ul></div>
+      <li>A payback period or annual saving.</li>
+      <li>A CNC, robot or conveyor under control. The CNC cell (scenario D01) is a 3D rendering of the simulation engine's event log; its G-code is illustrative and the audit interval of "today's line" is an adjustable assumption.</li></ul></div>
   </div>
   <p class="faint small foot">Write-ups: docs/research/SIM_18_1_RESULTS.md · COLLECTIVE_GATE_A_RESULTS_31OCT.md · WARP_MC_AND_TUNING_31OCT.md · <a href="/legacy">17.0 page</a></p>
 </section>

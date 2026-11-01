@@ -56,12 +56,29 @@ class FactoryScenario:
     cost_shock_escape_multiplier: float = 1.0
     assembly_capacity: int = 1
     cameras: tuple = ('phone', 'pi')         # surface cameras on each inspection line
+    # ---- CNC cell demo (D01). All of this is off for the registered F/M scenarios, whose truth tables are unchanged.
+    machine: str = 'printer'                  # 'printer' | 'cnc': what the 3D Lab draws. The engine models both as a batch machine.
+    tool_offset_fault_mm: float = 0.0         # wrong tool/wear offset from the first part: slot opening narrower and tab wider by
+                                              # this much (the S-DEF / T-DEF specimens are 1.6 mm). Persists until a correction is applied.
+    camera_gross_dim_mm: float | None = None  # the camera also flags a part whose functional width is off by more than this
+    camera_gross_sens: float = 0.9            # ... with this sensitivity. None: camera checks the surface only (registered behaviour).
+    caliper_mode: str = 'every_part'          # 'every_part': inline caliper on every part. 'flagged_only': no inline caliper; a caliper
+                                              # chamber measures every dimension of camera-flagged parts only (unflagged parts are not measured).
 
     def as_dict(self):
         return asdict(self)
 
 
-STATION_S = dict(phone=5.0, pi=6.0, caliper=7.0, assembly=9.0, sorting=3.0, review=45.0, rework=120.0)
+STATION_S = dict(phone=5.0, pi=6.0, caliper=7.0, assembly=9.0, sorting=3.0, review=45.0, rework=120.0,
+                 chamber=60.0,     # caliper chamber: an operator measures every dimension of one flagged part
+                 approval=30.0)    # an operator reads the chamber measurements and the program change before it is applied
+
+# Coupon geometry (examples/cad/generate_specimen_stl.py) for the caliper chamber: every dimension, with its tolerance.
+# The functional width (slot opening / tab width) comes from the measured STL; these are the other dimensions.
+COUPON_DIMS = {'slot': dict(length_mm=(60.0, 0.30), height_mm=(6.0, 0.30), base_length_mm=(12.0, 0.30), rail_width_mm=(6.0, 0.30)),
+               'tab': dict(length_mm=(60.0, 0.30), height_mm=(6.0, 0.30))}
+FUNCTIONAL_TOL_MM = 0.30          # slot opening / tab width tolerance used by the chamber verdict (ILLUSTRATIVE)
+DIM_PROCESS_SD_MM = 0.04          # process scatter of the non-functional dimensions (ILLUSTRATIVE)
 
 
 def draw_part(sc: FactoryScenario, seed: int, kind: str, idx: int, site: SiteConfig, t_print_s: float, lot_id: str,
@@ -77,7 +94,9 @@ def draw_part(sc: FactoryScenario, seed: int, kind: str, idx: int, site: SiteCon
     t_planned = seq * (site.print_setup_s / site.print_batch + site.print_per_part_s) * 2 / max(1, site.printers)
     drift = sc.process_drift_mm_per_h * t_planned / 3600.0
     bias = 0.0 if corrected else site.printer_bias_mm  # reprint: printer re-zeroed to the nominal CAD model
-    width = rng.gauss(nominal + bias + (-drift / 2 if kind == 'slot' else drift), site.width_sd_mm)
+    # CNC demo: a wrong tool/wear offset is a machine state, so it stays on a re-machined part too (same sign convention as drift)
+    fault = sc.tool_offset_fault_mm * (-1.0 if kind == 'slot' else 1.0)
+    width = rng.gauss(nominal + bias + fault + (-drift / 2 if kind == 'slot' else drift), site.width_sd_mm)
     warped = rng.random() < sc.warp_p
     if warped:
         width += -sc.warp_mm if kind == 'slot' else sc.warp_mm
@@ -91,10 +110,28 @@ def draw_part(sc: FactoryScenario, seed: int, kind: str, idx: int, site: SiteCon
         flag = bool(crack ^ (rng.random() < sc.camera_noise) ^ lot_flip)
         cams[cam] = None if missing else flag
     readings = [width + rng.gauss(0, site.caliper_sd_mm) for _ in range(3)]  # supplier, assembly re-measure, review
-    return dict(part_id=f'{kind[0].upper()}-{seed}-{idx:06d}', idx=idx, seq_idx=seq, kind=kind, site=site.name, lot_id=lot_id,
-                t_print_s=round(t_print_s, 3), true_width_mm=width, printed_width_mm=width, latent_width_mm=latent, offset_mm=offset_mm, warped=warped, crack=crack, lot_lighting_flip=lot_flip,
-                cam=cams, caliper=readings, expert_crack_seen=crack if rng.random() > 0.02 else False,
-                expert_width_mm=width + rng.gauss(0, 0.01), rework_ok=rng.random() < 0.8)
+    p = dict(part_id=f'{kind[0].upper()}-{seed}-{idx:06d}', idx=idx, seq_idx=seq, kind=kind, site=site.name, lot_id=lot_id,
+             t_print_s=round(t_print_s, 3), true_width_mm=width, printed_width_mm=width, latent_width_mm=latent, offset_mm=offset_mm, warped=warped, crack=crack, lot_lighting_flip=lot_flip,
+             cam=cams, caliper=readings, expert_crack_seen=crack if rng.random() > 0.02 else False,
+             expert_width_mm=width + rng.gauss(0, 0.01), rework_ok=rng.random() < 0.8)
+    # The CNC-demo observations come from their own part-keyed streams, so the streams above (and every
+    # registered truth table) are untouched when these features are off.
+    if sc.camera_gross_dim_mm is not None:
+        g = Random(f'gross:{seed}:{kind}:{idx}')
+        gross = abs(width - nominal) > sc.camera_gross_dim_mm      # the part as made, after any correction
+        p['gross_dim'] = gross
+        for cam in ('phone', 'pi', 'phone_local'):
+            seen = g.random() < sc.camera_gross_sens
+            if cams[cam] is not None and gross and seen:
+                cams[cam] = True
+    if sc.caliper_mode == 'flagged_only':
+        d = Random(f'dims:{seed}:{kind}:{idx}')
+        dims = {}
+        for name, (nom, tol) in COUPON_DIMS[kind].items():
+            true = nom + d.gauss(0, DIM_PROCESS_SD_MM)
+            dims[name] = dict(nominal_mm=nom, tol_mm=tol, true_mm=true, reading_mm=true + d.gauss(0, site.caliper_sd_mm))
+        p['dims'] = dims
+    return p
 
 
 def truth_hash(parts: list[dict]) -> str:
@@ -135,6 +172,21 @@ MULTI = (
                     **{**_TWO, 'sites': _two_sites(t=dict(printer_bias_mm=0.15, caliper_sd_mm=0.10))}),
 )
 BY_ID.update({s.sid: s for s in MULTI})
+
+
+# ---- CNC cell demo (D01): the closed-loop story shown in the 3D Lab ------------------------------------
+# Two CNC machines (one per part kind), each loaded from a stock crate by a robot, start the shift with a wrong
+# tool offset, so the first parts are out of tolerance by 1.6 mm (the size of the seeded S-DEF / T-DEF specimens).
+# The camera flags gross size errors as well as surface defects; flagged parts go to a caliper chamber where every
+# dimension is measured against the CAD nominal; unflagged parts are not measured. What happens next depends on
+# the control mode chosen at run time (engine.Factory: control='closed_loop' | 'audit' | 'none').
+CNC = (
+    FactoryScenario('D01', 'CNC cell: wrong tool offset from the first part (slot −1.6 / tab +1.6 mm); camera gate, caliper chamber for flagged parts only',
+                    machine='cnc', tool_offset_fault_mm=1.6, camera_gross_dim_mm=0.8, caliper_mode='flagged_only', warp_p=0.0,
+                    n_pairs=60, transport_s=15.0,
+                    sites=(SiteConfig(printers=2, print_batch=1, print_setup_s=12.0, print_per_part_s=48.0),)),
+)
+BY_ID.update({s.sid: s for s in CNC})
 
 
 def scale_scenario(stations: int) -> FactoryScenario:

@@ -215,14 +215,25 @@ function makeStage(el, { camPos = [0, 14, 18], target = [0, 0, 0], bloom = true,
 const ann = (text, cls = 'ann') => { const d = document.createElement('div'); d.className = cls; d.textContent = text; return new CSS2DObject(d); };
 
 // ---------------------------------------------------------------- factory layout
+// Machines (printers or CNCs, per scenario) at x = -14.4; the stock crates sit behind them (away from the belts) and
+// one robot per machine stands between the machine door and the start of its lane. Scrapped parts leave on the
+// reject conveyor (z = -8.3) and fall into the scrap bin at its end.
 const P = {
-  printer_slot: [-14, -2.6], printer_tab: [-14, 2.6], phone_0: [-8.5, -1], phone_1: [-8.5, 1], caliper_0: [-4.5, -1], caliper_1: [-4.5, 1],
-  buffer: [0.6, 0], assembly: [4.5, 0], sorting: [7.5, 0], ship: [11.5, 0], review: [2.5, -6], rework: [6.5, -6], scrap: [11.5, -6],
+  printer_slot: [-14.4, -3.0], printer_tab: [-14.4, 3.0], stock_slot: [-12.4, -5.3], stock_tab: [-12.4, 5.3],
+  robot_slot: [-12.3, -3.0], robot_tab: [-12.3, 3.0],
+  phone_0: [-8.5, -1], phone_1: [-8.5, 1], caliper_0: [-4.5, -1], caliper_1: [-4.5, 1],
+  buffer: [0.6, 0], assembly: [4.5, 0], sorting: [7.5, 0], ship: [11.5, 0], review: [2.5, -6], rework: [6.5, -6],
+  reject: [6.8, -8.3], scrap: [12.0, -8.3],
   phone_local: [-5.5, 6], caliper_local: [-2.5, 6],
 };
+const REJECT_BELT = { x0: 3.0, x1: 10.4, z: -8.3 };
 const STATION_INFO = {
   printer_slot: ['Slot printers', 'Print jobs of 4 parts (one lot). Width drift, warping and cracks are generated here; MTBF/MTTR failures.'],
   printer_tab: ['Tab printers', 'Print jobs of 4 parts (one lot). Kit-based CONWIP stops printing when the buffer is full.'],
+  stock_slot: ['Slot stock', 'Blanks for the slot machine. Each part consumes one blank.'],
+  stock_tab: ['Tab stock', 'Blanks for the tab machine. Each part consumes one blank.'],
+  robot_slot: ['Loading robot · slot', 'Takes a blank from the crate into the machine and the finished part onto the lane belt (display only: the engine times the job).'],
+  robot_tab: ['Loading robot · tab', 'Takes a blank from the crate into the machine and the finished part onto the lane belt (display only: the engine times the job).'],
   phone: ['iPhone camera', 'Surface check. A missing reading is never treated as "clear".'],
   caliper: ['Caliper', 'Measures width (σ 0.05 mm).'],
   phone_0: ['iPhone camera · slot lane', 'Surface check of every slot. A missing reading is never treated as "clear". Click "Open camera" to see its view or attach a real photo.'],
@@ -235,10 +246,26 @@ const STATION_INFO = {
   ship: ['Shipped', 'Shipped assemblies. Red marks a shipped defect (ground truth, evaluator only).'],
   review: ['Review (HOLD)', 'A held part or pair is re-checked by an expert (45 s, operator). It is released, reworked or scrapped.'],
   rework: ['Rework', 'Tab sanded to the design clearance (80% success).'],
+  reject: ['Reject conveyor', 'Scrapped parts leave the line here and fall into the scrap bin. Every one of them is a wasted blank.'],
   scrap: ['Scrap', 'Parts with confirmed defects, or failed rework.'],
   phone_local: ['Assembly-site camera', 'Used only when supplier evidence sharing is lost (scenario M03).'],
   caliper_local: ['Assembly-site caliper', 'Used only when supplier evidence sharing is lost (scenario M03).'],
 };
+// CNC cell (scenario D01): the same stations read differently. Merged over STATION_INFO when the run's machine is 'cnc'.
+const STATION_INFO_CNC = {
+  phone: ['Camera gate', 'Surface defects and gross size errors. A missing reading is never treated as "clear".'],
+  printer_slot: ['CNC · slot', 'One slot coupon per blank: 12 s robot load + 48 s machining. The tool offset is wrong from the first part (opening 1.6 mm too narrow) until a correction is applied.'],
+  printer_tab: ['CNC · tab', 'One tab coupon per blank: 12 s robot load + 48 s machining. The tool offset is wrong from the first part (tab 1.6 mm too wide) until a correction is applied.'],
+  phone_0: ['Camera gate · slot lane', 'Checks every slot for surface defects and gross size errors (> 0.8 mm, 90% sensitivity). A flag sends the part to the caliper chamber; three flags in a row stop the machine.'],
+  phone_1: ['Camera gate · tab lane', 'Checks every tab for surface defects and gross size errors (> 0.8 mm, 90% sensitivity). A flag sends the part to the caliper chamber; three flags in a row stop the machine.'],
+  caliper_0: ['(no inline caliper)', 'This line has no inline caliper: unflagged parts are not measured. Flagged parts are measured in the chamber.'],
+  caliper_1: ['(no inline caliper)', 'This line has no inline caliper: unflagged parts are not measured. Flagged parts are measured in the chamber.'],
+  review: ['Caliper chamber', 'An operator measures every dimension of a camera-flagged part with a digital caliper (60 s) and compares them with the CAD nominal. Nonconforming parts go to the reject conveyor; their deviations feed the correction. Unflagged parts never come here.'],
+  rework: ['Rework', 'A held pair whose tab is too wide can be reworked (80% success).'],
+};
+const machineInfo = (machine) => (machine === 'cnc' ? { ...STATION_INFO, ...STATION_INFO_CNC } : STATION_INFO);
+const stationName = (k) => machineInfo(lab.runs[0]?.machine)[k]?.[0] || k;
+const evStation = (s) => (s === 'chamber' ? 'review' : s);  // the chamber is the review station of a CNC run
 
 class FactoryView {
   constructor(el, partGeo) {
@@ -267,7 +294,7 @@ class FactoryView {
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 90), new THREE.MeshStandardMaterial({ map: floorTex, roughness: 1, roughnessMap: roughTex, metalness: 0.0, envMapIntensity: 0.45 }));
     floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; sc.add(floor);
     const pad = (x, z, w, d, c, o = 1) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ color: c, roughness: 0.6, transparent: o < 1, opacity: o })); m.rotation.x = -Math.PI / 2; m.position.set(x, 0.006, z); m.receiveShadow = true; sc.add(m); };
-    pad(-1.5, 0, 25, 3.2, 0x1d2a24, 0.8); pad(5.5, -6, 12.5, 4.2, 0x2a2414, 0.8); pad(-14, 0, 4.6, 8.8, 0x1b2230, 0.8);
+    pad(-1.5, 0, 25, 3.2, 0x1d2a24, 0.8); pad(7.2, -6.9, 14.4, 6.2, 0x2a2414, 0.8); pad(-13.6, 0, 6.4, 13.2, 0x1b2230, 0.8);
     const dash = new THREE.MeshBasicMaterial({ color: 0xa88400 });
     for (const z of [-1.62, 1.62]) for (let x = -13.5; x < 13; x += 1.1) { const d = new THREE.Mesh(new THREE.PlaneGeometry(0.65, 0.08), dash); d.rotation.x = -Math.PI / 2; d.position.set(x, 0.012, z); sc.add(d); }
     const wall = new THREE.Mesh(new THREE.PlaneGeometry(80, 6), metal(0x161b21, { roughness: 0.9 })); wall.position.set(0, 3, -13); wall.receiveShadow = true; sc.add(wall);
@@ -297,6 +324,7 @@ class FactoryView {
       const gearbox = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.3, 0.26), dark); gearbox.position.set(x1 - 0.3, BELT_Y - 0.25, z + motorSide * 0.62); sc.add(gearbox);
     };
     conveyor(-12.6, -0.3, -1, -1); conveyor(-12.6, -0.3, 1, 1); conveyor(1.5, 10, 0, -1);
+    conveyor(REJECT_BELT.x0, REJECT_BELT.x1, REJECT_BELT.z, -1);  // reject conveyor: chamber / review / rework -> scrap bin
     const rollerGeo = new THREE.CylinderGeometry(0.055, 0.055, 1.3, 14); rollerGeo.rotateX(Math.PI / 2);
     this.rollers = new THREE.InstancedMesh(rollerGeo, metal(0xb8c0c8, { metalness: 0.9, roughness: 0.22 }), this.rollerXZ.length);
     this.rollerAngle = 0; this.rollerDummy = new THREE.Object3D(); sc.add(this.rollers); this.updateRollers();
@@ -332,9 +360,63 @@ class FactoryView {
       const lamp = lampAt(x + 0.95, 2.62, z - 0.85);
       const l = ann(STATION_INFO[key][0]); l.position.set(x, 3.05, z); sc.add(l); this.labels.push(l);
       const r = ann('', 'readout'); r.position.set(x, 3.5, z); r.visible = false; sc.add(r);
-      this.stations[key] = { mesh: hit, lamp, label: l, intervals: [], printer: { gantry, head, nozzle, wipMesh, readout: r, kind } };
+      this.stations[key] = { mesh: hit, lamp, label: l, intervals: [], printer: { grp, gantry, head, nozzle, wipMesh, readout: r, kind } };
     };
     printer('printer_slot', 'slot'); printer('printer_tab', 'tab');
+    // ---- CNC machining centres (scenario D01): enclosure with a window, spindle head, vise with the blank being cut,
+    // chips, a three-colour lamp stack. Built next to the printers; load() shows one or the other.
+    const glass = new THREE.MeshPhysicalMaterial({ color: 0x9fc3e6, transparent: true, opacity: 0.22, roughness: 0.1, metalness: 0, depthWrite: false });
+    const cnc = (key, kind) => {
+      const [x, z] = P[key]; const grp = new THREE.Group(); grp.position.set(x, 0, z); sc.add(grp);
+      const col = kind === 'slot' ? C.slot : C.tab;
+      const add = (geo, mat, px, py, pz, parent = grp) => { const m = new THREE.Mesh(geo, mat); m.position.set(px, py, pz); m.castShadow = m.receiveShadow = true; parent.add(m); return m; };
+      add(new THREE.BoxGeometry(2.4, 0.9, 2.2), dark, 0, 0.45, 0);                                             // base cabinet
+      add(new THREE.BoxGeometry(2.4, 0.05, 0.1), new THREE.MeshStandardMaterial({ color: col, emissive: col, emissiveIntensity: 0.25 }), 0, 0.86, 1.1);
+      add(new THREE.BoxGeometry(2.4, 0.12, 2.2), metal(0x2c3138), 0, 2.46, 0);                                 // roof
+      for (const [px, pz] of [[-1.15, -1.05], [1.15, -1.05], [-1.15, 1.05], [1.15, 1.05]]) add(new THREE.BoxGeometry(0.1, 1.5, 0.1), alu, px, 1.65, pz);
+      add(new THREE.BoxGeometry(0.06, 1.5, 2.1), glass, 1.17, 1.65, 0);                                          // window toward the robot
+      add(new THREE.BoxGeometry(2.3, 1.5, 0.06), glass, 0, 1.65, 1.07); add(new THREE.BoxGeometry(2.3, 1.5, 0.06), glass, 0, 1.65, -1.07);
+      add(new THREE.BoxGeometry(0.06, 1.5, 2.1), metal(0x30363e), -1.17, 1.65, 0);                             // back panel
+      add(new THREE.BoxGeometry(1.4, 0.1, 1.1), metal(0x3a414a, { metalness: 0.6 }), 0, 0.95, 0);                // table
+      const viseMat = metal(0x5a6470, { metalness: 0.7, roughness: 0.4 });
+      add(new THREE.BoxGeometry(0.12, 0.3, 0.9), viseMat, -0.62, 1.15, 0); add(new THREE.BoxGeometry(0.12, 0.3, 0.9), viseMat, 0.62, 1.15, 0);
+      const blank = add(new THREE.BoxGeometry(1.0, 0.12, 0.45), metal(0x9aa3ad, { metalness: 0.85, roughness: 0.3 }), 0, 1.06, 0);
+      const wip = new THREE.Mesh(this.partGeo[kind], plaMat(col, { transparent: true, opacity: 0.95 })); wip.position.set(0, 1.0, 0); wip.visible = false; grp.add(wip);
+      const column = add(new THREE.BoxGeometry(0.5, 1.3, 0.5), metal(0x3a414a), -0.85, 1.75, 0);               // z column at the back
+      const headGrp = new THREE.Group(); headGrp.position.set(0, 1.9, 0); grp.add(headGrp);
+      add(new THREE.BoxGeometry(0.34, 0.5, 0.34), metal(0xe8eaed, { roughness: 0.4 }), 0, 0, 0, headGrp);        // spindle head
+      const spindle = add(new THREE.CylinderGeometry(0.07, 0.07, 0.42, 16), metal(0xb8c0c8, { metalness: 0.9, roughness: 0.2 }), 0, -0.42, 0, headGrp);
+      const tool = add(new THREE.CylinderGeometry(0.035, 0.035, 0.36, 12), new THREE.MeshStandardMaterial({ color: 0xffd27a, emissive: 0xff8c1a, emissiveIntensity: 0 }), 0, -0.78, 0, headGrp);
+      const chipGeo = new THREE.BoxGeometry(0.03, 0.012, 0.05);
+      const chips = new THREE.InstancedMesh(chipGeo, new THREE.MeshStandardMaterial({ color: 0xc9d1da, emissive: 0xffa040, emissiveIntensity: 0.4, metalness: 0.8, roughness: 0.3 }), 40);
+      chips.position.set(0, 0, 0); chips.visible = false; grp.add(chips);
+      const lampMat = (c) => new THREE.MeshStandardMaterial({ color: LAMP_OFF, emissive: BLACK, transparent: true, opacity: 0.95, userData: { on: new THREE.Color(c) } });
+      const stack = [0xff4040, 0xf0b400, 0x62d26f].map((c, i) => add(new THREE.CylinderGeometry(0.09, 0.09, 0.14, 16), lampMat(c), 0.95, 2.62 + i * 0.15, -0.85));
+      const r = ann('', 'readout'); r.position.set(x, 3.5, z); r.visible = false; sc.add(r);
+      grp.visible = false;  // the printer's invisible hit box (same footprint) serves both machine looks for picking
+      this.stations[key].cnc = { grp, headGrp, spindle, tool, blank, wip, chips, stack, readout: r, kind, column };
+    };
+    cnc('printer_slot', 'slot'); cnc('printer_tab', 'tab');
+    // ---- stock crates behind the machines: a box of blanks, one taken per part (count follows the run)
+    const crate = (key, kind) => {
+      const [x, z] = P[key]; const grp = new THREE.Group(); grp.position.set(x, 0, z); sc.add(grp);
+      const wood = metal(0x5a4632, { roughness: 0.85, metalness: 0 });
+      const side = (w, h, d, px, py, pz) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), wood); m.position.set(px, py, pz); m.castShadow = m.receiveShadow = true; grp.add(m); };
+      side(1.6, 0.06, 1.4, 0, 0.03, 0); side(1.6, 0.7, 0.05, 0, 0.35, -0.68); side(1.6, 0.7, 0.05, 0, 0.35, 0.68); side(0.05, 0.7, 1.4, -0.78, 0.35, 0); side(0.05, 0.7, 1.4, 0.78, 0.35, 0);
+      const blankGeo = new THREE.BoxGeometry(0.46, 0.1, 0.3);
+      const blanks = new THREE.InstancedMesh(blankGeo, metal(0x9aa3ad, { metalness: 0.85, roughness: 0.3 }), 60); blanks.castShadow = true; grp.add(blanks);
+      const d = new THREE.Object3D();
+      for (let i = 0; i < 60; i++) { const layer = Math.floor(i / 12), c = i % 12; d.position.set(-0.52 + (c % 3) * 0.52, 0.11 + layer * 0.105, -0.48 + Math.floor(c / 3) * 0.32); d.rotation.y = (hash(`b${i}`) - 0.5) * 0.08; d.updateMatrix(); blanks.setMatrixAt(i, d.matrix); }
+      blanks.instanceMatrix.needsUpdate = true;
+      const hit = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.8, 1.4), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      hit.position.set(x, 0.4, z); hit.userData = { station: key }; sc.add(hit);
+      const lamp = lampAt(x + 0.7, 0.85, z - 0.6); lamp.visible = false;
+      const l = ann(STATION_INFO[key][0]); l.position.set(x, 1.15, z); sc.add(l); this.labels.push(l);
+      const r = ann('', 'readout'); r.position.set(x, 1.5, z); r.visible = false; sc.add(r);
+      grp.visible = hit.visible = false;
+      this.stations[key] = { mesh: hit, lamp, label: l, intervals: [], hiddenStation: true, crate: { grp, blanks, readout: r, kind } };
+    };
+    crate('stock_slot', 'slot'); crate('stock_tab', 'tab');
     const iphone = (key) => {
       const [x, z] = P[key], side = Math.sign(z) || 1, y = 2.2;
       box(key, 0.12, 0.12, y + 0.25, 0x59636f);                     // post outside the lane
@@ -360,8 +442,10 @@ class FactoryView {
       this.jaws[line] = [-1, 1].map((sgn) => { const j = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.6, 0.9), metal(0x9aa3ad, { metalness: 0.8, roughness: 0.3 })); j.position.set(P[key][0] + sgn * 0.3, 1.35, P[key][1]); sc.add(j); return j; });
     }
     box('buffer', 1.6, 3.4, 0.7, 0x37414d); box('assembly', 2.0, 1.8, 1.25, 0x52687e); box('sorting', 1.6, 1.6, 0.85, 0x4a5867);
-    // ---- robot arm at assembly (3 animated joints)
-    { const base = new THREE.Group(); base.position.set(P.assembly[0], 0, -1.75); this.s.scene.add(base);
+    // ---- robot arms: one at assembly (registered look), one loader per machine in the CNC cell.
+    // Joints: yaw about y, shoulder and elbow about the yaw frame's z (the arm reaches along local -x), wrist keeps the gripper down.
+    const makeRobot = (x, z, scale = 1, hidden = false) => {
+      const base = new THREE.Group(); base.position.set(x, 0, z); base.scale.setScalar(scale); this.s.scene.add(base);
       const orange = metal(0xe07b1a, { roughness: 0.45 }), dk = metal(0x1f242b), al = metal(0x8d96a0, { metalness: 0.75, roughness: 0.32 });
       const pedestal = new THREE.Mesh(new THREE.CylinderGeometry(0.32, 0.4, 0.5, 24), dk); pedestal.position.y = 0.25; pedestal.castShadow = true; base.add(pedestal);
       const yaw = new THREE.Group(); yaw.position.y = 0.5; base.add(yaw);
@@ -373,7 +457,20 @@ class FactoryView {
       const wrist = new THREE.Group(); wrist.position.y = 0.9; elbow.add(wrist);
       const grip = new THREE.Mesh(new THREE.BoxGeometry(0.26, 0.12, 0.14), dk); grip.position.y = 0.06; wrist.add(grip);
       for (const sx of [-0.09, 0.09]) { const f = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.16, 0.08), al); f.position.set(sx, 0.18, 0); wrist.add(f); }
-      this.robot = { yaw, shoulder, elbow }; }
+      // a blank carried from the crate to the machine (loaders only; shown during the load phase)
+      const carried = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.1, 0.3), metal(0x9aa3ad, { metalness: 0.85, roughness: 0.3 })); carried.position.y = 0.3; carried.visible = false; wrist.add(carried);
+      base.visible = !hidden;
+      return { base, yaw, shoulder, elbow, wrist, carried, x, z, scale, L1: 1.1 * scale, L2: 0.9 * scale, pivotY: 0.82 * scale, cur: { yaw: 0, sh: 0.2, el: 1.4 } };
+    };
+    this.robot = makeRobot(P.assembly[0], -1.75);
+    this.loaders = { slot: makeRobot(...P.robot_slot, 1.15, true), tab: makeRobot(...P.robot_tab, 1.15, true) };
+    for (const [k, key] of [['slot', 'robot_slot'], ['tab', 'robot_tab']]) {
+      const r = this.loaders[k], hit = new THREE.Mesh(new THREE.BoxGeometry(0.9, 2.6, 0.9), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      hit.position.set(r.x, 1.3, r.z); hit.userData = { station: key }; hit.visible = false; sc.add(hit);
+      const lamp = lampAt(r.x, 0.6, r.z); lamp.visible = false;
+      const l = ann(STATION_INFO[key][0]); l.position.set(r.x, 2.9, r.z); sc.add(l); this.labels.push(l);
+      this.stations[key] = { mesh: hit, lamp, label: l, intervals: [], hiddenStation: true };
+    }
     // ---- operators (hi-vis vest, helmet) at caliper, review and rework
     this.operators = [];
     for (const [ox, oz] of [[P.caliper_0[0] + 0.9, 0], [P.review[0], P.review[1] - 1.45], [P.rework[0], P.rework[1] - 1.35]]) {
@@ -388,7 +485,14 @@ class FactoryView {
 
     box('ship', 2.8, 2.8, 0.22, 0x235c34); box('review', 2.4, 2.0, 0.95, 0x7a6418); box('rework', 2.0, 1.8, 0.95, 0x574c66); box('scrap', 2.8, 2.8, 0.22, 0x5e2a2a);
     box('phone_local', 0.35, 0.35, 1.6, 0x59636f); box('caliper_local', 1.4, 1.2, 0.9, 0x66717e);
-    for (const k of ['caliper_0', 'caliper_1', 'phone_0', 'phone_1']) { const r = ann('', 'readout'); r.position.set(P[k][0], k.startsWith('caliper') ? 2.2 : 3.4, P[k][1] + (k.startsWith('phone') ? Math.sign(P[k][1]) * 0.95 : 0)); r.visible = false; sc.add(r); this.readouts[k] = r; }
+    {  // reject conveyor as a station (label, hover, click); the belt itself is drawn by conveyor()
+      const [x, z] = P.reject, hit = new THREE.Mesh(new THREE.BoxGeometry(REJECT_BELT.x1 - REJECT_BELT.x0, 0.5, 1.2), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }));
+      hit.position.set(x, BELT_Y - 0.2, z); hit.userData = { station: 'reject' }; sc.add(hit);
+      const lamp = lampAt(REJECT_BELT.x1 - 0.5, BELT_Y + 0.2, z + 0.75), l = ann(STATION_INFO.reject[0]); l.position.set(x, BELT_Y + 0.5, z); sc.add(l); this.labels.push(l);
+      this.stations.reject = { mesh: hit, lamp, label: l, intervals: [] };
+    }
+    for (const k of ['caliper_0', 'caliper_1', 'phone_0', 'phone_1', 'review']) { const r = ann('', 'readout'); r.position.set(P[k][0], k.startsWith('caliper') ? 2.2 : k === 'review' ? 1.9 : 3.4, P[k][1] + (k.startsWith('phone') ? Math.sign(P[k][1]) * 0.95 : 0)); r.visible = false; sc.add(r); this.readouts[k] = r; }
+    this.setMachine('printer');
     this.ring = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.035, 8, 48), new THREE.MeshStandardMaterial({ color: C.accent, emissive: C.accent, emissiveIntensity: 1.6 }));
     this.ring.rotation.x = Math.PI / 2; this.ring.visible = false; sc.add(this.ring);
     this.stationRing = new THREE.Mesh(new THREE.RingGeometry(1.7, 1.8, 64), new THREE.MeshBasicMaterial({ color: C.accent, side: THREE.DoubleSide }));
@@ -399,14 +503,30 @@ class FactoryView {
     this.rollerXZ.forEach(([x, z], i) => { d.position.set(x, BELT_Y - 0.085, z); d.rotation.set(0, 0, this.rollerAngle); d.updateMatrix(); this.rollers.setMatrixAt(i, d.matrix); });
     this.rollers.instanceMatrix.needsUpdate = true;
   }
-  setLabels(on) { for (const [k, s] of Object.entries(this.stations)) s.label.visible = on && !s.hiddenStation; }
+  setLabels(on) { this.labelsOn = on; for (const [k, s] of Object.entries(this.stations)) s.label.visible = on && !s.hiddenStation; }
+
+  // Printer line or CNC cell: same engine, different machines on the floor. CNC: crates, loader robots and the chamber
+  // appear; the inline calipers disappear (that line does not measure unflagged parts).
+  setMachine(machine) {
+    this.machine = machine; const cnc = machine === 'cnc', info = machineInfo(machine);
+    for (const k of ['printer_slot', 'printer_tab']) { const st = this.stations[k]; st.printer.grp.visible = !cnc; st.cnc.grp.visible = cnc; st.printer.readout.visible = false; st.cnc.readout.visible = false; }
+    for (const k of ['stock_slot', 'stock_tab']) { const st = this.stations[k]; st.crate.grp.visible = st.mesh.visible = cnc; st.hiddenStation = !cnc; st.crate.readout.visible = false; }
+    for (const k of ['robot_slot', 'robot_tab']) { const st = this.stations[k]; st.mesh.visible = cnc; st.hiddenStation = !cnc; this.loaders[k.slice(6)].base.visible = cnc; }
+    for (const line of [0, 1]) { const st = this.stations[`caliper_${line}`]; st.mesh.visible = st.lamp.visible = !cnc; st.hiddenStation = cnc; this.jaws[line].forEach((j) => (j.visible = !cnc)); }
+    this.operators[0].visible = !cnc;  // the caliper operator; the chamber operator is the review one
+    for (const [k, st] of Object.entries(this.stations)) if (info[k]) st.label.element.textContent = info[k][0];
+    this.setLabels(this.labelsOn ?? true);
+  }
 
   load(data, caughtIds = new Set()) {
     const sc = this.s.scene; this.parts.forEach((x) => sc.remove(x.m)); this.parts = []; this.data = data;
+    const machine = data.machine || 'printer'; this.setMachine(machine);
+    for (const p of data.parts) p.events = p.events.map(([s, a, b]) => [evStation(s), a, b]);  // the chamber is the review station
+    this.totalByKind = { slot: data.parts.filter((p) => p.kind === 'slot').length, tab: data.parts.filter((p) => p.kind === 'tab').length };
     // bin places are given in order of arrival, so piles fill bottom-up (a pair = one place)
     const arrival = new Map();
     for (const p of data.parts) if (p.fate === 'shipped' || p.fate === 'scrap') {
-      const key = p.fate === 'shipped' ? `s:${p.pair || p.id}` : `x:${p.id}`, tEnd = pathFor(p, 0).at(-1)[0];
+      const key = p.fate === 'shipped' ? `s:${p.pair || p.id}` : `x:${p.id}`, tEnd = pathFor(p, 0, machine).at(-1)[0];
       arrival.set(key, Math.min(arrival.get(key) ?? Infinity, tEnd));
     }
     const rank = (prefix) => new Map([...arrival].filter(([k]) => k.startsWith(prefix)).sort((a, b) => a[1] - b[1]).map(([k], i) => [k, i]));
@@ -414,7 +534,7 @@ class FactoryView {
     for (const st of Object.values(this.stations)) st.intervals = [];
     for (const p of data.parts) {
       const bi = p.fate === 'shipped' ? shipRank.get(`s:${p.pair || p.id}`) : p.fate === 'scrap' ? scrapRank.get(`x:${p.id}`) : 0;
-      const kf = pathFor(p, bi);
+      const kf = pathFor(p, bi, machine);
       const mat = plaMat(p.kind === 'slot' ? C.slot : C.tab);
       const m = new THREE.Mesh(this.partGeo[p.kind], mat); m.castShadow = true; m.visible = false; m.userData = { part: p.id }; sc.add(m);
       const review = p.events.filter((e) => e[0] === 'review').map((e) => [e[1], e[2]]);
@@ -513,27 +633,38 @@ class FactoryView {
       if (st.cone) { st.cone.material.opacity = cur ? 0.12 : 0; for (const l of st.lenses || [st.lens]) l.material.emissiveIntensity = cur ? 2.0 : 0.1; }
       const r = this.readouts[k];
       if (r) {
-        r.visible = !!cur;
+        r.visible = !!cur && (k !== 'review' || this.machine === 'cnc');
         if (cur) {
           const p = cur[2];
           if (k.startsWith('caliper')) { r.element.textContent = `${fmt(p.measured_mm, 3)} mm`; r.element.style.background = ''; }
+          else if (k === 'review') {  // caliper chamber: the functional width against nominal, and how many dimensions failed
+            const ch = p.chamber, f = ch?.functional, bad = ch ? Object.values(ch.dims).filter((d) => !d.ok).length : 0;
+            r.element.textContent = ch ? `${fmt(f.reading_mm, 3)} mm · ${sign(f.deviation_mm, 2)} · ${bad ? `✖ ${bad} of ${Object.keys(ch.dims).length} out of tol.` : '✔ all dims in tol.'}` : 'measuring…';
+            r.element.style.background = ch && bad ? css('--escape') : '';
+          }
           else { const v = p.cams?.phone; r.element.textContent = v === null || v === undefined ? '— missing' : v ? '⚑ flagged' : '✔ clear'; r.element.style.background = v ? css('--review') : (v === null ? css('--scrap') : ''); }
         }
       }
     }
     if (playing) { this.rollerAngle -= (dtReal * lab.speed * BELT_SPEED) / 0.055; this.updateRollers(); }
     const now = performance.now() / 1000;
+    const cncMode = this.machine === 'cnc';
     for (const k of ['printer_slot', 'printer_tab']) {
       const st = this.stations[k], pr = st.printer, jobs = st.intervals.filter(([a, b]) => t >= a && t <= b);
       const on = jobs.length > 0;
-      pr.gantry.position.x = on ? Math.sin(now * 2.1) * 0.6 : 0; pr.head.position.x = pr.gantry.position.x;
-      pr.head.position.z = on ? Math.sin(now * 3.3) * 0.55 : 0; pr.nozzle.material.emissiveIntensity = on ? 2.4 : 0;
-      pr.wipMesh.visible = on;
-      if (on) { const [a, b] = jobs[0]; pr.wipMesh.scale.y = Math.max(0.02, Math.min(1, (t - a) / Math.max(1, b - a))); }
-      const rep = jobs.find((j) => j[2].reprint_of);
-      pr.readout.visible = !!rep;
-      if (rep) { pr.readout.element.textContent = `↻ reprint ${rep[2].root_id || ''}`; pr.readout.element.style.background = css('--caught'); }
+      if (!cncMode) {
+        pr.gantry.position.x = on ? Math.sin(now * 2.1) * 0.6 : 0; pr.head.position.x = pr.gantry.position.x;
+        pr.head.position.z = on ? Math.sin(now * 3.3) * 0.55 : 0; pr.nozzle.material.emissiveIntensity = on ? 2.4 : 0;
+        pr.wipMesh.visible = on;
+        if (on) { const [a, b] = jobs[0]; pr.wipMesh.scale.y = Math.max(0.02, Math.min(1, (t - a) / Math.max(1, b - a))); }
+        const rep = jobs.find((j) => j[2].reprint_of);
+        pr.readout.visible = !!rep;
+        if (rep) { pr.readout.element.textContent = `↻ reprint ${rep[2].root_id || ''}`; pr.readout.element.style.background = css('--caught'); }
+        continue;
+      }
+      this.animateCNC(st.cnc, k.slice(8), jobs[0], t, dtReal, playing, now);
     }
+    if (cncMode) this.animateCrates(t);
     if (this.robot) {
       const busy = this.stations.assembly.intervals.some(([a, b]) => t >= a && t <= b);
       const ph = busy ? now * 2.4 : 0;
@@ -548,7 +679,86 @@ class FactoryView {
       const key = `caliper_${line}`, gap = busyAt(this.stations[key]) ? 0.16 : 0.3;
       this.jaws[line][0].position.x = P[key][0] - gap; this.jaws[line][1].position.x = P[key][0] + gap;
     }
+    this.stations.reject.lamp.material.emissive.copy(scrap && this.parts.some((x) => x.scrapT && t < x.scrapT && t > x.kf[x.kf.length - 3]?.[0]) ? C.scrap : BLACK);
     return { ship, hold, scrap, esc };
+  }
+
+  // ---- CNC cell animation (display only: every time comes from the engine's event log) --------------------
+  // Machine state at time t from the run's line events: running / halted (amber) / fault (red), plus the readout text.
+  machineState(kind, t) {
+    const ev = (this.data?.line_events || []).filter((e) => e.kind === kind && e.t <= t);
+    let state = 'running', text = '', tText = -1e9;
+    for (const e of ev) {
+      if (e.type === 'HALT') { state = 'halted'; text = `■ STOPPED · ${e.consecutive_flags} flags in a row → chamber`; tText = e.t; }
+      else if (e.type === 'CORRECTION_PROPOSED') { if (state === 'halted') { text = `⏳ correction ${sign(e.offset_after_mm, 2)} mm · awaiting operator approval`; tText = e.t; } }
+      else if (e.type === 'CORRECTION_APPLIED') { text = `✔ program corrected ${sign(e.offset_mm, 2)} mm`; tText = e.t; }
+      else if (e.type === 'CORRECTION_REFUSED') { state = 'fault'; text = `✖ FAULT · ${sign(e.offset_after_mm, 2)} mm exceeds the ±${e.limit_mm} mm limit`; tText = e.t; }
+      else if (e.type === 'RESUMED') { if (state === 'halted') state = 'running'; }
+      else if (e.type === 'RESUMED_UNCONFIRMED') { if (state === 'halted') state = 'running'; text = '▶ resumed · flags not confirmed by the chamber'; tText = e.t; }
+    }
+    if (state === 'running' && t - tText > 240) text = '';  // a running machine shows its last message for a while, then nothing
+    return { state, text };
+  }
+  animateCNC(c, kind, job, t, dtReal, playing, now) {
+    const LOAD = 12, on = !!job;
+    const phase = !on ? 'idle' : t - job[0] < LOAD ? 'load' : 'cut';
+    const cutting = phase === 'cut';
+    c.headGrp.position.x = cutting ? Math.sin(now * 2.6) * 0.42 : 0; c.headGrp.position.z = cutting ? Math.cos(now * 1.7) * 0.18 : 0;
+    c.headGrp.position.y = cutting ? 1.78 : 1.95;
+    if (playing) c.spindle.rotation.y += dtReal * (cutting ? 40 : 0);
+    c.tool.material.emissiveIntensity = cutting ? 1.6 : 0;
+    c.blank.visible = phase !== 'idle'; c.wip.visible = cutting;
+    if (cutting) { const u = Math.min(1, (t - job[0] - LOAD) / Math.max(1, job[1] - job[0] - LOAD)); c.blank.scale.y = Math.max(0.06, 1 - u); c.blank.position.y = 1.0 + 0.06 * (1 - u); c.wip.material.opacity = 0.25 + 0.7 * u; }
+    else { c.blank.scale.y = 1; c.blank.position.y = 1.06; }
+    c.chips.visible = cutting;
+    if (cutting) {
+      const d = this.rollerDummy, tx = c.headGrp.position.x, tz = c.headGrp.position.z;
+      for (let i = 0; i < 40; i++) {
+        const ph = ((now * 1.6 + i * 0.173) % 1), a = i * 2.399 + now * 2;
+        d.position.set(tx + Math.cos(a) * (0.08 + 0.35 * ph), 1.02 + 0.3 * ph * (1 - ph) * 4 * 0.5 + 0.02, tz + Math.sin(a) * (0.08 + 0.3 * ph));
+        d.rotation.set(a, ph * 6, a * 0.5); d.updateMatrix(); c.chips.setMatrixAt(i, d.matrix);
+      }
+      c.chips.instanceMatrix.needsUpdate = true;
+    }
+    const ms = this.machineState(kind, t);
+    const lampOn = (i, on_, blink) => { const m = c.stack[i].material, v = on_ ? (blink ? 0.55 + 0.45 * Math.sin(now * 6) : 1) : 0; m.emissive.copy(on_ ? m.userData.on : BLACK); m.emissiveIntensity = 2.2 * v; m.color.copy(on_ ? m.userData.on : LAMP_OFF); };
+    lampOn(0, ms.state === 'fault', true); lampOn(1, ms.state === 'halted', true); lampOn(2, ms.state === 'running' && on, false);
+    const rep = job && job[2].reprint_of;
+    c.readout.visible = !!ms.text || !!rep;
+    if (ms.text) { c.readout.element.textContent = ms.text; c.readout.element.style.background = ms.state === 'fault' ? css('--escape') : ms.state === 'halted' ? css('--review') : css('--accent'); }
+    else if (rep) { c.readout.element.textContent = `↻ re-machined ${job[2].root_id || ''}`; c.readout.element.style.background = css('--caught'); }
+    // the loader: crate -> vise during the load phase; vise -> belt while the finished part moves on its first keyframes
+    const r = this.loaders[kind], mk = `printer_${kind}`, [mx, mz] = P[mk], [cx, cz] = P[`stock_${kind}`];
+    let target = null, carry = false;
+    if (phase === 'load') { const u = (t - job[0]) / LOAD; target = u < 0.45 ? [cx, 0.55 + 0.4 * Math.sin(Math.PI * u / 0.45), cz] : [mx + 0.1, 1.25 + 0.35 * Math.sin(Math.PI * (u - 0.45) / 0.55), mz]; carry = u > 0.15 && u < 0.92; }
+    else {
+      const handing = this.parts.find((x) => x.p.kind === kind && t >= x.kf[0][0] && t <= x.kf[1][0] && x.m.visible);
+      if (handing) target = [handing.m.position.x, handing.m.position.y + 0.12, handing.m.position.z];
+    }
+    r.carried.visible = carry;
+    this.poseRobot(r, target || [mx + 1.3, 1.6, mz], dtReal, !target);
+  }
+  // Two-link IK in the arm plane (yaw frame), joint angles eased toward the target.
+  poseRobot(r, [tx, ty, tz], dtReal, rest) {
+    const s = r.scale, L1 = 1.1, L2 = 0.9;
+    const dx = tx - r.x, dz = tz - r.z, d = Math.max(0.15, Math.hypot(dx, dz) / s), h = ty / s - 0.82;
+    const D = Math.min(Math.hypot(d, h), L1 + L2 - 0.02);
+    const alpha = Math.acos(Math.max(-1, Math.min(1, (L1 * L1 + D * D - L2 * L2) / (2 * L1 * D))));
+    const phi = Math.acos(Math.max(-1, Math.min(1, (L1 * L1 + L2 * L2 - D * D) / (2 * L1 * L2))));
+    const want = rest ? { yaw: Math.atan2(dz, -dx), sh: 0.35, el: 1.5 } : { yaw: Math.atan2(dz, -dx), sh: Math.atan2(d, h) - alpha, el: Math.PI - phi };
+    const k = 1 - Math.exp(-dtReal * 7), c = r.cur;
+    let dy = want.yaw - c.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy));
+    c.yaw += dy * k; c.sh += (want.sh - c.sh) * k; c.el += (want.el - c.el) * k;
+    r.yaw.rotation.y = c.yaw; r.shoulder.rotation.z = c.sh; r.elbow.rotation.z = c.el; r.wrist.rotation.z = Math.PI - c.sh - c.el;
+  }
+  animateCrates(t) {
+    for (const kind of ['slot', 'tab']) {
+      const st = this.stations[`stock_${kind}`], cr = st.crate;
+      const used = this.parts.reduce((n, x) => n + (x.p.kind === kind && x.p.print_t <= t ? 1 : 0), 0);
+      const left = Math.max(0, (this.totalByKind?.[kind] || 0) - used);
+      cr.blanks.count = Math.min(60, left);
+      cr.readout.visible = this.labelsOn !== false; cr.readout.element.textContent = `${left} blank${left === 1 ? '' : 's'}`; cr.readout.element.style.background = left ? '' : css('--escape');
+    }
   }
 
   pick(ev) {
@@ -572,6 +782,8 @@ class FactoryView {
 
 // Height of a part's resting surface at (x, z): conveyor, buffer table, review/rework benches or floor pads.
 function heightAt(x, z) {
+  if (x > REJECT_BELT.x0 - 0.2 && x < REJECT_BELT.x1 + 0.2 && Math.abs(z - REJECT_BELT.z) < 0.62) return BELT_Y + 0.07;  // reject conveyor (before the bench test below)
+  if (Math.abs(x - P.printer_slot[0]) < 0.8 && (Math.abs(z - P.printer_slot[1]) < 0.6 || Math.abs(z - P.printer_tab[1]) < 0.6)) return 1.06;  // CNC vise
   if (x > -12.8 && x < -0.2 && (Math.abs(z - 1) < 0.62 || Math.abs(z + 1) < 0.62)) return BELT_Y + 0.07;
   if (x > 1.3 && x < 10.2 && Math.abs(z) < 0.62) return BELT_Y + 0.07;
   if (Math.abs(x - P.buffer[0]) < 0.85 && Math.abs(z) < 1.75) return 0.76;
@@ -579,7 +791,7 @@ function heightAt(x, z) {
   if (Math.abs(x - P.printer_slot[0] - 1.7) < 0.3) return 0.25;
   return 0.25;
 }
-function pathFor(p, binIndex) {
+function pathFor(p, binIndex, machine = 'printer') {
   const kf = [], j = hash(p.id), jz = (j - 0.5) * 0.6;
   const pos = (k, dx = 0, dz = 0) => { const [x, z] = P[laneKey(k, p.line)] || P.buffer; return [x + dx, z + dz]; };
   // waiting spot just before a station, pulled in until it is on the station's own surface (belt / table), never the floor
@@ -591,7 +803,8 @@ function pathFor(p, binIndex) {
   const out = Math.max(p.print_t, first - 25);
   // printed part is handed from the printer straight onto the start of its lane belt (never the floor)
   const laneZ = (P[laneKey('phone', p.line)] || P.phone_0)[1], beltStart = [-12.2, laneZ + jz * 0.25];
-  kf.push([out, ...beltStart]);
+  if (machine === 'cnc') kf.push([out - 3, P[pr][0], P[pr][1]], [out, ...beltStart, 0.9]);  // in the vise, then the robot's arc to the belt
+  else kf.push([out, ...beltStart]);
   let prevEnd = out + 2, prevKey = pr;
   kf.push([prevEnd, ...beltStart]);
   for (const [station, start, end] of p.events) {
@@ -609,7 +822,12 @@ function pathFor(p, binIndex) {
   const [lx, lz] = pos(prevKey), toBin = (k) => Math.hypot(P[k][0] - lx, P[k][1] - lz) / BELT_SPEED;
   // the 4th value is the arc height of that move: parts are lifted over the pile, never through it
   if (p.fate === 'shipped') kf.push([last + toBin('ship'), ...binPos('ship'), 1.4]);
-  else if (p.fate === 'scrap') kf.push([last + toBin('scrap'), ...binPos('scrap'), 1.0]);
+  else if (p.fate === 'scrap') {
+    // onto the reject conveyor next to the bench it came from, ride to the end, fall into the scrap bin
+    const bx = Math.min(REJECT_BELT.x1 - 0.8, Math.max(REJECT_BELT.x0 + 0.3, lx)), on = [bx, REJECT_BELT.z + jz * 0.3];
+    const t1 = last + Math.hypot(on[0] - lx, on[1] - lz) / BELT_SPEED, t2 = t1 + (REJECT_BELT.x1 - 0.3 - bx) / BELT_SPEED;
+    kf.push([t1, ...on, 0.8], [t2, REJECT_BELT.x1 - 0.3, on[1], 0], [t2 + 1.5, ...binPos('scrap'), 0.6]);
+  }
   else kf.push([last + 4, ...pos('buffer', (j - 0.5) * 1.2, jz)]);
   return kf;
 }
@@ -627,7 +845,7 @@ function at(kf, t) {
 }
 
 // ---------------------------------------------------------------- lab controller
-const STORY = [
+const STORY_PRINTER = [
   ['Overview', 'One simulated shift of the Slot/Tab line. Each moving part is one simulated part from the discrete-event engine.', [-2, 23, 25.5], [-1.4, 0, -1.6]],
   ['Printers', 'Slots and tabs are printed in lots of 4. Width drift, warping and cracks are generated here; printers fail and get repaired (MTBF/MTTR).', [-19, 5, 7], [-14, 1, 0]],
   ['Two lanes, iPhone cameras', 'Slots run on one lane, tabs on the other. An iPhone camera over each lane checks the surface; the readout shows its result. Click a camera and choose "Open camera" to see its view or attach a real photo.', [-11, 5, 7], [-8, 1.2, 0]],
@@ -636,7 +854,20 @@ const STORY = [
   ['Review (HOLD)', 'Held parts go to review (45 s, shared operator). Holding everything looks "safe and cheap" on paper but cuts throughput by 82%.', [3, 6, 0], [3.5, 0.5, -5]],
   ['Shipped', 'Turn on ground truth: a red part is a shipped defect. In Compare mode, purple parts are defects the rule shipped and QualityRelay stopped.', [9, 6, 6], [11, 0, -2]],
 ];
+// Scenario D01: the CNC cell story. Every step points at something the engine's event log contains.
+const STORY_CNC = [
+  ['The CNC cell', 'Two CNC machines, one per part kind, each fed from a stock crate by a robot. The shift starts with a wrong tool offset: the first parts are 1.6 mm off. SIMULATED; nothing here drives a real machine.', [-6, 20, 24], [-6, 0, -0.5]],
+  ['Stock and robot', 'The robot takes a blank from the crate, loads the machine, and puts the finished part on the lane belt. The crate counts down: every part costs one blank, good or bad.', [-9.5, 4.5, -8.5], [-13, 1, -3]],
+  ['First batch defective', 'The slot comes out 1.6 mm too narrow, the tab 1.6 mm too wide (the size of the seeded S-DEF / T-DEF specimens). The machine cannot know. Turn on ground truth (T) and click a part.', [-17.5, 4, 4], [-14.4, 1.2, 0.5]],
+  ['Camera gate', 'The camera flags gross size errors as well as surface defects. A flag sends the part to the caliper chamber. Three flags in a row stop the machine: the amber lamp.', [-11, 5, 7], [-8, 1.2, 0]],
+  ['Caliper chamber', 'Only flagged parts come here. An operator measures every dimension with a digital caliper and compares them with the CAD nominal. Nonconforming parts leave on the reject conveyor.', [1, 5.5, -1.5], [3, 0.6, -6.5]],
+  ['Correction and approval', 'Three confirmed measurements give the deviation; the program change (a cutter-compensation line) is proposed, checked against a ±2 mm limit, and an operator approves it. Open the Loop tab to read the G-code diff.', [-17.5, 4, -1], [-14.4, 1.5, -2.5]],
+  ['Back to good parts', 'The machine resumes with the corrected program. Parts made after the correction clear the camera and are never measured again: the chamber only sees flagged parts.', [-8, 8, 10], [-9, 0.5, 0]],
+  ['Waste counted', 'The reject conveyor shows what the fault cost: blanks, machine time, time to correction. In Compare mode the left line finds the same fault only at the scheduled audit.', [8, 5.5, -3.5], [9, 0.3, -8.3]],
+];
+let STORY = STORY_PRINTER;
 const lab = { mode: 'single', views: [], runs: [], t: 0, T: 1, t0: 0, playing: true, speed: 10, sel: null, story: -1, caught: new Set() };
+const isCNC = () => lab.runs[0]?.machine === 'cnc';
 
 async function initLab() {
   const [sg, tg] = await Promise.all([loadSTL('slot_nominal_21p00.stl'), loadSTL('tab_nominal_20p00.stl')]);
@@ -644,10 +875,20 @@ async function initLab() {
   const partGeo = { slot: prep(sg), tab: prep(tg) };
   lab.views = [new FactoryView($('#vpA'), partGeo), new FactoryView($('#vpB'), partGeo)];
   const sc = await api('/sim/scenarios');
-  $('#scenario').innerHTML = ['single-site', 'multi-site'].map((g) => `<optgroup label="${g}">${sc.filter((s) => s.group === g).map((s) => `<option value="${s.sid}">${s.sid} · ${s.title}</option>`).join('')}</optgroup>`).join('');
+  lab.scenarioMachine = Object.fromEntries(sc.map((s) => [s.sid, s.machine]));
+  const groups = { 'cnc-demo': 'CNC cell demo', 'single-site': 'single-site', 'multi-site': 'multi-site' };
+  $('#scenario').innerHTML = Object.entries(groups).map(([g, label]) => `<optgroup label="${label}">${sc.filter((s) => s.group === g).map((s) => `<option value="${s.sid}">${s.sid} · ${s.title}</option>`).join('')}</optgroup>`).join('');
+  $('#scenario').value = 'F01';
+  const loopVisible = () => { $('#loopCfg').hidden = lab.scenarioMachine[$('#scenario').value] !== 'cnc'; };
+  $('#scenario').onchange = loopVisible; loopVisible();
   $$('#modeSeg button').forEach((b) => (b.onclick = () => setMode(b.dataset.mode)));
   $('#runBtn').onclick = run;
-  $('#demoBtn').onclick = async () => { $('#scenario').value = 'F03'; $('#seed').value = 3; $('#npairs').value = 100; $('#policy').value = 'bayes'; $('#pairing').value = 'optimized'; $('#truth').checked = true; await run(); };
+  $('#demoBtn').onclick = async () => { $('#scenario').value = 'F03'; $('#seed').value = 3; $('#npairs').value = 100; $('#policy').value = 'bayes'; $('#pairing').value = 'optimized'; $('#truth').checked = true; loopVisible(); await run(); };
+  $('#demoCncBtn').onclick = async () => {
+    $('#scenario').value = 'D01'; $('#seed').value = 0; $('#npairs').value = 60; $('#policy').value = 'bayes'; $('#pairing').value = 'optimized'; $('#truth').checked = true; loopVisible();
+    if (lab.mode !== 'compare') await setMode('compare'); else await run();
+    setRTab('loop'); story(0);
+  };
   $('#playBtn').onclick = togglePlay;
   $('#timeline').oninput = (e) => { lab.t = lab.t0 + (lab.T - lab.t0) * e.target.value / 1000; lab.playing = false; $('#playBtn').textContent = '▶'; };
   $('#speed').onchange = (e) => (lab.speed = +e.target.value);
@@ -698,8 +939,8 @@ async function initLab() {
           $(i ? '#countB' : '#countA').innerHTML = `<span><i>good</i><b>${c.ship}</b></span><span><i>held</i><b>${c.hold}</b></span><span><i>scrap</i><b>${c.scrap}</b></span><span><i>escaped</i><b style="color:var(--escape)">${truth ? c.esc : '—'}</b></span>`;
         });
       }
-      lab.views.forEach((v, i) => { if (i === 0 || lab.mode === 'compare') v.s.render(); });
-      renderAgents(false);
+      if (!lab.noRender) lab.views.forEach((v, i) => { if (i === 0 || lab.mode === 'compare') v.s.render(); });  // render=0: DOM-only test runs
+      renderAgents(false); renderLoop(false);
       if (lab.camView && !$('#studio').classList.contains('noinsp')) {
         const cones = [...Object.values(lab.camView.view.stations).filter((s) => s.cone).map((s) => s.cone), lab.camView.view.stationRing, lab.camView.view.ring];
         const prev = cones.map((c) => c.visible); cones.forEach((c) => (c.visible = false));   // the camera must not see its own light cone
@@ -710,14 +951,18 @@ async function initLab() {
   };
   requestAnimationFrame(loop);
   const q = new URLSearchParams(location.search);
+  lab.noRender = q.get('render') === '0';  // test hook: skip WebGL drawing (headless checks of the DOM and the engine data)
   if (q.get('scenario')) $('#scenario').value = q.get('scenario');
   for (const k of ['policy', 'pairing']) if (q.get(k)) $(`#${k}`).value = q.get(k);
   if (q.get('seed')) $('#seed').value = q.get('seed'); if (q.get('pairs')) $('#npairs').value = q.get('pairs');
+  loopVisible();
   if (q.get('mode') === 'compare') await setMode('compare'); else await run();
   lab.views.forEach((v) => v.s.flyTo(fitCam(v, STORY[0][2], STORY[0][3]), STORY[0][3], 2.6));
   if (q.get('select')?.startsWith('phone_') || q.get('select')?.startsWith('caliper_')) select({ type: 'station', id: q.get('select'), side: 0 });
   if (q.get('part')) select({ type: 'part', id: q.get('part'), side: lab.runs.length - 1 });
   if (q.get('debug') === '1') window.__qrLab = lab;  // test hook (overlap check)
+  if (q.get('rtab')) setRTab(q.get('rtab'));
+  if (q.get('t')) { lab.t = lab.t0 + (+q.get('t')); lab.playing = false; $('#playBtn').textContent = '▶'; lab.views.slice(0, lab.runs.length).forEach((v) => v.update(lab.t, 0, false, $('#truth').checked)); renderLoop(true); }
   if (q.get('photo') === '1') setTimeout(() => $('#photoBtn')?.click(), 3200);  // URL preset: open in Photo mode
   if (q.get('select') === 'caught') { const id = [...lab.caught][0] || lab.runs.at(-1)?.parts.find((p) => p.pair)?.id; if (id) select({ type: 'part', id, side: lab.runs.length - 1 }); }
 }
@@ -747,7 +992,7 @@ function bindPicking(v, side) {
   el.addEventListener('pointermove', (e) => {
     if (performance.now() - lastMove < 60) return; lastMove = performance.now();
     const hit = v.pick(e); el.style.cursor = hit ? 'pointer' : '';
-    if (hit) { tip.hidden = false; tip.style.left = `${e.clientX + 12}px`; tip.style.top = `${e.clientY + 10}px`; tip.textContent = hit.type === 'part' ? hit.id : STATION_INFO[hit.id][0]; }
+    if (hit) { tip.hidden = false; tip.style.left = `${e.clientX + 12}px`; tip.style.top = `${e.clientY + 10}px`; tip.textContent = hit.type === 'part' ? hit.id : stationName(hit.id); }
     else tip.hidden = true;
   });
   el.addEventListener('pointerleave', () => (tip.hidden = true));
@@ -804,25 +1049,35 @@ function story(i) {
 async function run() {
   if (lab.views[0]?.s.tracer) await exitPhoto();
   const btn = $('#runBtn'); btn.disabled = true; $('#runStatus').textContent = 'Running the discrete-event engine…';
-  const base = { scenario: $('#scenario').value || 'F01', seed: +$('#seed').value, n_pairs: +$('#npairs').value };
-  const right = { ...base, policy: $('#policy').value, pairing: $('#pairing').value };
-  const cfgs = lab.mode === 'compare' ? [{ ...base, policy: 'rules', pairing: 'fifo' }, right] : [right];
+  const cnc = lab.scenarioMachine?.[$('#scenario').value] === 'cnc';
+  // CNC cell: the closed-loop settings travel with the request; in Compare mode the left line is today's practice
+  // (fixed rule, FIFO, the chamber findings reach the machine at the scheduled audit) and the right line closes the loop.
+  const loop = cnc ? { halt_on_flags: +$('#haltN').value, confirm_n: +$('#confirmN').value, max_correction_mm: +$('#limitMm').value, audit_interval_s: 60 * +$('#auditMin').value } : {};
+  const base = { scenario: $('#scenario').value || 'F01', seed: +$('#seed').value, n_pairs: +$('#npairs').value, ...loop };
+  const right = { ...base, policy: $('#policy').value, pairing: $('#pairing').value, control: cnc ? ($('#policy').value === 'rules' ? 'audit' : 'closed_loop') : 'auto' };
+  const cfgs = lab.mode === 'compare' ? [{ ...base, policy: 'rules', pairing: 'fifo', control: cnc ? 'audit' : 'auto' }, right] : [right];
   try {
     const t0 = performance.now();
     lab.runs = await Promise.all(cfgs.map((c) => api('/sim/run', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(c) })));
-    lab.caught = new Set(); agState.side = null; setTimeout(() => renderAgents(true), 0);
+    lab.caught = new Set(); agState.side = null; setTimeout(() => { renderAgents(true); renderLoop(true); }, 0);
     if (lab.runs.length === 2) {
       const escL = new Set(lab.runs[0].parts.filter((p) => p.escaped).map((p) => p.id));
       for (const p of lab.runs[1].parts) if (escL.has(p.id) && !p.escaped) lab.caught.add(p.id);
     }
     lab.runs.forEach((r, i) => lab.views[i].load(r, i === 1 ? lab.caught : new Set()));
     lab.views.forEach((v) => v.setLabels($('#labels').checked));
+    STORY = isCNC() ? STORY_CNC : STORY_PRINTER; lab.story = -1; $('#storyStep').textContent = `0 / ${STORY.length}`;
+    $('#storyText').innerHTML = isCNC() ? 'Take the tour of the CNC cell: first batch defective, caught, measured, corrected.' : 'Take the guided tour of the line. The camera moves to each station.';
+    $('#storyNext').textContent = 'Start tour ▶';
+    $$('.rtabs button[data-rtab=loop]').forEach((b) => (b.hidden = !isCNC()));
+    if (!isCNC() && agState.tab === 'loop') setRTab('agents');
     const active = lab.views.slice(0, lab.runs.length);
     lab.T = Math.max(...active.map((v) => v.T)); lab.t0 = Math.min(...active.map((v) => v.t0)); lab.t = lab.t0;
     lab.playing = true; $('#playBtn').textContent = '❚❚';
     const name = (r) => (r.policy === 'rules' ? 'TODAY · rule' : r.policy === 'hold_all' ? 'HOLD ALL' : 'QUALITYRELAY');
+    const ctrl = (r) => (r.machine !== 'cnc' ? '' : r.control === 'closed_loop' ? ' · closed loop' : r.control === 'audit' ? ` · audit every ${fmt(r.loop.audit_interval_s / 60, 0)} min` : ' · no correction');
     lab.runs.forEach((r, i) => {
-      $(i ? '#titleB' : '#titleA').textContent = `${name(r)} · ${r.pairing === 'fifo' ? 'FIFO' : 'risk pairing'}`;
+      $(i ? '#titleB' : '#titleA').textContent = `${name(r)} · ${r.pairing === 'fifo' ? 'FIFO' : 'risk pairing'}${ctrl(r)}`;
       $(i ? '#provB' : '#provA').textContent = `SIMULATED · ${r.scenario} · seed ${r.seed} · ${r.n_pairs} pairs · conservation ${r.kpis.conservation_ok ? '✔' : '✖'}`;
     });
     const r = lab.runs[lab.runs.length - 1];
@@ -834,12 +1089,17 @@ async function run() {
 }
 
 function renderMetrics() {
-  const K = lab.runs.map((r) => r.kpis);
-  const rows = [['good / hour', (k) => k.good_per_hour, 1, +1], ['shipped good', (k) => k.shipped_good, 0, +1], ['escaped', (k) => k.escaped, 0, -1],
-    ['holds part / pair', (k) => k.part_holds + k.pair_holds, 0, -1], ['scrapped parts', (k) => k.scrapped_parts, 0, -1], ['mean cycle (min)', (k) => k.mean_cycle_s / 60, 1, -1]];
+  const K = lab.runs.map((r) => r.kpis), W = lab.runs.map((r) => r.waste);
+  const rows = isCNC()
+    ? [['wasted blanks (scrap)', (k, w) => w.scrapped_parts, 0, -1], ['made before the fix', (k, w) => w.parts_made_before_correction, 0, -1],
+      ['time to correction (min)', (k, w) => { const v = Object.values(w.first_correction_s || {}).filter((x) => x !== null); return v.length ? Math.max(...v) / 60 : null; }, 1, -1],
+      ['machine stopped (min)', (k, w) => Object.values(w.halted_s).reduce((a, b) => a + b, 0) / 60, 1, -1],
+      ['shipped good', (k) => k.shipped_good, 0, +1], ['escaped', (k) => k.escaped, 0, -1], ['good / hour', (k) => k.good_per_hour, 1, +1]]
+    : [['good / hour', (k) => k.good_per_hour, 1, +1], ['shipped good', (k) => k.shipped_good, 0, +1], ['escaped', (k) => k.escaped, 0, -1],
+      ['holds part / pair', (k) => k.part_holds + k.pair_holds, 0, -1], ['scrapped parts', (k) => k.scrapped_parts, 0, -1], ['mean cycle (min)', (k) => k.mean_cycle_s / 60, 1, -1]];
   $('#metrics').innerHTML = rows.map(([n, f, d, good]) => {
-    if (K.length === 1) return `<div><small>${n}</small><b>${fmt(f(K[0]), d)}</b></div>`;
-    const a = f(K[0]), b = f(K[1]), dlt = b - a, cls = Math.abs(dlt) < 1e-9 ? '' : (dlt * good > 0 ? 'up' : 'down');
+    if (K.length === 1) return `<div><small>${n}</small><b>${fmt(f(K[0], W[0]), d)}</b></div>`;
+    const a = f(K[0], W[0]), b = f(K[1], W[1]), dlt = (b ?? 0) - (a ?? 0), cls = Math.abs(dlt) < 1e-9 ? '' : (dlt * good > 0 ? 'up' : 'down');
     return `<div><small>${n}</small><b>${fmt(a, d)} → ${fmt(b, d)}</b><em class="${cls}">${Math.abs(dlt) < 1e-9 ? '±0' : sign(dlt, d)}</em></div>`;
   }).join('');
   if (K.length === 2) $('#metrics').insertAdjacentHTML('afterbegin', '<div class="lead">today →<br>QualityRelay</div>');
@@ -849,7 +1109,7 @@ function renderMetrics() {
 const findPart = (id, side) => lab.runs[side]?.parts.find((p) => p.id === id);
 const findPair = (id, side) => lab.runs[side]?.pairs.find((q) => q.pair_id === id);
 const camTxt = (v) => (v === null || v === undefined ? '<span class="badge hold">missing</span>' : v ? '<span class="badge hold">⚑ flagged</span>' : '<span class="badge ok">✔ clear</span>');
-const STN = Object.fromEntries(Object.entries(STATION_INFO).map(([k, v]) => [k, v[0]]));
+const STN = new Proxy({}, { get: (_, k) => machineInfo(lab.runs[0]?.machine)[k]?.[0] });  // station names follow the run's machine
 
 function partCard(p, side, truth) {
   const run = lab.runs[side], pair = p.pair ? findPair(p.pair, side) : null;
@@ -885,17 +1145,23 @@ function partCard(p, side, truth) {
       : 'it was <b>held back</b> and never shipped in a defective assembly';
     caught = `<div class="why" style="border-color:var(--caught)"><b>Caught:</b> on the left, the fixed rule shipped this part inside a defective assembly (ground truth). Here ${how}.</div>`;
   }
+  const cnc = run.machine === 'cnc', made = cnc ? 'machined' : 'printed';
+  const chamber = p.chamber ? `<section><h4>Caliper chamber · every dimension ${p.chamber.conforming ? '<span class="badge ok">conforming</span>' : '<span class="badge bad">nonconforming</span>'}</h4>
+      <table class="dims"><thead><tr><th>dimension</th><th class="num">nominal</th><th class="num">caliper</th><th class="num">deviation</th><th class="num">tol ±</th><th></th></tr></thead><tbody>
+      ${Object.entries(p.chamber.dims).map(([k, d]) => `<tr class="${d.ok ? '' : 'bad'}"><td>${k.replace(/_mm$/, '').replace(/_/g, ' ')}${d.functional ? ' <span class="faint">(functional)</span>' : ''}</td><td class="num">${fmt(d.nominal_mm, 2)}</td><td class="num">${fmt(d.reading_mm, 3)}</td><td class="num">${sign(d.deviation_mm, 3)}</td><td class="num">${fmt(d.tol_mm, 2)}</td><td>${d.ok ? '✔' : '✖'}</td></tr>`).join('')}</tbody></table>
+      <p class="faint small">${p.chamber.instrument}, σ ${fmt(p.chamber.caliper_sd_mm, 2)} mm, read by ${p.chamber.operator}. Nominal values are measured from the CAD meshes. Machine correction ${sign(p.offset_mm, 3)} mm was active when this part was made.</p></section>` : '';
   return `<h2>${p.kind === 'slot' ? 'Slot' : 'Tab'} <span class="num">${p.id}</span></h2>
-    <div class="sub">${p.lot} · printed ${mmss(p.print_t)}${lab.runs.length > 1 ? ` · ${side ? 'right' : 'left'} view` : ''}</div>
+    <div class="sub">${p.lot} · ${made} ${mmss(p.print_t)}${lab.runs.length > 1 ? ` · ${side ? 'right' : 'left'} view` : ''}</div>
     ${fate}${caught}
-    ${p.reprint_of ? `<div class="why" style="border-color:var(--caught)"><b>↻ Reprint</b> of <span class="link" data-part="${p.reprint_of}" data-side="${side}">${p.reprint_of}</span>: the defective original was scrapped and this part was printed again from the nominal CAD model (printer re-zeroed). It went through the full inspection again.</div>` : ''}
-    ${p.reprinted_as ? `<div class="why"><b>Defect confirmed → reprinted</b> as <span class="link" data-part="${p.reprinted_as}" data-side="${side}">${p.reprinted_as}</span>.</div>` : ''}
+    ${p.reprint_of ? `<div class="why" style="border-color:var(--caught)"><b>↻ ${cnc ? 'Re-machined' : 'Reprint'}</b> of <span class="link" data-part="${p.reprint_of}" data-side="${side}">${p.reprint_of}</span>: the defective original was scrapped and this part was ${cnc ? 'machined again from a new blank with the machine\'s current correction' : 'printed again from the nominal CAD model (printer re-zeroed)'}. It went through the full inspection again.</div>` : ''}
+    ${p.reprinted_as ? `<div class="why"><b>Defect confirmed → ${cnc ? 're-machined' : 'reprinted'}</b> as <span class="link" data-part="${p.reprinted_as}" data-side="${side}">${p.reprinted_as}</span>.</div>` : ''}
     <section><h4>Evidence (what the system saw)</h4><div class="kv">
       ${Object.entries(p.cams || {}).map(([k, v]) => `<span>${STN[k] || k} · ${p.kind} lane</span><span>${camTxt(v)}</span>`).join('')}
-      <span>caliper reading</span><span>${fmt(p.measured_mm, 3)} mm (σ ${fmt(p.caliper_sd, 2)})</span>
+      <span>caliper reading</span><span>${p.measured_mm === null || p.measured_mm === undefined ? '<span class="badge mute">not measured</span>' : `${fmt(p.measured_mm, 3)} mm (σ ${fmt(p.caliper_sd, 2)})`}</span>
       <span>P(surface defect)</span><span>${p.surface_posterior === null ? '—' : pct(p.surface_posterior, 3)}</span>
-      <span>expert review</span><span>${p.reviewed ? 'cleared' : p.events.some((e) => e[0] === 'review') ? 'yes' : 'no'}</span></div>
-      <p class="faint small">Camera sensitivity/specificity come from a held-out calibration (${run.model.calibration_id}).</p></section>
+      <span>${cnc ? 'caliper chamber' : 'expert review'}</span><span>${p.reviewed ? 'cleared' : p.events.some((e) => e[0] === 'review') ? 'yes' : 'no'}</span></div>
+      <p class="faint small">Camera sensitivity/specificity come from a held-out calibration (${run.model.calibration_id}).${cnc && (p.measured_mm === null || p.measured_mm === undefined) ? ' This line has no inline caliper: an unflagged part is not measured, so its width enters the pair decision as the process prior, not as a reading.' : ''}</p></section>
+    ${chamber}
     ${decision}
     <section><h4>Plain-language explanation <span class="badge mute">template · no LLM</span></h4><p class="explain">${explain(p, pair, run, truth)}</p></section>
     <section><h4>Timeline</h4><ul class="tl">${tl || '<li><span>—</span></li>'}</ul></section>
@@ -939,23 +1205,25 @@ function passportQR(id) {
 }
 // I7: deterministic, evidence-grounded explanation (no LLM key configured; nothing is invented)
 function explain(p, pair, run, truth) {
-  const kind = p.kind === 'slot' ? 'slot' : 'tab', nominal = p.kind === 'slot' ? 21.0 : 20.0, out = [];
-  out.push(`This ${kind} (${p.id}) was printed in ${p.lot.split(':').pop()} at ${mmss(p.print_t)}${p.reprint_of ? `, as a reprint of ${p.reprint_of}` : ''}.`);
+  const kind = p.kind === 'slot' ? 'slot' : 'tab', nominal = run.nominal ? run.nominal[p.kind] : (p.kind === 'slot' ? 21.0 : 20.0), out = [], cnc = run.machine === 'cnc';
+  out.push(`This ${kind} (${p.id}) was ${cnc ? 'machined' : 'printed'} in ${p.lot.split(':').pop()} at ${mmss(p.print_t)}${p.reprint_of ? `, as a ${cnc ? 're-machining' : 'reprint'} of ${p.reprint_of}` : ''}.`);
   const cam = p.cams?.phone;
-  out.push(cam === null || cam === undefined ? 'The iPhone camera produced no reading, so the surface counts as not checked, never as clear.'
-    : cam ? 'The iPhone camera flagged a possible surface defect, so the part went to expert review.' : 'The iPhone camera saw no surface defect.');
-  out.push(`The caliper measured ${fmt(p.measured_mm, 3)} mm (${sign(p.measured_mm - nominal, 3)} mm from the ${nominal.toFixed(1)} mm CAD nominal).`);
+  out.push(cam === null || cam === undefined ? 'The camera produced no reading, so the part counts as not checked, never as clear.'
+    : cam ? `The camera flagged it${cnc ? ' (surface defect or gross size error)' : ''}, so the part went to ${cnc ? 'the caliper chamber' : 'expert review'}.` : `The camera saw no ${cnc ? 'defect or gross size error' : 'surface defect'}.`);
+  if (p.measured_mm === null || p.measured_mm === undefined) out.push('No caliper measured it: this line measures flagged parts only, so its width is the process prior, not a reading.');
+  else if (p.chamber) out.push(`In the chamber the caliper read ${fmt(p.measured_mm, 3)} mm (${sign(p.measured_mm - nominal, 3)} mm from the ${nominal.toFixed(2)} mm CAD nominal); ${p.chamber.conforming ? 'every dimension was within tolerance' : `${Object.values(p.chamber.dims).filter((d) => !d.ok).length} dimension(s) were out of tolerance`}.`);
+  else out.push(`The caliper measured ${fmt(p.measured_mm, 3)} mm (${sign(p.measured_mm - nominal, 3)} mm from the ${nominal.toFixed(2)} mm CAD nominal).`);
   if (pair) {
     if (pair.reason === 'STALE_OR_MISSING_EVIDENCE') out.push('Its pair was held because supplier evidence arrived after the deadline.');
     else if (run.policy === 'rules') out.push(`Paired with ${p.kind === 'slot' ? pair.tab : pair.slot}, the measured clearance was ${fmt(pair.measured_clearance_mm, 3)} mm, so the rule said ${pair.decision === 'HOLD' ? 'HOLD (below 0.50 mm or a camera flag)' : 'PASS'}.`);
     else out.push(`Paired with ${p.kind === 'slot' ? pair.tab : pair.slot}, the estimated clearance was ${fmt(pair.posterior_clearance_mm, 3)} ± ${fmt(pair.posterior_clearance_sd, 3)} mm. The chance the pair is unsafe came out at ${pct(pair.p_unsafe, 3)}, ${pair.p_unsafe >= pair.threshold ? 'above' : 'below'} the ${pct(pair.threshold, 2)} break-even, so it was ${pair.decision === 'HOLD' ? 'held for review' : 'passed for assembly'}.`);
   }
-  out.push(p.fate === 'shipped' ? 'It was assembled and shipped.' : p.fate === 'scrap' ? `It was scrapped after review${p.reprinted_as ? ` and reprinted as ${p.reprinted_as}` : ''}.` : 'It was still waiting for a partner when the run ended.');
+  out.push(p.fate === 'shipped' ? 'It was assembled and shipped.' : p.fate === 'scrap' ? `It was scrapped${cnc ? ' onto the reject conveyor' : ' after review'}${p.reprinted_as ? ` and ${cnc ? 're-machined' : 'reprinted'} as ${p.reprinted_as}` : ''}.` : 'It was still waiting for a partner when the run ended.');
   if (truth && pair) out.push(`Ground truth (evaluator only): the pair was ${pair.truly_safe ? 'safe' : 'unsafe'}, so the decision was ${(pair.decision === 'HOLD') !== pair.truly_safe ? 'right' : (pair.decision === 'HOLD' ? 'cautious (a false hold)' : 'wrong (an escape)')}.`);
   return out.join(' ');
 }
 function stationCard(k, side) {
-  const run = lab.runs[side], s = run?.stations[k], [name, desc] = STATION_INFO[k];
+  const run = lab.runs[side], s = run?.stations[k], [name, desc] = machineInfo(run?.machine)[k];
   return `<h2>${name}</h2><div class="sub">station · ${run.scenario} · ${run.policy}+${run.pairing}</div><p class="muted">${desc}</p>
     ${s ? `<section><h4>Load in this run</h4><div class="kv"><span>visits</span><span>${s.visits}</span><span>busy time</span><span>${fmt(s.busy_s / 60, 1)} min</span>
       <span>busy share of the run</span><span>${pct(s.busy_share, 0)}</span><span>mean service</span><span>${fmt(s.busy_s / Math.max(1, s.visits), 1)} s</span></div>
@@ -976,8 +1244,70 @@ function summaryCard() {
     <li><span>click a station</span><span class="faint">its load in this run</span><span></span></li>
     <li><span>keys</span><span class="faint"><kbd>space</kbd> play · <kbd>L</kbd> labels · <kbd>T</kbd> truth · <kbd>←</kbd><kbd>→</kbd> tour · <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> move · <kbd>+</kbd><kbd>−</kbd> zoom · <kbd>F</kbd> fly to selection · <kbd>0</kbd> whole line</span><span></span></li></ul></section>
     <section><h4>Provenance</h4><p class="faint small">SIMULATED. Toy part generator, illustrative station timings, held-out calibration ${r.model.calibration_id}. Not a factory measurement.
-      This 3D Lab runs two lanes with one iPhone camera each (cameras: ${(r.cameras || []).join(', ')}) and reprints confirmed defects. The pre-registered results in the Results tab used phone + Pi cameras without reprint.</p></section>`;
+      ${r.machine === 'cnc' ? 'The CNC cell, its robots, conveyors and the caliper chamber are a 3D rendering of the engine\'s event log: no machine, robot or conveyor is controlled, and the G-code is illustrative. The audit interval of today\'s line is an assumption you can change.'
+      : `This 3D Lab runs two lanes with one iPhone camera each (cameras: ${(r.cameras || []).join(', ')}) and reprints confirmed defects. The pre-registered results in the Results tab used phone + Pi cameras without reprint.`}</p></section>`;
   return html;
+}
+
+// ---------------------------------------------------------------- closed loop (CNC cell): events up to the playback time
+const EV_LABEL = { HALT: 'machine stopped', CHAMBER_NONCONFORMING: 'chamber: nonconforming', CHAMBER_CONFORMING: 'chamber: conforming', CORRECTION_PROPOSED: 'correction proposed',
+  CORRECTION_APPLIED: 'correction applied', CORRECTION_REFUSED: 'correction refused', RESUMED: 'machine resumed', RESUMED_UNCONFIRMED: 'resumed, flags unconfirmed', AUDIT: 'scheduled audit' };
+const EV_CLASS = { HALT: 'hold', CHAMBER_NONCONFORMING: 'alarm', CORRECTION_PROPOSED: 'hold', CORRECTION_APPLIED: 'pass', CORRECTION_REFUSED: 'alarm', RESUMED: 'pass', RESUMED_UNCONFIRMED: '', AUDIT: '', CHAMBER_CONFORMING: 'pass' };
+const loopState = { last: 0 };
+function gcodeHTML(ev) {
+  const changed = new Set(ev.gcode_diff.map((d) => d.line));
+  const col = (lines, which) => `<pre class="gcode">${lines.map((l, i) => `<span class="${changed.has(i + 1) ? `chg ${which}` : ''}">${esc(l)}</span>`).join('\n')}</pre>`;
+  return `<div class="gcode2"><div><div class="faint small">program before</div>${col(ev.gcode_before, 'before')}</div><div><div class="faint small">program after (${ev.gcode_diff.length} line${ev.gcode_diff.length === 1 ? '' : 's'} changed)</div>${col(ev.gcode_after, 'after')}</div></div>`;
+}
+function renderLoop(force) {
+  const el = $('#loopBody'); if (!el || el.hidden) return;
+  const now = performance.now(); if (!force && now - loopState.last < 250) return; loopState.last = now;
+  const run = agRun();
+  if (!run || run.machine !== 'cnc') { el.innerHTML = '<p class="faint">Run the CNC cell scenario (D01).</p>'; return; }
+  const t = lab.t, evs = run.line_events.filter((e) => e.t <= t), parts = run.parts;
+  const made = parts.filter((p) => p.print_t <= t), scrapped = parts.filter((p) => p.fate === 'scrap' && (p.events.at(-1)?.[2] ?? Infinity) <= t);
+  const fixAt = {}; for (const e of evs) if (e.type === 'CORRECTION_APPLIED' && fixAt[e.kind] === undefined) fixAt[e.kind] = e.t;
+  const beforeFix = made.filter((p) => fixAt[p.kind] === undefined || p.print_t < fixAt[p.kind]).length;
+  const halted = {}; for (const k of ['slot', 'tab']) { let s = 0, since = null; for (const e of evs) { if (e.kind !== k) continue; if (e.type === 'HALT') since = e.t; else if ((e.type === 'RESUMED' || e.type === 'RESUMED_UNCONFIRMED') && since !== null) { s += e.t - since; since = null; } } if (since !== null) s += t - since; halted[k] = s; }
+  const flags = parts.filter((p) => p.flagged && (p.events.find((e) => e[0] === 'phone')?.[2] ?? Infinity) <= t).length;
+  const chamber = parts.filter((p) => p.chamber && (p.events.find((e) => e[0] === 'review')?.[2] ?? Infinity) <= t);
+  const side = lab.runs.length === 2 ? `<div class="seg mini" style="margin-bottom:8px">${lab.runs.map((r, i) => `<button class="${(agState.side ?? lab.runs.length - 1) === i ? 'on' : ''}" data-loopside="${i}">${i === 0 ? 'Today · audit' : 'QualityRelay · closed loop'}</button>`).join('')}</div>` : '';
+  const mode = run.control === 'closed_loop' ? `Closed loop: ${run.loop.halt_on_flags} flags in a row stop the machine; ${run.loop.confirm_n} chamber confirmations propose a correction (limit ±${run.loop.max_correction_mm} mm); an operator approves it.`
+    : run.control === 'audit' ? `Today's line: the machine keeps running; the chamber findings reach it at the scheduled audit every ${fmt(run.loop.audit_interval_s / 60, 0)} min (an assumption, set it in the Run panel).` : 'No correction is ever applied.';
+  const items = evs.filter((e) => e.type !== 'CHAMBER_CONFORMING' && e.type !== 'CHAMBER_NONCONFORMING').slice(-14).reverse().map((e) => {
+    let what = '';
+    if (e.type === 'HALT') what = `${e.kind} machine · ${e.consecutive_flags} flags in a row (${shortId(e.part)})`;
+    else if (e.type === 'CORRECTION_PROPOSED') what = `${e.kind}: ${e.n_measurements} chamber readings, deviation ${sign(e.estimate_mm, 3)} mm → offset ${sign(e.offset_after_mm, 3)} mm ${e.within_limits ? '(within limit)' : `<b style="color:var(--escape)">exceeds ±${e.limit_mm} mm</b>`} · ${e.trigger}`;
+    else if (e.type === 'CORRECTION_APPLIED') what = `${e.kind}: offset ${sign(e.offset_mm, 3)} mm written to the program · ${e.by}`;
+    else if (e.type === 'CORRECTION_REFUSED') what = `${e.kind}: nothing changed, machine stays stopped (FAULT)`;
+    else if (e.type === 'RESUMED') what = `${e.kind} machine · stopped for ${fmt(e.halted_s / 60, 1)} min`;
+    else if (e.type === 'RESUMED_UNCONFIRMED') what = `${e.kind} machine · ${e.chamber_confirmations}/${e.needed} confirmations`;
+    else if (e.type === 'AUDIT') what = `nonconforming found so far: slot ${e.nonconforming_found.slot}, tab ${e.nonconforming_found.tab}`;
+    return `<li><span class="t">${fmtT(e.t)}</span><span><span class="k ${EV_CLASS[e.type] || ''}">${EV_LABEL[e.type] || e.type.toLowerCase()}</span>${what}</span></li>`;
+  });
+  const props = evs.filter((e) => e.type === 'CORRECTION_PROPOSED');
+  const lastProp = props.at(-1);
+  const lastCh = chamber.at(-1);
+  el.innerHTML = `${side}
+    <div class="ag-head"><h2>Closed loop · CNC cell</h2><span class="chk ${run.control === 'closed_loop' ? 'ok' : ''}">${run.control.replace('_', ' ')}</span></div>
+    <div class="faint small" style="margin:-4px 0 10px">${mode} SIMULATED.</div>
+    <div class="ag-kpis">
+      <div class="ag-kpi"><b>${made.length}</b><span>blanks used</span></div>
+      <div class="ag-kpi"><b style="color:${scrapped.length ? 'var(--escape)' : ''}">${scrapped.length}</b><span>wasted (scrapped)</span></div>
+      <div class="ag-kpi"><b>${beforeFix}</b><span>made before the fix</span></div>
+      <div class="ag-kpi"><b>${flags}</b><span>camera flags</span></div>
+      <div class="ag-kpi"><b>${chamber.length}</b><span>chamber checks</span></div>
+      <div class="ag-kpi"><b>${fmt((halted.slot + halted.tab) / 60, 1)}<small style="font-size:11px"> min</small></b><span>machines stopped</span></div>
+    </div>
+    <div class="ag-sec"><h4>Machines <em>at ${fmtT(t)}</em></h4><div class="ag-roster">${['slot', 'tab'].map((k) => { const v = lab.views[agState.side ?? lab.runs.length - 1], ms = v.machineState(k, t); return `<span>${k} CNC</span><span class="${ms.state}">${ms.state.toUpperCase()}${fixAt[k] !== undefined ? ` · corrected at ${fmtT(fixAt[k])}` : ''}</span>`; }).join('')}</div></div>
+    ${lastCh ? `<div class="ag-sec"><h4>Last chamber measurement <em>${shortId(lastCh.id)} · ${lastCh.chamber.conforming ? 'conforming' : 'nonconforming'}</em></h4>
+      <table class="dims"><tbody>${Object.entries(lastCh.chamber.dims).map(([k, d]) => `<tr class="${d.ok ? '' : 'bad'}"><td>${k.replace(/_mm$/, '').replace(/_/g, ' ')}</td><td class="num">${fmt(d.reading_mm, 3)}</td><td class="num">${sign(d.deviation_mm, 3)}</td><td>${d.ok ? '✔' : '✖'}</td></tr>`).join('')}</tbody></table>
+      <div class="faint small">digital caliper vs CAD nominal · tolerance ±${fmt(lastCh.chamber.functional.tol_mm, 2)} mm · <span class="link" data-part="${lastCh.id}" data-side="${agState.side ?? lab.runs.length - 1}">open part</span></div></div>` : ''}
+    ${lastProp ? `<div class="ag-sec"><h4>Program change <em>${lastProp.kind} · ${lastProp.within_limits ? 'approved by operator' : 'REFUSED'}</em></h4>
+      <div class="faint small" style="margin-bottom:6px">Mean deviation of ${lastProp.n_measurements} chamber readings ${sign(lastProp.estimate_mm, 3)} mm → cutter-compensation (D2 wear) line. Nothing is sent to a machine; the text is illustrative.</div>${gcodeHTML(lastProp)}</div>` : ''}
+    <div class="ag-sec"><h4>Event log <em>${evs.length} events</em></h4><ul class="ag-log">${items.join('') || '<li class="faint">Nothing yet: the first parts are on their way to the camera.</li>'}</ul></div>`;
+  $$('[data-loopside]', el).forEach((b) => (b.onclick = () => { agState.side = +b.dataset.loopside; renderLoop(true); renderAgents(true); }));
+  $$('[data-part]', el).forEach((x) => (x.onclick = () => select({ type: 'part', id: x.dataset.part, side: +x.dataset.side })));
 }
 function renderInspector() {
   const truth = $('#truth').checked, sel = lab.sel; let html;
@@ -1011,8 +1341,9 @@ const lastIdx = (msgs, t) => { let lo = 0, hi = msgs.length; while (lo < hi) { c
 function setRTab(tab) {
   agState.tab = tab;
   $$('.rtabs button').forEach((b) => b.classList.toggle('on', b.dataset.rtab === tab));
-  $('#agentsBody').hidden = tab !== 'agents'; $('#inspBody').hidden = tab !== 'insp';
+  $('#agentsBody').hidden = tab !== 'agents'; $('#inspBody').hidden = tab !== 'insp'; $('#loopBody').hidden = tab !== 'loop';
   if (tab === 'agents') renderAgents(true);
+  if (tab === 'loop') renderLoop(true);
 }
 
 function agentsAt(run, t) {

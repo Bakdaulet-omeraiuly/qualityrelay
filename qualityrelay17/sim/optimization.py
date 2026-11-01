@@ -24,7 +24,7 @@ BIG = 1e6
 def _pair_cost(factory, s, t):
     c = factory.costs
     if factory.policy in ('rules', 'hold_all'):
-        clearance = s['measured_mm'] - t['measured_mm']
+        clearance = factory._m(s) - factory._m(t)  # an unmeasured part (caliper_mode flagged_only) counts as nominal for the rule
         # the rule will hold anything below tolerance; prefer the design clearance (1.0 mm)
         return (c.hold if clearance < 0.5 else 0.0) + abs(clearance - 1.0) * 1e-3
     p = factory.pair_risk(s, t)
