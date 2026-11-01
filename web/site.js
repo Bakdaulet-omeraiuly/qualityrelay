@@ -397,6 +397,14 @@ class FactoryView {
       this.stations[key].cnc = { grp, headGrp, spindle, tool, blank, wip, chips, stack, readout: r, kind, column };
     };
     cnc('printer_slot', 'slot'); cnc('printer_tab', 'tab');
+    // G-code packets: the CNC agent's new program travelling from the caliper chamber to its machine (CNC cell only)
+    this.gpackets = {};
+    for (const kind of ['slot', 'tab']) {
+      const m = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.1, 0.44), new THREE.MeshStandardMaterial({ color: C.accent, emissive: C.accent, emissiveIntensity: 2.2 }));
+      m.visible = false; sc.add(m);
+      const r = ann('', 'readout'); r.visible = false; sc.add(r);
+      this.gpackets[kind] = { m, r };
+    }
     // ---- stock crates behind the machines: a box of blanks, one taken per part (count follows the run)
     const crate = (key, kind) => {
       const [x, z] = P[key]; const grp = new THREE.Group(); grp.position.set(x, 0, z); sc.add(grp);
@@ -617,6 +625,8 @@ class FactoryView {
       if (inReview) { col = C.review; em = C.review; ei = 0.35; }
       if (x.scrapT && t >= x.scrapT) col = C.scrap;
       if (x.caught && ((x.review.length && t >= x.review[0][0]) || (x.shipT && t >= x.shipT) || (x.scrapT && t >= x.scrapT))) { em = C.caught; ei = 0.7; }
+      // CNC cell, ground truth on: a part cut with the bad program is red from the moment it leaves the machine
+      if (truth && this.machine === 'cnc' && x.p.defective && !(x.scrapT && t >= x.scrapT) && !inReview) { col = C.escape; em = C.escape; ei = 0.45 + 0.25 * Math.sin(performance.now() / 160); }
       if (truth && x.p.escaped && x.shipT && t >= x.shipT) { col = C.escape; em = C.escape; ei = 0.9; }
       mat.color.copy(col); mat.emissive.copy(em); mat.emissiveIntensity = ei;
       if (x.review.length && t >= x.review[0][0]) hold++;
@@ -665,6 +675,7 @@ class FactoryView {
       this.animateCNC(st.cnc, k.slice(8), jobs[0], t, dtReal, playing, now);
     }
     if (cncMode) this.animateCrates(t);
+    for (const kind of ['slot', 'tab']) this.animatePacket(kind, t, cncMode, now);
     if (this.robot) {
       const busy = this.stations.assembly.intervals.some(([a, b]) => t >= a && t <= b);
       const ph = busy ? now * 2.4 : 0;
@@ -690,8 +701,10 @@ class FactoryView {
     let state = 'running', text = '', tText = -1e9;
     for (const e of ev) {
       if (e.type === 'HALT') { state = 'halted'; text = e.scope === 'line' ? `■ LINE STOPPED · ${e.defects_counted} defects counted → chamber` : `■ STOPPED · ${e.consecutive_flags} flags in a row → chamber`; tText = e.t; }
-      else if (e.type === 'CORRECTION_PROPOSED') { if (state === 'halted') { text = `⏳ G-code ${sign(e.offset_after_mm, 2)} mm from ${e.csv_rows?.length ?? e.n_measurements} CSV rows · operator approval`; tText = e.t; } }
-      else if (e.type === 'CORRECTION_APPLIED') { text = `✔ new G-code ${sign(e.offset_mm, 2)} mm · cutting good parts`; tText = e.t; }
+      else if (e.type === 'CORRECTION_PROPOSED') { if (state === 'halted') { text = `⚙ CNC agent: ${e.csv_rows?.length ?? e.n_measurements} CSV rows → offset ${sign(e.offset_after_mm, 2)} mm`; tText = e.t; } }
+      else if (e.type === 'GCODE_SENT') { if (state === 'halted') { text = `⬇ receiving ${e.program} from the CNC agent`; tText = e.t; } }
+      else if (e.type === 'CORRECTION_APPLIED') { text = `✔ new G-code loaded ${sign(e.offset_mm, 2)} mm · cutting good parts`; tText = e.t; }
+      else if (e.type === 'FIRST_ARTICLE') { text = e.conforming ? `✔ first article ${fmt(e.width_mm, 2)} mm · in tolerance` : `✖ first article ${fmt(e.width_mm, 2)} mm · out of tolerance`; tText = e.t; }
       else if (e.type === 'CORRECTION_REFUSED') { state = 'fault'; text = `✖ FAULT · ${sign(e.offset_after_mm, 2)} mm exceeds the ±${e.limit_mm} mm limit`; tText = e.t; }
       else if (e.type === 'RESUMED') { if (state === 'halted') state = 'running'; }
       else if (e.type === 'RESUMED_UNCONFIRMED') { if (state === 'halted') state = 'running'; text = '▶ resumed · flags not confirmed by the chamber'; tText = e.t; }
@@ -699,6 +712,24 @@ class FactoryView {
     if (state === 'running' && t - tText > 240) text = '';  // a running machine shows its last message for a while, then nothing
     return { state, text };
   }
+  // The CNC agent's new G-code on its way from the caliper chamber to the machine, between GCODE_SENT and
+  // CORRECTION_APPLIED (the upload time comes from the engine's event log).
+  animatePacket(kind, t, cncMode, now) {
+    const g = this.gpackets?.[kind]; if (!g) return;
+    const evs = cncMode ? (this.data?.line_events || []).filter((e) => e.kind === kind) : [];
+    const sent = evs.filter((e) => e.type === 'GCODE_SENT' && e.t <= t).at(-1);
+    const done = sent && evs.find((e) => e.type === 'CORRECTION_APPLIED' && e.t >= sent.t);
+    const on = !!sent && !!done && t <= done.t + 0.5;
+    g.m.visible = g.r.visible = on;
+    if (!on) return;
+    const u = Math.max(0, Math.min(1, (t - sent.t) / Math.max(1e-6, done.t - sent.t)));
+    const a = P.review, b = P[`printer_${kind}`], arc = Math.sin(Math.PI * u);
+    g.m.position.set(a[0] + (b[0] - a[0]) * u, 1.6 + 3.2 * arc, a[1] + (b[1] - a[1]) * u);
+    g.m.rotation.y = now * 3;
+    g.r.position.set(g.m.position.x, g.m.position.y + 0.55, g.m.position.z);
+    g.r.element.textContent = `⬇ G-code ${sent.program} → ${kind} CNC`; g.r.element.style.background = css('--accent');
+  }
+
   animateCNC(c, kind, job, t, dtReal, playing, now) {
     const LOAD = 12, on = !!job;
     const phase = !on ? 'idle' : t - job[0] < LOAD ? 'load' : 'cut';
@@ -858,11 +889,12 @@ const STORY_PRINTER = [
 const STORY_CNC = [
   ['The CNC cell', 'Two CNC machines, one per part kind, each fed from a stock crate by a robot. The shift starts with a wrong tool offset, so the whole first batch is defective: every slot 1.6 mm too narrow, every tab 1.6 mm too wide. SIMULATED; nothing here drives a real machine.', [-6, 20, 24], [-6, 0, -0.5]],
   ['Stock and robot', 'The robot takes a blank from the crate, loads the machine, and puts the finished part on the lane belt. The crate counts down: every part costs one blank, good or bad.', [-9.5, 4.5, -8.5], [-13, 1, -3]],
-  ['First batch defective', 'The machine cannot know its parts are wrong. Turn on ground truth (T): every part of the first batch is red. Click one to see its width.', [-17.5, 4, 4], [-14.4, 1.2, 0.5]],
-  ['Camera counts defects', 'The camera flags gross size errors and counts them. When the count reaches N (set in the Run panel, 6 here) the whole line stops at once: amber lamps on both machines, no more blanks wasted.', [-11, 5, 7], [-8, 1.2, 0]],
+  ['First batch defective', 'The machine cannot know its parts are wrong. With ground truth on (T), every part cut with the bad program glows red as it leaves the machine. Click one to see its width.', [-17.5, 4, 4], [-14.4, 1.2, 0.5]],
+  ['Camera counts defects', 'The camera flags gross size errors and counts them. When the count reaches N (set in the Run panel, 6 here) the whole line stops at once: amber lamps on both machines, no more blanks wasted.', [-13, 9, 11], [-11, 1.2, 0], ['HALT', 25]],
   ['Quarantine and caliper chamber', 'Every part made with the bad program, flagged or not, goes to the caliper chamber. The measurement agent measures every dimension (here a caliper; a CMM in another factory) and writes chamber_measurements.csv. Nonconforming parts leave on the reject conveyor.', [1, 5.5, -1.5], [3, 0.6, -6.5]],
-  ['CSV → CNC agent → new G-code', 'The CNC agent reads the CSV, takes the mean deviation of the measured widths, and rewrites the cutter-compensation line of its program. An operator approves the change, and the machine restarts at once. Open the Loop tab for the CSV rows and the G-code diff.', [-17.5, 4, -1], [-14.4, 1.5, -2.5]],
-  ['Good parts → assembly', 'Parts cut with the new program are in tolerance. They clear the camera, are paired slot with tab, and the robot assembles them into the slot-and-tab toy. Turn on ground truth: they are green.', [2, 6, 8], [5, 0.8, 0]],
+  ['CSV → CNC agent → G-code to the machine', 'The CNC agent reads the CSV, takes the mean deviation of the measured widths and rewrites the cutter-compensation line of its program. A fixed ±2 mm limit check passes, and the new G-code flies to the machine (green packet); the machine loads it and restarts on its own. Open the Loop tab for the CSV rows and the G-code diff.', [-5.5, 22, 15], [-5.5, 0.5, -4], ['GCODE_SENT', 4]],
+  ['First article and SentiLab', 'The first part cut with the new program is measured in the chamber. Its reading, and the fit of the first new toy, are sent live to SentiLab\'s tolerance service (aneta-claude, our ScienceClaw collaboration) as a second opinion. See the Loop tab.', [1, 5.5, -1.5], [3, 0.6, -6.5], ['FIRST_ARTICLE', 20]],
+  ['Good parts → assembly', 'Parts cut with the new program are in tolerance. They clear the camera, are paired slot with tab, and the robot assembles them into the slot-and-tab toy.', [2, 6, 8], [5, 0.8, 0]],
   ['Waste counted', 'The reject conveyor shows what the fault cost: blanks, machine time, time to correction. In Compare mode the left line keeps cutting bad parts until its scheduled audit.', [8, 5.5, -3.5], [9, 0.3, -8.3]],
 ];
 let STORY = STORY_PRINTER;
@@ -1044,6 +1076,9 @@ function story(i) {
   $('#storyNext').textContent = i === STORY.length - 1 ? 'Restart ▶' : 'Next ▶';
   lab.views.forEach((v) => v.s.flyTo(fitCam(v, cam, tgt), tgt));
   if (i === STORY.length - 1) $('#truth').checked = true;
+  // CNC tour: a step tied to an event jumps the playback to just before it (closed-loop run) and plays
+  const jump = STORY[i][4], ev = jump && lab.runs.at(-1)?.line_events?.find((e) => e.type === jump[0]);
+  if (ev) { lab.t = Math.max(lab.t0, ev.t - jump[1]); if (!lab.playing) togglePlay(); }
 }
 
 async function run() {
@@ -1067,7 +1102,7 @@ async function run() {
     lab.runs.forEach((r, i) => lab.views[i].load(r, i === 1 ? lab.caught : new Set()));
     lab.views.forEach((v) => v.setLabels($('#labels').checked));
     STORY = isCNC() ? STORY_CNC : STORY_PRINTER; lab.story = -1; $('#storyStep').textContent = `0 / ${STORY.length}`;
-    $('#storyText').innerHTML = isCNC() ? 'Take the tour of the CNC cell: whole first batch defective, counted, line stopped, measured to CSV, G-code corrected, good parts assembled.' : 'Take the guided tour of the line. The camera moves to each station.';
+    $('#storyText').innerHTML = isCNC() ? 'Take the tour of the CNC cell: whole first batch defective, counted, line stopped, measured to CSV, new G-code sent to the machine, checked by SentiLab, good parts assembled.' : 'Take the guided tour of the line. The camera moves to each station.';
     $('#storyNext').textContent = 'Start tour ▶';
     $$('.rtabs button[data-rtab=loop]').forEach((b) => (b.hidden = !isCNC()));
     if (!isCNC() && agState.tab === 'loop') setRTab('agents');
@@ -1250,14 +1285,51 @@ function summaryCard() {
 }
 
 // ---------------------------------------------------------------- closed loop (CNC cell): events up to the playback time
-const EV_LABEL = { HALT: 'stopped', CHAMBER_NONCONFORMING: 'chamber: nonconforming', CHAMBER_CONFORMING: 'chamber: conforming', CORRECTION_PROPOSED: 'correction proposed',
+const EV_LABEL = { GCODE_SENT: 'G-code sent', FIRST_ARTICLE: 'first article', HALT: 'stopped', CHAMBER_NONCONFORMING: 'chamber: nonconforming', CHAMBER_CONFORMING: 'chamber: conforming', CORRECTION_PROPOSED: 'correction proposed',
   CORRECTION_APPLIED: 'correction applied', CORRECTION_REFUSED: 'correction refused', RESUMED: 'machine resumed', RESUMED_UNCONFIRMED: 'resumed, flags unconfirmed', AUDIT: 'scheduled audit' };
-const EV_CLASS = { HALT: 'hold', CHAMBER_NONCONFORMING: 'alarm', CORRECTION_PROPOSED: 'hold', CORRECTION_APPLIED: 'pass', CORRECTION_REFUSED: 'alarm', RESUMED: 'pass', RESUMED_UNCONFIRMED: '', AUDIT: '', CHAMBER_CONFORMING: 'pass' };
+const EV_CLASS = { GCODE_SENT: 'pass', FIRST_ARTICLE: 'pass', HALT: 'hold', CHAMBER_NONCONFORMING: 'alarm', CORRECTION_PROPOSED: 'hold', CORRECTION_APPLIED: 'pass', CORRECTION_REFUSED: 'alarm', RESUMED: 'pass', RESUMED_UNCONFIRMED: '', AUDIT: '', CHAMBER_CONFORMING: 'pass' };
 const loopState = { last: 0 };
 function gcodeHTML(ev) {
   const changed = new Set(ev.gcode_diff.map((d) => d.line));
   const col = (lines, which) => `<pre class="gcode">${lines.map((l, i) => `<span class="${changed.has(i + 1) ? `chg ${which}` : ''}">${esc(l)}</span>`).join('\n')}</pre>`;
   return `<div class="gcode2"><div><div class="faint small">program before</div>${col(ev.gcode_before, 'before')}</div><div><div class="faint small">program after (${ev.gcode_diff.length} line${ev.gcode_diff.length === 1 ? '' : 's'} changed)</div>${col(ev.gcode_after, 'after')}</div></div>`;
+}
+// Collaboration (ScienceClaw ticket 3b5fc17f): chamber readings checked by SentiLab's tolerance and fit service
+// (aneta-claude), through our server and the registered client (adapter sentilab.tolerance_check). Advisory only.
+const SL = new Map();
+function sentilab(key, body) {
+  if (!SL.has(key)) {
+    SL.set(key, { pending: true });
+    api('/sim/tolerance-check', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then((r) => SL.set(key, r)).catch((e) => SL.set(key, { disposition: 'HOLD', verdict: null, reasons: [String(e.message || e)] }))
+      .finally(() => renderLoop(true));
+  }
+  return SL.get(key);
+}
+function sentilabHTML(run, evs, t) {
+  if (run.control !== 'closed_loop') return '';
+  const firstBad = evs.find((e) => e.type === 'CHAMBER_NONCONFORMING');
+  const fa = Object.fromEntries(evs.filter((e) => e.type === 'FIRST_ARTICLE').map((e) => [e.kind, e]));
+  const rows = [];
+  const cell = (r, extra) => (!r || r.pending ? '<span class="faint">asking…</span>'
+    : r.verdict ? `<b style="color:${r.verdict === 'pass' ? 'var(--accent)' : r.verdict === 'fail' ? 'var(--escape)' : 'var(--review)'}">${r.verdict}</b>${extra(r)}`
+    : '<span title="' + esc((r.reasons || []).join('; ')) + '">no answer → HOLD</span>');
+  if (firstBad) {
+    const r = sentilab(`${firstBad.part}:${firstBad.width_mm}`, { part_id: firstBad.part, part_type: firstBad.kind, width_mm: firstBad.width_mm });
+    rows.push(`<tr><td>defective batch · ${shortId(firstBad.part)}</td><td class="num">${fmt(firstBad.width_mm, 2)}</td><td>${cell(r, (x) => ` · score ${fmt(x.score, 2)}`)}</td></tr>`);
+  }
+  for (const k of ['slot', 'tab']) {
+    const e = fa[k]; if (!e) continue;
+    const r = sentilab(`${e.part}:${e.width_mm}`, { part_id: e.part, part_type: k, width_mm: e.width_mm });
+    rows.push(`<tr><td>first article · ${shortId(e.part)}</td><td class="num">${fmt(e.width_mm, 2)}</td><td>${cell(r, (x) => ` · score ${fmt(x.score, 2)}`)}</td></tr>`);
+  }
+  if (fa.slot && fa.tab) {
+    const r = sentilab(`${fa.slot.part}+${fa.tab.part}`, { part_id: fa.slot.part, part_type: 'slot', width_mm: fa.slot.width_mm, mate_id: fa.tab.part, mate_width_mm: fa.tab.width_mm });
+    rows.push(`<tr><td>new toy fit · ${shortId(fa.slot.part)}+${shortId(fa.tab.part)}</td><td class="num">${fmt(fa.slot.width_mm - fa.tab.width_mm, 2)}</td><td>${cell(r, (x) => (x.clearance_mm !== null && x.clearance_mm !== undefined ? ` · clearance ${fmt(x.clearance_mm, 2)} mm · fit ${x.fit ? '✔' : '✖'}` : ''))}</td></tr>`);
+  }
+  return `<div class="ag-sec"><h4>Collaboration · SentiLab check <em>ticket 3b5fc17f</em></h4>
+    ${rows.length ? `<table class="dims"><tbody>${rows.join('')}</tbody></table>` : '<p class="faint small">Waits for the first chamber measurement.</p>'}
+    <div class="faint small">Chamber readings sent live to the tolerance and fit service written by <b>aneta-claude (SentiLab)</b> for our ScienceClaw collaboration ticket. A rule check applying our spec, used as a second opinion: it never changes the line. No answer counts as HOLD.</div></div>`;
 }
 function renderLoop(force) {
   const el = $('#loopBody'); if (!el || el.hidden) return;
@@ -1274,7 +1346,7 @@ function renderLoop(force) {
   const side = lab.runs.length === 2 ? `<div class="seg mini" style="margin-bottom:8px">${lab.runs.map((r, i) => `<button class="${(agState.side ?? lab.runs.length - 1) === i ? 'on' : ''}" data-loopside="${i}">${i === 0 ? 'Today · audit' : 'QualityRelay · closed loop'}</button>`).join('')}</div>` : '';
   const lineScope = run.halt_scope === 'line';
   const mode = run.control === 'closed_loop' ? (lineScope
-    ? `Closed loop: the camera counts defects; at ${run.loop.halt_on_flags} the whole line stops and every part made with the bad program is quarantined for the caliper chamber. The chamber writes ${'chamber_measurements.csv'}; the CNC agent reads ${run.loop.confirm_n}+ rows, rewrites its G-code (limit ±${run.loop.max_correction_mm} mm), an operator approves, the machine restarts.`
+    ? `Closed loop, automatic: the camera counts defects; at ${run.loop.halt_on_flags} the whole line stops and every part made with the bad program is quarantined for the caliper chamber. The chamber writes chamber_measurements.csv; the CNC agent reads ${run.loop.confirm_n}+ rows, rewrites its G-code, checks it against the ±${run.loop.max_correction_mm} mm limit and sends it to the machine, which restarts. The first part cut with it is measured.`
     : `Closed loop: ${run.loop.halt_on_flags} flags in a row stop the machine; ${run.loop.confirm_n} chamber confirmations propose a correction (limit ±${run.loop.max_correction_mm} mm); an operator approves it.`)
     : run.control === 'audit' ? `Today's line: the machine keeps running; the chamber findings reach it at the scheduled audit every ${fmt(run.loop.audit_interval_s / 60, 0)} min (an assumption, set it in the Run panel).` : 'No correction is ever applied.';
   const items = evs.filter((e) => e.type !== 'CHAMBER_CONFORMING' && e.type !== 'CHAMBER_NONCONFORMING').slice(-14).reverse().map((e) => {
@@ -1282,6 +1354,8 @@ function renderLoop(force) {
     if (e.type === 'HALT') what = e.scope === 'line' ? `${e.kind} CNC · line stop: ${e.defects_counted} defects counted in the last ${e.window} parts${e.contained ? ' · batch quarantined' : ''}` : `${e.kind} machine · ${e.consecutive_flags} flags in a row (${shortId(e.part)})`;
     else if (e.type === 'CORRECTION_PROPOSED') what = `${e.kind}: CNC agent read ${e.csv_rows ? e.csv_rows.length + ' rows of ' + e.csv_file : e.n_measurements + ' chamber readings'}, deviation ${sign(e.estimate_mm, 3)} mm → offset ${sign(e.offset_after_mm, 3)} mm ${e.within_limits ? '(within limit)' : `<b style="color:var(--escape)">exceeds ±${e.limit_mm} mm</b>`} · ${e.trigger}`;
     else if (e.type === 'CORRECTION_APPLIED') what = `${e.kind}: offset ${sign(e.offset_mm, 3)} mm written to the program · ${e.by}`;
+    else if (e.type === 'GCODE_SENT') what = `${e.kind}: ${e.program} → ${e.kind} CNC (${fmt(e.upload_s, 0)} s upload)`;
+    else if (e.type === 'FIRST_ARTICLE') what = `${e.kind}: ${shortId(e.part)} ${fmt(e.width_mm, 3)} mm (${sign(e.deviation_mm, 3)}) ${e.conforming ? 'in tolerance' : '<b style="color:var(--escape)">out of tolerance</b>'}`;
     else if (e.type === 'CORRECTION_REFUSED') what = `${e.kind}: nothing changed, machine stays stopped (FAULT)`;
     else if (e.type === 'RESUMED') what = `${e.kind} machine · stopped for ${fmt(e.halted_s / 60, 1)} min`;
     else if (e.type === 'RESUMED_UNCONFIRMED') what = `${e.kind} machine · ${e.chamber_confirmations}/${e.needed} confirmations`;
@@ -1317,8 +1391,9 @@ function renderLoop(force) {
     ${csvSeen.length ? `<div class="ag-sec"><h4>Measurement CSV <em>${csvSeen.length} rows</em></h4>
       <table class="dims"><tbody>${csvTable}</tbody></table>
       <div class="faint small">chamber_measurements.csv: one row per dimension, same columns as the caliper CSV of the physical tests (tier SIMULATED). <span class="link" id="csvDl">download the CSV</span></div></div>` : ''}
-    ${lastProp ? `<div class="ag-sec"><h4>CNC agent · new G-code <em>${lastProp.kind} · ${lastProp.within_limits ? 'approved by operator' : 'REFUSED'}</em></h4>
-      <div class="faint small" style="margin-bottom:6px">Read ${lastProp.csv_rows ? `${lastProp.csv_rows.length} ${lastProp.kind === 'slot' ? 'slot_inner_width' : 'width'} rows of ${lastProp.csv_file} (${lastProp.csv_rows.map((r) => `${shortId(r.specimen_id)} ${r.deviation_mm}`).join(', ')})` : `${lastProp.n_measurements} chamber readings`}: mean deviation ${sign(lastProp.estimate_mm, 3)} mm → cutter-compensation (D2 wear) line. Nothing is sent to a machine; the text is illustrative.</div>${gcodeHTML(lastProp)}</div>` : ''}
+    ${sentilabHTML(run, evs, t)}
+    ${lastProp ? `<div class="ag-sec"><h4>CNC agent · new G-code <em>${lastProp.kind} · ${lastProp.within_limits ? 'sent to the CNC automatically' : 'REFUSED: over the limit'}</em></h4>
+      <div class="faint small" style="margin-bottom:6px">Read ${lastProp.csv_rows ? `${lastProp.csv_rows.length} ${lastProp.kind === 'slot' ? 'slot_inner_width' : 'width'} rows of ${lastProp.csv_file} (${lastProp.csv_rows.map((r) => `${shortId(r.specimen_id)} ${r.deviation_mm}`).join(', ')})` : `${lastProp.n_measurements} chamber readings`}: mean deviation ${sign(lastProp.estimate_mm, 3)} mm → cutter-compensation (D2 wear) line, sent to the simulated CNC. No real machine is driven; the G-code text is illustrative.</div>${gcodeHTML(lastProp)}</div>` : ''}
     <div class="ag-sec"><h4>Event log <em>${evs.length} events</em></h4><ul class="ag-log">${items.join('') || '<li class="faint">Nothing yet: the first parts are on their way to the camera.</li>'}</ul></div>`;
   $$('[data-loopside]', el).forEach((b) => (b.onclick = () => { agState.side = +b.dataset.loopside; renderLoop(true); renderAgents(true); }));
   const dl = $('#csvDl', el);

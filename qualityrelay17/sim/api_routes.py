@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field
 from . import SOURCE_TIER, MODEL_VERSION
 from .cad import cad_catalogue, nominal_design, STL_DIR
 from .engine import Factory, calibrate_part_model, POLICIES, PAIRINGS, CONTROLS
-from .scenarios import GRID, MULTI, CNC, BY_ID
+from .scenarios import GRID, MULTI, CNC, BY_ID, FUNCTIONAL_TOL_MM
 
 ROOT = Path(__file__).resolve().parents[2]
 RES = ROOT / 'examples' / 'results'
@@ -181,7 +181,9 @@ def run(req: RunRequest):
                           events=sorted(tl[p['part_id']], key=lambda e: e[1]),
                           pair=pr.get('pair_id'), decision=pr.get('decision'), escaped=bool(pr.get('escaped')),
                           flagged=bool(p.get('flagged')), offset_mm=round(p.get('offset_mm', 0.0), 4), machine_s=p.get('machine_s'),
-                          chamber=p.get('chamber'), contained=bool(p.get('contained'))))
+                          chamber=p.get('chamber'), contained=bool(p.get('contained')), first_article=bool(p.get('first_article')),
+                          # ground truth (evaluator only): the part as cut is outside the functional tolerance
+                          defective=abs(p['true_width_mm'] - (f.design['slot_opening_mm'] if p['kind'] == 'slot' else f.design['tab_width_mm'])) > FUNCTIONAL_TOL_MM))
     pairs = []
     for pr in f.pairs:
         s, t = by_id.get(pr['slot_id']), by_id.get(pr['tab_id'])
@@ -222,6 +224,30 @@ def run(req: RunRequest):
                 costs=dict(hold=f.costs.hold, escaped_defect=f.costs.escaped_defect),
                 model=dict(calibration_id=m.calibration_id, phone_sens=m.phone_sens, phone_spec=m.phone_spec,
                            pi_sens=m.pi_sens, pi_spec=m.pi_spec, crack_prior=m.crack_prior))
+
+
+class ToleranceCheckRequest(BaseModel):
+    part_id: str = Field(..., min_length=1, max_length=64, pattern=r'^[A-Za-z0-9._+-]+$')
+    part_type: str = Field(..., pattern='^(slot|tab)$')
+    width_mm: float = Field(..., gt=0, le=100)
+    mate_id: str | None = Field(None, min_length=1, max_length=64, pattern=r'^[A-Za-z0-9._+-]+$')
+    mate_width_mm: float | None = Field(None, gt=0, le=100)
+
+
+@router.post('/tolerance-check')
+def tolerance_check(req: ToleranceCheckRequest):
+    """Collaboration (ScienceClaw ticket 3b5fc17f): forward one chamber reading, or a tab-slot pair, to the SentiLab
+    tolerance and fit rule check (aneta-claude) through the registered client (adapter sentilab.tolerance_check).
+    Advisory only: it never changes the simulation, and anything short of a clean answer is reported as HOLD."""
+    from dataclasses import asdict
+    from ..tolerance_service import URL, check
+    mate = None
+    if req.mate_id and req.mate_width_mm:
+        mate = (req.mate_id, 'tab' if req.part_type == 'slot' else 'slot', req.mate_width_mm)
+    v = check(req.part_id, req.part_type, req.width_mm, mate, timeout=4.0)
+    return dict(asdict(v), reasons=list(v.reasons), url=URL, provider='SentiLab (aneta-claude)', ticket='3b5fc17f',
+                adapter='sentilab.tolerance_check',
+                note='Rule check applying our own spec; advisory evidence only. The simulation does not depend on it.')
 
 
 def _csv(path):

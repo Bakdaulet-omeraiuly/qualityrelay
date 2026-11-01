@@ -6,6 +6,8 @@ controlled or read. The G-code shown is illustrative text, not a post-processed 
 
 ## The story the scenario tells
 
+Collaboration credit: the tolerance and fit check is SentiLab's (aneta-claude); see `collab/sentilab-tolerance-check/`.
+
 1. Two CNC machines (one per part kind) are each fed from a stock crate by a loading robot. One part per blank.
 2. The shift starts with a **wrong tool offset**: slot openings come out 1.6 mm too narrow, tabs 1.6 mm too wide
    (the size of the seeded `S-DEF` / `T-DEF` specimens in `examples/cad/`). **The whole first batch is defective.**
@@ -21,11 +23,19 @@ controlled or read. The G-code shown is illustrative text, not a post-processed 
    (`docs/engineering/templates/specimen_measurements.csv`), evidence tier `SIMULATED`. Nonconforming parts leave on
    the **reject conveyor** into the scrap bin; each is a wasted blank.
 6. **CNC agent:** reads the CSV, takes the mean deviation of the functional width rows (`slot_inner_width` / `width`)
-   of the quarantined parts, and rewrites the cutter-compensation (wear) line of its G-code. The change is checked
-   against a ±2 mm limit, **approved by an operator** (timed work on the operator pool), **applied**, and that machine
-   **restarts** at once.
-7. Parts cut with the new program are in tolerance. They clear the camera, are paired slot with tab, and the robot
-   **assembles the slot-and-tab toy**. Seeds 0–2, 60 pairs: 0 escaped assemblies, 60/60 shipped good.
+   of the quarantined parts, and rewrites the cutter-compensation (wear) line of its G-code. A **deterministic limit
+   check** (±2 mm) is the only gate: an out-of-limit change is refused and the machine stays stopped (FAULT). A change
+   within the limit is **sent to the machine automatically** (`GCODE_SENT`, program `O1002 … rev 2`, 15 s upload), loaded,
+   and the machine **restarts** at once. No person is in this loop. Nothing is sent to a real machine; the G-code is
+   illustrative.
+7. **First article:** the first part cut with each new program goes to the chamber (`FIRST_ARTICLE`). Parts made after
+   the fix are in tolerance; they are paired slot with tab and the robot **assembles the slot-and-tab toy**.
+   Seeds 0–2, 60 pairs: 0 escaped assemblies, 60/60 shipped good.
+7b. **Collaboration (ScienceClaw ticket 3b5fc17f):** in the Studio's Loop tab, the first defective chamber reading, the
+   first articles and the fit of the first new toy are sent live to SentiLab's tolerance and fit service (aneta-claude)
+   through `POST /sim/tolerance-check` and the registered client (`qualityrelay17/tolerance_service.py`, adapter
+   `sentilab.tolerance_check`). A rule check applying our own spec, shown as a second opinion; it never changes the
+   simulation, and no answer is shown as HOLD.
 8. **Today's line (baseline):** same parts, same camera, same chamber. The machine keeps running; the chamber
    findings reach it only at the **scheduled audit** (interval is an adjustable assumption, default 30 min).
 9. **Waste is counted** from the event log: blanks consumed, scrapped parts, parts made before the correction,

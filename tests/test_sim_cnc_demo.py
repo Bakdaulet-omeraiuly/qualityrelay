@@ -57,19 +57,28 @@ def test_fault_is_in_the_truth_table_and_the_demo_streams_leave_registered_parts
     assert t['latent_width_mm'] > draw_part(base, 1, 'tab', 7, site, 0.0, 'lot', design)['latent_width_mm']  # tab wider
 
 
-def test_closed_loop_stops_the_line_measures_the_suspect_batch_corrects_with_approval_and_resumes():
+def test_closed_loop_stops_the_line_measures_the_suspect_batch_sends_new_gcode_automatically_and_resumes():
     f, o = _run('closed_loop')
     assert o['conservation_ok'] and o['machine'] == 'cnc' and o['control'] == 'closed_loop'
     ty = _types(o)
     assert ty.count('HALT') == 2 and ty.count('CORRECTION_APPLIED') == 2 and ty.count('RESUMED') == 2 and 'CORRECTION_REFUSED' not in ty
     for kind in ('slot', 'tab'):
-        seq = [e['type'] for e in o['line_events'] if e['kind'] == kind and e['type'] in ('HALT', 'CORRECTION_PROPOSED', 'CORRECTION_APPLIED', 'RESUMED')]
-        assert seq == ['HALT', 'CORRECTION_PROPOSED', 'CORRECTION_APPLIED', 'RESUMED'], seq
-    # the proposal is checked against a limit, approved by an operator (timed work on the operator pool), then applied
+        seq = [e['type'] for e in o['line_events'] if e['kind'] == kind and e['type'] in
+               ('HALT', 'CORRECTION_PROPOSED', 'GCODE_SENT', 'CORRECTION_APPLIED', 'RESUMED', 'FIRST_ARTICLE')]
+        assert seq == ['HALT', 'CORRECTION_PROPOSED', 'GCODE_SENT', 'CORRECTION_APPLIED', 'RESUMED', 'FIRST_ARTICLE'], seq
+    # the proposal passes the deterministic limit check and the new program is sent to the machine with no person in the loop
     prop = next(e for e in o['line_events'] if e['type'] == 'CORRECTION_PROPOSED')
+    sent = next(e for e in o['line_events'] if e['type'] == 'GCODE_SENT' and e['kind'] == prop['kind'])
     appl = next(e for e in o['line_events'] if e['type'] == 'CORRECTION_APPLIED' and e['kind'] == prop['kind'])
-    assert prop['within_limits'] and prop['n_measurements'] >= 3 and appl['t'] > prop['t'] and 'operator' in appl['by']
-    assert any(st == 'approval' for _a, _b, st, _k in f.events)
+    assert prop['within_limits'] and prop['n_measurements'] >= 3 and sent['t'] == prop['t'] and appl['t'] == pytest.approx(sent['t'] + sent['upload_s'])
+    assert sent['program'] == f"O1002 {prop['kind']} rev 2" and sent['offset_mm'] == appl['offset_mm'] and 'automatic' in appl['by']
+    assert not any(st == 'approval' for _a, _b, st, _k in f.events)
+    # the first part cut with each new program is measured in the chamber and is in tolerance
+    fa = [e for e in o['line_events'] if e['type'] == 'FIRST_ARTICLE']
+    assert {e['kind'] for e in fa} == {'slot', 'tab'} and all(e['conforming'] for e in fa) and o['waste']['first_articles'] == 2
+    for e in fa:
+        p = next(q for q in f.parts if q['part_id'] == e['part'])
+        assert p['first_article'] and p['chamber'] and p['t_print_s'] >= o['waste']['first_correction_s'][e['kind']]
     # the estimate is the 1.6 mm fault (tab wider / slot narrower), so the offset cancels it
     for e in o['line_events']:
         if e['type'] == 'CORRECTION_PROPOSED':
@@ -79,7 +88,7 @@ def test_closed_loop_stops_the_line_measures_the_suspect_batch_corrects_with_app
         went = any(st == 'chamber' and k.endswith(p['part_id']) for _a, _b, st, k in f.events)
         assert went == (p['chamber'] is not None if 'chamber' in p else False) or not went
         if p.get('chamber'):
-            assert (p['flagged'] or p.get('contained')) and p['measured_mm'] == p['chamber']['functional']['reading_mm']
+            assert (p['flagged'] or p.get('contained') or p.get('first_article')) and p['measured_mm'] == p['chamber']['functional']['reading_mm']
             assert set(p['chamber']['dims']) >= {'length_mm', 'height_mm'} and all('deviation_mm' in d for d in p['chamber']['dims'].values())
         else:
             assert p['measured_mm'] is None
@@ -171,7 +180,9 @@ def test_sim_run_exposes_the_cnc_demo_and_keeps_registered_runs_unchanged():
     assert d['kpis']['conservation_ok'] and [e['type'] for e in d['line_events']].count('CORRECTION_APPLIED') == 2
     assert d['waste']['halts'] == 2 and d['loop']['audit_interval_s'] is None
     ch = [p for p in d['parts'] if p['chamber']]
-    assert ch and all((p['flagged'] or p['contained']) and p['measured_mm'] is not None for p in ch)
+    assert ch and all((p['flagged'] or p['contained'] or p['first_article']) and p['measured_mm'] is not None for p in ch)
+    early = [p for p in d['parts'] if p['print_t'] < 100]
+    assert early and all(p['defective'] for p in early)  # ground truth: the first batch is defective, and the site can show it
     assert d['halt_scope'] == 'line' and d['contain_suspect'] and d['loop']['halt_on_flags'] == 6
     assert d['chamber_csv'].startswith('timestamp_iso,specimen_id,') and d['kpis']['escaped'] == 0
     assert any(p['measured_mm'] is None and not p['flagged'] for p in d['parts'])
@@ -239,3 +250,35 @@ def test_machine_scope_variant_stops_one_machine_on_flags_in_a_row():
     assert o['conservation_ok'] and o['waste']['contained_parts'] == 0 and o['waste']['corrections_applied'] == 2
     with pytest.raises(ValueError):
         Factory(replace(D01, halt_scope='plant'), 0, 'bayes', 'optimized', control='closed_loop', **WEB)
+
+
+def test_audit_line_has_no_first_article_and_no_gcode_upload():
+    _, o = _run('audit', 'rules', 'fifo')
+    ty = _types(o)
+    assert 'FIRST_ARTICLE' not in ty and 'GCODE_SENT' not in ty and o['waste']['first_articles'] == 0
+
+
+def test_tolerance_check_endpoint_forwards_to_sentilab_and_holds_on_failure(monkeypatch):
+    import urllib.error
+    from qualityrelay17 import tolerance_service
+    sent = []
+
+    def fake(url, body, timeout):
+        sent.append(body)
+        return 200, {'verdict': 'fail', 'score': 0.0, 'reasons': ['out of spec'], 'version': '1.0'}
+    monkeypatch.setattr(tolerance_service, '_post', fake)
+    c = TestClient(app)
+    r = c.post('/sim/tolerance-check', json=dict(part_id='S-0-000000', part_type='slot', width_mm=19.4)).json()
+    assert r['verdict'] == 'fail' and r['disposition'] == 'REJECT' and r['origin'] == 'EXTERNAL_SERVICE'
+    assert r['ticket'] == '3b5fc17f' and r['adapter'] == 'sentilab.tolerance_check'
+    assert sent[-1]['dims_mm'] == {'slot_inner_width': 19.4} and sent[-1]['units'] == 'mm'
+    c.post('/sim/tolerance-check', json=dict(part_id='S-1', part_type='slot', width_mm=21.0, mate_id='T-1', mate_width_mm=20.0))
+    assert sent[-1]['mate'] == {'part_id': 'T-1', 'dims_mm': {'width': 20.0}}
+
+    def down(url, body, timeout):
+        raise urllib.error.URLError('offline')
+    monkeypatch.setattr(tolerance_service, '_post', down)
+    r = c.post('/sim/tolerance-check', json=dict(part_id='T-1', part_type='tab', width_mm=20.0)).json()
+    assert r['disposition'] == 'HOLD' and r['verdict'] is None
+    assert c.post('/sim/tolerance-check', json=dict(part_id='x;rm', part_type='tab', width_mm=20.0)).status_code == 422
+    assert c.post('/sim/tolerance-check', json=dict(part_id='T-1', part_type='pin', width_mm=20.0)).status_code == 422

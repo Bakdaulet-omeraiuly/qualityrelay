@@ -44,6 +44,12 @@ in `examples/results/sentilab_tolerance_check/live_run_1nov.json`; the service i
 `THIRD_PARTY_MANIFEST.json` as `sentilab.tolerance_check`. Offline tests:
 `tests/test_tolerance_service.py`.
 
+**In the CNC cell demo** (Studio `#sim`, scenario D01, Loop tab): the website calls
+`POST /sim/tolerance-check`, which uses the same client, for the first defective chamber reading
+(expect `fail`), the first part cut with each corrected program (expect `pass`), and the fit of the
+first new slot-tab toy (`clearance_mm`, `fit`). The answers are shown as a second opinion and never
+change the simulation.
+
 ## Contract
 
 `POST /api/check`

@@ -94,7 +94,7 @@
         <div class="row2"><label>Seed<input id="seed" type="number" min="0" max="999" value="0"/></label>
           <label>Pairs<input id="npairs" type="number" min="10" max="150" value="60"/></label></div>
         <div id="loopCfg" hidden>
-          <p class="hint">CNC cell: the whole first batch is defective. The camera counts defects; at N the whole line stops. Every part from the bad program goes to the caliper chamber, which writes a measurement CSV; the CNC agent reads it, rewrites its G-code, an operator approves, and good parts go on to assembly. Today's line finds the same fault at its scheduled audit.</p>
+          <p class="hint">CNC cell: the whole first batch is defective. The camera counts defects; at N the whole line stops. Every part from the bad program goes to the caliper chamber, which writes a measurement CSV; the CNC agent reads it, rewrites its G-code and sends it to the machine automatically (±2 mm limit check), and good parts go on to assembly. SentiLab's tolerance service (collaboration) double-checks the chamber readings. Today's line finds the same fault at its scheduled audit.</p>
           <div class="row2"><label title="Camera-detected defects that stop the whole line (5–10 in the demo).">Stop the line after N defects<input id="haltN" type="number" min="1" max="20" value="6"/></label>
             <label title="Chamber CSV rows the CNC agent needs before it changes the program.">CSV rows for a fix<input id="confirmN" type="number" min="1" max="20" value="3"/></label></div>
           <div class="row2"><label>Correction limit (± mm)<input id="limitMm" type="number" min="0.1" max="10" step="0.1" value="2"/></label>
@@ -120,7 +120,7 @@
         <div class="legend">
           <span><i class="sw slot"></i>Slot</span><span><i class="sw tab"></i>Tab</span>
           <span><i class="sw review"></i>HOLD → review</span><span><i class="sw scrap"></i>Scrapped</span>
-          <span><i class="sw escape"></i>Escaped defect</span><span><i class="sw caught"></i>Caught (compare)</span>
+          <span><i class="sw escape"></i>Defective (truth) / escaped</span><span><i class="sw caught"></i>Caught (compare)</span>
         </div>
       </div>
     </aside>

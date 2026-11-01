@@ -68,6 +68,7 @@ class FactoryScenario:
                                               # 'line': N camera-detected defects among the last 2N inspected parts stop EVERY machine.
     contain_suspect: bool = False             # on a stop, every part made with the suspect program (flagged or not) is quarantined
                                               # and measured in the caliper chamber, including parts already waiting to be paired.
+    first_article: bool = False               # after a program change, the first part cut with it is measured in the chamber
 
     def as_dict(self):
         return asdict(self)
@@ -75,7 +76,8 @@ class FactoryScenario:
 
 STATION_S = dict(phone=5.0, pi=6.0, caliper=7.0, assembly=9.0, sorting=3.0, review=45.0, rework=120.0,
                  chamber=60.0,     # caliper chamber: an operator measures every dimension of one flagged part
-                 approval=30.0)    # an operator reads the chamber measurements and the program change before it is applied
+                 approval=30.0,    # (machine-scope variant, no longer used by D01) operator approval of a program change
+                 upload=15.0)      # the CNC agent sends the new program to the machine, which loads it
 
 # Coupon geometry (examples/cad/generate_specimen_stl.py) for the caliper chamber: every dimension, with its tolerance.
 # The functional width (slot opening / tab width) comes from the measured STL; these are the other dimensions.
@@ -184,14 +186,15 @@ BY_ID.update({s.sid: s for s in MULTI})
 # specimens). The camera flags gross size errors; once it has counted N defects (5-10 on the website) the WHOLE line
 # stops so no more blanks are wasted. Every part made with the bad program is quarantined and measured in the caliper
 # chamber (every dimension, written to a measurement CSV in the physical-test template format); the CNC agent reads
-# that CSV, rewrites the cutter-compensation line of its G-code, an operator approves, and the machine restarts. The
+# that CSV, rewrites the cutter-compensation line of its G-code, checks it against a fixed limit and sends it to the
+# machine automatically, which restarts. The first part cut with the new program is measured (first article); the
 # parts made afterwards are in tolerance and go on to pairing and assembly (the slot-tab toy). Machined coupons:
 # no print cracks (crack_p=0). What happens depends on the control mode chosen at run time
 # (engine.Factory: control='closed_loop' | 'audit' | 'none').
 CNC = (
     FactoryScenario('D01', 'CNC cell: whole first batch defective (wrong tool offset, slot −1.6 / tab +1.6 mm); camera counts defects, line stops, chamber → CSV → G-code fix → assembly',
                     machine='cnc', tool_offset_fault_mm=1.6, camera_gross_dim_mm=0.8, caliper_mode='flagged_only', warp_p=0.0,
-                    crack_p=0.0, halt_scope='line', contain_suspect=True,
+                    crack_p=0.0, halt_scope='line', contain_suspect=True, first_article=True,
                     n_pairs=60, transport_s=15.0,
                     sites=(SiteConfig(printers=2, print_batch=1, print_setup_s=12.0, print_per_part_s=48.0),)),
 )

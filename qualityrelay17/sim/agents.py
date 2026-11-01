@@ -143,7 +143,7 @@ class AgentTeam:
 
     def on_line_event(self, ev):
         """Halt / correction events of the CNC demo as messages: Process proposes the program change, the Safety
-        gate records the operator's approval or the refusal. The engine decides; this is the trace of it."""
+        gate records the automatic limit check (pass or refusal), Metrology reports the first article. The engine decides; this is the trace of it."""
         k, kind = ev['type'], ev.get('kind')
         if k == 'HALT':
             self._send('ALARM', 'process', 'governance', ev.get('part'), {'kind': kind, 'event': 'HALT', 'consecutive_flags': ev.get('consecutive_flags')})
@@ -153,11 +153,17 @@ class AgentTeam:
                        'gcode_lines_changed': len(ev['gcode_diff'])})
         elif k == 'CORRECTION_APPLIED':
             self.setpoints.append(dict(t=round(self.f.env.now, 1), kind=kind, offset_mm=ev['offset_mm'], by=ev['by']))
-            self._send('DECISION', 'governance', 'process', f'{kind}-correction', {'stage': 'correction', 'decision': 'PASS', 'reason': 'OPERATOR_APPROVED',
+            self._send('DECISION', 'governance', 'process', f'{kind}-correction', {'stage': 'correction', 'decision': 'PASS', 'reason': 'AUTO_WITHIN_LIMIT',
                        'offset_mm': ev['offset_mm'], 'by': ev['by']})
         elif k == 'CORRECTION_REFUSED':
             self._send('DECISION', 'governance', 'process', f'{kind}-correction', {'stage': 'correction', 'decision': 'HOLD', 'reason': 'CORRECTION_LIMIT',
                        'offset_mm': ev.get('offset_after_mm'), 'limit_mm': ev.get('limit_mm')})
+        elif k == 'GCODE_SENT':
+            self._send('PROPOSE_SETPOINT', 'process', 'governance', f'{kind}-program', {'kind': kind, 'event': k, 'program': ev['program'],
+                       'offset_mm': ev['offset_mm']})
+        elif k == 'FIRST_ARTICLE':
+            self._send('MEASUREMENT', 'metrology', 'process', ev['part'], {'kind': kind, 'event': k, 'width_mm': ev['width_mm'],
+                       'conforming': ev['conforming']})
         elif k in ('RESUMED', 'RESUMED_UNCONFIRMED'):
             self._send('ALARM', 'process', 'governance', f'{kind}-machine', {'kind': kind, 'event': k})
 

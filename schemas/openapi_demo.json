@@ -1361,6 +1361,46 @@
         }
       }
     },
+    "/sim/tolerance-check": {
+      "post": {
+        "tags": [
+          "simulation-18.1"
+        ],
+        "summary": "Tolerance Check",
+        "description": "Collaboration (ScienceClaw ticket 3b5fc17f): forward one chamber reading, or a tab-slot pair, to the SentiLab\ntolerance and fit rule check (aneta-claude) through the registered client (adapter sentilab.tolerance_check).\nAdvisory only: it never changes the simulation, and anything short of a clean answer is reported as HOLD.",
+        "operationId": "tolerance_check_sim_tolerance_check_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ToleranceCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/sim/results": {
       "get": {
         "tags": [
@@ -2822,6 +2862,62 @@
           "decision"
         ],
         "title": "StageRequest"
+      },
+      "ToleranceCheckRequest": {
+        "properties": {
+          "part_id": {
+            "type": "string",
+            "maxLength": 64,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._+-]+$",
+            "title": "Part Id"
+          },
+          "part_type": {
+            "type": "string",
+            "pattern": "^(slot|tab)$",
+            "title": "Part Type"
+          },
+          "width_mm": {
+            "type": "number",
+            "maximum": 100.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Width Mm"
+          },
+          "mate_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 64,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9._+-]+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mate Id"
+          },
+          "mate_width_mm": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Mate Width Mm"
+          }
+        },
+        "type": "object",
+        "required": [
+          "part_id",
+          "part_type",
+          "width_mm"
+        ],
+        "title": "ToleranceCheckRequest"
       },
       "ValidationError": {
         "properties": {

@@ -725,13 +725,14 @@
       "capability": "Tolerance and slot-tab fit rule check over HTTPS (ScienceClaw ticket 3b5fc17f)",
       "upstream": "sentilab-tolerance-check",
       "status": "WORKING",
-      "scope": "Rule check applying our own spec, not a model and not independent evidence. Live HTTPS calls by curl from a team member's MacBook on 1 Nov 2026 against v1; the Python client and CSV script are tested offline (fake transport and the vendored code under Node). Advisory only: any failure becomes HOLD.",
+      "scope": "Rule check applying our own spec, not a model and not independent evidence. Live HTTPS calls by curl from a team member's MacBook on 1 Nov 2026 against v1; the Python client and CSV script are tested offline (fake transport and the vendored code under Node). Advisory only: any failure becomes HOLD. Also used by the CNC cell demo (scenario D01): POST /sim/tolerance-check sends the first defective chamber reading, the first articles and the first new toy's fit; shown in the Studio's Loop tab, advisory only.",
       "origin": "EXTERNAL_SERVICE",
       "requires_packages": [],
       "evidence": {
         "tests": [
           "tests/test_tolerance_service.py",
-          "tests/test_collab_tolerance_check.py"
+          "tests/test_collab_tolerance_check.py",
+          "tests/test_sim_cnc_demo.py"
         ],
         "artifacts": [
           "examples/results/sentilab_tolerance_check/live_run_1nov.json"
