@@ -26,6 +26,24 @@ a slot, and rounds to 0.01 mm. v1 is deployed for the demo with the contributor'
 our tests below match v1's behaviour. Swapping in v2 means replacing `api/check.mjs`, the hash in
 the test, and flipping case 10 back to a 422.
 
+## Used by QualityRelay
+
+`qualityrelay17/tolerance_service.py` is the client (standard library only). It sends a width,
+or a tab-slot pair, and maps the answer to an advisory PASS / HOLD / REJECT with origin
+`EXTERNAL_SERVICE`. If the service is unreachable, slow, returns an error or an answer it does not
+recognise, the result is HOLD. `scripts/check_measurements_with_service.py` sends the physical-tier
+caliper readings from a measurement CSV:
+
+```bash
+python3 scripts/check_measurements_with_service.py measurements.csv --out run.json
+```
+
+Each specimen is checked with its reading nearest a spec limit, and every tab-slot pair with the
+widest tab reading against the narrowest slot reading. The first live calls (curl, 1 Nov 2026) are
+in `examples/results/sentilab_tolerance_check/live_run_1nov.json`; the service is registered in
+`THIRD_PARTY_MANIFEST.json` as `sentilab.tolerance_check`. Offline tests:
+`tests/test_tolerance_service.py`.
+
 ## Contract
 
 `POST /api/check`

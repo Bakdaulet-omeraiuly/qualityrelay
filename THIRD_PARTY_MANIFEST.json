@@ -414,6 +414,17 @@
       "revision": null,
       "bundled": false,
       "notes": "academic comparison only; never in a commercial product or training set"
+    },
+    {
+      "id": "sentilab-tolerance-check",
+      "name": "SentiLab tolerance and fit check (aneta-claude)",
+      "kind": "service",
+      "url": "https://qualityrelay-tolerance-check.vercel.app/api/check",
+      "license": "UNSPECIFIED (asked in ticket 3b5fc17f; source copy disclosed in NOTICES_EXTERNAL_CODE.md)",
+      "license_review": "to_verify",
+      "revision": "753e763ef6166f752091f8830474ce06cd253d03e475735518e260ee354f84ab",
+      "bundled": false,
+      "notes": "Hosted rule check applying our own spec; not a model and not independent evidence. The service itself is not bundled."
     }
   ],
   "adapters": [
@@ -707,6 +718,25 @@
       "origin": "NONE",
       "requires_packages": [],
       "evidence": {}
+    },
+    {
+      "id": "sentilab.tolerance_check",
+      "provider": "SentiLab (aneta-claude)",
+      "capability": "Tolerance and slot-tab fit rule check over HTTPS (ScienceClaw ticket 3b5fc17f)",
+      "upstream": "sentilab-tolerance-check",
+      "status": "WORKING",
+      "scope": "Rule check applying our own spec, not a model and not independent evidence. Live HTTPS calls by curl from a team member's MacBook on 1 Nov 2026 against v1; the Python client and CSV script are tested offline (fake transport and the vendored code under Node). Advisory only: any failure becomes HOLD.",
+      "origin": "EXTERNAL_SERVICE",
+      "requires_packages": [],
+      "evidence": {
+        "tests": [
+          "tests/test_tolerance_service.py",
+          "tests/test_collab_tolerance_check.py"
+        ],
+        "artifacts": [
+          "examples/results/sentilab_tolerance_check/live_run_1nov.json"
+        ]
+      }
     }
   ]
 }
