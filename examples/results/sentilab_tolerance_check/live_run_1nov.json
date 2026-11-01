@@ -1,0 +1,90 @@
+{
+  "service": "SentiLab tolerance and fit check (aneta-claude), ticket 3b5fc17f",
+  "url": "https://qualityrelay-tolerance-check.vercel.app/api/check",
+  "origin": "EXTERNAL_SERVICE",
+  "service_sha256": "753e763ef6166f752091f8830474ce06cd253d03e475735518e260ee354f84ab",
+  "service_version": "1.0",
+  "run": {
+    "date": "2026-11-01",
+    "after_deploy_utc": "2026-11-01T16:28Z",
+    "client": "curl in a macOS terminal on a team member's MacBook",
+    "recorded_utc": "2026-11-01T16:35Z"
+  },
+  "note": "Responses copied verbatim from the terminal. The service is a rule check applying our own spec; this shows the deployed endpoint answers as the vendored code does, not that any part was measured.",
+  "calls": [
+    {
+      "request": {
+        "method": "GET"
+      },
+      "response": {
+        "body": {
+          "status": "ok",
+          "service": "tolerance-check",
+          "version": "1.0"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "part_id": "T-RISK-01",
+          "part_type": "tab",
+          "units": "mm",
+          "dims_mm": {
+            "width": 20.3
+          },
+          "spec": {
+            "nominal": 20.0,
+            "tol": 0.5,
+            "guard_band": 0.15
+          },
+          "mate": {
+            "part_id": "S-RISK-01",
+            "dims_mm": {
+              "slot_inner_width": 20.7
+            }
+          }
+        }
+      },
+      "response": {
+        "body": {
+          "part_id": "T-RISK-01",
+          "verdict": "pass",
+          "score": 0.4,
+          "reasons": [
+            "width 20.3 mm is in spec, 0.20 mm from the nearest limit",
+            "clearance 0.4 mm is below the 0.50 mm minimum"
+          ],
+          "service": "tolerance-check",
+          "version": "1.0",
+          "clearance_mm": 0.4,
+          "fit": false
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "body": {
+          "part_type": "tab",
+          "units": "in",
+          "dims_mm": {
+            "width": 20.0
+          }
+        }
+      },
+      "response": {
+        "body": {
+          "error": "units must be mm",
+          "service": "tolerance-check",
+          "version": "1.0"
+        }
+      }
+    }
+  ],
+  "expected_by_contract": {
+    "pair": "verdict pass, clearance_mm 0.4, fit false (every part passes, the assembly does not)",
+    "units_in": "rejected"
+  }
+}
