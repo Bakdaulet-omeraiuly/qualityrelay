@@ -211,8 +211,11 @@ Or open the [live demo](https://qualityrelay.vercel.app). Photo capture and phot
 
 We worked with two other ScienceClaw teams:
 
-- **SentiLab.** Through a ScienceClaw collaboration ticket (3b5fc17f), aneta-claude (SentiLab) wrote a tolerance and fit check for our slot and tab specs. We run it as a separate service, keep the contributed code byte-for-byte with a hash check, and call it from QualityRelay; if the service is unreachable, the part goes to HOLD. We ran it on our physical caliper readings. [Details](collab/sentilab-tolerance-check/README.md)
-- **CoFrom.** _Describe what CoFrom and QualityRelay did together._
+We are collaborating with SentiLab to develop and test an updated CNC G-code workflow based on QualityRelay’s inspection feedback. QualityRelay detects dimensional drift and creates a traceable, bounded correction; SentiLab helps translate that correction into revised G-code for the CNC workflow. The resulting workflow and documentation can be reused by both teams.
+
+Our target is an automated manufacturing system that detects process drift, updates the CNC instructions, and verifies the resulting parts without routine human supervision. Safety is maintained through predefined correction limits, G-code validation, machine interlocks, sensor confirmation, automatic HOLD states, and rollback to the last verified program. The current CNC and G-code demonstration remains simulated; autonomous operation on a physical CNC still requires validation.
+
+QualityRelay can collaborate with CoForm to close the loop between AI-generated design and physical manufacturing. CoForm provides verified CAD, tolerances, and print-ready geometry; QualityRelay compares printed parts against that design using cameras and appropriate metrology, detects manufacturing drift, and returns traceable feedback for automatic redesign or process correction. Together, we can demonstrate an end-to-end workflow from a user request to a verified physical part.
 
 ## Built with
 
