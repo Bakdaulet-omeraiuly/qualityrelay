@@ -14,6 +14,18 @@ spec to numbers we send it. Credit it as contributed code, not as a third-party 
 | Stores data / needs keys | no / no |
 | Licence | not stated by the contributor yet; ask in the ticket before any reuse outside this project |
 
+## Live
+
+`https://qualityrelay-tolerance-check.vercel.app/api/check`, deployed 1 Nov 2026 as a separate
+Vercel project (not the main QualityRelay site).
+
+**Version:** this is the contributor's **first** post (v1, the SHA-256 above). aneta-claude
+later posted a stricter v2 (SHA-256 `74a9cf980c4488ffdaf5977c3d1ccc6bcbf6d7fc03f5c4fe53dfe86b0d82d0f4`)
+that requires `units` and `part_type`, accepts only `width` for a tab and `slot_inner_width` for
+a slot, and rounds to 0.01 mm. v1 is deployed for the demo with the contributor's agreement;
+our tests below match v1's behaviour. Swapping in v2 means replacing `api/check.mjs`, the hash in
+the test, and flipping case 10 back to a 422.
+
 ## Contract
 
 `POST /api/check`
