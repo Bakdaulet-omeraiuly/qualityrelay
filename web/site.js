@@ -256,11 +256,11 @@ const STATION_INFO_CNC = {
   phone: ['Camera gate', 'Surface defects and gross size errors. A missing reading is never treated as "clear".'],
   printer_slot: ['CNC · slot', 'One slot coupon per blank: 12 s robot load + 48 s machining. The tool offset is wrong from the first part (opening 1.6 mm too narrow) until a correction is applied.'],
   printer_tab: ['CNC · tab', 'One tab coupon per blank: 12 s robot load + 48 s machining. The tool offset is wrong from the first part (tab 1.6 mm too wide) until a correction is applied.'],
-  phone_0: ['Camera gate · slot lane', 'Checks every slot for surface defects and gross size errors (> 0.8 mm, 90% sensitivity). A flag sends the part to the caliper chamber; three flags in a row stop the machine.'],
-  phone_1: ['Camera gate · tab lane', 'Checks every tab for surface defects and gross size errors (> 0.8 mm, 90% sensitivity). A flag sends the part to the caliper chamber; three flags in a row stop the machine.'],
+  phone_0: ['Camera gate · slot lane', 'Checks every slot for surface defects and gross size errors (> 0.8 mm, 90% sensitivity) and counts the defects. When the count reaches N (5–10, set in the Run panel) the whole line stops; flagged parts go to the caliper chamber.'],
+  phone_1: ['Camera gate · tab lane', 'Checks every tab for surface defects and gross size errors (> 0.8 mm, 90% sensitivity) and counts the defects. When the count reaches N (5–10, set in the Run panel) the whole line stops; flagged parts go to the caliper chamber.'],
   caliper_0: ['(no inline caliper)', 'This line has no inline caliper: unflagged parts are not measured. Flagged parts are measured in the chamber.'],
   caliper_1: ['(no inline caliper)', 'This line has no inline caliper: unflagged parts are not measured. Flagged parts are measured in the chamber.'],
-  review: ['Caliper chamber', 'An operator measures every dimension of a camera-flagged part with a digital caliper (60 s) and compares them with the CAD nominal. Nonconforming parts go to the reject conveyor; their deviations feed the correction. Unflagged parts never come here.'],
+  review: ['Caliper chamber', 'The measurement agent measures every dimension of a flagged or quarantined part with a digital caliper (60 s; a CMM or gauge in another factory) and writes each reading to chamber_measurements.csv. Nonconforming parts go to the reject conveyor; the CSV goes back to the CNC agent.'],
   rework: ['Rework', 'A held pair whose tab is too wide can be reworked (80% success).'],
 };
 const machineInfo = (machine) => (machine === 'cnc' ? { ...STATION_INFO, ...STATION_INFO_CNC } : STATION_INFO);
@@ -689,9 +689,9 @@ class FactoryView {
     const ev = (this.data?.line_events || []).filter((e) => e.kind === kind && e.t <= t);
     let state = 'running', text = '', tText = -1e9;
     for (const e of ev) {
-      if (e.type === 'HALT') { state = 'halted'; text = `■ STOPPED · ${e.consecutive_flags} flags in a row → chamber`; tText = e.t; }
-      else if (e.type === 'CORRECTION_PROPOSED') { if (state === 'halted') { text = `⏳ correction ${sign(e.offset_after_mm, 2)} mm · awaiting operator approval`; tText = e.t; } }
-      else if (e.type === 'CORRECTION_APPLIED') { text = `✔ program corrected ${sign(e.offset_mm, 2)} mm`; tText = e.t; }
+      if (e.type === 'HALT') { state = 'halted'; text = e.scope === 'line' ? `■ LINE STOPPED · ${e.defects_counted} defects counted → chamber` : `■ STOPPED · ${e.consecutive_flags} flags in a row → chamber`; tText = e.t; }
+      else if (e.type === 'CORRECTION_PROPOSED') { if (state === 'halted') { text = `⏳ G-code ${sign(e.offset_after_mm, 2)} mm from ${e.csv_rows?.length ?? e.n_measurements} CSV rows · operator approval`; tText = e.t; } }
+      else if (e.type === 'CORRECTION_APPLIED') { text = `✔ new G-code ${sign(e.offset_mm, 2)} mm · cutting good parts`; tText = e.t; }
       else if (e.type === 'CORRECTION_REFUSED') { state = 'fault'; text = `✖ FAULT · ${sign(e.offset_after_mm, 2)} mm exceeds the ±${e.limit_mm} mm limit`; tText = e.t; }
       else if (e.type === 'RESUMED') { if (state === 'halted') state = 'running'; }
       else if (e.type === 'RESUMED_UNCONFIRMED') { if (state === 'halted') state = 'running'; text = '▶ resumed · flags not confirmed by the chamber'; tText = e.t; }
@@ -856,14 +856,14 @@ const STORY_PRINTER = [
 ];
 // Scenario D01: the CNC cell story. Every step points at something the engine's event log contains.
 const STORY_CNC = [
-  ['The CNC cell', 'Two CNC machines, one per part kind, each fed from a stock crate by a robot. The shift starts with a wrong tool offset: the first parts are 1.6 mm off. SIMULATED; nothing here drives a real machine.', [-6, 20, 24], [-6, 0, -0.5]],
+  ['The CNC cell', 'Two CNC machines, one per part kind, each fed from a stock crate by a robot. The shift starts with a wrong tool offset, so the whole first batch is defective: every slot 1.6 mm too narrow, every tab 1.6 mm too wide. SIMULATED; nothing here drives a real machine.', [-6, 20, 24], [-6, 0, -0.5]],
   ['Stock and robot', 'The robot takes a blank from the crate, loads the machine, and puts the finished part on the lane belt. The crate counts down: every part costs one blank, good or bad.', [-9.5, 4.5, -8.5], [-13, 1, -3]],
-  ['First batch defective', 'The slot comes out 1.6 mm too narrow, the tab 1.6 mm too wide (the size of the seeded S-DEF / T-DEF specimens). The machine cannot know. Turn on ground truth (T) and click a part.', [-17.5, 4, 4], [-14.4, 1.2, 0.5]],
-  ['Camera gate', 'The camera flags gross size errors as well as surface defects. A flag sends the part to the caliper chamber. Three flags in a row stop the machine: the amber lamp.', [-11, 5, 7], [-8, 1.2, 0]],
-  ['Caliper chamber', 'Only flagged parts come here. An operator measures every dimension with a digital caliper and compares them with the CAD nominal. Nonconforming parts leave on the reject conveyor.', [1, 5.5, -1.5], [3, 0.6, -6.5]],
-  ['Correction and approval', 'Three confirmed measurements give the deviation; the program change (a cutter-compensation line) is proposed, checked against a ±2 mm limit, and an operator approves it. Open the Loop tab to read the G-code diff.', [-17.5, 4, -1], [-14.4, 1.5, -2.5]],
-  ['Back to good parts', 'The machine resumes with the corrected program. Parts made after the correction clear the camera and are never measured again: the chamber only sees flagged parts.', [-8, 8, 10], [-9, 0.5, 0]],
-  ['Waste counted', 'The reject conveyor shows what the fault cost: blanks, machine time, time to correction. In Compare mode the left line finds the same fault only at the scheduled audit.', [8, 5.5, -3.5], [9, 0.3, -8.3]],
+  ['First batch defective', 'The machine cannot know its parts are wrong. Turn on ground truth (T): every part of the first batch is red. Click one to see its width.', [-17.5, 4, 4], [-14.4, 1.2, 0.5]],
+  ['Camera counts defects', 'The camera flags gross size errors and counts them. When the count reaches N (set in the Run panel, 6 here) the whole line stops at once: amber lamps on both machines, no more blanks wasted.', [-11, 5, 7], [-8, 1.2, 0]],
+  ['Quarantine and caliper chamber', 'Every part made with the bad program, flagged or not, goes to the caliper chamber. The measurement agent measures every dimension (here a caliper; a CMM in another factory) and writes chamber_measurements.csv. Nonconforming parts leave on the reject conveyor.', [1, 5.5, -1.5], [3, 0.6, -6.5]],
+  ['CSV → CNC agent → new G-code', 'The CNC agent reads the CSV, takes the mean deviation of the measured widths, and rewrites the cutter-compensation line of its program. An operator approves the change, and the machine restarts at once. Open the Loop tab for the CSV rows and the G-code diff.', [-17.5, 4, -1], [-14.4, 1.5, -2.5]],
+  ['Good parts → assembly', 'Parts cut with the new program are in tolerance. They clear the camera, are paired slot with tab, and the robot assembles them into the slot-and-tab toy. Turn on ground truth: they are green.', [2, 6, 8], [5, 0.8, 0]],
+  ['Waste counted', 'The reject conveyor shows what the fault cost: blanks, machine time, time to correction. In Compare mode the left line keeps cutting bad parts until its scheduled audit.', [8, 5.5, -3.5], [9, 0.3, -8.3]],
 ];
 let STORY = STORY_PRINTER;
 const lab = { mode: 'single', views: [], runs: [], t: 0, T: 1, t0: 0, playing: true, speed: 10, sel: null, story: -1, caught: new Set() };
@@ -885,7 +885,7 @@ async function initLab() {
   $('#runBtn').onclick = run;
   $('#demoBtn').onclick = async () => { $('#scenario').value = 'F03'; $('#seed').value = 3; $('#npairs').value = 100; $('#policy').value = 'bayes'; $('#pairing').value = 'optimized'; $('#truth').checked = true; loopVisible(); await run(); };
   $('#demoCncBtn').onclick = async () => {
-    $('#scenario').value = 'D01'; $('#seed').value = 0; $('#npairs').value = 60; $('#policy').value = 'bayes'; $('#pairing').value = 'optimized'; $('#truth').checked = true; loopVisible();
+    $('#scenario').value = 'D01'; $('#seed').value = 0; $('#npairs').value = 60; $('#policy').value = 'bayes'; $('#pairing').value = 'optimized'; $('#truth').checked = true; $('#haltN').value = 6; loopVisible();
     if (lab.mode !== 'compare') await setMode('compare'); else await run();
     setRTab('loop'); story(0);
   };
@@ -1067,7 +1067,7 @@ async function run() {
     lab.runs.forEach((r, i) => lab.views[i].load(r, i === 1 ? lab.caught : new Set()));
     lab.views.forEach((v) => v.setLabels($('#labels').checked));
     STORY = isCNC() ? STORY_CNC : STORY_PRINTER; lab.story = -1; $('#storyStep').textContent = `0 / ${STORY.length}`;
-    $('#storyText').innerHTML = isCNC() ? 'Take the tour of the CNC cell: first batch defective, caught, measured, corrected.' : 'Take the guided tour of the line. The camera moves to each station.';
+    $('#storyText').innerHTML = isCNC() ? 'Take the tour of the CNC cell: whole first batch defective, counted, line stopped, measured to CSV, G-code corrected, good parts assembled.' : 'Take the guided tour of the line. The camera moves to each station.';
     $('#storyNext').textContent = 'Start tour ▶';
     $$('.rtabs button[data-rtab=loop]').forEach((b) => (b.hidden = !isCNC()));
     if (!isCNC() && agState.tab === 'loop') setRTab('agents');
@@ -1250,7 +1250,7 @@ function summaryCard() {
 }
 
 // ---------------------------------------------------------------- closed loop (CNC cell): events up to the playback time
-const EV_LABEL = { HALT: 'machine stopped', CHAMBER_NONCONFORMING: 'chamber: nonconforming', CHAMBER_CONFORMING: 'chamber: conforming', CORRECTION_PROPOSED: 'correction proposed',
+const EV_LABEL = { HALT: 'stopped', CHAMBER_NONCONFORMING: 'chamber: nonconforming', CHAMBER_CONFORMING: 'chamber: conforming', CORRECTION_PROPOSED: 'correction proposed',
   CORRECTION_APPLIED: 'correction applied', CORRECTION_REFUSED: 'correction refused', RESUMED: 'machine resumed', RESUMED_UNCONFIRMED: 'resumed, flags unconfirmed', AUDIT: 'scheduled audit' };
 const EV_CLASS = { HALT: 'hold', CHAMBER_NONCONFORMING: 'alarm', CORRECTION_PROPOSED: 'hold', CORRECTION_APPLIED: 'pass', CORRECTION_REFUSED: 'alarm', RESUMED: 'pass', RESUMED_UNCONFIRMED: '', AUDIT: '', CHAMBER_CONFORMING: 'pass' };
 const loopState = { last: 0 };
@@ -1272,12 +1272,15 @@ function renderLoop(force) {
   const flags = parts.filter((p) => p.flagged && (p.events.find((e) => e[0] === 'phone')?.[2] ?? Infinity) <= t).length;
   const chamber = parts.filter((p) => p.chamber && (p.events.find((e) => e[0] === 'review')?.[2] ?? Infinity) <= t);
   const side = lab.runs.length === 2 ? `<div class="seg mini" style="margin-bottom:8px">${lab.runs.map((r, i) => `<button class="${(agState.side ?? lab.runs.length - 1) === i ? 'on' : ''}" data-loopside="${i}">${i === 0 ? 'Today · audit' : 'QualityRelay · closed loop'}</button>`).join('')}</div>` : '';
-  const mode = run.control === 'closed_loop' ? `Closed loop: ${run.loop.halt_on_flags} flags in a row stop the machine; ${run.loop.confirm_n} chamber confirmations propose a correction (limit ±${run.loop.max_correction_mm} mm); an operator approves it.`
+  const lineScope = run.halt_scope === 'line';
+  const mode = run.control === 'closed_loop' ? (lineScope
+    ? `Closed loop: the camera counts defects; at ${run.loop.halt_on_flags} the whole line stops and every part made with the bad program is quarantined for the caliper chamber. The chamber writes ${'chamber_measurements.csv'}; the CNC agent reads ${run.loop.confirm_n}+ rows, rewrites its G-code (limit ±${run.loop.max_correction_mm} mm), an operator approves, the machine restarts.`
+    : `Closed loop: ${run.loop.halt_on_flags} flags in a row stop the machine; ${run.loop.confirm_n} chamber confirmations propose a correction (limit ±${run.loop.max_correction_mm} mm); an operator approves it.`)
     : run.control === 'audit' ? `Today's line: the machine keeps running; the chamber findings reach it at the scheduled audit every ${fmt(run.loop.audit_interval_s / 60, 0)} min (an assumption, set it in the Run panel).` : 'No correction is ever applied.';
   const items = evs.filter((e) => e.type !== 'CHAMBER_CONFORMING' && e.type !== 'CHAMBER_NONCONFORMING').slice(-14).reverse().map((e) => {
     let what = '';
-    if (e.type === 'HALT') what = `${e.kind} machine · ${e.consecutive_flags} flags in a row (${shortId(e.part)})`;
-    else if (e.type === 'CORRECTION_PROPOSED') what = `${e.kind}: ${e.n_measurements} chamber readings, deviation ${sign(e.estimate_mm, 3)} mm → offset ${sign(e.offset_after_mm, 3)} mm ${e.within_limits ? '(within limit)' : `<b style="color:var(--escape)">exceeds ±${e.limit_mm} mm</b>`} · ${e.trigger}`;
+    if (e.type === 'HALT') what = e.scope === 'line' ? `${e.kind} CNC · line stop: ${e.defects_counted} defects counted in the last ${e.window} parts${e.contained ? ' · batch quarantined' : ''}` : `${e.kind} machine · ${e.consecutive_flags} flags in a row (${shortId(e.part)})`;
+    else if (e.type === 'CORRECTION_PROPOSED') what = `${e.kind}: CNC agent read ${e.csv_rows ? e.csv_rows.length + ' rows of ' + e.csv_file : e.n_measurements + ' chamber readings'}, deviation ${sign(e.estimate_mm, 3)} mm → offset ${sign(e.offset_after_mm, 3)} mm ${e.within_limits ? '(within limit)' : `<b style="color:var(--escape)">exceeds ±${e.limit_mm} mm</b>`} · ${e.trigger}`;
     else if (e.type === 'CORRECTION_APPLIED') what = `${e.kind}: offset ${sign(e.offset_mm, 3)} mm written to the program · ${e.by}`;
     else if (e.type === 'CORRECTION_REFUSED') what = `${e.kind}: nothing changed, machine stays stopped (FAULT)`;
     else if (e.type === 'RESUMED') what = `${e.kind} machine · stopped for ${fmt(e.halted_s / 60, 1)} min`;
@@ -1288,6 +1291,13 @@ function renderLoop(force) {
   const props = evs.filter((e) => e.type === 'CORRECTION_PROPOSED');
   const lastProp = props.at(-1);
   const lastCh = chamber.at(-1);
+  const halt = evs.find((e) => e.type === 'HALT');
+  const counted = lineScope ? (halt ? halt.defects_counted : Math.min(flags, run.loop.halt_on_flags)) : null;
+  const quarantined = parts.filter((p) => p.contained && (p.events.find((e) => e[0] === 'review')?.[2] ?? Infinity) <= t).length;
+  const csvRows = (run.chamber_csv || '').trim().split('\n'), csvHead = csvRows[0] || '';
+  const csvSeen = csvRows.slice(1).filter((r) => { const ts = Date.parse(r.split(',')[0]); return Number.isFinite(ts) && (ts - Date.parse('2026-11-01T08:00:00+00:00')) / 1000 <= t + 1; });
+  const csvCols = csvHead.split(','), ci = (n) => csvCols.indexOf(n);
+  const csvTable = csvSeen.slice(-8).map((r) => r.split(',')).map((c) => `<tr class="${/OUT OF/.test(c[ci('notes')]) ? 'bad' : ''}"><td>${shortId(c[ci('specimen_id')])}</td><td>${esc(c[ci('feature')])}</td><td class="num">${c[ci('value_mm')]}</td><td class="num">${c[ci('deviation_mm')]}</td></tr>`).join('');
   el.innerHTML = `${side}
     <div class="ag-head"><h2>Closed loop · CNC cell</h2><span class="chk ${run.control === 'closed_loop' ? 'ok' : ''}">${run.control.replace('_', ' ')}</span></div>
     <div class="faint small" style="margin:-4px 0 10px">${mode} SIMULATED.</div>
@@ -1295,7 +1305,8 @@ function renderLoop(force) {
       <div class="ag-kpi"><b>${made.length}</b><span>blanks used</span></div>
       <div class="ag-kpi"><b style="color:${scrapped.length ? 'var(--escape)' : ''}">${scrapped.length}</b><span>wasted (scrapped)</span></div>
       <div class="ag-kpi"><b>${beforeFix}</b><span>made before the fix</span></div>
-      <div class="ag-kpi"><b>${flags}</b><span>camera flags</span></div>
+      <div class="ag-kpi"><b>${lineScope ? `${counted}<small style="font-size:11px">/${run.loop.halt_on_flags}</small>` : flags}</b><span>${lineScope ? 'defects counted → stop' : 'camera flags'}</span></div>
+      ${lineScope ? `<div class="ag-kpi"><b>${quarantined}</b><span>quarantined (unflagged)</span></div>` : ''}
       <div class="ag-kpi"><b>${chamber.length}</b><span>chamber checks</span></div>
       <div class="ag-kpi"><b>${fmt((halted.slot + halted.tab) / 60, 1)}<small style="font-size:11px"> min</small></b><span>machines stopped</span></div>
     </div>
@@ -1303,10 +1314,15 @@ function renderLoop(force) {
     ${lastCh ? `<div class="ag-sec"><h4>Last chamber measurement <em>${shortId(lastCh.id)} · ${lastCh.chamber.conforming ? 'conforming' : 'nonconforming'}</em></h4>
       <table class="dims"><tbody>${Object.entries(lastCh.chamber.dims).map(([k, d]) => `<tr class="${d.ok ? '' : 'bad'}"><td>${k.replace(/_mm$/, '').replace(/_/g, ' ')}</td><td class="num">${fmt(d.reading_mm, 3)}</td><td class="num">${sign(d.deviation_mm, 3)}</td><td>${d.ok ? '✔' : '✖'}</td></tr>`).join('')}</tbody></table>
       <div class="faint small">digital caliper vs CAD nominal · tolerance ±${fmt(lastCh.chamber.functional.tol_mm, 2)} mm · <span class="link" data-part="${lastCh.id}" data-side="${agState.side ?? lab.runs.length - 1}">open part</span></div></div>` : ''}
-    ${lastProp ? `<div class="ag-sec"><h4>Program change <em>${lastProp.kind} · ${lastProp.within_limits ? 'approved by operator' : 'REFUSED'}</em></h4>
-      <div class="faint small" style="margin-bottom:6px">Mean deviation of ${lastProp.n_measurements} chamber readings ${sign(lastProp.estimate_mm, 3)} mm → cutter-compensation (D2 wear) line. Nothing is sent to a machine; the text is illustrative.</div>${gcodeHTML(lastProp)}</div>` : ''}
+    ${csvSeen.length ? `<div class="ag-sec"><h4>Measurement CSV <em>${csvSeen.length} rows</em></h4>
+      <table class="dims"><tbody>${csvTable}</tbody></table>
+      <div class="faint small">chamber_measurements.csv: one row per dimension, same columns as the caliper CSV of the physical tests (tier SIMULATED). <span class="link" id="csvDl">download the CSV</span></div></div>` : ''}
+    ${lastProp ? `<div class="ag-sec"><h4>CNC agent · new G-code <em>${lastProp.kind} · ${lastProp.within_limits ? 'approved by operator' : 'REFUSED'}</em></h4>
+      <div class="faint small" style="margin-bottom:6px">Read ${lastProp.csv_rows ? `${lastProp.csv_rows.length} ${lastProp.kind === 'slot' ? 'slot_inner_width' : 'width'} rows of ${lastProp.csv_file} (${lastProp.csv_rows.map((r) => `${shortId(r.specimen_id)} ${r.deviation_mm}`).join(', ')})` : `${lastProp.n_measurements} chamber readings`}: mean deviation ${sign(lastProp.estimate_mm, 3)} mm → cutter-compensation (D2 wear) line. Nothing is sent to a machine; the text is illustrative.</div>${gcodeHTML(lastProp)}</div>` : ''}
     <div class="ag-sec"><h4>Event log <em>${evs.length} events</em></h4><ul class="ag-log">${items.join('') || '<li class="faint">Nothing yet: the first parts are on their way to the camera.</li>'}</ul></div>`;
   $$('[data-loopside]', el).forEach((b) => (b.onclick = () => { agState.side = +b.dataset.loopside; renderLoop(true); renderAgents(true); }));
+  const dl = $('#csvDl', el);
+  if (dl) dl.onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([run.chamber_csv], { type: 'text/csv' })); a.download = `chamber_measurements_${run.scenario}_seed${run.seed}_${run.control}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); };
   $$('[data-part]', el).forEach((x) => (x.onclick = () => select({ type: 'part', id: x.dataset.part, side: +x.dataset.side })));
 }
 function renderInspector() {

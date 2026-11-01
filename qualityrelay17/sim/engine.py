@@ -18,13 +18,18 @@ optimization.match_batch). Common random numbers: identical parts, sensor noise,
 and failure times for every policy. Every output is SIMULATED; timings are ILLUSTRATIVE.
 
 CNC cell demo (scenario D01, scenarios.CNC): the same engine with the machines read as CNCs. The camera
-also flags gross size errors; a caliper chamber measures every dimension of flagged parts only. Control
-modes: 'closed_loop' stops a machine after N consecutive flags, derives a correction from the chamber
-measurements, has an operator approve the program change, then resumes; 'audit' (today) lets the machine
+also flags gross size errors; a caliper chamber measures every dimension of flagged parts and writes them to a
+measurement CSV. Control modes: 'closed_loop' stops a machine after N consecutive flags (halt_scope 'machine')
+or the whole line after N camera-detected defects (halt_scope 'line'), quarantines every part made with the
+suspect program (contain_suspect), derives the correction from the chamber CSV, has an operator approve the
+program change, then resumes; 'audit' (today) lets the machine
 run and corrects it at the next scheduled audit; 'none' never corrects. Every event is logged and the
 waste is counted. No real machine, robot or conveyor is driven by any of this.
 """
 from __future__ import annotations
+import csv
+import io
+from collections import deque
 from dataclasses import dataclass, asdict
 from math import sqrt
 from random import Random
@@ -36,6 +41,17 @@ from .cad import nominal_design
 from .des import Env, Signal
 from .gcode import program as gcode_program, diff as gcode_diff
 from .scenarios import FactoryScenario, SiteConfig, STATION_S, FUNCTIONAL_TOL_MM, draw_part, truth_hash
+
+# Caliper-chamber CSV: the physical-test template (docs/engineering/templates/specimen_measurements.csv), so the same
+# tools read a simulated chamber file and a real one. Simulated rows carry evidence_tier SIMULATED, which
+# physical_data.functional_readings() never accepts as physical evidence.
+CSV_COLUMNS = ('timestamp_iso', 'specimen_id', 'manual_id', 'part_type', 'feature', 'location', 'reading_no', 'value_mm',
+               'nominal_mm', 'deviation_mm', 'unit', 'instrument_id', 'calibration_id', 'operator_id', 'method', 'image_file',
+               'image_sha256', 'evidence_tier', 'notes')
+CSV_FEATURE = {'slot_opening_mm': 'slot_inner_width', 'tab_width_mm': 'width'}  # functional widths, as physical_data.FUNCTIONAL
+CSV_FILE = 'chamber_measurements.csv'
+SIM_SHIFT_START = '2026-11-01T08:00:00+00:00'  # simulated shift clock: t = 0 s of a run
+CALIPER_RESOLUTION_MM = 0.01
 
 TOL = 0.5
 POLICIES = ('rules', 'bayes', 'hold_all')  # hold_all: the Gate-A B7 degenerate optimum, run through a real review station
@@ -148,6 +164,11 @@ class Factory:
         self.proposal_open = {'slot': False, 'tab': False}
         self.next_audit_t = audit_interval_s
         self.line_events = []
+        if sc.halt_scope not in ('machine', 'line'):
+            raise ValueError('halt_scope must be machine|line')
+        self.defect_window = deque(maxlen=2 * halt_on_flags)  # line scope: (flagged, kind) of the last 2N inspected parts
+        self.suspect = {'slot': [], 'tab': []}           # [made_after, made_until|None]: programs found bad, parts quarantined
+        self.chamber_csv = []                            # caliper-chamber rows (CSV_COLUMNS), in measurement order
         self.sc, self.seed, self.policy, self.pairing = sc, seed, policy, pairing
         self.costs = costs or Costs(); self.model = model or calibrate_part_model()
         self.batch_k, self.keep_log = batch_k, keep_log
@@ -219,7 +240,7 @@ class Factory:
                           shipped=0, escaped=0, shipped_good=0, holds_stale_evidence=0, part_holds=0, pair_holds=0,
                           local_reinspections=0, released_after_review=0, reprints=0, holds_missing_central=0,
                           camera_flags=0, chamber_checks=0, chamber_nonconforming=0, halts=0, proposals=0, corrections_applied=0,
-                          corrections_refused=0, audits=0)
+                          corrections_refused=0, audits=0, contained=0)
 
     # ---- helpers -------------------------------------------------------------------
     def _svc(self, key, mean_s):
@@ -264,12 +285,21 @@ class Factory:
         while self.halt[kind] is not None:  # a stopped machine takes no new blank until it is resumed
             yield ('wait', self.halt[kind])
 
+    def _acquire_machine(self, pr, kind):
+        """Take the machine; if the line was stopped while waiting for it, give it back until the stop is lifted, so
+        no blank is cut during a stop."""
+        yield ('acquire', {pr: 1})
+        while self.halt[kind] is not None:
+            yield ('release', {pr: 1})
+            yield from self._wait_if_halted(kind)
+            yield ('acquire', {pr: 1})
+
     def printer(self, site: SiteConfig, jobs):
         pr = self.res[(site.name, 'printer')]
         for job_id, kind, idxs in jobs:
             yield from self._wait_if_halted(kind)
             yield ('acquire', {self.wip[kind]: len(idxs)})
-            yield ('acquire', {pr: 1})
+            yield from self._acquire_machine(pr, kind)
             t0 = self.env.now
             delay = self._failure_delay(pr)
             yield ('timeout', delay + self._svc(f'print:{job_id}', site.print_setup_s + site.print_per_part_s * len(idxs)))
@@ -300,7 +330,9 @@ class Factory:
         p['flagged'] = flagged
         if flagged:
             self.stats['camera_flags'] += 1
-        if self.control == 'closed_loop' and p['t_print_s'] > self.last_correction_t[p['kind']]:
+        if self.control == 'closed_loop' and sc.halt_scope == 'line':
+            self._count_defect(p, flagged)
+        elif self.control == 'closed_loop' and p['t_print_s'] > self.last_correction_t[p['kind']]:
             # only parts made with the current machine state count; parts made before a correction are still in the
             # pipeline for a while and must not stop the corrected machine again
             kind = p['kind']
@@ -331,8 +363,16 @@ class Factory:
                 ok = yield from self._review_part(p)
                 if not ok:
                     self._gate_passed(p); self._upstream_exit(); return
+        # quarantine: a part made with a program found bad goes to the caliper chamber whatever the camera said
+        if sc.contain_suspect and self._suspect(p):
+            p['contained'] = True
+            self.stats['contained'] += 1
+            self.stats['part_holds'] += 1
+            ok = yield from self._review_part(p)
+            if not ok:
+                self._gate_passed(p); self._upstream_exit(); return
         # supplier-side part gate
-        if self._part_hold(p, ('phone', 'pi')):
+        elif self._part_hold(p, ('phone', 'pi')):
             self.stats['part_holds'] += 1
             ok = yield from self._review_part(p)
             if not ok:
@@ -486,7 +526,7 @@ class Factory:
         root = old.get('root_id', old['part_id'])
         yield from self._wait_if_halted(old['kind'])
         yield ('acquire', {self.wip[old['kind']]: 1})
-        yield ('acquire', {pr: 1})
+        yield from self._acquire_machine(pr, old['kind'])
         t0 = self.env.now
         delay = self._failure_delay(pr)
         yield ('timeout', delay + self._svc(f'reprint:{root}:{n}', site.print_setup_s + site.print_per_part_s))
@@ -520,18 +560,83 @@ class Factory:
         correction are still in the pipeline for a while and say nothing about the corrected machine)."""
         return [(d, pid) for t, d, pid, made in self.chamber_devs[kind] if made > self.last_correction_t[kind]]
 
-    def _halt(self, kind, p):
+    def _halt(self, kind, p, counted=None):
         self.halt[kind] = Signal()
         self.halt_since[kind] = self.env.now
         self.stats['halts'] += 1
-        self._event('HALT', kind, part=p['part_id'], consecutive_flags=self.flag_run[kind],
-                    note=f'{self.flag_run[kind]} consecutive camera flags on {kind}s: the {kind} machine takes no new blank; '
-                         f'flagged parts go to the caliper chamber')
+        if counted is None:
+            self._event('HALT', kind, part=p['part_id'], consecutive_flags=self.flag_run[kind], scope='machine',
+                        note=f'{self.flag_run[kind]} consecutive camera flags on {kind}s: the {kind} machine takes no new blank; '
+                             f'flagged parts go to the caliper chamber')
+        else:
+            n, window, contained = counted
+            self._event('HALT', kind, part=p['part_id'], consecutive_flags=n, defects_counted=n, window=window, scope='line',
+                        contained=contained,
+                        note=f'the camera counted {n} defective parts among the last {window} inspected: the whole line stops, no new blank '
+                             f'is cut' + ('; every ' + kind + ' made with the current program is quarantined for the caliper chamber' if contained else ''))
         if self.agents:
             self.agents.on_line_event(self.line_events[-1])
         if len(self._since_correction(kind)) >= self.confirm_n and not self.proposal_open[kind]:  # already confirmed by the chamber
             self.proposal_open[kind] = True
             self.env.process(self._correct(kind, self.site[p['site']], 'chamber measurements before the halt'))
+
+    # ---- line scope: count defects, stop every machine, quarantine the suspect batch ------------------------------
+    def _suspect(self, p):
+        made = p['t_print_s']
+        return any(a < made and (b is None or made <= b) for a, b in self.suspect[p['kind']])
+
+    def _close_suspect(self, kind):
+        for iv in self.suspect[kind]:
+            if iv[1] is None:
+                iv[1] = self.env.now
+
+    def _count_defect(self, p, flagged):
+        """Line scope: the camera counts defects among the parts made with the current programs. N among the last 2N
+        inspected parts stop every machine (a run of surface false alarms at a few per cent never reaches N)."""
+        kind = p['kind']
+        if p['t_print_s'] <= self.last_correction_t[kind] or self._suspect(p) or any(h is not None for h in self.halt.values()):
+            return  # made before a correction, already quarantined, or the line is already stopped
+        self.defect_window.append((bool(flagged), kind))
+        n = sum(f for f, _ in self.defect_window)
+        if n < self.halt_on_flags:
+            return
+        bad = {k for f, k in self.defect_window if f}
+        window = len(self.defect_window)
+        self.defect_window.clear()
+        for k in ('slot', 'tab'):
+            if self.machine_fault[k] or self.halt[k] is not None:
+                continue
+            contain = self.sc.contain_suspect and k in bad
+            if contain:
+                self.suspect[k].append([self.last_correction_t[k], None])
+            self._halt(k, p, counted=(n, window, contain))
+        if self.sc.contain_suspect:
+            self._contain()
+        for k in ('slot', 'tab'):  # a machine with nothing of its kind left to measure decides now
+            if self.halt[k] is not None and self.in_flight[k] == 0:
+                self._settle(k, self.site[p['site']])
+
+    def _contain(self):
+        """Pull quarantined parts back from the pairing buffer to the caliper chamber (not yet measured ones)."""
+        for kind in ('slot', 'tab'):
+            keep = []
+            for q in self.buffer[kind]:
+                if self._suspect(q) and not q.get('chamber'):
+                    self.in_flight[kind] += 1
+                    self.env.process(self._recheck(q))
+                else:
+                    keep.append(q)
+            self.buffer[kind][:] = keep
+
+    def _recheck(self, q):
+        q['contained'] = True
+        self.stats['contained'] += 1
+        self.stats['part_holds'] += 1
+        ok = yield from self._review_part(q)
+        self._gate_passed(q)
+        if ok:
+            self.buffer[q['kind']].append(q)
+            self._try_pair(flush=self.upstream == 0)
 
     def _gate_passed(self, p):
         """The part is past the part gate (released or scrapped). A stopped machine with nothing left to measure
@@ -541,13 +646,18 @@ class Factory:
         if self.control != 'closed_loop' or self.halt[kind] is None or self.proposal_open[kind] or self.in_flight[kind] > 0 \
                 or self.machine_fault[kind]:  # FAULT: a refused correction keeps the machine stopped for maintenance
             return
+        self._settle(kind, self.site[p['site']])
+
+    def _settle(self, kind, site):
+        """Nothing of this kind is left to measure: correct from the chamber data, or resume without a change."""
         since = self._since_correction(kind)
         if len(since) >= self.confirm_n:
             self.proposal_open[kind] = True
-            self.env.process(self._correct(kind, self.site[p['site']], 'chamber measurements, last part in flight'))
+            self.env.process(self._correct(kind, site, 'chamber measurements, last part in flight'))
         else:
             self._event('RESUMED_UNCONFIRMED', kind, chamber_confirmations=len(since), needed=self.confirm_n,
                         note='no part of this kind is left before the gate and the chamber did not confirm the camera flags: resume, nothing to correct')
+            self._close_suspect(kind)
             self._resume(kind)
 
     def _resume(self, kind):
@@ -557,6 +667,7 @@ class Factory:
         self.halt_s[kind] += self.env.now - self.halt_since[kind]
         self.halt[kind] = None
         self.flag_run[kind] = 0
+        self.defect_window.clear()
         self.env.fire(sig)
         self._event('RESUMED', kind, halted_s=round(self.env.now - self.halt_since[kind], 3))
         if self.agents:
@@ -591,6 +702,7 @@ class Factory:
         self.hold_part_seconds += self.env.now - t0
         rep = self.chamber_report(p, site)
         p['chamber'] = rep
+        self._write_csv(p, rep)
         p['measured_mm'] = rep['functional']['reading_mm']
         p['caliper_sd'] = site.caliper_sd_mm
         self._monitor(p, site)
@@ -620,11 +732,44 @@ class Factory:
             self.env.process(self._correct(kind, site, 'chamber measurements after the halt'))
         return False
 
+    def _write_csv(self, p, rep):
+        """The chamber's measurement file: one row per dimension, in the physical-test template format."""
+        from datetime import datetime, timedelta
+        ts = (datetime.fromisoformat(SIM_SHIFT_START) + timedelta(seconds=round(self.env.now))).isoformat()
+        for name, d in rep['dims'].items():
+            v = round(round(d['reading_mm'] / CALIPER_RESOLUTION_MM) * CALIPER_RESOLUTION_MM, 2)
+            self.chamber_csv.append(dict(
+                timestamp_iso=ts, specimen_id=p['part_id'], manual_id='', part_type=p['kind'],
+                feature=CSV_FEATURE.get(name, name.removesuffix('_mm')), location='overall', reading_no=1, value_mm=f'{v:.2f}',
+                nominal_mm=f"{d['nominal_mm']:.2f}", deviation_mm=f"{v - d['nominal_mm']:+.2f}", unit='mm',
+                instrument_id='chamber-caliper-sim', calibration_id='', operator_id='measurement-agent', method='caliper_chamber',
+                image_file='', image_sha256='', evidence_tier='SIMULATED',
+                notes=f"program offset {p.get('offset_mm', 0.0):+.3f} mm; {'in' if d['ok'] else 'OUT OF'} tolerance ±{d['tol_mm']:.2f}"))
+
+    def chamber_csv_text(self, rows=None) -> str:
+        out = io.StringIO()
+        w = csv.DictWriter(out, fieldnames=CSV_COLUMNS, lineterminator='\n')
+        w.writeheader()
+        w.writerows(self.chamber_csv if rows is None else rows)
+        return out.getvalue()
+
+    def _csv_estimate(self, kind, ids, cur):
+        """The CNC agent's side: read the chamber CSV, keep the functional width of the listed parts, and turn the mean
+        deviation into the process deviation of the current program (the program's own offset removed)."""
+        feature = CSV_FEATURE['slot_opening_mm' if kind == 'slot' else 'tab_width_mm']
+        rows = [r for r in csv.DictReader(io.StringIO(self.chamber_csv_text()))
+                if r['specimen_id'] in ids and r['part_type'] == kind and r['feature'] == feature]
+        if not rows:
+            return None, []
+        return mean(float(r['deviation_mm']) for r in rows) - cur, rows
+
     def _proposal(self, kind, site, trigger, pts=None):
         key = (site.name, kind)
         pts = self._since_correction(kind) if pts is None else pts
-        est = mean(d for d, _ in pts)
         cur = self.offset.get(key, 0.0)
+        est, rows = self._csv_estimate(kind, {pid for _, pid in pts}, cur)
+        if est is None:  # no file rows (cannot happen in a chamber run): fall back to the chamber's own numbers
+            est = mean(d for d, _ in pts)
         new = cur - est
         within = abs(new) <= self.max_correction_mm
         before = gcode_program(kind, self.design, cur)
@@ -633,6 +778,7 @@ class Factory:
         ev = self._event('CORRECTION_PROPOSED', kind, trigger=trigger, n_measurements=len(pts), parts=[pid for _, pid in pts],
                          estimate_mm=round(est, 4), offset_before_mm=round(cur, 4), offset_after_mm=round(new, 4),
                          within_limits=within, limit_mm=self.max_correction_mm,
+                         csv_file=CSV_FILE, csv_rows=[{k: r[k] for k in ('specimen_id', 'feature', 'value_mm', 'nominal_mm', 'deviation_mm')} for r in rows],
                          gcode_before=before, gcode_after=after, gcode_diff=gcode_diff(before, after))
         if self.agents:
             self.agents.on_line_event(ev)
@@ -641,6 +787,7 @@ class Factory:
     def _apply(self, kind, site, key, est, new, by):
         self.offset[key] = new
         self.last_correction_t[kind] = self.env.now
+        self._close_suspect(kind)
         self.stats['corrections_applied'] += 1
         self.corrections.append(dict(t=round(self.env.now, 1), site=site.name, kind=kind, estimate_mm=round(est, 4), offset_mm=round(new, 4), by=by))
         ev = self._event('CORRECTION_APPLIED', kind, offset_mm=round(new, 4), by=by)
@@ -701,6 +848,7 @@ class Factory:
                     audits=st['audits'], first_halt_s=first_flag, first_correction_s={k: v for k, v in first_fix.items()},
                     parts_made_before_correction=made_before_fix,
                     parts_made_out_of_tolerance_truth=made_defective_truth, escaped_pairs=st['escaped'],
+                    contained_parts=st['contained'], chamber_csv_rows=len(self.chamber_csv),
                     machine_fault={k: v for k, v in self.machine_fault.items()})
 
     def _try_pair(self, flush=False):
@@ -897,6 +1045,8 @@ class Factory:
             machine=self.sc.machine, control=self.control, halt_on_flags=self.halt_on_flags, confirm_n=self.confirm_n,
             max_correction_mm=self.max_correction_mm, audit_interval_s=self.audit_interval_s if self.control == 'audit' else None,
             caliper_mode=self.sc.caliper_mode, line_events=self.line_events[:400], waste=self.waste(end),
+            halt_scope=self.sc.halt_scope, contain_suspect=self.sc.contain_suspect,
+            chamber_csv=self.chamber_csv_text() if self.chamber_csv else '',
         )
 
 

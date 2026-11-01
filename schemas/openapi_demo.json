@@ -2683,7 +2683,7 @@
             "maximum": 20.0,
             "minimum": 1.0,
             "title": "Halt On Flags",
-            "default": 3
+            "default": 6
           },
           "confirm_n": {
             "type": "integer",
@@ -2697,7 +2697,7 @@
             "maximum": 10.0,
             "exclusiveMinimum": 0.0,
             "title": "Max Correction Mm",
-            "default": 2
+            "default": 2.0
           },
           "audit_interval_s": {
             "type": "number",

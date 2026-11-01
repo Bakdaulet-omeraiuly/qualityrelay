@@ -1,6 +1,12 @@
-"""CNC cell demo (scenario D01): camera gate, caliper chamber for flagged parts only, halt -> measure -> correct
--> approve -> resume, the audit baseline, waste accounting and the illustrative G-code. Everything is SIMULATED."""
+"""CNC cell demo (scenario D01): the whole first batch is defective; the camera counts defects and N of them stop the
+whole line; the suspect batch is quarantined and measured in the caliper chamber, which writes a measurement CSV;
+the CNC agent corrects its G-code from that CSV; an operator approves; the machines restart and good parts go on
+to assembly. Also: the per-machine variant, the audit baseline, waste accounting and the illustrative G-code.
+Everything is SIMULATED."""
+import csv
+import io
 from dataclasses import replace
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -8,16 +14,20 @@ from fastapi.testclient import TestClient
 from qualityrelay17.api import app
 from qualityrelay17.sim import gcode
 from qualityrelay17.sim.cad import nominal_design
-from qualityrelay17.sim.engine import Factory, calibrate_part_model, width_posterior
+from qualityrelay17.sim.engine import CSV_COLUMNS, Factory, calibrate_part_model, width_posterior
+from qualityrelay17.sim.physical_data import functional_readings
 from qualityrelay17.sim.scenarios import BY_ID, GRID, MULTI, FUNCTIONAL_TOL_MM, draw_part, SiteConfig, FactoryScenario
 
 M = calibrate_part_model(n=200)
 D01 = replace(BY_ID['D01'], n_pairs=40, cameras=('phone',), sites=tuple(replace(s, inspection_lines=2) for s in BY_ID['D01'].sites))
 WEB = dict(model=M, reprint=True, lane_by_kind=True)
+N = 6  # defects counted before the line stops (the website default)
+ROOT = Path(__file__).resolve().parents[1]
 
 
-def _run(control, policy='bayes', pairing='optimized', seed=0, **kw):
-    f = Factory(D01, seed, policy, pairing, control=control, **WEB, **kw)
+def _run(control, policy='bayes', pairing='optimized', seed=0, sc=D01, **kw):
+    kw.setdefault('halt_on_flags', N)
+    f = Factory(sc, seed, policy, pairing, control=control, **WEB, **kw)
     return f, f.run()
 
 
@@ -28,8 +38,10 @@ def _types(o):
 def test_registered_scenarios_have_the_demo_features_off():
     for s in list(GRID) + list(MULTI):
         assert s.machine == 'printer' and s.tool_offset_fault_mm == 0.0 and s.camera_gross_dim_mm is None and s.caliper_mode == 'every_part'
+        assert s.halt_scope == 'machine' and not s.contain_suspect
     d = D01
     assert d.machine == 'cnc' and d.caliper_mode == 'flagged_only' and d.tool_offset_fault_mm == 1.6
+    assert d.halt_scope == 'line' and d.contain_suspect and d.crack_p == 0.0
 
 
 def test_fault_is_in_the_truth_table_and_the_demo_streams_leave_registered_parts_untouched():
@@ -45,7 +57,7 @@ def test_fault_is_in_the_truth_table_and_the_demo_streams_leave_registered_parts
     assert t['latent_width_mm'] > draw_part(base, 1, 'tab', 7, site, 0.0, 'lot', design)['latent_width_mm']  # tab wider
 
 
-def test_closed_loop_halts_measures_only_flagged_parts_corrects_with_approval_and_resumes():
+def test_closed_loop_stops_the_line_measures_the_suspect_batch_corrects_with_approval_and_resumes():
     f, o = _run('closed_loop')
     assert o['conservation_ok'] and o['machine'] == 'cnc' and o['control'] == 'closed_loop'
     ty = _types(o)
@@ -62,12 +74,12 @@ def test_closed_loop_halts_measures_only_flagged_parts_corrects_with_approval_an
     for e in o['line_events']:
         if e['type'] == 'CORRECTION_PROPOSED':
             assert abs(abs(e['estimate_mm']) - 1.6) < 0.25 and abs(e['offset_after_mm'] + e['estimate_mm']) < 1e-9
-    # the chamber measured flagged parts only; unflagged parts have no reading and no caliper event at all
+    # the chamber measured flagged and quarantined parts only; the rest have no reading and no caliper event at all
     for p in f.parts:
         went = any(st == 'chamber' and k.endswith(p['part_id']) for _a, _b, st, k in f.events)
         assert went == (p['chamber'] is not None if 'chamber' in p else False) or not went
         if p.get('chamber'):
-            assert p['flagged'] and p['measured_mm'] == p['chamber']['functional']['reading_mm']
+            assert (p['flagged'] or p.get('contained')) and p['measured_mm'] == p['chamber']['functional']['reading_mm']
             assert set(p['chamber']['dims']) >= {'length_mm', 'height_mm'} and all('deviation_mm' in d for d in p['chamber']['dims'].values())
         else:
             assert p['measured_mm'] is None
@@ -119,7 +131,7 @@ def test_unconfirmed_flags_resume_the_machine_without_a_correction():
 def test_agents_match_the_line_in_the_cnc_cell(control, policy, pairing):
     key = lambda ff: [(p['pair_id'], p['decision'], p.get('p_unsafe'), p.get('fate')) for p in ff.pairs]  # noqa: E731
     a, oa = _run(control, policy, pairing)
-    b = Factory(D01, 0, policy, pairing, control=control, agents=True, **WEB); ob = b.run()
+    b = Factory(D01, 0, policy, pairing, control=control, agents=True, halt_on_flags=N, **WEB); ob = b.run()
     assert key(a) == key(b) and oa['waste'] == ob['waste'] and _types(oa) == _types(ob)
     assert len(b.agents.setpoints) == len(a.corrections)
     kinds = [m[1] for m in b.agents.messages]
@@ -159,7 +171,9 @@ def test_sim_run_exposes_the_cnc_demo_and_keeps_registered_runs_unchanged():
     assert d['kpis']['conservation_ok'] and [e['type'] for e in d['line_events']].count('CORRECTION_APPLIED') == 2
     assert d['waste']['halts'] == 2 and d['loop']['audit_interval_s'] is None
     ch = [p for p in d['parts'] if p['chamber']]
-    assert ch and all(p['flagged'] and p['measured_mm'] is not None for p in ch)
+    assert ch and all((p['flagged'] or p['contained']) and p['measured_mm'] is not None for p in ch)
+    assert d['halt_scope'] == 'line' and d['contain_suspect'] and d['loop']['halt_on_flags'] == 6
+    assert d['chamber_csv'].startswith('timestamp_iso,specimen_id,') and d['kpis']['escaped'] == 0
     assert any(p['measured_mm'] is None and not p['flagged'] for p in d['parts'])
     prop = next(e for e in d['line_events'] if e['type'] == 'CORRECTION_PROPOSED')
     assert prop['gcode_before'] and prop['gcode_after'] and prop['gcode_diff']
@@ -168,5 +182,60 @@ def test_sim_run_exposes_the_cnc_demo_and_keeps_registered_runs_unchanged():
     assert today['waste']['parts_made_before_correction'] > d['waste']['parts_made_before_correction']
     reg = c.post('/sim/run', json=dict(scenario='F02', policy='bayes', pairing='optimized', seed=1, n_pairs=30)).json()
     assert reg['machine'] == 'printer' and reg['control'] == 'none' and reg['line_events'] == [] and reg['waste']['halts'] == 0
+    assert reg['chamber_csv'] == ''
     assert all(p['measured_mm'] is not None for p in reg['parts'])
     assert c.post('/sim/run', json=dict(scenario='D01', control='bogus')).status_code == 422
+
+
+def test_the_camera_counts_n_defects_and_the_whole_line_stops_at_once():
+    for seed in (0, 1, 2):
+        f, o = _run('closed_loop', seed=seed)
+        halts = [e for e in o['line_events'] if e['type'] == 'HALT']
+        assert {e['kind'] for e in halts} == {'slot', 'tab'} and len({e['t'] for e in halts}) == 1  # both machines, same moment
+        h = halts[0]
+        assert h['scope'] == 'line' and h['defects_counted'] == N and N <= h['window'] <= 2 * N and h['contained']
+        # no blank is cut while a machine is stopped
+        stop = {e['kind']: e['t'] for e in halts}
+        go = {e['kind']: e['t'] for e in o['line_events'] if e['type'] == 'RESUMED'}
+        assert not [p['part_id'] for p in f.parts if stop[p['kind']] < p['t_print_s'] < go[p['kind']]]
+        # every part made with the bad program was measured in the chamber and none was shipped; nothing escaped
+        fix = o['waste']['first_correction_s']
+        before = [p for p in f.parts if p['t_print_s'] < fix[p['kind']]]
+        assert before and all(p.get('chamber') for p in before)
+        assert all(p['fate'] == 'scrap' for p in before if not p['chamber']['conforming'])
+        assert o['escaped'] == 0 and o['shipped'] == o['shipped_good'] == D01.n_pairs and o['conservation_ok']
+        assert o['waste']['contained_parts'] > 0  # unflagged parts of the bad batch were caught by the quarantine, not the camera
+
+
+def test_more_defects_counted_means_a_later_stop_and_more_waste():
+    stops, made = [], []
+    for n in (5, 10):
+        _, o = _run('closed_loop', halt_on_flags=n)
+        stops.append(o['waste']['first_halt_s']); made.append(o['waste']['parts_made_before_correction'])
+    assert stops[0] < stops[1] and made[0] <= made[1]
+
+
+def test_chamber_writes_the_physical_template_csv_and_the_cnc_agent_reads_it():
+    f, o = _run('closed_loop')
+    header = (ROOT / 'docs/engineering/templates/specimen_measurements.csv').read_text().splitlines()[0].split(',')
+    rows = list(csv.DictReader(io.StringIO(o['chamber_csv'])))
+    assert list(CSV_COLUMNS) == header and list(rows[0]) == header
+    measured = {p['part_id'] for p in f.parts if p.get('chamber')}
+    assert {r['specimen_id'] for r in rows} == measured and all(r['evidence_tier'] == 'SIMULATED' for r in rows)
+    assert {r['feature'] for r in rows if r['part_type'] == 'slot'} >= {'slot_inner_width', 'length', 'height'}
+    assert functional_readings(rows) == {}  # simulated rows are never accepted as physical evidence
+    for e in (e for e in o['line_events'] if e['type'] == 'CORRECTION_PROPOSED'):
+        used = e['csv_rows']
+        assert e['csv_file'] == 'chamber_measurements.csv' and len(used) == e['n_measurements']
+        assert {r['specimen_id'] for r in used} == set(e['parts'])
+        assert e['estimate_mm'] == pytest.approx(sum(float(r['deviation_mm']) for r in used) / len(used) - e['offset_before_mm'], abs=1e-4)
+
+
+def test_machine_scope_variant_stops_one_machine_on_flags_in_a_row():
+    sc = replace(D01, halt_scope='machine', contain_suspect=False)
+    f, o = _run('closed_loop', sc=sc, halt_on_flags=3)
+    halts = [e for e in o['line_events'] if e['type'] == 'HALT']
+    assert len(halts) == 2 and all(e['scope'] == 'machine' and e['consecutive_flags'] == 3 for e in halts)
+    assert o['conservation_ok'] and o['waste']['contained_parts'] == 0 and o['waste']['corrections_applied'] == 2
+    with pytest.raises(ValueError):
+        Factory(replace(D01, halt_scope='plant'), 0, 'bayes', 'optimized', control='closed_loop', **WEB)

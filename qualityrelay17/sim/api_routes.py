@@ -88,7 +88,7 @@ class RunRequest(BaseModel):
     agents: bool = True      # decisions made by the six agents (sim/agents.py); a reference run checks they match
     # CNC demo (D01). 'auto': closed loop for the QualityRelay policies, scheduled audit for today's rule; 'none' elsewhere.
     control: str = Field('auto', pattern='^(auto|none|closed_loop|audit)$')
-    halt_on_flags: int = Field(3, ge=1, le=20)                 # consecutive camera flags that stop the machine
+    halt_on_flags: int = Field(6, ge=1, le=20)                 # D01: camera-detected defects that stop the line (machine scope: flags in a row)
     confirm_n: int = Field(3, ge=1, le=20)                     # chamber confirmations before a correction is proposed
     max_correction_mm: float = Field(2.0, gt=0, le=10)         # a larger proposed change is refused (machine stays stopped)
     audit_interval_s: float = Field(1800.0, ge=60, le=8 * 3600)  # today's line: the chamber findings reach the machine at the next audit
@@ -181,7 +181,7 @@ def run(req: RunRequest):
                           events=sorted(tl[p['part_id']], key=lambda e: e[1]),
                           pair=pr.get('pair_id'), decision=pr.get('decision'), escaped=bool(pr.get('escaped')),
                           flagged=bool(p.get('flagged')), offset_mm=round(p.get('offset_mm', 0.0), 4), machine_s=p.get('machine_s'),
-                          chamber=p.get('chamber')))
+                          chamber=p.get('chamber'), contained=bool(p.get('contained'))))
     pairs = []
     for pr in f.pairs:
         s, t = by_id.get(pr['slot_id']), by_id.get(pr['tab_id'])
@@ -216,6 +216,7 @@ def run(req: RunRequest):
                 loop=dict(halt_on_flags=req.halt_on_flags, confirm_n=req.confirm_n, max_correction_mm=req.max_correction_mm,
                           audit_interval_s=req.audit_interval_s if control == 'audit' else None),
                 line_events=summary['line_events'], waste=summary['waste'],
+                halt_scope=sc.halt_scope, contain_suspect=sc.contain_suspect, chamber_csv=summary['chamber_csv'],
                 nominal=dict(slot=f.design['slot_opening_mm'], tab=f.design['tab_width_mm']),
                 kpis={k: summary[k] for k in keep}, parts=parts, pairs=pairs, stations=stations, agents=agents_out,
                 costs=dict(hold=f.costs.hold, escaped_defect=f.costs.escaped_defect),
