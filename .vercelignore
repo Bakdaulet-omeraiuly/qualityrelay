@@ -1,0 +1,15 @@
+.venv
+.git
+.env
+.env.*
+data
+tests
+firmware
+legacy
+**/__pycache__
+*.pyc
+.claude
+.kiro
+pyproject.toml
+uv.lock
+requirements-*.txt

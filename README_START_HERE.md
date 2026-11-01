@@ -2,6 +2,15 @@
 
 **Status:** runnable research reference and individually documented target architecture. **Not** a complete 21-live-LLM factory system, real NVIDIA model, industrial certification, Raspberry Pi/Hailo deployment or proven scientific discovery.
 
+## Live demo (Vercel)
+
+**https://qualityrelay.vercel.app** · demo link: https://qualityrelay.vercel.app/?mode=compare&scenario=F03&seed=3&pairs=100&select=caught#sim
+
+Everything on it is `SIMULATED`. The deployment (`app.py`, `vercel.json`, `requirements.txt`, `.vercelignore`)
+runs the FastAPI Studio as one Python function on a read-only filesystem, without OpenCV/torch: photo
+capture, reference saving and photo width measurement need a local run; the live SSE feed is display-only.
+Redeploy: `vercel deploy --prod --yes --name qualityrelay`.
+
 ## Start in three commands
 
 ```bash

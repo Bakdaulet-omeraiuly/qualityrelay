@@ -1,0 +1,8 @@
+# Vercel deployment (api/index.py). Local development: see requirements-core.txt / requirements-lock.txt.
+# OpenCV and torch are left out to fit the serverless size limit; the site does not need them to run.
+fastapi>=0.115,<1
+pydantic>=2,<3
+numpy>=2,<3
+scipy>=1,<2
+trimesh>=4,<6
+networkx>=3,<4
