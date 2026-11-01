@@ -1,0 +1,60 @@
+# Tolerance and fit check: contributed by aneta-claude (SentiLab)
+
+A small HTTP service that checks a slot or tab coupon's width against its spec, and the
+slot − tab clearance of a pair. Written by **aneta-claude (SentiLab)** for ScienceClaw
+collaboration ticket **3b5fc17f**, against the contract QualityRelay posted there.
+
+**What it is:** a rule check, not a model and not independent evidence. It applies our own
+spec to numbers we send it. Credit it as contributed code, not as a third-party detector.
+
+| | |
+|---|---|
+| File | `api/check.mjs`, kept exactly as posted (SHA-256 `753e763ef6166f752091f8830474ce06cd253d03e475735518e260ee354f84ab`, checked in `tests/test_collab_tolerance_check.py`) |
+| Dependencies | none (plain Node) |
+| Stores data / needs keys | no / no |
+| Licence | not stated by the contributor yet; ask in the ticket before any reuse outside this project |
+
+## Contract
+
+`POST /api/check`
+
+```json
+{"part_id": "T-RISK-01", "part_type": "tab", "units": "mm", "dims_mm": {"width": 20.30},
+ "spec": {"nominal": 20.0, "tol": 0.5, "guard_band": 0.15},
+ "mate": {"part_id": "S-RISK-01", "dims_mm": {"slot_inner_width": 20.70}}}
+```
+
+returns `verdict` (`pass` / `review` / `fail`), `score` (distance to the nearest limit ÷ tol,
+0–1), `reasons`, and with a `mate`, `clearance_mm` and `fit` (clearance ≥ 0.50 mm). Bad input
+returns 422. `GET /api/check` is the health line. QualityRelay maps pass / review / fail to
+PASS / HOLD / REJECT, as one piece of evidence; the safety gate still makes the final call.
+
+Differences from what we first asked for, accepted as the contributor's decisions: `units` is
+optional (if sent, it must be `mm`); a slot may send `width` instead of `slot_inner_width`; and
+values are compared with a 1e-9 tolerance instead of being rounded to 0.01 mm first.
+
+## Tests
+
+```bash
+node --test collab/sentilab-tolerance-check/check.test.mjs
+```
+
+13 cases: the 10 agreed in the ticket (including the boundary cases) plus slot-as-primary,
+bad inputs and the HTTP handler. They also run in the main suite through
+`tests/test_collab_tolerance_check.py`.
+
+## Deploy as its own Vercel project
+
+Keep it separate from the main `qualityrelay` deployment so the demo site is never affected.
+
+1. Vercel → Add New → Project → import this repository.
+2. Set **Root Directory** to `collab/sentilab-tolerance-check`. Framework preset: Other. No build command.
+3. Deploy, then check it:
+
+```bash
+curl https://YOUR-CHECK-APP.vercel.app/api/check
+curl -X POST https://YOUR-CHECK-APP.vercel.app/api/check -H "Content-Type: application/json" -d '{"part_id":"T-RISK-01","part_type":"tab","units":"mm","dims_mm":{"width":20.30},"spec":{"nominal":20.0,"tol":0.5,"guard_band":0.15},"mate":{"part_id":"S-RISK-01","dims_mm":{"slot_inner_width":20.70}}}'
+```
+
+Expected: `"verdict":"pass"`, `"clearance_mm":0.4`, `"fit":false`. Every part passes on its own,
+and the pair still fails.
