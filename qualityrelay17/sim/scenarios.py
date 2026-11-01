@@ -64,6 +64,10 @@ class FactoryScenario:
     camera_gross_sens: float = 0.9            # ... with this sensitivity. None: camera checks the surface only (registered behaviour).
     caliper_mode: str = 'every_part'          # 'every_part': inline caliper on every part. 'flagged_only': no inline caliper; a caliper
                                               # chamber measures every dimension of camera-flagged parts only (unflagged parts are not measured).
+    halt_scope: str = 'machine'               # closed loop. 'machine': N consecutive camera flags of one kind stop that machine.
+                                              # 'line': N camera-detected defects among the last 2N inspected parts stop EVERY machine.
+    contain_suspect: bool = False             # on a stop, every part made with the suspect program (flagged or not) is quarantined
+                                              # and measured in the caliper chamber, including parts already waiting to be paired.
 
     def as_dict(self):
         return asdict(self)
@@ -176,13 +180,18 @@ BY_ID.update({s.sid: s for s in MULTI})
 
 # ---- CNC cell demo (D01): the closed-loop story shown in the 3D Lab ------------------------------------
 # Two CNC machines (one per part kind), each loaded from a stock crate by a robot, start the shift with a wrong
-# tool offset, so the first parts are out of tolerance by 1.6 mm (the size of the seeded S-DEF / T-DEF specimens).
-# The camera flags gross size errors as well as surface defects; flagged parts go to a caliper chamber where every
-# dimension is measured against the CAD nominal; unflagged parts are not measured. What happens next depends on
-# the control mode chosen at run time (engine.Factory: control='closed_loop' | 'audit' | 'none').
+# tool offset, so every part of the first batch is out of tolerance by 1.6 mm (the size of the seeded S-DEF / T-DEF
+# specimens). The camera flags gross size errors; once it has counted N defects (5-10 on the website) the WHOLE line
+# stops so no more blanks are wasted. Every part made with the bad program is quarantined and measured in the caliper
+# chamber (every dimension, written to a measurement CSV in the physical-test template format); the CNC agent reads
+# that CSV, rewrites the cutter-compensation line of its G-code, an operator approves, and the machine restarts. The
+# parts made afterwards are in tolerance and go on to pairing and assembly (the slot-tab toy). Machined coupons:
+# no print cracks (crack_p=0). What happens depends on the control mode chosen at run time
+# (engine.Factory: control='closed_loop' | 'audit' | 'none').
 CNC = (
-    FactoryScenario('D01', 'CNC cell: wrong tool offset from the first part (slot −1.6 / tab +1.6 mm); camera gate, caliper chamber for flagged parts only',
+    FactoryScenario('D01', 'CNC cell: whole first batch defective (wrong tool offset, slot −1.6 / tab +1.6 mm); camera counts defects, line stops, chamber → CSV → G-code fix → assembly',
                     machine='cnc', tool_offset_fault_mm=1.6, camera_gross_dim_mm=0.8, caliper_mode='flagged_only', warp_p=0.0,
+                    crack_p=0.0, halt_scope='line', contain_suspect=True,
                     n_pairs=60, transport_s=15.0,
                     sites=(SiteConfig(printers=2, print_batch=1, print_setup_s=12.0, print_per_part_s=48.0),)),
 )

@@ -94,14 +94,14 @@
         <div class="row2"><label>Seed<input id="seed" type="number" min="0" max="999" value="0"/></label>
           <label>Pairs<input id="npairs" type="number" min="10" max="150" value="60"/></label></div>
         <div id="loopCfg" hidden>
-          <p class="hint">CNC cell: the camera flags gross size errors; only flagged parts are measured in the caliper chamber. QualityRelay stops the machine, measures, proposes the program change, an operator approves, the machine resumes. Today's line finds the same fault at its scheduled audit.</p>
-          <div class="row2"><label>Stop after N flags in a row<input id="haltN" type="number" min="1" max="20" value="3"/></label>
-            <label>Chamber confirmations<input id="confirmN" type="number" min="1" max="20" value="3"/></label></div>
+          <p class="hint">CNC cell: the whole first batch is defective. The camera counts defects; at N the whole line stops. Every part from the bad program goes to the caliper chamber, which writes a measurement CSV; the CNC agent reads it, rewrites its G-code, an operator approves, and good parts go on to assembly. Today's line finds the same fault at its scheduled audit.</p>
+          <div class="row2"><label title="Camera-detected defects that stop the whole line (5–10 in the demo).">Stop the line after N defects<input id="haltN" type="number" min="1" max="20" value="6"/></label>
+            <label title="Chamber CSV rows the CNC agent needs before it changes the program.">CSV rows for a fix<input id="confirmN" type="number" min="1" max="20" value="3"/></label></div>
           <div class="row2"><label>Correction limit (± mm)<input id="limitMm" type="number" min="0.1" max="10" step="0.1" value="2"/></label>
             <label title="An assumption about today's line, not a measurement.">Today: audit every (min)<input id="auditMin" type="number" min="1" max="480" value="30"/></label></div>
         </div>
         <div id="compareHint" hidden><p class="hint">Left: today (fixed rule + FIFO). Right: the policy above. Same parts, same sensor noise, same failures (common random numbers).</p><button class="ghost" id="demoBtn" style="width:100%;margin-bottom:10px">★ Demo: warping burst F03 · seed 3 · 100 pairs</button></div>
-        <button class="ghost" id="demoCncBtn" style="width:100%;margin-bottom:10px" title="Scenario D01 in Compare mode: today's audit line on the left, the closed loop on the right.">★ Demo: CNC cell D01 · first batch defective</button>
+        <button class="ghost" id="demoCncBtn" style="width:100%;margin-bottom:10px" title="Scenario D01 in Compare mode: today's audit line on the left, the closed loop on the right.">★ Demo: CNC cell D01 · defective batch → stop → CSV → G-code → assembly</button>
         <button id="runBtn" class="primary">Run simulation</button>
         <div id="runStatus" class="status" role="status"></div>
       </div>
