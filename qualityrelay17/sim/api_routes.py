@@ -92,6 +92,7 @@ class RunRequest(BaseModel):
     confirm_n: int = Field(3, ge=1, le=20)                     # chamber confirmations before a correction is proposed
     max_correction_mm: float = Field(2.0, gt=0, le=10)         # a larger proposed change is refused (machine stays stopped)
     audit_interval_s: float = Field(1800.0, ge=60, le=8 * 3600)  # today's line: the chamber findings reach the machine at the next audit
+    planner: str = 'fixed'   # 'fixed' | 'llm_cached': Assembly's requests from the cached LLM planner (replay only, never calls the API)
 
 
 def _who(key: str):
@@ -124,12 +125,18 @@ def run(req: RunRequest):
         sc = replace(sc, cameras=('phone',))
     if req.two_lanes:
         sc = replace(sc, sites=tuple(replace(s, inspection_lines=max(2, s.inspection_lines)) if s.makes == 'both' else s for s in sc.sites))
+    planner = None
+    if req.planner == 'llm_cached':
+        from .llm_cache import CachingPlanner
+        planner = CachingPlanner(mode='replay')  # the website never spends: misses fall back to the fixed order, counted
+    elif req.planner != 'fixed':
+        raise HTTPException(422, 'planner must be fixed|llm_cached')
     control = _control(req, sc)
     assert control in CONTROLS
     loop = dict(control=control, halt_on_flags=req.halt_on_flags, confirm_n=req.confirm_n, max_correction_mm=req.max_correction_mm,
                 audit_interval_s=req.audit_interval_s)
     f = Factory(sc, req.seed, req.policy, req.pairing, model=_model(), keep_log=True, reprint=req.reprint,
-                lane_by_kind=req.two_lanes, agents=req.agents, **loop)
+                lane_by_kind=req.two_lanes, agents=req.agents, planner=planner, **loop)
     summary = f.run()
     agents_out = None
     if req.agents:
@@ -140,7 +147,8 @@ def run(req: RunRequest):
         a_, r_ = [key(p) for p in f.pairs], [key(p) for p in ref.pairs]
         agents_out = f.agents.export()
         agents_out['check'] = dict(pairs=len(a_), equal=sum(x == y for x, y in zip(a_, r_)) if len(a_) == len(r_) else 0,
-                                   identical=a_ == r_, note='agent decisions vs the line\'s built-in computation, same seed')
+                                   identical=a_ == r_, note=('LLM-planned requests vs the fixed-order line, same seed: a difference means the planner changed what was asked'
+                                         if planner else 'agent decisions vs the line\'s built-in computation, same seed'))
         agents_out['policy_inside'] = {'bayes': 'Bayes expected-cost threshold', 'rules': 'fixed rule (today\'s practice)',
                                        'hold_all': 'hold everything for review'}[req.policy]
     tl = {p['part_id']: [] for p in f.parts}

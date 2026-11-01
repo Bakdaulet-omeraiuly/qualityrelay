@@ -88,6 +88,8 @@
         <label>Scenario<select id="scenario"></select></label>
         <label><span id="policyLabel">Decision policy</span>
           <select id="policy"><option value="bayes">Calibrated Bayes (QualityRelay)</option><option value="rules">Fixed rule (today)</option><option value="hold_all">Hold everything</option></select></label>
+        <label title="Which evidence the Assembly agent asks for. 'LLM (cached)' replays answers recorded once from adilnurgg's OpenAI planner; it never calls the API from the website.">Assembly requests
+          <select id="planner"><option value="fixed">Fixed order (code)</option><option value="llm_cached">LLM planner (cached, $0)</option></select></label>
         <label>Pairing<select id="pairing"><option value="optimized">Risk-optimised (SciPy)</option><option value="fifo">First-in first-out</option></select></label>
         <div class="row2"><label>Seed<input id="seed" type="number" min="0" max="999" value="0"/></label>
           <label>Pairs<input id="npairs" type="number" min="10" max="150" value="60"/></label></div>

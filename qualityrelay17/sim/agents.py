@@ -68,8 +68,12 @@ def _wilson(k, n, z=1.96):
 
 
 class AgentTeam:
-    def __init__(self, factory):
+    def __init__(self, factory, planner=None):
         self.f = factory
+        # optional request planner for the Assembly agent (adilnurgg's RequestPlanner interface; e.g. the
+        # cached LLM planner in sim/llm_cache.py). None = ask every owner in a fixed order (registered behaviour).
+        self.planner = planner
+        self.planner_log = dict(rounds=0, requests=0, finishes=0, rejected_proposals=0, sources={})
         self.messages = []          # [t, kind, sender, recipient, case, body, bytes]
         self.decisions = {}         # pair_id / part_id -> agent decision record
         # private stores: an agent reads only its own
@@ -239,8 +243,10 @@ class AgentTeam:
                 ps, src = surface_posterior(cams, f.model, tuple(cams)), 'CAMERAS'
             cal = [x for x in got if x['kind'] == 'CALIPER']
             if cal:
-                reading, sd = cal[-1]['payload']['measurement_mm'], cal[-1]['payload']['uncertainty_mm']  # latest: the chamber's, if any
-            else:  # no verified reading: fall back to the prior only (decision will be conservative)
+                reading, sd = cal[-1]['payload']['measurement_mm'], cal[-1]['payload']['uncertainty_mm']
+            else:  # absent required readings fail closed; flagged-only simulations may have no caliper event
+                if f.sc.caliper_mode == 'every_part' or any(e.kind == 'CALIPER' for e in self.evidence.get(pid, [])):
+                    self._rejected.append((pid, 'CALIPER', 'NOT_REQUESTED_OR_NOT_VERIFIED'))
                 reading, sd = part['measured_mm'], part['caliper_sd']
             mu, var = width_posterior(reading, kind, f.model, sd)
             self._send('HYPOTHESIS_UPDATE', 'assembly', 'assembly', pair_id, {'part': pid, 'p_surface': round(ps, 6), 'source': src,
@@ -313,10 +319,10 @@ class AgentTeam:
         has_caliper = self.f.sc.caliper_mode == 'every_part' or any(e.kind == 'CALIPER' for e in self.evidence.get(pid, []))
         kinds = ['PHONE_IMAGE'] + (['PI_IMAGE'] if 'pi' in self.f.sc.cameras else []) + (['CALIPER'] if has_caliper else [])
         got = []
-        for kind in kinds:
+        for kind, reason_code, hyps, source in self._plan(bus, pid, kinds, got):
             req = bus.make('REQUEST_EVIDENCE', 'assembly_engineer', OWNERSHIP[kind], pid,
-                           {'requested_kind': kind, 'reason_code': 'PAIR_GATE', 'hypotheses': ['surface_defect', 'clearance_below_0.5mm'],
-                            'max_cost': self.f.costs.peer_request, 'deadline_ms': 1500, 'pair': case_label})
+                           {'requested_kind': kind, 'reason_code': reason_code, 'hypotheses': hyps,
+                            'max_cost': self.f.costs.peer_request, 'deadline_ms': 1500, 'pair': case_label, 'proposed_by': source})
             reply = bus.send(req)
             self._log_bus(req); self._log_bus(reply)
             P = self.protocol
@@ -330,6 +336,42 @@ class AgentTeam:
                     got.append(x)
         self.protocol['cost_charged'] += bus.cost_charged - before
         return got
+
+    def _plan(self, bus, pid, kinds, got):
+        """Yields the requests to send for one part. Without a planner: every kind, fixed order. With a
+        planner: one round at a time, it sees only the Assembly agent's own view (adilnurgg's state format)."""
+        if self.planner is None:
+            for k in kinds:
+                yield k, 'PAIR_GATE', ['surface_defect', 'clearance_violation'], 'fixed'
+            return
+        from ..roles import ROLES
+        from ..collective.planner import HYPOTHESES
+        rc, history, L = self.f.costs.peer_request, [], self.planner_log
+        remaining = rc * len(kinds)
+        for _ in range(len(kinds) + 2):
+            seen = {x['kind'] for x in got}
+            state = {'case_id': pid, 'requester_role': 'assembly_engineer', 'role_domain': ROLES['assembly_engineer'].domain,
+                     'entitled_sources': list(ROLES['assembly_engineer'].required_sources), 'hypotheses': list(HYPOTHESES),
+                     'visible_evidence': [{'kind': x['kind'], 'verdict': x['verdict'], 'verification_status': x['verification_status'],
+                                           'held_by': 'peer'} for x in got],
+                     'missing_kinds': [k for k in kinds if k not in seen], 'peers': {k: OWNERSHIP[k] for k in kinds},
+                     'requests_so_far': list(history), 'budget_remaining': round(remaining, 4), 'request_cost': rc,
+                     'belief': round(self.f.model.crack_prior, 6)}
+            L['rounds'] += 1
+            action = self.planner.next_action(state)
+            src = getattr(self.planner, 'last_source', None) or getattr(self.planner, 'name', 'planner')
+            L['sources'][src] = L['sources'].get(src, 0) + 1
+            if not action or action.get('action') == 'finish':
+                L['finishes'] += 1; return
+            kind = action.get('requested_kind')
+            if (action.get('action') != 'request' or kind not in state['missing_kinds'] or any(h['kind'] == kind for h in history)
+                    or action.get('recipient_role') != OWNERSHIP.get(kind) or remaining < rc - 1e-9):  # float-safe budget check
+                L['rejected_proposals'] += 1; continue
+            L['requests'] += 1
+            n_before = len(got)
+            yield kind, action.get('reason_code') or 'NEED_EVIDENCE', action.get('hypotheses') or list(HYPOTHESES), src
+            remaining -= rc
+            history.append({'kind': kind, 'outcome': 'GRANTED' if len(got) > n_before else 'NO_ADMISSIBLE_EVIDENCE'})
 
     # ---- outcomes -----------------------------------------------------------------------
     def on_review(self, case, outcome, *, flagged_parts=(), confirmed_parts=()):
@@ -373,7 +415,12 @@ class AgentTeam:
                'sigma_mm': {s.name: round((s.width_sd_mm ** 2 + s.caliper_sd_mm ** 2) ** 0.5, 4) for s in f.sc.sites},
                'cusum': {'k': 0.5, 'h': 5}, 'clip_mm': 0.2}
         self.protocol['cost_charged'] = round(self.protocol['cost_charged'], 4)
+        planner = None
+        if self.planner is not None:
+            planner = dict(self.planner.describe() if hasattr(self.planner, 'describe') else {'planner': getattr(self.planner, 'name', '?')},
+                           **{'assembly_rounds': self.planner_log})
         return dict(roster=AGENTS, kinds=list(KINDS), messages=self.messages, decisions=self.decisions, spc=spc, protocol=self.protocol,
+                    planner=planner,
                     protocol_source='qualityrelay17/collective (adilnurgg): PeerBus, role-signed messages, ACL, VERIFY',
                     alarms=self.alarms, setpoints=self.setpoints, learning=self.learning, per_agent=senders,
                     total_messages=len(self.messages), total_bytes=sum(m[6] for m in self.messages))

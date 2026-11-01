@@ -122,7 +122,7 @@ class Factory:
                  agents: bool = False, architecture: str = 'local', uplink_mbps: float = 100.0,
                  image_bytes: int = 2_000_000, central_outages: tuple = (),
                  control: str = 'none', halt_on_flags: int = 3, confirm_n: int = 3, max_correction_mm: float = 2.0,
-                 audit_interval_s: float = 1800.0):
+                 audit_interval_s: float = 1800.0, planner=None):
         if policy not in POLICIES or pairing not in PAIRINGS:
             raise ValueError('unknown policy/pairing')
         if sc.evidence_sharing not in ('full', 'summary', 'none'):
@@ -182,7 +182,7 @@ class Factory:
         # messages; results must equal agents=False (checked by tests and by /sim/run).
         if agents:
             from .agents import AgentTeam
-            self.agents = AgentTeam(self)
+            self.agents = AgentTeam(self, planner=planner)
         else:
             self.agents = None
         self.env = env = Env()

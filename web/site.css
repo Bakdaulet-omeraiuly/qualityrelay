@@ -254,3 +254,5 @@ code{font-family:var(--mono);font-size:12px;background:var(--panel2);padding:1px
 .gcode .chg{display:inline-block;width:100%;color:var(--text)}
 .gcode .chg.before{background:rgba(255,93,93,.18)}.gcode .chg.after{background:rgba(118,185,0,.18)}
 .ag-roster .running{color:#a7e05a}.ag-roster .halted{color:#f0c64a}.ag-roster .fault{color:#ff9b9b}
+.ag-click li{cursor:pointer}.ag-click li:hover{background:var(--panel2)}
+.ag-net g[data-agent]:hover rect{stroke:var(--accent)}

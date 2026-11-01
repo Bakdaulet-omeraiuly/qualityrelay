@@ -2671,6 +2671,45 @@
             "type": "boolean",
             "title": "Agents",
             "default": true
+          },
+          "control": {
+            "type": "string",
+            "pattern": "^(auto|none|closed_loop|audit)$",
+            "title": "Control",
+            "default": "auto"
+          },
+          "halt_on_flags": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Halt On Flags",
+            "default": 3
+          },
+          "confirm_n": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Confirm N",
+            "default": 3
+          },
+          "max_correction_mm": {
+            "type": "number",
+            "maximum": 10.0,
+            "exclusiveMinimum": 0.0,
+            "title": "Max Correction Mm",
+            "default": 2
+          },
+          "audit_interval_s": {
+            "type": "number",
+            "maximum": 28800.0,
+            "minimum": 60.0,
+            "title": "Audit Interval S",
+            "default": 1800.0
+          },
+          "planner": {
+            "type": "string",
+            "title": "Planner",
+            "default": "fixed"
           }
         },
         "type": "object",
